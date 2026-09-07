@@ -2,7 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, useLocation } from 'react-router-dom'
 
-import { Eyebrow } from '@/components/Eyebrow'
+import { Wordmark } from '@/components/Wordmark'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -56,7 +56,9 @@ export default function SignInPage() {
   return (
     <main className="mx-auto flex min-h-[100dvh] w-full max-w-[400px] flex-col justify-center px-4 py-10">
       <header className="mb-8">
-        <Eyebrow>{t('app.name')}</Eyebrow>
+        {/* The wordmark, not a caption: on the one screen where `merit` is the
+            brand rather than a label it gets §4.2's wordmark treatment. */}
+        <Wordmark className="block" />
         <h1 className="mt-2 text-xl font-semibold tracking-tight text-balance">
           {t('auth.signIn.title')}
         </h1>

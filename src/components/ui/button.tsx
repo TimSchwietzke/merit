@@ -11,25 +11,31 @@ import { cn } from '@/lib/utils'
  *
  * Gone from the shadcn original, deliberately:
  *   - `ring-3` focus — Merit's focus ring is a 2px accent outline defined once
- *     globally in index.css (§16.2).
+ *     globally in index.css (§16.2). shadcn's `outline-none` goes with it: it
+ *     lands in Tailwind's `utilities` layer, the global rule lands in `base`,
+ *     and utilities win — so leaving it in silently deleted the focus ring from
+ *     every button in the app.
  *   - `rounded-lg` (6px) — buttons sit at radius 5 (`rounded-md`).
  *   - `h-8` / `h-9` — every touch target is at least 44px (§5.2).
  *   - `active:translate-y-px` — motion is feedback, not decoration (§13).
  */
 const buttonVariants = cva(
   `inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent
-   font-medium whitespace-normal text-sm transition-colors [transition-duration:140ms] outline-none
-   select-none disabled:pointer-events-none disabled:opacity-35
+   font-medium whitespace-normal text-sm transition-colors [transition-duration:140ms]
+   select-none active:[transition-duration:0ms] disabled:pointer-events-none disabled:opacity-35
    [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4`,
   {
     variants: {
       variant: {
-        // One per screen at most.
-        primary: 'bg-accent text-bg hover:opacity-90',
-        // The important-but-not-only action. Hover inverts.
-        tinted: 'border-accent bg-accent-soft text-accent hover:bg-accent hover:text-bg',
-        quiet: 'border-line text-ink hover:border-line-strong',
-        bare: 'text-ink-muted hover:bg-surface hover:text-ink',
+        // One per screen at most. The accent fill cannot go to surface-2 on
+        // press, so it deepens instead — the point is that *something* answers
+        // the tap (§6).
+        primary: 'bg-accent text-bg hover:opacity-90 active:opacity-80',
+        // The important-but-not-only action. Hover inverts; press completes it.
+        tinted:
+          'border-accent bg-accent-soft text-accent hover:bg-accent hover:text-bg active:bg-accent active:text-bg active:opacity-90',
+        quiet: 'border-line text-ink hover:border-line-strong active:bg-surface-2',
+        bare: 'text-ink-muted hover:bg-surface hover:text-ink active:bg-surface-2 active:text-ink',
       },
       size: {
         // 12px 18px / min-h 44 on touch, 8px 14px / min-h 36 from md up.

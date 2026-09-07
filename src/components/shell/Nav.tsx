@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
 
 import { NAV_ITEMS } from '@/components/shell/nav-items'
+import { Wordmark } from '@/components/Wordmark'
 import { cn } from '@/lib/utils'
 
 /**
@@ -23,7 +24,7 @@ export function Nav() {
         aria-label={t('nav.label')}
         className="hidden lg:sticky lg:top-0 lg:flex lg:h-[100dvh] lg:w-60 lg:shrink-0 lg:flex-col lg:gap-1 lg:border-r lg:border-line lg:bg-surface lg:px-3 lg:py-5"
       >
-        <span className="mb-4 px-2.5 text-lg font-semibold tracking-tight">{t('app.name')}</span>
+        <Wordmark className="mb-4 px-2.5" />
         {NAV_ITEMS.map(({ to, labelKey, Icon }) => (
           <NavLink
             key={to}
