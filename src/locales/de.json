@@ -1,13 +1,13 @@
 {
   "app": {
-    "name": "Merit"
+    "name": "merit"
   },
   "nav": {
     "label": "Hauptnavigation",
-    "dashboard": "Übersicht",
-    "food": "Ernährung",
-    "training": "Training",
-    "more": "Mehr"
+    "dashboard": "übersicht",
+    "food": "ernährung",
+    "training": "training",
+    "more": "mehr"
   },
   "common": {
     "notBuiltYet": "noch nicht gebaut"

@@ -1,13 +1,13 @@
 {
   "app": {
-    "name": "Merit"
+    "name": "merit"
   },
   "nav": {
     "label": "Main navigation",
-    "dashboard": "Dashboard",
-    "food": "Food",
-    "training": "Training",
-    "more": "More"
+    "dashboard": "dashboard",
+    "food": "food",
+    "training": "training",
+    "more": "more"
   },
   "common": {
     "notBuiltYet": "not built yet"
