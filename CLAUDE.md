@@ -1,6 +1,6 @@
 # CLAUDE.md
 
-Working agreement for this repository. Read `docs/goal.md` for what the product
+Working agreement for this repository. Read `docs/GOAL.md` for what the product
 is and `DESIGN.md` for how it should look before writing UI. `DESIGN.md` is the
 authority on anything visual: where it contradicts a library default, the library
 loses and the component is overridden.
@@ -9,7 +9,7 @@ loses and the component is overridden.
 
 ## Stack
 
-- **Vite + React 18 + TypeScript** (strict mode, no `any`)
+- **Vite + React 19 + TypeScript** (strict mode, no `any`)
 - **Tailwind CSS + shadcn/ui** — components are copied into `src/components/ui`
   and owned by this repo, not imported from a library
 - **Supabase** — Postgres, Auth, Storage, Edge Functions. EU region (Frankfurt)
@@ -49,17 +49,19 @@ loses and the component is overridden.
 ```
 src/
   components/ui/     shadcn components (owned, editable)
+  components/shell/  the app frame: AppShell, Nav
   components/        shared app components
   features/          one folder per domain: nutrition, weight, training, auth
     <feature>/       components, hooks, and queries for that feature
   lib/               supabase client, utils, formatters
   locales/           de.json, en.json
+  styles/            tokens.css, fonts.css
   types/             shared types; database types generated from Supabase
 supabase/
   migrations/        SQL migrations, including RLS policies
   functions/         Edge Functions
 DESIGN.md            design system — root, read before any UI work
-docs/                goal.md
+docs/                GOAL.md
 ```
 
 ### Naming
@@ -100,7 +102,7 @@ docs/                goal.md
 
 ## How to work with me
 
-- **Ask before inventing product behaviour.** If `docs/goal.md` does not answer
+- **Ask before inventing product behaviour.** If `docs/GOAL.md` does not answer
   a question about what the app should do, ask rather than guess.
 - **Do not ask about code style.** It is in this file; follow it.
 - **One feature at a time.** Finish and test a vertical slice (schema → query →

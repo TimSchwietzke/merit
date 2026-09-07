@@ -1,0 +1,38 @@
+{
+  "app": {
+    "name": "Merit"
+  },
+  "nav": {
+    "label": "Hauptnavigation",
+    "dashboard": "Übersicht",
+    "food": "Ernährung",
+    "training": "Training",
+    "more": "Mehr"
+  },
+  "common": {
+    "notBuiltYet": "noch nicht gebaut"
+  },
+  "pages": {
+    "dashboard": {
+      "title": "Übersicht",
+      "planned": "Hier steht die Zusammenfassung des Tages — Kalorien im Verhältnis zu deinem Ziel, die Makroverteilung und ob heute eine Einheit ansteht."
+    },
+    "food": {
+      "title": "Ernährung",
+      "planned": "Hier wird Essen erfasst — Katalog durchsuchen, Barcode scannen oder Werte selbst eintragen."
+    },
+    "training": {
+      "title": "Training",
+      "planned": "Hier steht das Training — deine Trainingstage, die Einheit für heute und die Sätze, während du sie protokollierst."
+    },
+    "more": {
+      "title": "Mehr",
+      "planned": "Hier stehen Gewicht, Einstellungen, Datenexport und die rechtlichen Seiten."
+    },
+    "notFound": {
+      "title": "Seite nicht gefunden",
+      "body": "Diese Adresse gibt es nicht.",
+      "back": "Zurück zur Übersicht"
+    }
+  }
+}

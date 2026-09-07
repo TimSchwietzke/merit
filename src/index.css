@@ -1,0 +1,153 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./styles/tokens.css";
+
+@custom-variant dark (&:is([data-theme="dark"] *));
+
+/* ── House tokens as Tailwind utilities ──────────────────────────────
+   bg-surface, text-ink-faint, border-line, text-2xs all become real classes. */
+@theme inline {
+  --color-bg: var(--merit-bg);
+  --color-surface: var(--merit-surface);
+  --color-surface-2: var(--merit-surface-2);
+  --color-line: var(--merit-line);
+  --color-line-strong: var(--merit-line-strong);
+  --color-ink: var(--merit-ink);
+  --color-ink-muted: var(--merit-ink-muted);
+  --color-ink-faint: var(--merit-ink-faint);
+  --color-accent: var(--merit-accent);
+  --color-accent-soft: var(--merit-accent-soft);
+  --color-danger: var(--merit-danger);
+
+  --font-sans: "IBM Plex Sans Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
+  --font-serif: "IBM Plex Serif", ui-serif, Georgia, serif;
+
+  /* One step up from NCLA — a phone held at arm's length. See DESIGN.md §4.2. */
+  --text-2xs: 0.75rem;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.875rem;
+  --text-base: 0.9375rem;
+  --text-input: 1rem;      /* iOS zooms below this. Non-negotiable on mobile. */
+  --text-prose: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.75rem;
+  --text-3xl: 2.125rem;
+
+  /* Nothing rounder than 6px. Larger radii read as toy UI. */
+  --radius-sm: 3px;
+  --radius-md: 5px;
+  --radius-lg: 6px;
+}
+
+/* ── shadcn bridge ───────────────────────────────────────────────────
+   shadcn components reference these names. They are mapped onto the house
+   tokens here and nowhere else. Two mappings are counter-intuitive:
+
+     --accent  in shadcn means "subtle hover fill", NOT the brand accent.
+               The brand accent is --primary.
+     --muted   in shadcn is a BACKGROUND; --muted-foreground is the text.
+
+   Getting either wrong produces a UI where every hover is moss green. */
+:root {
+  --background: var(--merit-bg);
+  --foreground: var(--merit-ink);
+
+  --card: var(--merit-surface);
+  --card-foreground: var(--merit-ink);
+  --popover: var(--merit-surface);
+  --popover-foreground: var(--merit-ink);
+
+  --primary: var(--merit-accent);
+  --primary-foreground: var(--merit-bg);
+
+  --secondary: var(--merit-surface-2);
+  --secondary-foreground: var(--merit-ink);
+
+  --muted: var(--merit-surface-2);
+  --muted-foreground: var(--merit-ink-muted);
+
+  --accent: var(--merit-surface-2);        /* hover fill — see note above */
+  --accent-foreground: var(--merit-ink);
+
+  --destructive: var(--merit-danger);
+  --destructive-foreground: var(--merit-bg);
+
+  --border: var(--merit-line);
+  --input: var(--merit-line);
+  --ring: var(--merit-accent);
+
+  --chart-1: var(--merit-chart-1);
+  --chart-2: var(--merit-chart-2);
+  --chart-3: var(--merit-chart-3);
+  --chart-4: var(--merit-chart-4);
+  --chart-5: var(--merit-chart-5);
+
+  --radius: 6px;                            /* shadcn ships 0.5rem */
+}
+
+@layer base {
+  * {
+    border-color: var(--color-line);
+  }
+
+  body {
+    background-color: var(--color-bg);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    /* The installed PWA has no browser chrome to absorb the notch. */
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  /* Every changing number is tabular, or the dashboard jitters as you type. */
+  .tnum,
+  input[inputmode="decimal"],
+  input[inputmode="numeric"] {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* iOS zooms a focused input under 16px. Never suppress with user-scalable=no. */
+  @media (max-width: 767px) {
+    input, textarea, select { font-size: var(--text-input); }
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background-color: var(--color-accent-soft);
+    color: var(--color-ink);
+  }
+
+  /* Motion is feedback, never decoration. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+/* Long-form copy (privacy policy, imprint). Thirty lines, kept under control
+   rather than pulling in the typography plugin. */
+.prose-app { font-size: var(--text-prose); line-height: 1.7; }
+.prose-app > * + * { margin-top: 0.85em; }
+.prose-app :is(ul, ol) { padding-left: 1.35rem; list-style: revert; }
+.prose-app li + li { margin-top: 0.35rem; }
+.prose-app li::marker { color: var(--color-ink-faint); }
+.prose-app a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+}
+.prose-app strong { font-weight: 600; color: var(--color-ink); }

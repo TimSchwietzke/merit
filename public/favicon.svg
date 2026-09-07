@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" role="img" aria-label="Merit">
+  <style>
+    :root { --mark: #4f6b2c; --paper: #fdfcf9; }
+    @media (prefers-color-scheme: dark) { :root { --mark: #a8c27a; --paper: #121212; } }
+  </style>
+  <rect width="32" height="32" rx="6" fill="var(--mark)" />
+  <path d="M8 23V9h3.2l4.8 8.1L20.8 9H24v14h-3.1v-8.6L16.9 21h-1.8l-4-6.6V23z" fill="var(--paper)" />
+</svg>

@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- viewport-fit=cover is what makes env(safe-area-inset-*) non-zero.
+         No user-scalable=no: it breaks pinch-zoom for everyone who needs it. -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- Kept in step with the resolved theme by applyTheme() in src/lib/theme.ts.
+         It colours the status bar area of the installed PWA. -->
+    <meta name="theme-color" content="#fdfcf9" />
+    <title>Merit</title>
+
+    <!--
+      Theme bootstrap. Inline, and deliberately duplicated from src/lib/theme.ts:
+      it has to run before the first paint, which means before the bundle exists,
+      which means it cannot import anything. Without it every reload flashes the
+      wrong theme — the most obvious quality tell in a themed app, and worse in an
+      installed PWA where there is no browser chrome to distract from it.
+      Storage failures (private mode, blocked storage) must never stop a theme
+      from being applied. See DESIGN.md §2.5.
+    -->
+    <script>
+      (function () {
+        var theme = "light";
+        try {
+          var stored = localStorage.getItem("merit.theme");
+          theme = stored === "light" || stored === "dark" ? stored
+            : window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        } catch (e) { theme = "light"; }
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
