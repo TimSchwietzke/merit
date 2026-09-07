@@ -12,6 +12,22 @@
   "common": {
     "notBuiltYet": "not built yet"
   },
+  "auth": {
+    "signIn": {
+      "title": "Sign in",
+      "lead": "Merit is invite-only. Accounts are created by hand — there is no sign-up.",
+      "email": "e-mail",
+      "password": "password",
+      "submit": "Sign in",
+      "pending": "Signing in…"
+    },
+    "errors": {
+      "invalidCredentials": "That address and password do not match an account. Check both and try again.",
+      "rateLimited": "Too many attempts. Wait a minute, then try again.",
+      "offline": "No connection to the server. Check your network and try again.",
+      "unknown": "The request did not go through. Try again."
+    }
+  },
   "pages": {
     "dashboard": {
       "title": "Dashboard",
@@ -27,7 +43,13 @@
     },
     "more": {
       "title": "More",
-      "planned": "Weight, settings, data export and the legal pages go here."
+      "planned": "Weight, settings, data export and the legal pages go here.",
+      "account": {
+        "label": "account",
+        "signedInAs": "signed in as",
+        "signOut": "Sign out",
+        "signingOut": "Signing out…"
+      }
     },
     "notFound": {
       "title": "Page not found",

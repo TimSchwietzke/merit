@@ -1,26 +1,40 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 import { AppShell } from '@/components/shell/AppShell'
+import { RequireAuth } from '@/features/auth/RequireAuth'
+import { SessionProvider } from '@/features/auth/SessionProvider'
+import SignInPage from '@/features/auth/SignInPage'
 import DashboardPage from '@/features/dashboard/DashboardPage'
 import MorePage from '@/features/more/MorePage'
 import NotFoundPage from '@/features/more/NotFoundPage'
 import FoodPage from '@/features/nutrition/FoodPage'
 import TrainingPage from '@/features/training/TrainingPage'
 
-// One route, one file (DESIGN.md §7).
+// One route, one file (DESIGN.md §7). Everything except /sign-in sits behind
+// RequireAuth — there is no public page in Merit and no open sign-up.
 const router = createBrowserRouter([
+  { path: '/sign-in', element: <SignInPage /> },
   {
-    element: <AppShell />,
+    element: <RequireAuth />,
     children: [
-      { path: '/', element: <DashboardPage /> },
-      { path: '/food', element: <FoodPage /> },
-      { path: '/training', element: <TrainingPage /> },
-      { path: '/more', element: <MorePage /> },
-      { path: '*', element: <NotFoundPage /> },
+      {
+        element: <AppShell />,
+        children: [
+          { path: '/', element: <DashboardPage /> },
+          { path: '/food', element: <FoodPage /> },
+          { path: '/training', element: <TrainingPage /> },
+          { path: '/more', element: <MorePage /> },
+          { path: '*', element: <NotFoundPage /> },
+        ],
+      },
     ],
   },
 ])
 
 export default function App() {
-  return <RouterProvider router={router} />
+  return (
+    <SessionProvider>
+      <RouterProvider router={router} />
+    </SessionProvider>
+  )
 }
