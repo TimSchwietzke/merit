@@ -329,9 +329,17 @@ Section labels are **lowercase or sentence case in mono**, small and faint. Smal
 all-uppercase wide tracking are both out. Where uppercase appears it is on a mono label at 12px with
 normal tracking — a technical marker, not a decorative one.
 
+**Navigation, labels and the product name are lowercase.** `merit` · `nutrition` · `training` ·
+`settings` · `today` · `last session`. Not `Merit`, not `Nutrition`, not Title Case anywhere in
+chrome. Sentence case is for prose — a full sentence starts with a capital and ends with a full stop.
+A nav item is not a sentence.
+
+This applies to the wordmark too: the app is `merit`, lowercase, in every place it renders. The only
+places `Merit` appears capitalised are the manifest `name`, the `<title>`, legal text and the README —
+places where it is a proper noun in someone else's sentence rather than a piece of this interface.
+
 Units are lowercase and follow SI: `g`, `kg`, `ml`, `kcal`, `cm`. Never `Kcal`, never `KG`. A unit is
-always mono, always `ink-faint`, and always separated from its number by a hair space or a normal
-space — never glued on.
+always mono, always `ink-faint`, and always separated from its number by a space — never glued on.
 
 ---
 
@@ -365,7 +373,7 @@ target does.
 | Row inside a list | `12px 16px`, min-h 52 | `10px 16px` |
 | Panel field / body | `14px 16px` | `12px 16px` |
 | Panel header strip | `10px 16px` | `8px 14px` |
-| Page content area | `16px` horizontal, `20px` top | `32px`, widening to `40px` at `lg` |
+| Page content area | `16px` horizontal, `20px` top | `24px`, and **no more than 24px** at `lg` |
 
 The gap between two adjacent touch targets is at least 8px. A delete button 2px from a value field is
 a mis-tap waiting to happen, and in Merit a mis-tap deletes a logged meal.
@@ -391,6 +399,13 @@ Pick one rhythm per page type and hold it.
 | Content column, dashboard | ~860px, centred |
 | Content column, reading | 72–76ch |
 | Modal dialog (`md` and up) | 420–520px |
+
+**A wide screen is not an invitation to add whitespace.** Merit is a dense tool; on a 1440px display
+the content column is capped and *centred*, with 24px gutters — the extra width becomes empty page,
+not extra padding inside panels. Row padding, panel padding and the gap between sections stay within
+a step or two of their mobile values. Interfaces that scale their own padding with the viewport are
+the single most reliable tell of a generated layout: everything breathes uniformly and nothing has a
+hierarchy. Density is the signature; keep it at every width.
 
 ---
 
@@ -446,6 +461,15 @@ accent edges on one screen cancel out.
 - **The bottom bar is `surface` with a `border-t` in `line`**, plus `padding-bottom:
   env(safe-area-inset-bottom)`. Not translucent, not blurred, not floating — it is a plane, and it
   must stay legible over a scrolling chart.
+- **From `lg`, the header carries a path bar**, not a page title. Mono `text-2xs`, `ink-faint`, with
+  the current segment promoted to `ink`, separated by a thin `/` in `line-strong`:
+  `merit / nutrition / today`. It sits in the sticky header, left-aligned to the content column, and
+  it is the same lowercase vocabulary as the navigation (§4.4). Segments before the last are links.
+
+  This is a carried-over signature, not decoration: the file-tree reading is what makes the app feel
+  like a tool rather than a dashboard template. Below `lg` it is replaced by a single mono label for
+  the current screen — a three-segment path on a 375px screen is noise.
+
 - **Sticky chrome is thin**: a header of `border-b` + `bg/90` + `backdrop-blur`, never an opaque bar
   with a shadow.
 - **The primary action of a screen sits in its lower half** on mobile. The top of a phone screen is
@@ -895,7 +919,7 @@ this app can do.
 nothing fail silently — a barcode that did not resolve is an empty state, not an error dialog.
 
 **The footer is one quiet mono line** stating what Merit is and one true fact about it, plus the
-link to the source (§15).
+source link the licence requires (§15).
 
 ---
 
@@ -916,9 +940,8 @@ Merit is installed to a home screen and used in places with no signal.
   IndexedDB or Supabase. Nothing else goes into `localStorage`, ever.
 - **Sync is last-write-wins per row, with the local timestamp preserved.** A set logged at 18:42
   offline is a set logged at 18:42, not at 21:10 when the phone found wifi.
-- **A source link is visible to users of the hosted app.** Merit is open source (MIT); the link to
-  the repository lives in the footer of the settings screen as a plain mono line. The licence does
-  not compel it — showing people the code behind a health tool holding their data does.
+- **The AGPL requires a source link visible to users of the hosted app.** It lives in the footer of
+  the settings screen as a plain mono line. This is a licence obligation, not a nicety.
 
 ---
 
@@ -1012,7 +1035,7 @@ are still in use.
 - A chart series told apart by colour alone.
 - Anything in `localStorage` other than the theme.
 - A hardcoded user-facing string, or a layout that only fits the English label.
-- The source link missing from the shipped app.
+- The AGPL source link missing from the shipped app.
 
 ---
 
