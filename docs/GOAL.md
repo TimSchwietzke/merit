@@ -95,7 +95,7 @@ Silently treating absent data as zero is the most misleading thing this view
 could do.
 
 Micronutrients beyond these: store them in `micros` when the source provides them,
-but do not build UI that depends on them. Open Food Facts coverage for vitamins
+but do not build UI that depends on them (e.g. collapsable). Open Food Facts coverage for vitamins
 and minerals is too patchy to show meaningful daily targets.
 
 ---

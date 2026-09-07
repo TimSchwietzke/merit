@@ -1,0 +1,75 @@
+# ── Secrets ─────────────────────────────────────────────────────────
+# Everything except .env.example. Nothing here ever reaches the repo.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.supabase/.temp/
+
+# ── Dependencies ────────────────────────────────────────────────────
+node_modules/
+.pnp
+.pnp.js
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+
+# ── Build output ────────────────────────────────────────────────────
+dist/
+dist-ssr/
+build/
+*.local
+
+# ── Vercel ──────────────────────────────────────────────────────────
+.vercel
+
+# ── Supabase ────────────────────────────────────────────────────────
+# Local dev stack state. Migrations in supabase/migrations/ ARE committed.
+supabase/.branches/
+supabase/.temp/
+
+# ── Testing ─────────────────────────────────────────────────────────
+coverage/
+.nyc_output/
+test-results/
+playwright-report/
+playwright/.cache/
+blob-report/
+
+# ── Caches ──────────────────────────────────────────────────────────
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+*.tsbuildinfo
+.vite/
+
+# ── Logs ────────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# ── Editors ─────────────────────────────────────────────────────────
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.swp
+*.swo
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# ── OS ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
