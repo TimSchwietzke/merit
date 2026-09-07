@@ -44,6 +44,21 @@
     "more": {
       "title": "More",
       "planned": "Weight, settings, data export and the legal pages go here.",
+      "preferences": {
+        "label": "preferences",
+        "language": "language",
+        "theme": "theme",
+        "languages": {
+          "de": "deutsch",
+          "en": "english"
+        },
+        "themes": {
+          "light": "light",
+          "dark": "dark",
+          "system": "system"
+        },
+        "saveFailed": "That preference did not save and has been put back. Check your connection and try again."
+      },
       "account": {
         "label": "account",
         "signedInAs": "signed in as",

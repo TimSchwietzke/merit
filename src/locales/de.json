@@ -44,6 +44,21 @@
     "more": {
       "title": "Mehr",
       "planned": "Hier stehen Gewicht, Einstellungen, Datenexport und die rechtlichen Seiten.",
+      "preferences": {
+        "label": "einstellungen",
+        "language": "sprache",
+        "theme": "erscheinungsbild",
+        "languages": {
+          "de": "deutsch",
+          "en": "english"
+        },
+        "themes": {
+          "light": "hell",
+          "dark": "dunkel",
+          "system": "system"
+        },
+        "saveFailed": "Die Einstellung wurde nicht gespeichert und ist zurückgesetzt. Prüfe dein Netz und versuche es noch einmal."
+      },
       "account": {
         "label": "konto",
         "signedInAs": "angemeldet als",
