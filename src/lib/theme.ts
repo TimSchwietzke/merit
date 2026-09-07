@@ -38,10 +38,30 @@ export function getStoredPref(): ThemePref {
   }
 }
 
+/**
+ * Whether this device has a theme of its own.
+ *
+ * The distinction matters for sync: `profiles.theme` is the preference that
+ * travels between devices, but applying it over a local choice would repaint
+ * after first paint — the flash §17 calls out. So the stored value wins where
+ * it exists, and the profile only seeds a device that has never chosen.
+ */
+export function hasStoredPref(): boolean {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY)
+    return stored === 'light' || stored === 'dark' || stored === 'system'
+  } catch {
+    return false
+  }
+}
+
 export function storePref(pref: ThemePref): void {
   try {
-    if (pref === 'system') localStorage.removeItem(STORAGE_KEY)
-    else localStorage.setItem(STORAGE_KEY, pref)
+    // 'system' is written rather than removed: an explicit "follow the OS" and
+    // a device that has never chosen are different states, and only the second
+    // should be seeded from the profile. The inline bootstrap in index.html
+    // reads anything that is not 'light'/'dark' as system, so this is safe.
+    localStorage.setItem(STORAGE_KEY, pref)
   } catch {
     // The preference is lost on reload; the current session still honours it.
   }

@@ -1,0 +1,113 @@
+import { test as base, type Page } from '@playwright/test'
+
+/**
+ * The visual harness (DESIGN.md §16.2: "opened at 375px, in German, in both
+ * themes"). It renders every screen across the width sweep without touching the
+ * Supabase project: the session is seeded into `localStorage` in the shape
+ * supabase-js expects, and the two endpoints the app would call are answered
+ * locally.
+ *
+ * This is a *visual* harness, not an end-to-end test. The real e2e specs
+ * CLAUDE.md asks for — log in, log a food, log a set — assert behaviour against
+ * a local Supabase and belong with the features they cover.
+ */
+
+/** Derived from VITE_SUPABASE_URL; supabase-js stores under `sb-<ref>-auth-token`. */
+const PROJECT_REF = process.env.MERIT_SUPABASE_REF ?? 'localhost'
+
+const USER = {
+  id: '00000000-0000-4000-8000-000000000001',
+  email: 'harness@merit.test',
+}
+
+/** Far future, so supabase-js never tries to refresh and never hits the network. */
+const EXPIRES_AT = 4102444800 // 2100-01-01
+
+export type Theme = 'light' | 'dark'
+export type Locale = 'de' | 'en'
+
+export interface Viewport {
+  name: string
+  width: number
+  height: number
+}
+
+/**
+ * Big screens down to mobile. 1920 and 1440 are where §5.4's "a wide screen is
+ * not an invitation to add whitespace" gets tested; 1024 is the breakpoint the
+ * sidebar and the path bar appear at; 768 is `md`; 375 is the design target.
+ */
+export const VIEWPORTS: Viewport[] = [
+  { name: '1920', width: 1920, height: 1080 },
+  { name: '1440', width: 1440, height: 900 },
+  { name: '1024', width: 1024, height: 800 },
+  { name: '768', width: 768, height: 900 },
+  { name: '375', width: 375, height: 812 },
+]
+
+export interface Route {
+  name: string
+  path: string
+  /** Sign-in is the one screen that renders signed *out*, outside the shell. */
+  signedOut?: boolean
+}
+
+export const ROUTES: Route[] = [
+  { name: 'dashboard', path: '/' },
+  { name: 'food', path: '/food' },
+  { name: 'training', path: '/training' },
+  { name: 'more', path: '/more' },
+  { name: 'not-found', path: '/nowhere' },
+  { name: 'sign-in', path: '/sign-in', signedOut: true },
+]
+
+/** Signs the browser in and answers the profile query, offline. */
+export async function stubBackend(
+  page: Page,
+  { theme, locale, signedOut = false }: { theme: Theme; locale: Locale; signedOut?: boolean },
+) {
+  await page.addInitScript(
+    ({ ref, user, expiresAt, theme, locale, signedOut }) => {
+      const session = {
+        access_token: 'harness-access-token',
+        refresh_token: 'harness-refresh-token',
+        token_type: 'bearer',
+        expires_at: expiresAt,
+        expires_in: expiresAt - Math.floor(Date.now() / 1000),
+        user: {
+          id: user.id,
+          aud: 'authenticated',
+          role: 'authenticated',
+          email: user.email,
+          app_metadata: {},
+          user_metadata: {},
+          created_at: '2026-01-01T00:00:00Z',
+        },
+      }
+      if (!signedOut) window.localStorage.setItem(`sb-${ref}-auth-token`, JSON.stringify(session))
+      // The theme is read synchronously by the bootstrap script before paint.
+      window.localStorage.setItem('merit.theme', theme)
+      // i18n falls back to navigator before the profile arrives; pin it so the
+      // first frame is already in the language under test.
+      Object.defineProperty(navigator, 'languages', { get: () => [locale] })
+      Object.defineProperty(navigator, 'language', { get: () => locale })
+    },
+    { ref: PROJECT_REF, user: USER, expiresAt: EXPIRES_AT, theme, locale, signedOut },
+  )
+
+  await page.route('**/rest/v1/profiles*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ locale, theme }),
+    }),
+  )
+
+  // Nothing else should reach the network. Fail loudly rather than hanging.
+  await page.route('**/auth/v1/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }),
+  )
+}
+
+export const test = base.extend({})
+export { expect } from '@playwright/test'

@@ -73,3 +73,6 @@ lerna-debug.log*
 .DS_Store
 Thumbs.db
 desktop.ini
+# Playwright: downloaded browsers, captures and run artefacts
+e2e/shots/
+e2e/.results/

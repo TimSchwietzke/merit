@@ -1,26 +1,38 @@
 import { Outlet } from 'react-router-dom'
 
+import { AppHeader } from '@/components/shell/AppHeader'
 import { Nav } from '@/components/shell/Nav'
-import { useTheme } from '@/lib/useTheme'
+import { PreferencesProvider } from '@/features/settings/PreferencesProvider'
 
 /**
  * The frame every route renders inside. `dvh`, never `vh` — mobile browser
  * chrome changes height as you scroll and `100vh` cuts the layout off exactly
  * when the keyboard is open (DESIGN.md §8).
+ *
+ * The header sits inside the content column rather than above the whole frame,
+ * so from `lg` the path bar starts on the same left edge as the content and the
+ * sidebar keeps the full height of the viewport.
+ *
+ * Gutters stop at 24px and the column stops at 860px (§5.2, §5.4): past that a
+ * wide screen gets empty page, not inflated padding.
  */
 export function AppShell() {
-  // Keeps the document in step with the OS while the preference is "system".
-  useTheme()
-
   return (
-    <div className="min-h-[100dvh] lg:flex">
-      <Nav />
-      <main
-        className="mx-auto w-full max-w-[860px] px-4 pt-5 md:px-6 md:pt-6
-                   pb-[calc(56px+1.5rem+env(safe-area-inset-bottom))] lg:pb-6"
-      >
-        <Outlet />
-      </main>
-    </div>
+    // Owns the theme (and so keeps the document in step with the OS while the
+    // preference is "system") as well as the locale, for every signed-in route.
+    <PreferencesProvider>
+      <div className="min-h-[100dvh] lg:flex">
+        <Nav />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <AppHeader />
+          <main
+            className="mx-auto w-full max-w-[860px] px-4 pt-5 md:px-6 md:pt-6
+                       pb-[calc(56px+1.5rem+env(safe-area-inset-bottom))] lg:pb-6"
+          >
+            <Outlet />
+          </main>
+        </div>
+      </div>
+    </PreferencesProvider>
   )
 }

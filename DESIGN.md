@@ -231,7 +231,8 @@ The rest is direct: `--background → bg`, `--foreground → ink`, `--card → s
 |---|---|
 | `dialog`, `sheet`, `drawer`, `popover`, `dropdown-menu`, `select`, `command` | Use. This is where the behaviour is worth the most. |
 | `input`, `textarea`, `label`, `checkbox`, `switch`, `radio-group`, `slider` | Use, restyled per §10.5. |
-| `tabs` | Use as the base for the segmented control (§10.7). Restyle completely. |
+| `toggle-group` | Use as the base for the segmented control (§10.7), `type="single"`. Restyle completely. |
+| `tabs` | **Do not use** as a segmented control. `tablist`/`tab` promises panels a settings toggle does not have. Available if a screen ever genuinely switches panels. |
 | `button` | Use as the base, but replace the variant set with Merit's four (§10.4). Delete the ones that do not exist here. |
 | `sonner` (toasts) | Use sparingly. Merit prefers in-place state to notifications. |
 | `calendar` | Use for the date picker; restyle heavily, it is the most opinionated component in the set. |
@@ -635,10 +636,19 @@ A label is mono `text-2xs`, `ink-faint`, optionally uppercase, never wide tracki
 
 ### 10.7 Segmented control
 
-Base: shadcn `tabs`, restyled to a single bordered container with `overflow: hidden` and radius 5;
-children are flush buttons with no borders of their own. Active: `bg-accent-soft` + `text-accent`.
-Inactive: `ink-faint`, hover `surface` + `ink`. Used for theme, meal type, chart range, and any 2–4
-way exclusive choice. `role="group"` with an `aria-label`, each button `aria-pressed`.
+Base: shadcn `toggle-group` with `type="single"`, restyled to a single bordered container with
+`overflow: hidden` and radius 5; children are flush buttons with no borders of their own. Active:
+`bg-accent-soft` + `text-accent`. Inactive: `ink-faint`, hover `surface` + `ink`. Used for theme,
+meal type, chart range, and any 2–4 way exclusive choice.
+
+**It is a radio group, not a row of toggles.** `role="radiogroup"` with an `aria-label`, each option
+`role="radio"` with `aria-checked` — which is what `toggle-group type="single"` renders, so it comes
+for free along with arrow-key roving focus. This replaces an earlier `role="group"` + `aria-pressed`
+spec, and the distinction is not pedantry: `aria-pressed` describes buttons that happen to be
+mutually exclusive, so a screen reader announces three independent toggles and leaves the user to
+infer that exactly one can win. `radiogroup` announces "2 of 3" and makes the exclusivity part of
+what is read out. Selecting the active option again must not clear it — a segmented control has no
+empty state.
 
 Above four options it becomes a `select`. A five-segment control on a 375px screen has 60px segments.
 
