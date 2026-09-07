@@ -1,14 +1,14 @@
 import { useTranslation } from 'react-i18next'
 
 import { NotBuiltYet } from '@/components/NotBuiltYet'
-import { PageHeader } from '@/components/PageHeader'
+import { ScreenTitle } from '@/components/ScreenTitle'
 
 export default function DashboardPage() {
   const { t } = useTranslation()
 
   return (
     <>
-      <PageHeader title={t('pages.dashboard.title')} />
+      <ScreenTitle>{t('nav.dashboard')}</ScreenTitle>
       <NotBuiltYet label={t('common.notBuiltYet')}>{t('pages.dashboard.planned')}</NotBuiltYet>
     </>
   )

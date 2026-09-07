@@ -4,13 +4,16 @@
   },
   "nav": {
     "label": "Main navigation",
+    "path": "Path",
     "dashboard": "dashboard",
     "food": "food",
     "training": "training",
     "more": "more"
   },
   "common": {
-    "notBuiltYet": "not built yet"
+    "notBuiltYet": "not built yet",
+    "today": "today",
+    "notFound": "not found"
   },
   "auth": {
     "signIn": {
@@ -30,19 +33,15 @@
   },
   "pages": {
     "dashboard": {
-      "title": "Dashboard",
       "planned": "The day's summary goes here — calories against your target, the macro split, and whether a session is due."
     },
     "food": {
-      "title": "Food",
       "planned": "Logging a food goes here — search the catalogue, scan a barcode, or enter the values by hand."
     },
     "training": {
-      "title": "Training",
       "planned": "Training goes here — your routines, the session for today, and the sets as you log them."
     },
     "more": {
-      "title": "More",
       "planned": "Weight, settings, data export and the legal pages go here.",
       "preferences": {
         "label": "preferences",

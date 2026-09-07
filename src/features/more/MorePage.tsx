@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Field } from '@/components/Field'
 import { NotBuiltYet } from '@/components/NotBuiltYet'
-import { PageHeader } from '@/components/PageHeader'
 import { Panel } from '@/components/Panel'
+import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
 import { SegmentedControl } from '@/components/SegmentedControl'
 import { Button } from '@/components/ui/button'
@@ -35,46 +36,40 @@ export default function MorePage() {
 
   return (
     <>
-      <PageHeader title={t('pages.more.title')} />
+      <ScreenTitle>{t('nav.more')}</ScreenTitle>
       <NotBuiltYet label={t('common.notBuiltYet')}>{t('pages.more.planned')}</NotBuiltYet>
 
       <section className="mt-8">
         <SectionHead label={t('pages.more.preferences.label')} />
+        {/* Field puts the label above the control, not beside it: `design` plus
+            three segments does not sit on one line at 375px (DESIGN.md §9, §10.2). */}
         <Panel>
-          {/* Label above control, not beside it: `erscheinungsbild` plus three
-              segments does not sit on one line at 375px (DESIGN.md §9, §10.2). */}
-          <div className="px-4 py-3.5">
-            <p className="font-mono text-2xs text-ink-faint">{t('pages.more.preferences.language')}</p>
-            <div className="mt-2">
-              <SegmentedControl<Locale>
-                label={t('pages.more.preferences.language')}
-                value={locale}
-                disabled={status === 'loading'}
-                onChange={setLocale}
-                segments={[
-                  { value: 'de', label: t('pages.more.preferences.languages.de') },
-                  { value: 'en', label: t('pages.more.preferences.languages.en') },
-                ]}
-              />
-            </div>
-          </div>
+          <Field label={t('pages.more.preferences.language')}>
+            <SegmentedControl<Locale>
+              label={t('pages.more.preferences.language')}
+              value={locale}
+              disabled={status === 'loading'}
+              onChange={setLocale}
+              segments={[
+                { value: 'de', label: t('pages.more.preferences.languages.de') },
+                { value: 'en', label: t('pages.more.preferences.languages.en') },
+              ]}
+            />
+          </Field>
 
-          <div className="border-t border-line px-4 py-3.5">
-            <p className="font-mono text-2xs text-ink-faint">{t('pages.more.preferences.theme')}</p>
-            <div className="mt-2">
-              <SegmentedControl<ThemePref>
-                label={t('pages.more.preferences.theme')}
-                value={theme}
-                disabled={status === 'loading'}
-                onChange={setTheme}
-                segments={[
-                  { value: 'light', label: t('pages.more.preferences.themes.light') },
-                  { value: 'dark', label: t('pages.more.preferences.themes.dark') },
-                  { value: 'system', label: t('pages.more.preferences.themes.system') },
-                ]}
-              />
-            </div>
-          </div>
+          <Field label={t('pages.more.preferences.theme')}>
+            <SegmentedControl<ThemePref>
+              label={t('pages.more.preferences.theme')}
+              value={theme}
+              disabled={status === 'loading'}
+              onChange={setTheme}
+              segments={[
+                { value: 'light', label: t('pages.more.preferences.themes.light') },
+                { value: 'dark', label: t('pages.more.preferences.themes.dark') },
+                { value: 'system', label: t('pages.more.preferences.themes.system') },
+              ]}
+            />
+          </Field>
         </Panel>
 
         {saveFailed ? (
@@ -87,10 +82,9 @@ export default function MorePage() {
       <section className="mt-8">
         <SectionHead label={t('pages.more.account.label')} />
         <Panel>
-          <div className="px-4 py-3.5">
-            <p className="font-mono text-2xs text-ink-faint">{t('pages.more.account.signedInAs')}</p>
-            <p className="mt-2 text-sm break-all">{session?.user.email}</p>
-          </div>
+          <Field label={t('pages.more.account.signedInAs')}>
+            <p className="break-all">{session?.user.email}</p>
+          </Field>
         </Panel>
 
         {errorKey ? (
