@@ -58,12 +58,16 @@ export function SegmentedControl<T extends string>({
           value={segment.value}
           className={cn(
             `min-h-11 px-3.5 py-2.5 text-sm transition-colors [transition-duration:140ms]
-             md:min-h-[30px] md:px-2.5 md:py-1.5 disabled:opacity-35`,
+             active:[transition-duration:0ms] md:min-h-[30px] md:px-2.5 md:py-1.5
+             disabled:opacity-35`,
             // Keyed off data-state in both directions rather than a base style
             // plus a hover override, so the active segment does not lose its
             // fill on hover depending on which rule Tailwind emits last.
+            // There is no hover on touch, so the press state is the only
+            // feedback a tap gets (§6). It is never transitioned.
             `data-[state=off]:text-ink-faint data-[state=off]:hover:bg-surface
-             data-[state=off]:hover:text-ink`,
+             data-[state=off]:hover:text-ink data-[state=off]:active:bg-surface-2
+             data-[state=off]:active:text-ink`,
             `data-[state=on]:bg-accent-soft data-[state=on]:font-medium data-[state=on]:text-accent`,
           )}
         >
