@@ -895,7 +895,7 @@ this app can do.
 nothing fail silently — a barcode that did not resolve is an empty state, not an error dialog.
 
 **The footer is one quiet mono line** stating what Merit is and one true fact about it, plus the
-source link the licence requires (§15).
+link to the source (§15).
 
 ---
 
@@ -916,8 +916,9 @@ Merit is installed to a home screen and used in places with no signal.
   IndexedDB or Supabase. Nothing else goes into `localStorage`, ever.
 - **Sync is last-write-wins per row, with the local timestamp preserved.** A set logged at 18:42
   offline is a set logged at 18:42, not at 21:10 when the phone found wifi.
-- **The AGPL requires a source link visible to users of the hosted app.** It lives in the footer of
-  the settings screen as a plain mono line. This is a licence obligation, not a nicety.
+- **A source link is visible to users of the hosted app.** Merit is open source (MIT); the link to
+  the repository lives in the footer of the settings screen as a plain mono line. The licence does
+  not compel it — showing people the code behind a health tool holding their data does.
 
 ---
 
@@ -1011,7 +1012,7 @@ are still in use.
 - A chart series told apart by colour alone.
 - Anything in `localStorage` other than the theme.
 - A hardcoded user-facing string, or a layout that only fits the English label.
-- The AGPL source link missing from the shipped app.
+- The source link missing from the shipped app.
 
 ---
 

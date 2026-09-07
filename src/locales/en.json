@@ -1,0 +1,38 @@
+{
+  "app": {
+    "name": "Merit"
+  },
+  "nav": {
+    "label": "Main navigation",
+    "dashboard": "Dashboard",
+    "food": "Food",
+    "training": "Training",
+    "more": "More"
+  },
+  "common": {
+    "notBuiltYet": "not built yet"
+  },
+  "pages": {
+    "dashboard": {
+      "title": "Dashboard",
+      "planned": "The day's summary goes here — calories against your target, the macro split, and whether a session is due."
+    },
+    "food": {
+      "title": "Food",
+      "planned": "Logging a food goes here — search the catalogue, scan a barcode, or enter the values by hand."
+    },
+    "training": {
+      "title": "Training",
+      "planned": "Training goes here — your routines, the session for today, and the sets as you log them."
+    },
+    "more": {
+      "title": "More",
+      "planned": "Weight, settings, data export and the legal pages go here."
+    },
+    "notFound": {
+      "title": "Page not found",
+      "body": "This address does not exist.",
+      "back": "Back to the dashboard"
+    }
+  }
+}
