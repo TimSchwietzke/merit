@@ -16,8 +16,8 @@ export function AppShell() {
     <div className="min-h-[100dvh] lg:flex">
       <Nav />
       <main
-        className="mx-auto w-full max-w-[860px] px-4 pt-5 md:px-8 lg:px-10 lg:pt-8
-                   pb-[calc(56px+1.5rem+env(safe-area-inset-bottom))] lg:pb-10"
+        className="mx-auto w-full max-w-[860px] px-4 pt-5 md:px-6 md:pt-6
+                   pb-[calc(56px+1.5rem+env(safe-area-inset-bottom))] lg:pb-6"
       >
         <Outlet />
       </main>

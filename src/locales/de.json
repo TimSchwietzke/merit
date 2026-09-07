@@ -1,16 +1,32 @@
 {
   "app": {
-    "name": "Merit"
+    "name": "merit"
   },
   "nav": {
     "label": "Hauptnavigation",
-    "dashboard": "Übersicht",
-    "food": "Ernährung",
-    "training": "Training",
-    "more": "Mehr"
+    "dashboard": "übersicht",
+    "food": "ernährung",
+    "training": "training",
+    "more": "mehr"
   },
   "common": {
     "notBuiltYet": "noch nicht gebaut"
+  },
+  "auth": {
+    "signIn": {
+      "title": "Anmelden",
+      "lead": "Merit ist nur auf Einladung nutzbar. Konten werden von Hand angelegt — eine Registrierung gibt es nicht.",
+      "email": "e-mail",
+      "password": "passwort",
+      "submit": "Anmelden",
+      "pending": "Wird angemeldet …"
+    },
+    "errors": {
+      "invalidCredentials": "Diese Adresse und dieses Passwort gehören zu keinem Konto. Prüfe beides und versuche es noch einmal.",
+      "rateLimited": "Zu viele Versuche. Warte eine Minute und versuche es dann noch einmal.",
+      "offline": "Keine Verbindung zum Server. Prüfe dein Netz und versuche es noch einmal.",
+      "unknown": "Die Anfrage ist nicht durchgekommen. Versuche es noch einmal."
+    }
   },
   "pages": {
     "dashboard": {
@@ -27,7 +43,13 @@
     },
     "more": {
       "title": "Mehr",
-      "planned": "Hier stehen Gewicht, Einstellungen, Datenexport und die rechtlichen Seiten."
+      "planned": "Hier stehen Gewicht, Einstellungen, Datenexport und die rechtlichen Seiten.",
+      "account": {
+        "label": "konto",
+        "signedInAs": "angemeldet als",
+        "signOut": "Abmelden",
+        "signingOut": "Wird abgemeldet …"
+      }
     },
     "notFound": {
       "title": "Seite nicht gefunden",
