@@ -16,7 +16,8 @@
     "today": "heute",
     "notFound": "nicht gefunden",
     "loading": "wird geladen",
-    "undo": "Rückgängig"
+    "undo": "Rückgängig",
+    "add": "hinzufügen"
   },
   "auth": {
     "signIn": {
@@ -39,7 +40,75 @@
       "planned": "Hier steht die Zusammenfassung des Tages — Kalorien im Verhältnis zu deinem Ziel, die Makroverteilung und ob heute eine Einheit ansteht."
     },
     "food": {
-      "planned": "Hier wird Essen erfasst — Katalog durchsuchen, Barcode scannen oder Werte selbst eintragen."
+      "loadFailed": "Die Einträge des Tages konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
+      "deleted": "{{name}} entfernt",
+      "undoFailed": "Die Portion konnte nicht wiederhergestellt werden. Trage sie noch einmal ein.",
+      "day": {
+        "previous": "Vorheriger Tag",
+        "next": "Nächster Tag",
+        "today": "Zurück zu heute"
+      },
+      "meals": {
+        "breakfast": "frühstück",
+        "lunch": "mittag",
+        "dinner": "abend",
+        "snack": "snack"
+      },
+      "nutrients": {
+        "kcal": "energie",
+        "fat": "fett",
+        "saturatedFat": "davon gesättigte fettsäuren",
+        "carbs": "kohlenhydrate",
+        "sugars": "davon zucker",
+        "fibre": "ballaststoffe",
+        "protein": "eiweiß",
+        "salt": "salz"
+      },
+      "totals": {
+        "label": "der tag",
+        "partial": "unvollständig · {{known}} von {{total}}",
+        "none": "keine angabe"
+      },
+      "log": {
+        "label": "erfasst",
+        "empty": "noch nichts erfasst",
+        "add": "Lebensmittel hinzufügen"
+      },
+      "add": {
+        "title": "Lebensmittel hinzufügen",
+        "lead": "Durchsuche, was Merit schon kennt. Fehlt etwas, trage es ein.",
+        "search": "suche",
+        "searchHint": " · mindestens zwei buchstaben",
+        "searching": "wird gesucht",
+        "noResults": "kein treffer",
+        "addYourself": "Selbst eintragen",
+        "searchFailed": "Die Suche ist nicht durchgekommen. Prüfe dein Netz und versuche es noch einmal.",
+        "back": "Zurück zum Tag"
+      },
+      "portion": {
+        "quantity": "menge",
+        "meal": "mahlzeit",
+        "quantityInvalid": "Trage eine Menge zwischen 1 und 10000 g ein, zum Beispiel 250.",
+        "previewPending": "trage eine Menge ein, um die Werte zu sehen",
+        "saveFailed": "Die Portion wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+        "save": "Eintragen",
+        "saving": "Wird eingetragen …"
+      },
+      "new": {
+        "title": "Lebensmittel anlegen",
+        "shared": "Was du anlegst, landet im gemeinsamen Katalog aller Merit-Nutzer. Die Werte gelten je 100 g oder 100 ml, so wie sie auf der Packung stehen.",
+        "name": "name",
+        "brand": "marke",
+        "optional": " · optional",
+        "required": "pflicht",
+        "nameInvalid": "Gib dem Lebensmittel einen Namen.",
+        "valueInvalid": "Trage eine Zahl ein oder lass das Feld leer, wenn die Packung nichts dazu sagt.",
+        "requiredInvalid": "Energie, Fett, Kohlenhydrate und Eiweiß werden gebraucht, um überhaupt etwas dagegen rechnen zu können.",
+        "subValueTooHigh": "Ein Teilwert kann nicht größer sein als der Wert, zu dem er gehört.",
+        "save": "In den Katalog aufnehmen",
+        "saving": "Wird angelegt …",
+        "saveFailed": "Das Lebensmittel wurde nicht angelegt. Prüfe dein Netz und versuche es noch einmal."
+      }
     },
     "training": {
       "planned": "Hier steht das Training — deine Trainingstage, die Einheit für heute und die Sätze, während du sie protokollierst."

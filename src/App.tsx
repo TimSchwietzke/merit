@@ -9,6 +9,7 @@ import DashboardPage from '@/features/dashboard/DashboardPage'
 import MorePage from '@/features/more/MorePage'
 import NotFoundPage from '@/features/more/NotFoundPage'
 import FoodPage from '@/features/nutrition/FoodPage'
+import AddFoodPage from '@/features/nutrition/AddFoodPage'
 import TrainingPage from '@/features/training/TrainingPage'
 
 // Weight is the only screen that pulls in Recharts, which is a third of the
@@ -28,6 +29,7 @@ const router = createBrowserRouter([
         children: [
           { path: '/', element: <DashboardPage /> },
           { path: '/food', element: <FoodPage /> },
+          { path: '/food/add', element: <AddFoodPage /> },
           { path: '/training', element: <TrainingPage /> },
           { path: '/more', element: <MorePage /> },
           { path: '/weight', element: <WeightPage /> },

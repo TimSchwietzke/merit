@@ -58,6 +58,7 @@ export const ROUTES: Route[] = [
   { name: 'training', path: '/training' },
   { name: 'more', path: '/more' },
   { name: 'weight', path: '/weight' },
+  { name: 'food-add', path: '/food/add' },
   { name: 'not-found', path: '/nowhere' },
   { name: 'sign-in', path: '/sign-in', signedOut: true },
 ]
@@ -115,6 +116,46 @@ export async function stubBackend(
       body: JSON.stringify(rows),
     })
   })
+
+  // A day's foods, joined as PostgREST returns them, plus a catalogue for the
+  // search. One portion is missing its fibre and salt so the `partial` marker
+  // — the whole point of the missing-is-not-zero rule — is in every capture.
+  const FOODS = [
+    {
+      id: 'f1', name: 'Skyr, natur', brand: 'Arla', source: 'off',
+      serving_size_g: null, serving_label: null,
+      kcal_100g: 63, fat_100g: 0.2, carbs_100g: 4, protein_100g: 11,
+      saturated_fat_100g: 0.1, sugars_100g: 4, fibre_100g: 0, salt_100g: 0.1,
+    },
+    {
+      id: 'f2', name: 'Haferflocken, kernig', brand: null, source: 'community',
+      serving_size_g: 60, serving_label: 'Portion',
+      kcal_100g: 372, fat_100g: 7, carbs_100g: 59, protein_100g: 13,
+      saturated_fat_100g: 1.3, sugars_100g: 1.1, fibre_100g: 10, salt_100g: 0.02,
+    },
+    {
+      id: 'f3', name: 'Banane', brand: null, source: 'usda',
+      serving_size_g: null, serving_label: null,
+      kcal_100g: 89, fat_100g: 0.3, carbs_100g: 23, protein_100g: 1.1,
+      saturated_fat_100g: null, sugars_100g: 12, fibre_100g: null, salt_100g: null,
+    },
+  ]
+
+  await page.route('**/rest/v1/food_logs*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([
+        { id: 'l1', meal_type: 'breakfast', quantity_g: 180, foods: FOODS[0] },
+        { id: 'l2', meal_type: 'breakfast', quantity_g: 60, foods: FOODS[1] },
+        { id: 'l3', meal_type: 'snack', quantity_g: 120, foods: FOODS[2] },
+      ]),
+    }),
+  )
+
+  await page.route('**/rest/v1/foods*', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(FOODS) }),
+  )
 
   await page.route('**/rest/v1/profiles*', (route) =>
     route.fulfill({

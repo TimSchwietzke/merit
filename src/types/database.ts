@@ -39,6 +39,113 @@ export type Database = {
   }
   public: {
     Tables: {
+      food_logs: {
+        Row: {
+          created_at: string
+          date: string
+          food_id: string
+          id: string
+          meal_type: string
+          quantity_g: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date: string
+          food_id: string
+          id?: string
+          meal_type: string
+          quantity_g: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date?: string
+          food_id?: string
+          id?: string
+          meal_type?: string
+          quantity_g?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "food_logs_food_id_fkey"
+            columns: ["food_id"]
+            isOneToOne: false
+            referencedRelation: "foods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      foods: {
+        Row: {
+          barcode: string | null
+          brand: string | null
+          carbs_100g: number
+          created_at: string
+          created_by: string | null
+          fat_100g: number
+          fibre_100g: number | null
+          id: string
+          kcal_100g: number
+          micros: Json | null
+          name: string
+          protein_100g: number
+          salt_100g: number | null
+          saturated_fat_100g: number | null
+          serving_label: string | null
+          serving_size_g: number | null
+          source: string
+          sugars_100g: number | null
+          updated_at: string
+        }
+        Insert: {
+          barcode?: string | null
+          brand?: string | null
+          carbs_100g: number
+          created_at?: string
+          created_by?: string | null
+          fat_100g: number
+          fibre_100g?: number | null
+          id?: string
+          kcal_100g: number
+          micros?: Json | null
+          name: string
+          protein_100g: number
+          salt_100g?: number | null
+          saturated_fat_100g?: number | null
+          serving_label?: string | null
+          serving_size_g?: number | null
+          source: string
+          sugars_100g?: number | null
+          updated_at?: string
+        }
+        Update: {
+          barcode?: string | null
+          brand?: string | null
+          carbs_100g?: number
+          created_at?: string
+          created_by?: string | null
+          fat_100g?: number
+          fibre_100g?: number | null
+          id?: string
+          kcal_100g?: number
+          micros?: Json | null
+          name?: string
+          protein_100g?: number
+          salt_100g?: number | null
+          saturated_fat_100g?: number | null
+          serving_label?: string | null
+          serving_size_g?: number | null
+          source?: string
+          sugars_100g?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           activity_level: string | null

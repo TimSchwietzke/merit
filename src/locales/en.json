@@ -16,7 +16,8 @@
     "today": "today",
     "notFound": "not found",
     "loading": "loading",
-    "undo": "Undo"
+    "undo": "Undo",
+    "add": "add"
   },
   "auth": {
     "signIn": {
@@ -39,7 +40,75 @@
       "planned": "The day's summary goes here — calories against your target, the macro split, and whether a session is due."
     },
     "food": {
-      "planned": "Logging a food goes here — search the catalogue, scan a barcode, or enter the values by hand."
+      "loadFailed": "The day's foods could not be loaded. Check your connection and try again.",
+      "deleted": "{{name}} removed",
+      "undoFailed": "That portion could not be put back. Log it again.",
+      "day": {
+        "previous": "Previous day",
+        "next": "Next day",
+        "today": "Back to today"
+      },
+      "meals": {
+        "breakfast": "breakfast",
+        "lunch": "lunch",
+        "dinner": "dinner",
+        "snack": "snack"
+      },
+      "nutrients": {
+        "kcal": "energy",
+        "fat": "fat",
+        "saturatedFat": "of which saturates",
+        "carbs": "carbohydrate",
+        "sugars": "of which sugars",
+        "fibre": "fibre",
+        "protein": "protein",
+        "salt": "salt"
+      },
+      "totals": {
+        "label": "the day",
+        "partial": "partial · {{known}} of {{total}} foods",
+        "none": "no data"
+      },
+      "log": {
+        "label": "logged",
+        "empty": "nothing logged yet",
+        "add": "Add food"
+      },
+      "add": {
+        "title": "Add food",
+        "lead": "Search what Merit already knows. If it is not there yet, add it.",
+        "search": "search",
+        "searchHint": " · at least two letters",
+        "searching": "searching",
+        "noResults": "no food matches",
+        "addYourself": "Add it yourself",
+        "searchFailed": "The search did not go through. Check your connection and try again.",
+        "back": "Back to the day"
+      },
+      "portion": {
+        "quantity": "quantity",
+        "meal": "meal",
+        "quantityInvalid": "Enter a quantity between 1 and 10000 g, like 250.",
+        "previewPending": "enter a quantity to see what it comes to",
+        "saveFailed": "That portion did not save. Check your connection and try again.",
+        "save": "Log it",
+        "saving": "Logging…"
+      },
+      "new": {
+        "title": "Add a food",
+        "shared": "Anything you add goes into the catalogue everyone using Merit shares. Values are per 100 g or 100 ml, as they appear on the packaging.",
+        "name": "name",
+        "brand": "brand",
+        "optional": " · optional",
+        "required": "required",
+        "nameInvalid": "Give the food a name.",
+        "valueInvalid": "Enter a number, or leave it empty if the packaging does not say.",
+        "requiredInvalid": "Energy, fat, carbohydrate and protein are needed to log anything against them.",
+        "subValueTooHigh": "A sub-value cannot be larger than the total it is part of.",
+        "save": "Add to the catalogue",
+        "saving": "Adding…",
+        "saveFailed": "That food was not added. Check your connection and try again."
+      }
     },
     "training": {
       "planned": "Training goes here — your routines, the session for today, and the sets as you log them."

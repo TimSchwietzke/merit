@@ -18,6 +18,7 @@ export interface PathSegment {
     | 'nav.training'
     | 'nav.more'
     | 'nav.weight'
+    | 'common.add'
     | 'common.today'
     | 'common.notFound'
   /** Omitted on the last segment: you do not link to where you already are. */
@@ -30,6 +31,7 @@ const PATHS: Record<string, PathSegment[]> = {
   '/': [ROOT, { labelKey: 'nav.dashboard', to: '/' }, { labelKey: 'common.today' }],
   '/food': [ROOT, { labelKey: 'nav.food', to: '/food' }, { labelKey: 'common.today' }],
   '/training': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'common.today' }],
+  '/food/add': [ROOT, { labelKey: 'nav.food', to: '/food' }, { labelKey: 'common.add' }],
   '/more': [ROOT, { labelKey: 'nav.more' }],
   // Weight is reached through `more` rather than from a tab of its own (there
   // are four and four is the ceiling, §7), and the path says so.
