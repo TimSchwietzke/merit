@@ -68,8 +68,7 @@
         "signingOut": "Signing out…"
       },
       "tracking": {
-        "label": "tracking",
-        "weight": "Weight"
+        "label": "tracking"
       }
     },
     "notFound": {
@@ -82,6 +81,7 @@
       "averageNote": "The average is the mean of every weigh-in in the {{days}} days ending on that day. Days without one are left out, not filled in.",
       "deleted": "{{date}} deleted",
       "undoFailed": "That entry could not be put back. Log the day again.",
+      "range": "Time range",
       "latest": {
         "label": "last weigh-in",
         "none": "nothing logged yet",
@@ -89,7 +89,6 @@
       },
       "chart": {
         "label": "trend · kg",
-        "range": "Chart range",
         "ranges": {
           "days": "{{days}} d",
           "all": "all"
@@ -121,7 +120,8 @@
       "list": {
         "label": "log",
         "empty": "nothing logged yet",
-        "editing": "editing"
+        "editing": "editing",
+        "emptyRange": "nothing logged in this range"
       }
     }
   }

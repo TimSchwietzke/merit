@@ -68,8 +68,7 @@
         "signingOut": "Wird abgemeldet …"
       },
       "tracking": {
-        "label": "erfassung",
-        "weight": "Gewicht"
+        "label": "erfassung"
       }
     },
     "notFound": {
@@ -82,6 +81,7 @@
       "averageNote": "Der Durchschnitt ist das Mittel aller Wiegungen in den {{days}} Tagen bis zu diesem Tag. Tage ohne Wiegung bleiben leer und werden nicht aufgefüllt.",
       "deleted": "{{date}} gelöscht",
       "undoFailed": "Der Eintrag konnte nicht wiederhergestellt werden. Trage den Tag noch einmal ein.",
+      "range": "Zeitraum",
       "latest": {
         "label": "letzte wiegung",
         "none": "noch nichts eingetragen",
@@ -89,7 +89,6 @@
       },
       "chart": {
         "label": "verlauf · kg",
-        "range": "Zeitraum des Diagramms",
         "ranges": {
           "days": "{{days}} T",
           "all": "alle"
@@ -121,7 +120,8 @@
       "list": {
         "label": "protokoll",
         "empty": "noch nichts eingetragen",
-        "editing": "wird bearbeitet"
+        "editing": "wird bearbeitet",
+        "emptyRange": "in diesem Zeitraum nichts eingetragen"
       }
     }
   }

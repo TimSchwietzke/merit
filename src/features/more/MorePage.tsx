@@ -44,7 +44,10 @@ export default function MorePage() {
         <SectionHead label={t('pages.more.tracking.label')} />
         <Rows>
           <Row to="/weight">
-            <span className="min-w-0 flex-1 truncate">{t('pages.more.tracking.weight')}</span>
+            {/* `nav.weight`, not a label of its own: the tab bar, the path bar
+                and this row are one vocabulary, and a second copy is how two
+                casings of the same word get into the app (§4.4). */}
+            <span className="min-w-0 flex-1 truncate">{t('nav.weight')}</span>
             <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
               →
             </span>
