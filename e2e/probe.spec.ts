@@ -68,14 +68,23 @@ for (const theme of ['light', 'dark'] as const) {
 }
 
 test('no horizontal scroll at any width, in German', async ({ page }) => {
-  // Thirty full page loads against a dev server. The 20s default is sized for
-  // one capture, not for a sweep.
   test.slow()
   await stubBackend(page, { theme: 'light', locale: 'de' })
-  for (const width of [1920, 1440, 1024, 768, 375, 320]) {
-    await page.setViewportSize({ width, height: 800 })
-    for (const path of ['/', '/food', '/training', '/more', '/weight']) {
-      await page.goto(path)
+  // Each screen is loaded once and then resized, rather than reloaded at every
+  // width. Overflow is a layout property, so a resize answers the question just
+  // as well — and it leaves the time budget to actually wait for the screen to
+  // finish rendering. Measuring straight after `goto` measures the skeleton,
+  // which is how a 544px-wide table got past this probe.
+  for (const path of ['/', '/food', '/training', '/more', '/weight']) {
+    await page.setViewportSize({ width: 375, height: 800 })
+    await page.goto(path)
+    await page.locator('main').waitFor({ state: 'visible' })
+    await page.waitForTimeout(1000)
+
+    for (const width of [1920, 1440, 1024, 768, 375, 320]) {
+      await page.setViewportSize({ width, height: 800 })
+      // The chart re-measures on a resize; give it a frame to do it in.
+      await page.waitForTimeout(150)
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       )

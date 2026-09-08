@@ -141,26 +141,34 @@ export function WeightChart({ points, locale }: { points: WeightPoint[]; locale:
       </figcaption>
 
       {/* The figures behind the picture. A chart is `role="img"` with a summary;
-          the values themselves still have to be readable (§11). */}
-      <table className="sr-only">
-        <caption>{t('pages.weight.chart.tableCaption')}</caption>
-        <thead>
-          <tr>
-            <th scope="col">{t('pages.weight.chart.columnDay')}</th>
-            <th scope="col">{t('pages.weight.chart.columnWeight')}</th>
-            <th scope="col">{t('pages.weight.chart.average', { days: AVERAGE_WINDOW_DAYS })}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {logged.map((point) => (
-            <tr key={point.date}>
-              <th scope="row">{formatDayShort(point.date, locale)}</th>
-              <td>{point.weightKg === null ? '' : `${formatNumber(point.weightKg, locale)} kg`}</td>
-              <td>{point.averageKg === null ? '' : `${formatNumber(point.averageKg, locale)} kg`}</td>
+          the values themselves still have to be readable (§11).
+
+          `sr-only` goes on a wrapping div, not on the table: it hides by way of
+          `width: 1px` plus `overflow: hidden`, and a table treats a width as a
+          minimum — it lays out at its content width regardless, which made this
+          screen 544px wide on a 375px phone and took the fixed tab bar with it
+          (§8: no horizontal scrolling, ever). A block box does clip. */}
+      <div className="sr-only">
+        <table>
+          <caption>{t('pages.weight.chart.tableCaption')}</caption>
+          <thead>
+            <tr>
+              <th scope="col">{t('pages.weight.chart.columnDay')}</th>
+              <th scope="col">{t('pages.weight.chart.columnWeight')}</th>
+              <th scope="col">{t('pages.weight.chart.average', { days: AVERAGE_WINDOW_DAYS })}</th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {logged.map((point) => (
+              <tr key={point.date}>
+                <th scope="row">{formatDayShort(point.date, locale)}</th>
+                <td>{point.weightKg === null ? '' : `${formatNumber(point.weightKg, locale)} kg`}</td>
+                <td>{point.averageKg === null ? '' : `${formatNumber(point.averageKg, locale)} kg`}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </figure>
   )
 }
