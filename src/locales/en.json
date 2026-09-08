@@ -124,7 +124,9 @@
         "addYourself": "Add it yourself",
         "attribution": "Product data from Open Food Facts, under the ODbL.",
         "starting": "starting the camera",
-        "retry": "Try the camera again"
+        "retry": "Try the camera again",
+        "torchOn": "Turn the light on",
+        "torchOff": "Turn the light off"
       }
     },
     "training": {

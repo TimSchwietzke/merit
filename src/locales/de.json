@@ -124,7 +124,9 @@
         "addYourself": "Selbst eintragen",
         "attribution": "Produktdaten von Open Food Facts, unter der ODbL.",
         "starting": "kamera startet",
-        "retry": "Kamera erneut versuchen"
+        "retry": "Kamera erneut versuchen",
+        "torchOn": "Licht einschalten",
+        "torchOff": "Licht ausschalten"
       }
     },
     "training": {

@@ -35,3 +35,42 @@ test('a mistyped barcode is refused before any request', async ({ page }) => {
   await expect(page.getByRole('alert')).toBeVisible()
   await expect(page.getByText('Nutella')).toHaveCount(0)
 })
+
+test('the torch appears only where the camera has one, and toggles', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+
+  // The synthetic camera Chromium provides has no torch, which is the right
+  // answer for it and means nothing would ever exercise this control. The
+  // capability is forced on so the button is rendered, measured and tapped.
+  await page.addInitScript(() => {
+    const applied: MediaTrackConstraints[] = []
+    ;(window as unknown as { torchApplied: MediaTrackConstraints[] }).torchApplied = applied
+    MediaStreamTrack.prototype.getCapabilities = () =>
+      ({ torch: true }) as unknown as MediaTrackCapabilities
+    MediaStreamTrack.prototype.applyConstraints = async (constraints) => {
+      applied.push(constraints ?? {})
+    }
+  })
+
+  await page.goto('/food/add?scan=1')
+  await waitForScreen(page)
+
+  const torch = page.getByRole('button', { name: 'Licht einschalten' })
+  await torch.waitFor()
+
+  const box = await torch.boundingBox()
+  expect(box?.height, '§5.2: 44px floor').toBeGreaterThanOrEqual(44)
+  expect(box?.width).toBeGreaterThanOrEqual(44)
+
+  await torch.click()
+  await expect(page.getByRole('button', { name: 'Licht ausschalten' })).toHaveAttribute(
+    'aria-pressed',
+    'true',
+  )
+
+  const applied = await page.evaluate(
+    () => (window as unknown as { torchApplied: MediaTrackConstraints[] }).torchApplied,
+  )
+  expect(applied.at(-1)).toEqual({ advanced: [{ torch: true }] })
+})

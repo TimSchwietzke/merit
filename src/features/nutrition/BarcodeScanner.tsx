@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BrowserMultiFormatReader, type IScannerControls } from '@zxing/browser'
 import { BarcodeFormat, DecodeHintType } from '@zxing/library'
+import { Flashlight, FlashlightOff } from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -34,6 +35,23 @@ const FORMATS = [
 
 type CameraState = 'starting' | 'running' | 'denied'
 
+/**
+ * The torch, where the camera has one.
+ *
+ * `torch` is not in the TypeScript DOM types and not in every browser — it is
+ * still a draft — so it is read off the track's own capabilities and the button
+ * only exists where the answer is yes. A toggle that does nothing is worse than
+ * no toggle: in a dark aisle it reads as the app being broken rather than as
+ * the phone not offering it.
+ */
+type TorchCapabilities = MediaTrackCapabilities & { torch?: boolean }
+type TorchConstraint = MediaTrackConstraintSet & { torch?: boolean }
+
+function hasTorch(track: MediaStreamTrack | null): boolean {
+  const capabilities = (track?.getCapabilities?.() ?? {}) as TorchCapabilities
+  return capabilities.torch === true
+}
+
 export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => void; busy: boolean }) {
   const { t } = useTranslation()
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -41,8 +59,16 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
   // Bumped to ask for the camera again after a refusal, which needs a fresh
   // user gesture on iOS.
   const [attempt, setAttempt] = useState(0)
+  const [torch, setTorch] = useState<'unavailable' | 'off' | 'on'>('unavailable')
   const [typed, setTyped] = useState('')
   const [typedError, setTypedError] = useState<string | null>(null)
+
+  // Merit opens the camera itself and hands ZXing the element, rather than
+  // letting `decodeFromConstraints` open it. The stream is then ours to hold:
+  // the torch lives on its track, and reading the track back off the video
+  // element does not survive ZXing stopping a previous scanner and clearing
+  // `srcObject` out from under it.
+  const trackRef = useRef<MediaStreamTrack | null>(null)
 
   // The callback is read through a ref so a re-render never restarts the camera.
   const onCodeRef = useRef(onCode)
@@ -58,14 +84,25 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
     hints.set(DecodeHintType.POSSIBLE_FORMATS, FORMATS)
     const reader = new BrowserMultiFormatReader(hints, { delayBetweenScanAttempts: 250 })
 
+    let stream: MediaStream | null = null
+
     async function start() {
       try {
-        controls = await reader.decodeFromConstraints(
+        stream = await navigator.mediaDevices.getUserMedia({
           // The camera on the back of the phone, which is the one pointing at
           // the packet. `ideal` rather than `exact`: a laptop has one camera
           // and `exact` fails outright there.
-          { video: { facingMode: { ideal: 'environment' } } },
-          videoRef.current as HTMLVideoElement,
+          video: { facingMode: { ideal: 'environment' } },
+        })
+        if (stopped) return
+
+        const video = videoRef.current
+        if (!video) return
+        video.srcObject = stream
+        trackRef.current = stream.getVideoTracks()[0] ?? null
+
+        controls = await reader.decodeFromVideoElement(
+          video,
           (result) => {
             if (stopped || !result) return
             // A misread is far more likely than a code with a valid check
@@ -75,8 +112,12 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
             if (hasValidCheckDigit(code)) onCodeRef.current(code)
           },
         )
-        if (stopped) controls.stop()
-        else setCamera('running')
+        if (stopped) {
+          controls.stop()
+          return
+        }
+        setCamera('running')
+        if (hasTorch(trackRef.current)) setTorch('off')
       } catch {
         // No permission, no camera, or an insecure origin. All of them mean
         // the same thing to the person holding the phone.
@@ -88,9 +129,28 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
 
     return () => {
       stopped = true
+      setTorch('unavailable')
       controls?.stop()
+      // Ours to open, so ours to close. Without this the camera light on the
+      // phone stays on after leaving the screen.
+      stream?.getTracks().forEach((track) => track.stop())
+      trackRef.current = null
     }
   }, [attempt])
+
+  const toggleTorch = useCallback(async () => {
+    const track = trackRef.current
+    if (!track) return
+    const next = torch !== 'on'
+    try {
+      await track.applyConstraints({ advanced: [{ torch: next } as TorchConstraint] })
+      setTorch(next ? 'on' : 'off')
+    } catch {
+      // The capability was advertised and the constraint was refused anyway.
+      // Drop the control rather than leaving a button that lies.
+      setTorch('unavailable')
+    }
+  }, [torch])
 
   const retry = useCallback(() => {
     setCamera('starting')
@@ -137,15 +197,35 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
       )}
 
       {camera !== 'denied' ? (
-        <p className="font-mono text-2xs text-ink-faint">
-          {t(
-            busy
-              ? 'pages.food.scan.looking'
-              : camera === 'starting'
-                ? 'pages.food.scan.starting'
-                : 'pages.food.scan.instruction',
+        // The instruction line, and the torch beside it rather than floating
+        // over the feed: §10.10 wants the viewport carrying a reticle and
+        // nothing else.
+        <div className="flex items-center justify-between gap-3">
+          <p className="min-w-0 font-mono text-2xs text-ink-faint">
+            {t(
+              busy
+                ? 'pages.food.scan.looking'
+                : camera === 'starting'
+                  ? 'pages.food.scan.starting'
+                  : 'pages.food.scan.instruction',
+            )}
+          </p>
+
+          {torch === 'unavailable' ? null : (
+            <Button
+              variant="bare"
+              size="icon"
+              // The label says what the tap will do, and `aria-pressed` says
+              // which way the toggle currently sits.
+              aria-label={t(torch === 'on' ? 'pages.food.scan.torchOff' : 'pages.food.scan.torchOn')}
+              aria-pressed={torch === 'on'}
+              className={torch === 'on' ? 'text-accent' : undefined}
+              onClick={() => void toggleTorch()}
+            >
+              {torch === 'on' ? <Flashlight /> : <FlashlightOff />}
+            </Button>
           )}
-        </p>
+        </div>
       ) : null}
 
       {/* In place, not on another screen (§10.10). */}
