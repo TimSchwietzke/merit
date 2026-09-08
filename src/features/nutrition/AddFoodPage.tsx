@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -7,7 +7,6 @@ import { Row, Rows } from '@/components/Rows'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { BarcodeScanner } from '@/features/nutrition/BarcodeScanner'
 import { NewFoodForm, type NewFood } from '@/features/nutrition/NewFoodForm'
 import { resolveBarcode } from '@/features/nutrition/resolve-barcode'
 import { PortionForm } from '@/features/nutrition/PortionForm'
@@ -34,6 +33,15 @@ import type { MealType } from '@/lib/nutrition'
  * two and three and slot in between, at the point where the search comes back
  * with nothing.
  */
+/**
+ * The decoder is a third of the bundle gzipped and only this one state needs
+ * it, so it is fetched when somebody opens the scanner rather than by everyone
+ * on every page load.
+ */
+const BarcodeScanner = lazy(() =>
+  import('@/features/nutrition/BarcodeScanner').then((m) => ({ default: m.BarcodeScanner })),
+)
+
 export default function AddFoodPage() {
   const { t } = useTranslation()
   const { i18n } = useTranslation()
@@ -167,7 +175,11 @@ export default function AddFoodPage() {
     return (
       <>
         <PageHeader title={t('pages.food.scan.title')} />
-        <BarcodeScanner onCode={onCode} busy={pending} />
+        <Suspense
+          fallback={<p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>}
+        >
+          <BarcodeScanner onCode={onCode} busy={pending} />
+        </Suspense>
 
         {scanResult ? (
           <div className="mt-6 rounded-lg border border-line bg-surface px-4 py-6 text-center">

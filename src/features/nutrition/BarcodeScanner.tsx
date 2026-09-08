@@ -1,5 +1,7 @@
-import { useEffect, useRef, useState, type FormEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
+import { BrowserMultiFormatReader, type IScannerControls } from '@zxing/browser'
+import { BarcodeFormat, DecodeHintType } from '@zxing/library'
 
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -11,92 +13,73 @@ import { hasValidCheckDigit } from '@/lib/barcode'
  * frame, one centred reticle in `line-strong`, one mono line of instruction.
  * No overlay animation and no scanning laser.
  *
- * It falls through to typing the number **in place** rather than on another
- * screen — which is also the only path on a browser without `BarcodeDetector`
- * (Safari, Firefox), and on a phone where camera permission was refused. The
- * state says which of those it is rather than showing a dead black rectangle.
+ * Decoding is ZXing rather than the platform's `BarcodeDetector`. The native
+ * API is not in Safari, and Merit is used on iPhones — so the native path was
+ * a decoder that worked for nobody who actually uses this app, plus a second
+ * code path neither of us could test. One decoder, everywhere.
  *
- * `BarcodeDetector` is the platform's own decoder, so no library is shipped for
- * this. Where it is missing the typed field is the whole feature; if the people
- * actually testing Merit are on iPhones, a decoder like `@zxing/browser` goes
- * in here behind the same interface.
+ * It still falls through to typing the number **in place** rather than on
+ * another screen: a phone can refuse camera access, and a barcode can be
+ * scuffed past reading.
  */
 
-interface DetectedBarcode {
-  rawValue: string
-}
+/** The 1D symbologies on food packaging. Narrowing them speeds up every frame. */
+const FORMATS = [
+  BarcodeFormat.EAN_13,
+  BarcodeFormat.EAN_8,
+  BarcodeFormat.UPC_A,
+  BarcodeFormat.UPC_E,
+  BarcodeFormat.CODE_128,
+]
 
-interface Detector {
-  detect: (source: CanvasImageSource) => Promise<DetectedBarcode[]>
-}
-
-type DetectorConstructor = new (options?: { formats?: string[] }) => Detector
-
-/** The 1D symbologies on food packaging. QR and the 2D formats are not. */
-const FORMATS = ['ean_13', 'ean_8', 'upc_a', 'upc_e', 'code_128']
-
-const detectorSupported = () =>
-  typeof window !== 'undefined' && 'BarcodeDetector' in window
-
-type CameraState = 'starting' | 'running' | 'unsupported' | 'denied'
+type CameraState = 'starting' | 'running' | 'denied'
 
 export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => void; busy: boolean }) {
   const { t } = useTranslation()
   const videoRef = useRef<HTMLVideoElement>(null)
-  // Read once per mount: whether the browser has a decoder does not change
-  // while the screen is open, and it decides whether the camera starts at all.
-  const [supported] = useState(detectorSupported)
-  const [camera, setCamera] = useState<CameraState>(supported ? 'starting' : 'unsupported')
+  const [camera, setCamera] = useState<CameraState>('starting')
+  // Bumped to ask for the camera again after a refusal, which needs a fresh
+  // user gesture on iOS.
+  const [attempt, setAttempt] = useState(0)
   const [typed, setTyped] = useState('')
   const [typedError, setTypedError] = useState<string | null>(null)
 
-  // The scan callback is read through a ref so restarting the camera is not one
-  // of the things a re-render can do.
+  // The callback is read through a ref so a re-render never restarts the camera.
   const onCodeRef = useRef(onCode)
   useEffect(() => {
     onCodeRef.current = onCode
   }, [onCode])
 
   useEffect(() => {
-    if (!supported) return
-
-    let stream: MediaStream | null = null
-    let frame = 0
+    let controls: IScannerControls | null = null
     let stopped = false
+
+    const hints = new Map()
+    hints.set(DecodeHintType.POSSIBLE_FORMATS, FORMATS)
+    const reader = new BrowserMultiFormatReader(hints, { delayBetweenScanAttempts: 250 })
 
     async function start() {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
+        controls = await reader.decodeFromConstraints(
           // The camera on the back of the phone, which is the one pointing at
-          // the packet.
-          video: { facingMode: { ideal: 'environment' } },
-        })
-        if (stopped) return
-
-        const video = videoRef.current
-        if (!video) return
-        video.srcObject = stream
-        await video.play()
-        setCamera('running')
-
-        const Ctor = (window as unknown as { BarcodeDetector: DetectorConstructor }).BarcodeDetector
-        const detector = new Ctor({ formats: FORMATS })
-
-        // Polled rather than run per frame: decoding at 60fps heats a phone up
-        // for no extra hit rate.
-        const tick = async () => {
-          if (stopped || !videoRef.current || videoRef.current.readyState < 2) return
-          try {
-            const codes = await detector.detect(videoRef.current)
-            const hit = codes.find((code) => hasValidCheckDigit(code.rawValue))
-            if (hit && !stopped) onCodeRef.current(hit.rawValue)
-          } catch {
-            // A frame that cannot be decoded is the normal case, not an error.
-          }
-        }
-
-        frame = window.setInterval(() => void tick(), 250)
+          // the packet. `ideal` rather than `exact`: a laptop has one camera
+          // and `exact` fails outright there.
+          { video: { facingMode: { ideal: 'environment' } } },
+          videoRef.current as HTMLVideoElement,
+          (result) => {
+            if (stopped || !result) return
+            // A misread is far more likely than a code with a valid check
+            // digit, so this is the filter that keeps a wrong product off the
+            // screen.
+            const code = result.getText()
+            if (hasValidCheckDigit(code)) onCodeRef.current(code)
+          },
+        )
+        if (stopped) controls.stop()
+        else setCamera('running')
       } catch {
+        // No permission, no camera, or an insecure origin. All of them mean
+        // the same thing to the person holding the phone.
         if (!stopped) setCamera('denied')
       }
     }
@@ -105,10 +88,14 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
 
     return () => {
       stopped = true
-      window.clearInterval(frame)
-      stream?.getTracks().forEach((track) => track.stop())
+      controls?.stop()
     }
-  }, [supported])
+  }, [attempt])
+
+  const retry = useCallback(() => {
+    setCamera('starting')
+    setAttempt((n) => n + 1)
+  }, [])
 
   function submitTyped(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -123,14 +110,19 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
 
   return (
     <div className="flex flex-col gap-6">
-      {camera === 'unsupported' || camera === 'denied' ? (
-        <p className="font-mono text-2xs text-ink-faint">
-          {t(camera === 'denied' ? 'pages.food.scan.denied' : 'pages.food.scan.unsupported')}
-        </p>
+      {camera === 'denied' ? (
+        <div>
+          <p className="text-sm text-ink-muted">{t('pages.food.scan.denied')}</p>
+          <Button variant="quiet" className="mt-3" onClick={retry}>
+            {t('pages.food.scan.retry')}
+          </Button>
+        </div>
       ) : (
         <div className="relative overflow-hidden rounded-lg bg-surface-2">
           <video
             ref={videoRef}
+            // Both are load-bearing on iOS: without `playsinline` Safari takes
+            // the video fullscreen, and an unmuted stream will not autoplay.
             playsInline
             muted
             aria-label={t('pages.food.scan.viewport')}
@@ -144,9 +136,15 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
         </div>
       )}
 
-      {camera === 'starting' || camera === 'running' ? (
+      {camera !== 'denied' ? (
         <p className="font-mono text-2xs text-ink-faint">
-          {t(busy ? 'pages.food.scan.looking' : 'pages.food.scan.instruction')}
+          {t(
+            busy
+              ? 'pages.food.scan.looking'
+              : camera === 'starting'
+                ? 'pages.food.scan.starting'
+                : 'pages.food.scan.instruction',
+          )}
         </p>
       ) : null}
 
