@@ -81,6 +81,36 @@ export type Database = {
         }
         Relationships: []
       }
+      weight_logs: {
+        Row: {
+          body_fat_pct: number | null
+          created_at: string
+          date: string
+          measurements: Json | null
+          updated_at: string
+          user_id: string
+          weight_kg: number
+        }
+        Insert: {
+          body_fat_pct?: number | null
+          created_at?: string
+          date: string
+          measurements?: Json | null
+          updated_at?: string
+          user_id: string
+          weight_kg: number
+        }
+        Update: {
+          body_fat_pct?: number | null
+          created_at?: string
+          date?: string
+          measurements?: Json | null
+          updated_at?: string
+          user_id?: string
+          weight_kg?: number
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

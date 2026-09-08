@@ -1,4 +1,12 @@
-import { ROUTES, VIEWPORTS, stubBackend, test, type Locale, type Theme } from './fixtures'
+import {
+  ROUTES,
+  VIEWPORTS,
+  stubBackend,
+  test,
+  waitForScreen,
+  type Locale,
+  type Theme,
+} from './fixtures'
 
 /**
  * Captures every screen across the width sweep in both themes and both
@@ -24,8 +32,13 @@ for (const { theme, locale } of MATRIX) {
           // Not `networkidle`: Vite's HMR socket never idles, which flaked on
           // ~7% of captures. And not the sidebar `nav` — it is display:none
           // below `lg`, so waiting on that hangs exactly at the widths that
-          // matter most. `main` is present and visible at every width.
-          await page.locator('main').waitFor({ state: 'visible' })
+          // matter most.
+          await waitForScreen(page)
+          // The stubbed queries answer in milliseconds, but they only start
+          // once the screen has mounted — on a lazy route that is after its
+          // chunk arrives. Without this the capture is of a screen still
+          // saying `wird geladen`.
+          await page.waitForTimeout(300)
           // Fonts have to be swapped in or the shot measures the fallback.
           await page.evaluate(() => document.fonts.ready)
           await page.screenshot({

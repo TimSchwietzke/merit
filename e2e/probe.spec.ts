@@ -1,4 +1,4 @@
-import { ROUTES, expect, stubBackend, test } from './fixtures'
+import { ROUTES, expect, stubBackend, test, waitForScreen } from './fixtures'
 
 /**
  * The checks §16 says to compute rather than judge. These are assertions, not
@@ -68,11 +68,23 @@ for (const theme of ['light', 'dark'] as const) {
 }
 
 test('no horizontal scroll at any width, in German', async ({ page }) => {
+  test.slow()
   await stubBackend(page, { theme: 'light', locale: 'de' })
-  for (const width of [1920, 1440, 1024, 768, 375, 320]) {
-    await page.setViewportSize({ width, height: 800 })
-    for (const path of ['/', '/food', '/training', '/more']) {
-      await page.goto(path)
+  // Each screen is loaded once and then resized, rather than reloaded at every
+  // width. Overflow is a layout property, so a resize answers the question just
+  // as well — and it leaves the time budget to actually wait for the screen to
+  // finish rendering. Measuring straight after `goto` measures the skeleton,
+  // which is how a 544px-wide table got past this probe.
+  for (const path of ['/', '/food', '/training', '/more', '/weight']) {
+    await page.setViewportSize({ width: 375, height: 800 })
+    await page.goto(path)
+    await waitForScreen(page)
+    await page.waitForTimeout(500)
+
+    for (const width of [1920, 1440, 1024, 768, 375, 320]) {
+      await page.setViewportSize({ width, height: 800 })
+      // The chart re-measures on a resize; give it a frame to do it in.
+      await page.waitForTimeout(150)
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
       )
@@ -105,7 +117,7 @@ test('every touch target clears 44px at 375px, on every screen', async ({ page }
     await page.setViewportSize({ width: 375, height: 812 })
     for (const route of ROUTES) {
       await page.goto(route.path)
-      await page.locator('main').waitFor({ state: 'visible' })
+      await waitForScreen(page)
       const small = await page.evaluate(() =>
         [...document.querySelectorAll('button, a, input, [role=radio]')]
           .map((el) => ({ el, r: el.getBoundingClientRect() }))
@@ -120,4 +132,28 @@ test('every touch target clears 44px at 375px, on every screen', async ({ page }
   }
   // §5.2 / §16.2: every interactive element is at least 44x44 on touch.
   expect(offenders).toEqual([])
+})
+
+test('the undo toast clears the tab bar', async ({ page }) => {
+  // It has landed underneath it twice: sonner anchors the *top* of the toast at
+  // its bottom offset, so an offset of "bar height plus a gutter" is short by
+  // exactly one toast (src/components/ui/sonner.tsx).
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+  await page.goto('/weight')
+  await page.getByRole('button', { name: 'Eintrag löschen' }).click()
+
+  const undo = page.getByRole('button', { name: 'Rückgängig' })
+  await undo.waitFor()
+  // The toast slides up; measuring mid-animation measures the wrong place.
+  await page.waitForTimeout(800)
+  const toast = await undo.evaluate(
+    (el) => el.closest('[data-sonner-toast]')?.getBoundingClientRect().bottom ?? 0,
+  )
+  // Not `nav` — there are three, and the header's path bar is the last of them.
+  const bar = await page
+    .locator('nav.fixed')
+    .evaluate((el) => el.getBoundingClientRect().top)
+
+  expect(toast, 'toast overlaps the tab bar').toBeLessThanOrEqual(bar)
 })
