@@ -11,7 +11,7 @@ import { WeightChart } from '@/features/weight/WeightChart'
 import { WeightForm } from '@/features/weight/WeightForm'
 import { WeightList } from '@/features/weight/WeightList'
 import { useWeightLogs } from '@/features/weight/useWeightLogs'
-import { todayKey } from '@/lib/date'
+import { daysBetween, todayKey } from '@/lib/date'
 import { formatDayShort, formatDelta, formatNumber } from '@/lib/format'
 import {
   AVERAGE_WINDOW_DAYS,
@@ -49,6 +49,28 @@ export default function WeightPage() {
   // today, so a fortnight with no entries reads as a fortnight with no entries.
   const from = rangeStart(range, today) ?? entries[0]?.date ?? today
   const points = buildSeries(entries, from, today)
+
+  // The chart and the log show the same stretch of time. They used to disagree
+  // — thirty days above, everything below — and "everything" is a hundred rows
+  // by spring. The range is the answer to how long the list is, which is why
+  // its control appears at both ends of the screen: reading the log and having
+  // to scroll back to the chart to change what the log shows is the annoyance.
+  const visible = entries.filter((entry) => daysBetween(from, entry.date) >= 0)
+
+  const rangeControl = (
+    <SegmentedControl<WeightRange>
+      label={t('pages.weight.range')}
+      value={range}
+      onChange={setRange}
+      segments={WEIGHT_RANGES.map((value) => ({
+        value,
+        label:
+          value === 'all'
+            ? t('pages.weight.chart.ranges.all')
+            : t('pages.weight.chart.ranges.days', { days: value }),
+      }))}
+    />
+  )
 
   async function onDelete(date: string) {
     const deleted = entries.find((entry) => entry.date === date)
@@ -109,20 +131,7 @@ export default function WeightPage() {
       </section>
 
       <section className="mt-8">
-        <SectionHead
-          label={t('pages.weight.chart.label')}
-          hint={
-            <SegmentedControl<WeightRange>
-              label={t('pages.weight.chart.range')}
-              value={range}
-              onChange={setRange}
-              segments={WEIGHT_RANGES.map((value) => ({
-                value,
-                label: value === 'all' ? t('pages.weight.chart.ranges.all') : t('pages.weight.chart.ranges.days', { days: value }),
-              }))}
-            />
-          }
-        />
+        <SectionHead label={t('pages.weight.chart.label')} hint={rangeControl} />
         {status === 'loading' ? (
           <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
         ) : (
@@ -154,13 +163,18 @@ export default function WeightPage() {
       </section>
 
       <section className="mt-8">
-        <SectionHead label={t('pages.weight.list.label')} />
+        <SectionHead label={t('pages.weight.list.label')} hint={rangeControl} />
         {status === 'error' ? (
           <p role="alert" className="text-sm text-danger">
             {t('pages.weight.loadFailed')}
           </p>
         ) : (
-          <WeightList entries={entries} selected={selected} onSelect={setSelected} />
+          <WeightList
+            entries={visible}
+            selected={selected}
+            empty={t(entries.length === 0 ? 'pages.weight.list.empty' : 'pages.weight.list.emptyRange')}
+            onSelect={setSelected}
+          />
         )}
       </section>
 

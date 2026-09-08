@@ -21,18 +21,22 @@ import type { WeightEntry } from '@/lib/weight'
 export function WeightList({
   entries,
   selected,
+  empty,
   onSelect,
 }: {
   /** Ascending by date, as the hook holds them. */
   entries: WeightEntry[]
   selected: string
+  /** Why the list is empty — nothing logged at all reads differently from
+   *  nothing logged in the range on screen (§14). */
+  empty: string
   onSelect: (date: string) => void
 }) {
   const { t, i18n } = useTranslation()
   const locale = i18n.language
   const today = todayKey()
 
-  if (entries.length === 0) return <EmptyState>{t('pages.weight.list.empty')}</EmptyState>
+  if (entries.length === 0) return <EmptyState>{empty}</EmptyState>
 
   return (
     <Rows>
