@@ -150,10 +150,17 @@ export default function FoodPage() {
           ))
         )}
 
-        {/* The primary action, in the lower half where a thumb reaches (§7). */}
-        <Button asChild variant="primary" className="mt-6 w-full md:w-auto">
-          <Link to={`/food/add?date=${date}`}>{t('pages.food.log.add')}</Link>
-        </Button>
+        {/* The primary actions, in the lower half where a thumb reaches (§7).
+            Scanning is the tinted one rather than a second primary: §10.4 allows
+            one primary per screen, and the search covers what a scan cannot. */}
+        <div className="mt-6 flex flex-col gap-3 md:flex-row">
+          <Button asChild variant="primary">
+            <Link to={`/food/add?date=${date}`}>{t('pages.food.log.add')}</Link>
+          </Button>
+          <Button asChild variant="tinted">
+            <Link to={`/food/add?date=${date}&scan=1`}>{t('pages.food.scan.open')}</Link>
+          </Button>
+        </div>
       </section>
     </>
   )
