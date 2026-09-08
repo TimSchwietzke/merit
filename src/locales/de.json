@@ -108,6 +108,22 @@
         "save": "In den Katalog aufnehmen",
         "saving": "Wird angelegt …",
         "saveFailed": "Das Lebensmittel wurde nicht angelegt. Prüfe dein Netz und versuche es noch einmal."
+      },
+      "scan": {
+        "title": "Barcode scannen",
+        "open": "Barcode scannen",
+        "viewport": "Kamera, auf einen Barcode gerichtet",
+        "instruction": "halte den Barcode in den Rahmen",
+        "looking": "wird nachgeschlagen",
+        "barcode": "barcode",
+        "look": "Nachschlagen",
+        "barcodeInvalid": "Das ist kein Barcode. Prüfe die Ziffern und versuche es noch einmal.",
+        "unsupported": "Dieser Browser kann keinen Barcode über die Kamera lesen. Tippe die Nummer ein.",
+        "denied": "Merit hat keinen Zugriff auf die Kamera. Erlaube ihn im Browser oder tippe die Nummer ein.",
+        "missing": "kein Produkt zu diesem Barcode",
+        "offline": "Open Food Facts war nicht erreichbar. Prüfe dein Netz oder trage das Lebensmittel selbst ein.",
+        "addYourself": "Selbst eintragen",
+        "attribution": "Produktdaten von Open Food Facts, unter der ODbL."
       }
     },
     "training": {

@@ -59,6 +59,7 @@ export const ROUTES: Route[] = [
   { name: 'more', path: '/more' },
   { name: 'weight', path: '/weight' },
   { name: 'food-add', path: '/food/add' },
+  { name: 'food-scan', path: '/food/add?scan=1' },
   { name: 'not-found', path: '/nowhere' },
   { name: 'sign-in', path: '/sign-in', signedOut: true },
 ]
