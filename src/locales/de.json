@@ -8,12 +8,15 @@
     "dashboard": "übersicht",
     "food": "ernährung",
     "training": "training",
-    "more": "mehr"
+    "more": "mehr",
+    "weight": "gewicht"
   },
   "common": {
     "notBuiltYet": "noch nicht gebaut",
     "today": "heute",
-    "notFound": "nicht gefunden"
+    "notFound": "nicht gefunden",
+    "loading": "wird geladen",
+    "undo": "Rückgängig"
   },
   "auth": {
     "signIn": {
@@ -42,7 +45,7 @@
       "planned": "Hier steht das Training — deine Trainingstage, die Einheit für heute und die Sätze, während du sie protokollierst."
     },
     "more": {
-      "planned": "Hier stehen Gewicht, Einstellungen, Datenexport und die rechtlichen Seiten.",
+      "planned": "Hier stehen Einstellungen, Datenexport und die rechtlichen Seiten.",
       "preferences": {
         "label": "einstellungen",
         "language": "sprache",
@@ -63,12 +66,63 @@
         "signedInAs": "angemeldet als",
         "signOut": "Abmelden",
         "signingOut": "Wird abgemeldet …"
+      },
+      "tracking": {
+        "label": "erfassung"
       }
     },
     "notFound": {
       "title": "Seite nicht gefunden",
       "body": "Diese Adresse gibt es nicht.",
       "back": "Zurück zur Übersicht"
+    },
+    "weight": {
+      "loadFailed": "Deine Wiegungen konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
+      "averageNote": "Der Durchschnitt ist das Mittel aller Wiegungen in den {{days}} Tagen bis zu diesem Tag. Tage ohne Wiegung bleiben leer und werden nicht aufgefüllt.",
+      "deleted": "{{date}} gelöscht",
+      "undoFailed": "Der Eintrag konnte nicht wiederhergestellt werden. Trage den Tag noch einmal ein.",
+      "range": "Zeitraum",
+      "latest": {
+        "label": "letzte wiegung",
+        "none": "noch nichts eingetragen",
+        "vsLastWeek": "zur Vorwoche"
+      },
+      "chart": {
+        "label": "verlauf · kg",
+        "ranges": {
+          "days": "{{days}} T",
+          "all": "alle"
+        },
+        "empty": "trage ein Gewicht ein, um den Verlauf zu sehen",
+        "raw": "täglich",
+        "average": "{{days}}-Tage-Schnitt",
+        "aria": "Gewicht in Kilogramm, {{entries}} Wiegungen von {{from}} bis {{to}}, zwischen {{low}} und {{high}} kg. Die Tageswerte und ihr Sieben-Tage-Durchschnitt.",
+        "tableCaption": "Alle Wiegungen im gewählten Zeitraum, mit ihrem Sieben-Tage-Durchschnitt.",
+        "columnDay": "Tag",
+        "columnWeight": "Gewicht"
+      },
+      "form": {
+        "label": "gewicht eintragen",
+        "correcting": "dieser Tag wird korrigiert",
+        "date": "tag",
+        "weight": "gewicht",
+        "bodyFat": "körperfett",
+        "optional": " · optional",
+        "weightInvalid": "Trage ein Gewicht zwischen 20 und 400 kg ein, zum Beispiel 82,4.",
+        "bodyFatInvalid": "Trage einen Wert zwischen 1 und 75 Prozent ein, zum Beispiel 18,5, oder lass das Feld leer.",
+        "save": "Gewicht speichern",
+        "saving": "Wird gespeichert …",
+        "saveFailed": "Die Wiegung wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+        "delete": "Eintrag löschen",
+        "deleting": "Wird gelöscht …",
+        "deleteFailed": "Der Eintrag konnte nicht gelöscht werden. Prüfe dein Netz und versuche es noch einmal."
+      },
+      "list": {
+        "label": "protokoll",
+        "empty": "noch nichts eingetragen",
+        "editing": "wird bearbeitet",
+        "emptyRange": "in diesem Zeitraum nichts eingetragen"
+      }
     }
   }
 }
