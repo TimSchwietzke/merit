@@ -118,12 +118,13 @@
         "barcode": "barcode",
         "look": "Look up",
         "barcodeInvalid": "That is not a barcode. Check the digits and try again.",
-        "unsupported": "This browser cannot use the camera to read a barcode. Type the number instead.",
-        "denied": "Merit has no access to the camera. Allow it in the browser, or type the number instead.",
+        "denied": "Merit has no access to the camera. Allow it in the browser, then try again — or type the number below.",
         "missing": "no product for this barcode",
         "offline": "Open Food Facts could not be reached. Check your connection, or add the food yourself.",
         "addYourself": "Add it yourself",
-        "attribution": "Product data from Open Food Facts, under the ODbL."
+        "attribution": "Product data from Open Food Facts, under the ODbL.",
+        "starting": "starting the camera",
+        "retry": "Try the camera again"
       }
     },
     "training": {

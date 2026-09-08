@@ -118,12 +118,13 @@
         "barcode": "barcode",
         "look": "Nachschlagen",
         "barcodeInvalid": "Das ist kein Barcode. Prüfe die Ziffern und versuche es noch einmal.",
-        "unsupported": "Dieser Browser kann keinen Barcode über die Kamera lesen. Tippe die Nummer ein.",
-        "denied": "Merit hat keinen Zugriff auf die Kamera. Erlaube ihn im Browser oder tippe die Nummer ein.",
+        "denied": "Merit hat keinen Zugriff auf die Kamera. Erlaube ihn im Browser und versuche es noch einmal — oder tippe die Nummer unten ein.",
         "missing": "kein Produkt zu diesem Barcode",
         "offline": "Open Food Facts war nicht erreichbar. Prüfe dein Netz oder trage das Lebensmittel selbst ein.",
         "addYourself": "Selbst eintragen",
-        "attribution": "Produktdaten von Open Food Facts, unter der ODbL."
+        "attribution": "Produktdaten von Open Food Facts, unter der ODbL.",
+        "starting": "kamera startet",
+        "retry": "Kamera erneut versuchen"
       }
     },
     "training": {
