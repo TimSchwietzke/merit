@@ -8,12 +8,15 @@
     "dashboard": "dashboard",
     "food": "food",
     "training": "training",
-    "more": "more"
+    "more": "more",
+    "weight": "weight"
   },
   "common": {
     "notBuiltYet": "not built yet",
     "today": "today",
-    "notFound": "not found"
+    "notFound": "not found",
+    "loading": "loading",
+    "undo": "Undo"
   },
   "auth": {
     "signIn": {
@@ -42,7 +45,7 @@
       "planned": "Training goes here — your routines, the session for today, and the sets as you log them."
     },
     "more": {
-      "planned": "Weight, settings, data export and the legal pages go here.",
+      "planned": "Settings, data export and the legal pages go here.",
       "preferences": {
         "label": "preferences",
         "language": "language",
@@ -63,12 +66,63 @@
         "signedInAs": "signed in as",
         "signOut": "Sign out",
         "signingOut": "Signing out…"
+      },
+      "tracking": {
+        "label": "tracking",
+        "weight": "Weight"
       }
     },
     "notFound": {
       "title": "Page not found",
       "body": "This address does not exist.",
       "back": "Back to the dashboard"
+    },
+    "weight": {
+      "loadFailed": "Your weigh-ins could not be loaded. Check your connection and try again.",
+      "averageNote": "The average is the mean of every weigh-in in the {{days}} days ending on that day. Days without one are left out, not filled in.",
+      "deleted": "{{date}} deleted",
+      "undoFailed": "That entry could not be put back. Log the day again.",
+      "latest": {
+        "label": "last weigh-in",
+        "none": "nothing logged yet",
+        "vsLastWeek": "vs. last week"
+      },
+      "chart": {
+        "label": "trend · kg",
+        "range": "Chart range",
+        "ranges": {
+          "days": "{{days}} d",
+          "all": "all"
+        },
+        "empty": "log a weight to see the trend",
+        "raw": "daily",
+        "average": "{{days}}-day average",
+        "aria": "Weight in kilograms, {{entries}} weigh-ins from {{from}} to {{to}}, between {{low}} and {{high}} kg. The daily values and their seven-day average.",
+        "tableCaption": "Every weigh-in in the selected range, with its seven-day average.",
+        "columnDay": "Day",
+        "columnWeight": "Weight"
+      },
+      "form": {
+        "label": "log a weight",
+        "correcting": "correcting this day",
+        "date": "day",
+        "weight": "weight",
+        "bodyFat": "body fat",
+        "optional": " · optional",
+        "weightInvalid": "Enter a weight between 20 and 400 kg, like 82.4.",
+        "bodyFatInvalid": "Enter a percentage between 1 and 75, like 18.5, or leave it empty.",
+        "save": "Save weight",
+        "saving": "Saving…",
+        "saveFailed": "That weigh-in did not save. Check your connection and try again.",
+        "delete": "Delete entry",
+        "deleting": "Deleting…",
+        "deleteFailed": "That entry could not be deleted. Check your connection and try again."
+      },
+      "list": {
+        "label": "log",
+        "empty": "nothing logged yet",
+        "editing": "editing"
+      }
     }
   }
 }

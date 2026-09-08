@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Field } from '@/components/Field'
 import { NotBuiltYet } from '@/components/NotBuiltYet'
 import { Panel } from '@/components/Panel'
+import { Row, Rows } from '@/components/Rows'
 import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
 import { SegmentedControl } from '@/components/SegmentedControl'
@@ -38,6 +39,18 @@ export default function MorePage() {
     <>
       <ScreenTitle>{t('nav.more')}</ScreenTitle>
       <NotBuiltYet label={t('common.notBuiltYet')}>{t('pages.more.planned')}</NotBuiltYet>
+
+      <section className="mt-8">
+        <SectionHead label={t('pages.more.tracking.label')} />
+        <Rows>
+          <Row to="/weight">
+            <span className="min-w-0 flex-1 truncate">{t('pages.more.tracking.weight')}</span>
+            <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
+              →
+            </span>
+          </Row>
+        </Rows>
+      </section>
 
       <section className="mt-8">
         <SectionHead label={t('pages.more.preferences.label')} />

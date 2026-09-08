@@ -57,6 +57,7 @@ export const ROUTES: Route[] = [
   { name: 'food', path: '/food' },
   { name: 'training', path: '/training' },
   { name: 'more', path: '/more' },
+  { name: 'weight', path: '/weight' },
   { name: 'not-found', path: '/nowhere' },
   { name: 'sign-in', path: '/sign-in', signedOut: true },
 ]
@@ -94,6 +95,26 @@ export async function stubBackend(
     },
     { ref: PROJECT_REF, user: USER, expiresAt: EXPIRES_AT, theme, locale, signedOut },
   )
+
+  // A month of weigh-ins, so the chart renders with both series and a gap in it
+  // rather than as an empty state in every capture.
+  await page.route('**/rest/v1/weight_logs*', (route) => {
+    const today = new Date()
+    const rows = Array.from({ length: 30 }, (_, i) => {
+      const day = new Date(today)
+      day.setDate(day.getDate() - (29 - i))
+      return {
+        date: `${day.getFullYear()}-${String(day.getMonth() + 1).padStart(2, '0')}-${String(day.getDate()).padStart(2, '0')}`,
+        weight_kg: Math.round((83 - i * 0.05 + Math.sin(i) * 0.4) * 10) / 10,
+        body_fat_pct: i % 7 === 0 ? 18.5 : null,
+      }
+    }).filter((_, i) => i < 12 || i > 18)
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(rows),
+    })
+  })
 
   await page.route('**/rest/v1/profiles*', (route) =>
     route.fulfill({

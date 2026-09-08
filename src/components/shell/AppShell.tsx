@@ -1,7 +1,9 @@
+import { Suspense } from 'react'
 import { Outlet } from 'react-router-dom'
 
 import { AppHeader } from '@/components/shell/AppHeader'
 import { Nav } from '@/components/shell/Nav'
+import { Toaster } from '@/components/ui/sonner'
 import { PreferencesProvider } from '@/features/settings/PreferencesProvider'
 
 /**
@@ -29,10 +31,16 @@ export function AppShell() {
             className="mx-auto w-full max-w-[860px] px-4 pt-5 md:px-6 md:pt-6
                        pb-[calc(56px+1.5rem+env(safe-area-inset-bottom))] lg:pb-6"
           >
-            <Outlet />
+            {/* No spinner: the split chunk arrives in a frame or two on any
+                connection that got this far, and a flash of one is worse than
+                nothing (§17). */}
+            <Suspense fallback={null}>
+              <Outlet />
+            </Suspense>
           </main>
         </div>
       </div>
+      <Toaster />
     </PreferencesProvider>
   )
 }

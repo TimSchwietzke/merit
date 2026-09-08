@@ -68,10 +68,13 @@ for (const theme of ['light', 'dark'] as const) {
 }
 
 test('no horizontal scroll at any width, in German', async ({ page }) => {
+  // Thirty full page loads against a dev server. The 20s default is sized for
+  // one capture, not for a sweep.
+  test.slow()
   await stubBackend(page, { theme: 'light', locale: 'de' })
   for (const width of [1920, 1440, 1024, 768, 375, 320]) {
     await page.setViewportSize({ width, height: 800 })
-    for (const path of ['/', '/food', '/training', '/more']) {
+    for (const path of ['/', '/food', '/training', '/more', '/weight']) {
       await page.goto(path)
       const overflow = await page.evaluate(
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
@@ -120,4 +123,28 @@ test('every touch target clears 44px at 375px, on every screen', async ({ page }
   }
   // §5.2 / §16.2: every interactive element is at least 44x44 on touch.
   expect(offenders).toEqual([])
+})
+
+test('the undo toast clears the tab bar', async ({ page }) => {
+  // It has landed underneath it twice: sonner anchors the *top* of the toast at
+  // its bottom offset, so an offset of "bar height plus a gutter" is short by
+  // exactly one toast (src/components/ui/sonner.tsx).
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+  await page.goto('/weight')
+  await page.getByRole('button', { name: 'Eintrag löschen' }).click()
+
+  const undo = page.getByRole('button', { name: 'Rückgängig' })
+  await undo.waitFor()
+  // The toast slides up; measuring mid-animation measures the wrong place.
+  await page.waitForTimeout(800)
+  const toast = await undo.evaluate(
+    (el) => el.closest('[data-sonner-toast]')?.getBoundingClientRect().bottom ?? 0,
+  )
+  // Not `nav` — there are three, and the header's path bar is the last of them.
+  const bar = await page
+    .locator('nav.fixed')
+    .evaluate((el) => el.getBoundingClientRect().top)
+
+  expect(toast, 'toast overlaps the tab bar').toBeLessThanOrEqual(bar)
 })

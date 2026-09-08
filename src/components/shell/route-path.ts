@@ -11,7 +11,15 @@
  * for today). `/more` is not, so it stops at two.
  */
 export interface PathSegment {
-  labelKey: 'app.name' | 'nav.dashboard' | 'nav.food' | 'nav.training' | 'nav.more' | 'common.today' | 'common.notFound'
+  labelKey:
+    | 'app.name'
+    | 'nav.dashboard'
+    | 'nav.food'
+    | 'nav.training'
+    | 'nav.more'
+    | 'nav.weight'
+    | 'common.today'
+    | 'common.notFound'
   /** Omitted on the last segment: you do not link to where you already are. */
   to?: string
 }
@@ -23,6 +31,9 @@ const PATHS: Record<string, PathSegment[]> = {
   '/food': [ROOT, { labelKey: 'nav.food', to: '/food' }, { labelKey: 'common.today' }],
   '/training': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'common.today' }],
   '/more': [ROOT, { labelKey: 'nav.more' }],
+  // Weight is reached through `more` rather than from a tab of its own (there
+  // are four and four is the ceiling, §7), and the path says so.
+  '/weight': [ROOT, { labelKey: 'nav.more', to: '/more' }, { labelKey: 'nav.weight' }],
 }
 
 const NOT_FOUND: PathSegment[] = [ROOT, { labelKey: 'common.notFound' }]
@@ -33,10 +44,17 @@ export function pathSegments(pathname: string): PathSegment[] {
 
 /**
  * The one label the header shows below `lg`. A three-segment path on a 375px
- * screen is noise (§7), so the screen names itself and the rest is dropped —
- * which means the *screen* segment, not the trailing `today`.
+ * screen is noise (§7), so the screen names itself and the rest is dropped.
+ *
+ * The screen is the last segment that names a place: the root is the app, and a
+ * trailing `today` qualifies a screen rather than being one. Taking the second
+ * segment instead would name a nested screen after the section it hangs under —
+ * `/weight` would announce itself as `more`.
  */
 export function screenLabelKey(pathname: string): PathSegment['labelKey'] {
   const segments = pathSegments(pathname)
-  return (segments[1] ?? ROOT).labelKey
+    .slice(1)
+    .filter((segment) => segment.labelKey !== 'common.today')
+
+  return (segments[segments.length - 1] ?? ROOT).labelKey
 }
