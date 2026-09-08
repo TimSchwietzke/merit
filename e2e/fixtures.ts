@@ -130,5 +130,18 @@ export async function stubBackend(
   )
 }
 
+/**
+ * Wait until a screen has actually rendered.
+ *
+ * `main` alone is not enough: it is visible from the first frame, and the lazy
+ * routes (`React.lazy` behind a `Suspense` with no fallback) leave it empty
+ * until their chunk arrives. Waiting on visibility captured a blank page — and
+ * a probe that measures nothing passes.
+ */
+export async function waitForScreen(page: Page) {
+  await page.locator('main').waitFor({ state: 'visible' })
+  await page.waitForFunction(() => (document.querySelector('main')?.childElementCount ?? 0) > 0)
+}
+
 export const test = base.extend({})
 export { expect } from '@playwright/test'

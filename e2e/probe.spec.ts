@@ -1,4 +1,4 @@
-import { ROUTES, expect, stubBackend, test } from './fixtures'
+import { ROUTES, expect, stubBackend, test, waitForScreen } from './fixtures'
 
 /**
  * The checks §16 says to compute rather than judge. These are assertions, not
@@ -78,8 +78,8 @@ test('no horizontal scroll at any width, in German', async ({ page }) => {
   for (const path of ['/', '/food', '/training', '/more', '/weight']) {
     await page.setViewportSize({ width: 375, height: 800 })
     await page.goto(path)
-    await page.locator('main').waitFor({ state: 'visible' })
-    await page.waitForTimeout(1000)
+    await waitForScreen(page)
+    await page.waitForTimeout(500)
 
     for (const width of [1920, 1440, 1024, 768, 375, 320]) {
       await page.setViewportSize({ width, height: 800 })
@@ -117,7 +117,7 @@ test('every touch target clears 44px at 375px, on every screen', async ({ page }
     await page.setViewportSize({ width: 375, height: 812 })
     for (const route of ROUTES) {
       await page.goto(route.path)
-      await page.locator('main').waitFor({ state: 'visible' })
+      await waitForScreen(page)
       const small = await page.evaluate(() =>
         [...document.querySelectorAll('button, a, input, [role=radio]')]
           .map((el) => ({ el, r: el.getBoundingClientRect() }))
