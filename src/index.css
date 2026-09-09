@@ -35,10 +35,13 @@
   --text-2xl: 1.75rem;
   --text-3xl: 2.125rem;
 
-  /* Nothing rounder than 6px. Larger radii read as toy UI. */
+  /* Radius scales with the surface (DESIGN.md §6): a 5px button is tight and a
+     12px one is a pill, but a full-width sheet with 6px corners reads as a page
+     that failed to load its styling. */
   --radius-sm: 3px;
   --radius-md: 5px;
-  --radius-lg: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
 }
 
 /* ── shadcn bridge ───────────────────────────────────────────────────
@@ -84,7 +87,7 @@
   --chart-4: var(--merit-chart-4);
   --chart-5: var(--merit-chart-5);
 
-  --radius: 6px;                            /* shadcn ships 0.5rem */
+  --radius: 5px;                            /* shadcn ships 0.5rem */
 }
 
 @layer base {

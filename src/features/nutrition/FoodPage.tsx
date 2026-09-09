@@ -101,7 +101,11 @@ export default function FoodPage() {
               const sub = nutrient === 'saturatedFat' || nutrient === 'sugars'
               return (
                 <li key={nutrient} className="flex items-baseline justify-between gap-3 py-2">
-                  <span className={`min-w-0 truncate text-sm ${sub ? 'pl-4 text-ink-muted' : ''}`}>
+                  {/* Wraps rather than truncating (§4.1). `davon gesättigte
+                      fettsäuren` is the app's worst case and it lost its ending
+                      to the marker beside it; the label is the part that says
+                      what the number is. */}
+                  <span className={`min-w-0 text-sm ${sub ? 'pl-4 text-ink-muted' : ''}`}>
                     {t(`pages.food.nutrients.${nutrient}`)}
                   </span>
 

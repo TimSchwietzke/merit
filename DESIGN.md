@@ -215,7 +215,8 @@ The rest is direct: `--background → bg`, `--foreground → ink`, `--card → s
 
 ### 3.2 Overrides applied to every component on the day it is added
 
-- **`--radius: 6px`.** shadcn ships `0.5rem` and its `rounded-xl` cards land well above the ceiling.
+- **`--radius: 5px`.** shadcn ships `0.5rem`, and its `rounded-xl` on a button is a pill. Controls
+  are tight; large surfaces take §6's larger radii.
 - **Remove every shadow.** shadcn puts `shadow-sm` on cards, buttons and inputs. Structure comes from
   hairlines. Shadows survive only on true overlays — dialog, popover, dropdown, sheet — where an
   element genuinely floats above the page.
@@ -237,7 +238,7 @@ The rest is direct: `--background → bg`, `--foreground → ink`, `--card → s
 | `sonner` (toasts) | Use sparingly. Merit prefers in-place state to notifications. |
 | `calendar` | Use for the date picker; restyle heavily, it is the most opinionated component in the set. |
 | `card` | **Do not use.** Merit's `Panel` (§10.2) is six lines and shadow-free by construction. |
-| `accordion` | **Do not use** on any reference or logging screen. §7. |
+| `accordion`, `collapsible` | **Do not use on a logging screen** (§7). On a browse or catalogue screen, use — expanded by default, and remember what the reader collapsed (§10.11). |
 | `alert`, `badge` | **Do not use.** Merit has `Chip` (§10.6) and plain prose. |
 | `table` | **Do not use below `md`.** Merit's `Rows` (§10.1) is the list primitive; tables are a desktop affordance only. |
 | `avatar`, `carousel`, `breadcrumb` | Not needed. Do not add speculatively. |
@@ -273,8 +274,14 @@ over a phone connection.
 
 **Mono means something.** It marks anything machine-shaped or countable, which in Merit is a great
 deal: every gram, kilogram, kilocalorie, rep count, set number, RIR value, barcode, date, time,
-duration, and **every small section label**. The rule: if a human wrote it as prose, it is not mono.
+duration, and **every short section label**. The rule: if a human wrote it as prose, it is not mono.
 A food name is sans. `183 g` is mono.
+
+**A label long enough to truncate is sans, and may wrap.** Mono is wider per character than sans at
+the same size, so a long compound — `davon gesättigte fettsäuren` is the app's worst case, and it did
+truncate — loses its ending in a font chosen for the numbers beside it. The label is the part that
+says what the number *is*; losing its ending to a font choice is the wrong trade. Short structural
+labels stay mono, which is nearly all of them.
 
 **Serif is the voice.** Exactly one kind of sentence per screen gets it: the single line worth
 remembering. In Merit that is the dashboard's one-line statement about the day, and nothing else. Not
@@ -335,9 +342,11 @@ normal tracking — a technical marker, not a decorative one.
 chrome. Sentence case is for prose — a full sentence starts with a capital and ends with a full stop.
 A nav item is not a sentence.
 
-This applies to the wordmark too: the app is `merit`, lowercase, in every place it renders. The only
-places `Merit` appears capitalised are the manifest `name`, the `<title>`, legal text and the README —
-places where it is a proper noun in someone else's sentence rather than a piece of this interface.
+This applies to the wordmark too: the app is `merit`, lowercase, in every place it renders —
+including the `<title>`, which is the first piece of the brand anybody sees and had no business
+disagreeing with the wordmark two centimetres below it. `Merit` appears capitalised only in legal
+text and the README, where it is a proper noun in someone else's sentence rather than a piece of
+this interface.
 
 Units are lowercase and follow SI: `g`, `kg`, `ml`, `kcal`, `cm`. Never `Kcal`, never `KG`. A unit is
 always mono, always `ink-faint`, and always separated from its number by a space — never glued on.
@@ -417,16 +426,24 @@ the bottom bar, the sidebar edge. Shadows exist only on things that genuinely fl
 dropdown, bottom sheet. A shadowed card grid is the clearest sign the language has been abandoned —
 and it is exactly what shadcn ships by default, so §3.2 is not optional.
 
-**Radius, hard ceiling 6px:**
+**Radius scales with the size of the thing:**
 
 ```css
 --radius-sm: 3px;   /* inline code, chart cells, tiny marks */
 --radius-md: 5px;   /* buttons, inputs, chips, nav items */
---radius-lg: 6px;   /* panels, rows, sheets, dialogs */
+--radius-lg: 10px;  /* panels, row lists, cards */
+--radius-xl: 14px;  /* bottom sheets and dialogs */
 ```
 
-`border-radius: 9999px` is allowed for exactly two things: a thin progress track, and the drag handle
-of a bottom sheet. Everything else above 6px reads as toy UI.
+The old ceiling was 6px on everything, inherited from a desktop editor where every surface is a
+panel a few pixels from its neighbour. It does not survive the move to a phone: a full-width bottom
+sheet with 6px corners reads as a web page that failed to load its styling, not as a tight interface,
+because every sheet the reader has ever pulled up on that device is rounder. A control stays tight —
+a 5px button is right and a 12px one is a pill in disguise — but a large surface takes a larger
+radius, which is the same rule the ceiling was reaching for, applied proportionally.
+
+Still no pills. `border-radius: 9999px` is allowed for exactly two things: a thin progress track, and
+the drag handle of a bottom sheet. A fully rounded button is toy UI at any size.
 
 **Elevation without shadow.**
 
@@ -477,8 +494,24 @@ accent edges on one screen cancel out.
   the hardest place to reach one-handed, and Merit is used one-handed.
 - **Do not animate a grid-template change.** `grid-template-columns` is not interpolable; a
   transition on it flips late and reads as lag.
-- **Reference and logging screens never hide content.** No accordions, no tabs, no "show more" on a
-  screen someone opened because they are standing between sets. An extra tap there is real damage.
+- **A logging screen never hides content.** No accordion, no tab strip, no "show more" on a screen
+  someone opened because they are standing between sets holding a phone. An extra tap there is real
+  damage, and the set form, the day's totals and the comparison line are all on screen at once.
+
+  **This is a rule about logging, not about every screen.** It was written with one screen in mind
+  and its own justification says so. A screen whose job is *finding* something among many — the
+  exercise catalogue, the food catalogue, a long log — has the opposite need: structure is the point
+  there, and a flat list of two hundred rows with a search box is the worse interface. Those screens
+  are governed by §10.11, which requires grouping and filtering and permits collapsing, and which
+  forbids the thing this rule was actually protecting against: content hidden *by default*.
+
+  The test is what the person came to do. Acting on something already decided → show everything.
+  Looking for one thing among many → help them narrow it.
+- **Four tabs, and everything else lives under `more` — so `more` is grouped, never a flat list.**
+  The ceiling is real and worth keeping, but it makes one screen the home of weight, goals, settings,
+  export and the legal pages, and a flat list of those is the junk drawer the ceiling was avoiding.
+  Sections with §10.3 heads, ordered by how often they are opened, daily things first.
+
 - **Prose belongs in Markdown; data belongs in TypeScript.** The exercise catalogue, the meal types
   and the activity-level factors are typed data modules with a single source, not content authored
   twice.
@@ -783,6 +816,50 @@ mid-afternoon more often than at midnight.
 
 ---
 
+### 10.11 Finding things in a long list
+
+Merit has two catalogues that everybody adds to, so both get longer every week and neither can be
+browsed as a flat list for long. This section is what §7 hands those screens instead of its
+no-hiding rule.
+
+**Filter chips, not a select.** §10.6's chip, made pressable: `border-line` / `bg-surface-2` /
+`ink-muted` at rest, `border-accent` / `bg-accent-soft` / `text-accent` when active, in a wrapping
+row above the list. Multi-select within a facet, union within it and intersection across facets —
+picking `chest` and `back` shows both; picking `chest` and `barbell` shows the overlap. A `select`
+hides the options until tapped, allows one, and hides the current state behind a closed control;
+none of that is what filtering wants. §10.7's "above four options it becomes a select" governs a
+single-choice *setting*, not a filter.
+
+The active count is visible without opening anything, and there is always a way back to everything —
+a `clear` chip that appears only when something is filtered, never a permanently disabled control.
+
+**Grouping is structure, not decoration.** Results in a long list are grouped under §10.3 heads —
+muscle group for exercises, meal for a day's food. A group states how many rows it holds, in mono
+`text-2xs`, because that is the number that tells a reader whether to bother opening it.
+
+**Disclosure, and the one rule that matters about it.** Every group can be collapsed and **every
+group starts open.** Content collapsed by default is the anti-pattern (§17); a section that opens
+expanded and can be folded away is a control the reader is given, which is the opposite. What the
+reader collapses is remembered for that screen, because a section folded away and re-opened by the
+app on the next visit is not a control, it is a suggestion.
+
+The header is a button: `aria-expanded`, the chevron rotating 150ms, the panel animating its own
+height over the same 150ms (§13). No cross-fade, no slide.
+
+**Recently used comes first and is never filtered away.** On a screen whose job is picking, the
+answer is usually something picked before. That group sits above the facets and above the search
+field, it ignores whatever filters are set, and it is the one group allowed to be short.
+
+**Search narrows, it does not replace.** The field filters the same grouped, faceted list rather
+than swapping it for a flat set of results — otherwise typing one letter destroys the structure the
+rest of this section built, and clearing it rebuilds a screen the reader has to re-orient in.
+
+**An empty result names the way out.** Not `no results`, but which filter is responsible and how to
+drop it — and, where the catalogue is one everybody extends, the offer to add the missing thing
+(§10.8). That is the path by which both catalogues grow.
+
+---
+
 ## 11. Charts and data visualisation
 
 The house style is comfortable with dense information, and Merit is mostly numbers over time.
@@ -863,7 +940,12 @@ Rules:
 - **The press state is never transitioned.** A 150ms fade-in on `:active` reads as lag on touch,
   where there is no hover to precede it.
 - **Nothing auto-plays.** Merit has no self-running animation at all.
-- Transform and opacity only. No animated `height`, no animated grid columns.
+- Transform and opacity only, **with one exception: a disclosure may animate its own height** at
+  150ms, matching the chevron beside it. The motion table above has always listed disclosure, and
+  every other way of animating one is unavailable — `interpolate-size` and `calc-size()` are
+  Chromium-only, and Merit is used on iPhones. The choice was never "transform or height", it was
+  "height or nothing", and a section that snaps open gives no sense of where its content came from.
+  Nothing else animates a size. No animated grid columns (§7).
 - **No celebratory motion.** Logging a meal is not an achievement to be confettied.
 
 ---
@@ -1027,7 +1109,9 @@ are still in use.
 - Pure `#000` or `#fff`.
 - A spinner where a real empty state belongs.
 - A theme that flashes the wrong colours on reload.
-- An accordion or a tab strip on a reference screen.
+- Content collapsed by default on a screen someone opened to read it. The component was never the
+  problem — a section that opens expanded and *can* be collapsed hides nothing and adds a control
+  (§10.11). Starting collapsed is what costs a tap to reach what they came for.
 
 **Merit's own**
 
@@ -1045,6 +1129,9 @@ are still in use.
 - A hover-only tooltip on a chart.
 - A chart series told apart by colour alone.
 - Anything in `localStorage` other than the theme.
+- A catalogue or a long list with no way to narrow it: no grouping, no filter, search only. It is
+  survivable at thirty rows and hostile at two hundred, which is what a shared catalogue becomes
+  (§10.11).
 - A hardcoded user-facing string, or a layout that only fits the English label.
 - The source link missing from the shipped app.
 
@@ -1185,10 +1272,11 @@ so the themes keep working.
   --text-2xl: 1.75rem;
   --text-3xl: 2.125rem;
 
-  /* Nothing rounder than 6px. Larger radii read as toy UI. */
+  /* Radius scales with the surface. Controls stay tight; sheets do not. §6. */
   --radius-sm: 3px;
   --radius-md: 5px;
-  --radius-lg: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
 }
 
 /* ── shadcn bridge ───────────────────────────────────────────────────
@@ -1234,7 +1322,7 @@ so the themes keep working.
   --chart-4: var(--merit-chart-4);
   --chart-5: var(--merit-chart-5);
 
-  --radius: 6px;                            /* shadcn ships 0.5rem */
+  --radius: 5px;                            /* shadcn ships 0.5rem */
 }
 
 @layer base {
