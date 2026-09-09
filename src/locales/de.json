@@ -113,7 +113,7 @@
         "title": "Barcode scannen",
         "open": "Barcode scannen",
         "viewport": "Kamera, auf einen Barcode gerichtet",
-        "instruction": "halte den Barcode in den Rahmen",
+        "instruction": "halte den Barcode in den Rahmen — er wird von selbst erkannt",
         "looking": "wird nachgeschlagen",
         "barcode": "barcode",
         "look": "Nachschlagen",
@@ -126,7 +126,8 @@
         "starting": "kamera startet",
         "retry": "Kamera erneut versuchen",
         "torchOn": "Licht einschalten",
-        "torchOff": "Licht ausschalten"
+        "torchOff": "Licht ausschalten",
+        "or": "oder nummer eintippen"
       }
     },
     "training": {
