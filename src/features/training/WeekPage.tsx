@@ -113,7 +113,7 @@ export default function WeekPage() {
                       >
                         <span className="block truncate text-sm text-ink">{session.routine.name}</span>
                         <span className="block truncate font-mono text-2xs text-ink-faint">
-                          {session.totalSets > 0
+                          {session.loggedSets > 0
                             ? t('pages.training.week.done', {
                                 logged: session.loggedSets,
                                 total: session.totalSets,

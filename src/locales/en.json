@@ -11,7 +11,8 @@
     "more": "more",
     "weight": "weight",
     "goals": "goals",
-    "routines": "routines"
+    "routines": "routines",
+    "session": "session"
   },
   "common": {
     "notBuiltYet": "not built yet",
@@ -261,6 +262,33 @@
         "manage": "Training days",
         "free": "Free session",
         "paused": "Plan paused until {{date}}"
+      },
+      "session": {
+        "label": "the session",
+        "changeRoutine": "Do a different training day",
+        "changeRoutineTitle": "Which training day?",
+        "replaced": "{{wanted}} instead of {{displaced}} on this day. {{displaced}} is back next week.",
+        "start": "Start the session",
+        "starting": "Starting…",
+        "startFailed": "That did not start. Check your connection and try again.",
+        "resume": "Open the session",
+        "removeSet": "One set fewer",
+        "addSet": "One set more",
+        "removeExercise": "Not today",
+        "sets": "{{sets}} × {{reps}}",
+        "empty": "nothing left in this session",
+        "unsaved": "changed for today",
+        "save": "Save the change",
+        "scopeTitle": "Keep this change for…",
+        "scopeToday": "Today only",
+        "scopeTodayHint": "The training day itself is untouched.",
+        "scopeAlways": "Every future session",
+        "scopeAlwaysHint": "Changes the training day for good.",
+        "scopePick": "Pick the days",
+        "scopePickHint": "For a stretch where you have less time.",
+        "pickTitle": "Which days?",
+        "pickDone": "Apply to {{count}} days",
+        "saveFailed": "That change did not save. Check your connection and try again."
       }
     },
     "more": {

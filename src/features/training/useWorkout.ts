@@ -41,10 +41,11 @@ export interface WorkoutState {
     values: { reps: number; weightKg: number; rir: number | null },
   ) => Promise<boolean>
   removeSet: (id: string) => Promise<boolean>
-  /** Write a routine's planned sets onto the day. Resolves false if any failed. */
+  /** Write a routine's planned sets onto a day — this one unless told another. */
   startRoutine: (plan: {
     routineId: string
     exercises: { exerciseId: string; targetSets: number; targetReps: number }[]
+    forDate?: string
   }) => Promise<boolean>
 }
 
@@ -216,26 +217,46 @@ export function useWorkout(date: string): WorkoutState {
     async (plan: {
       routineId: string
       exercises: { exerciseId: string; targetSets: number; targetReps: number }[]
+      forDate?: string
     }) => {
       if (!userId) return false
+      const on = plan.forDate ?? date
 
-      const workout = await supabase
+      // A day can hold several workouts now, so this is an insert rather than
+      // an upsert — but not a second one from the same routine, which would be
+      // the same session written twice by a double tap.
+      const existing = await supabase
         .from('workouts')
-        .upsert({ user_id: userId, date, routine_id: plan.routineId }, { onConflict: 'user_id,date' })
         .select('id')
-        .single()
+        .eq('user_id', userId)
+        .eq('date', on)
+        .eq('routine_id', plan.routineId)
+        .maybeSingle()
+
+      const workout = existing.data
+        ? existing
+        : await supabase
+            .from('workouts')
+            .insert({ user_id: userId, date: on, routine_id: plan.routineId })
+            .select('id')
+            .single()
+
       if (!workout.data || workout.error) return false
+      // Started already: its sets are what they are, and rewriting them would
+      // throw away everything logged so far.
+      if (existing.data) return true
+      const workoutId = workout.data.id
 
       const lastWeight = (exerciseId: string): number => {
         const earlier = rowsRef.current
-          .filter((row) => row.exercise_id === exerciseId && row.workouts.date < date)
+          .filter((row) => row.exercise_id === exerciseId && row.workouts.date < on)
           .sort((a, b) => b.workouts.date.localeCompare(a.workouts.date))
         return earlier[0]?.weight_kg ?? 0
       }
 
       const rows = plan.exercises.flatMap((entry) =>
         Array.from({ length: entry.targetSets }, (_, index) => ({
-          workout_id: workout.data.id,
+          workout_id: workoutId,
           user_id: userId,
           exercise_id: entry.exerciseId,
           set_number: index + 1,

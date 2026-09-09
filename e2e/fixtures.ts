@@ -63,6 +63,7 @@ export const ROUTES: Route[] = [
   { name: 'goals', path: '/goals' },
   { name: 'training-add', path: '/training/add' },
   { name: 'training-routines', path: '/training/routines' },
+  { name: 'training-session', path: '/training/session?routine=r1' },
   { name: 'not-found', path: '/nowhere' },
   { name: 'sign-in', path: '/sign-in', signedOut: true },
 ]

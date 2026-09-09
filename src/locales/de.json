@@ -11,7 +11,8 @@
     "more": "mehr",
     "weight": "gewicht",
     "goals": "ziele",
-    "routines": "trainingstage"
+    "routines": "trainingstage",
+    "session": "einheit"
   },
   "common": {
     "notBuiltYet": "noch nicht gebaut",
@@ -261,6 +262,33 @@
         "manage": "Trainingstage",
         "free": "Freies Training",
         "paused": "Plan pausiert bis {{date}}"
+      },
+      "session": {
+        "label": "die einheit",
+        "changeRoutine": "Anderen Trainingstag machen",
+        "changeRoutineTitle": "Welcher Trainingstag?",
+        "replaced": "{{wanted}} statt {{displaced}} an diesem Tag. {{displaced}} ist nächste Woche wieder da.",
+        "start": "Einheit starten",
+        "starting": "Wird gestartet …",
+        "startFailed": "Das hat nicht geklappt. Prüfe dein Netz und versuche es noch einmal.",
+        "resume": "Einheit öffnen",
+        "removeSet": "Ein Satz weniger",
+        "addSet": "Ein Satz mehr",
+        "removeExercise": "Heute nicht",
+        "sets": "{{sets}} × {{reps}}",
+        "empty": "in dieser Einheit ist nichts mehr übrig",
+        "unsaved": "für heute geändert",
+        "save": "Änderung speichern",
+        "scopeTitle": "Änderung behalten für …",
+        "scopeToday": "Nur heute",
+        "scopeTodayHint": "Der Trainingstag selbst bleibt, wie er ist.",
+        "scopeAlways": "Jede weitere Einheit",
+        "scopeAlwaysHint": "Ändert den Trainingstag dauerhaft.",
+        "scopePick": "Tage auswählen",
+        "scopePickHint": "Für eine Zeit, in der du weniger Zeit hast.",
+        "pickTitle": "Welche Tage?",
+        "pickDone": "Auf {{count}} Tage anwenden",
+        "saveFailed": "Die Änderung wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal."
       }
     },
     "more": {
