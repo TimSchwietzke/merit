@@ -146,6 +146,42 @@ export type Database = {
         }
         Relationships: []
       }
+      nutrition_goals: {
+        Row: {
+          carbs_g: number
+          created_at: string
+          fat_g: number
+          kcal: number
+          mode: string
+          protein_g: number
+          updated_at: string
+          user_id: string
+          valid_from: string
+        }
+        Insert: {
+          carbs_g: number
+          created_at?: string
+          fat_g: number
+          kcal: number
+          mode: string
+          protein_g: number
+          updated_at?: string
+          user_id: string
+          valid_from?: string
+        }
+        Update: {
+          carbs_g?: number
+          created_at?: string
+          fat_g?: number
+          kcal?: number
+          mode?: string
+          protein_g?: number
+          updated_at?: string
+          user_id?: string
+          valid_from?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           activity_level: string | null

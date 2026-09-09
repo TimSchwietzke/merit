@@ -11,6 +11,7 @@ import NotFoundPage from '@/features/more/NotFoundPage'
 import FoodPage from '@/features/nutrition/FoodPage'
 import AddFoodPage from '@/features/nutrition/AddFoodPage'
 import LoggedPortionPage from '@/features/nutrition/LoggedPortionPage'
+import GoalsPage from '@/features/goals/GoalsPage'
 import TrainingPage from '@/features/training/TrainingPage'
 
 // Weight is the only screen that pulls in Recharts, which is a third of the
@@ -35,6 +36,7 @@ const router = createBrowserRouter([
           { path: '/training', element: <TrainingPage /> },
           { path: '/more', element: <MorePage /> },
           { path: '/weight', element: <WeightPage /> },
+          { path: '/goals', element: <GoalsPage /> },
           { path: '*', element: <NotFoundPage /> },
         ],
       },

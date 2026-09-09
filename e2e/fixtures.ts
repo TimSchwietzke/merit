@@ -60,6 +60,7 @@ export const ROUTES: Route[] = [
   { name: 'weight', path: '/weight' },
   { name: 'food-add', path: '/food/add' },
   { name: 'food-scan', path: '/food/add?scan=1' },
+  { name: 'goals', path: '/goals' },
   { name: 'not-found', path: '/nowhere' },
   { name: 'sign-in', path: '/sign-in', signedOut: true },
 ]
@@ -204,11 +205,38 @@ export async function stubBackend(
     }),
   )
 
+  // A target in force, so the day view renders its progress rather than its
+  // "set a target" state, and the goals screen has something to show.
+  await page.route('**/rest/v1/nutrition_goals*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([
+        {
+          mode: 'calculated',
+          valid_from: '2026-01-01',
+          kcal: 2100,
+          protein_g: 150,
+          fat_g: 70,
+          carbs_g: 220,
+        },
+      ]),
+    }),
+  )
+
   await page.route('**/rest/v1/profiles*', (route) =>
     route.fulfill({
       status: 200,
       contentType: 'application/json',
-      body: JSON.stringify({ locale, theme }),
+      body: JSON.stringify({
+        locale,
+        theme,
+        height_cm: 181,
+        birth_date: '1995-06-15',
+        sex: 'male',
+        activity_level: 'moderate',
+        goal: 'lose',
+      }),
     }),
   )
 
