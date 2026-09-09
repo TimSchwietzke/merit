@@ -157,9 +157,61 @@ test('a routine with no exercises is listed but never planned into the week', as
   await expect(page.getByRole('link', { name: /Nacken & Schultern/ })).toBeVisible()
   await expect(page.getByText('noch keine Übungen')).toBeVisible()
 
-  // And its editor will not let it be planned until it holds something.
+  // And its editor will not let it be saved until it holds something.
   await page.getByRole('link', { name: /Nacken & Schultern/ }).click()
-  await expect(page.getByRole('button', { name: 'Mo', exact: true })).toBeDisabled()
+  await page.getByRole('radio', { name: /übungen/ }).click()
+  await expect(page.getByRole('button', { name: 'Speichern' })).toBeDisabled()
+})
+
+test('the editor asks for the name and the days before the exercises', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+  await page.goto('/training/routines/r3')
+  await waitForScreen(page)
+
+  // Step one is what it is called and when it happens. The weekdays are here,
+  // not behind a list of exercises somebody has to finish first.
+  await expect(page.getByLabel('name')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Mo', exact: true })).toBeEnabled()
+  await expect(page.getByRole('button', { name: 'Übung hinzufügen' })).toBeHidden()
+
+  await page.getByRole('button', { name: /Weiter/ }).click()
+  await expect(page.getByRole('button', { name: 'Übung hinzufügen' })).toBeVisible()
+  await expect(page.getByLabel('name')).toBeHidden()
+})
+
+test('nothing is written until save, and the picker stays open', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+
+  const writes: string[] = []
+  for (const path of ['**/rest/v1/routines*', '**/rest/v1/routine_days*', '**/rest/v1/rpc/**']) {
+    await page.route(path, async (route) => {
+      if (route.request().method() !== 'GET') writes.push(route.request().url())
+      await route.fallback()
+    })
+  }
+
+  await page.goto('/training/routines/r1')
+  await waitForScreen(page)
+
+  await page.getByLabel('name').fill('Oberkörper 2')
+  await page.getByRole('button', { name: 'Mi', exact: true }).click()
+  await page.getByRole('button', { name: /Weiter/ }).click()
+
+  // Two picks, one sheet: it does not close under you between them.
+  await page.getByRole('button', { name: 'Übung hinzufügen' }).click()
+  // Recently used repeats the row that is also in its muscle group; either
+  // will do.
+  await page.getByRole('button', { name: /Bankdrücken/ }).first().click()
+  await page.getByRole('button', { name: /Latzug/ }).first().click()
+  await expect(page.getByRole('dialog')).toBeVisible()
+  expect(writes).toEqual([])
+
+  await page.getByRole('button', { name: 'Schließen' }).click()
+  await page.getByRole('button', { name: 'Speichern' }).click()
+  await expect(page).toHaveURL(/\/training$/)
+  expect(writes.length).toBeGreaterThan(0)
 })
 
 test('adding a routine is one target, and it yields the corner while a session runs', async ({

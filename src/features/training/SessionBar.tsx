@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, type FormEvent, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 
@@ -11,8 +11,30 @@ const REPS = { min: 1, max: 1000, decimals: 0 } as const
 const WEIGHT = { min: 0, max: 1000, decimals: 2 } as const
 const RIR = { min: 0, max: 10, decimals: 0 } as const
 
-const FIELD = `min-h-11 min-w-0 rounded-md bg-surface-2 px-2 text-right font-mono text-input
-               tabular-nums text-ink placeholder:text-ink-faint md:min-h-9 md:text-sm`
+const FIELD = `min-h-11 w-full min-w-0 rounded-md bg-surface-2 px-2 text-right font-mono
+               text-input tabular-nums text-ink placeholder:text-ink-faint md:min-h-9 md:text-sm`
+
+/**
+ * One labelled field of the row. A `<label>` wrapping its input rather than an
+ * `aria-label`, so the name is on the screen as well as in the accessibility
+ * tree — it is the thing that was missing.
+ */
+function Field({
+  label,
+  className,
+  children,
+}: {
+  label: string
+  className: string
+  children: ReactNode
+}) {
+  return (
+    <label className={`flex min-w-0 flex-col gap-1 ${className}`}>
+      <span className="px-0.5 font-mono text-2xs text-ink-faint">{label}</span>
+      {children}
+    </label>
+  )
+}
 
 /**
  * The set you are on, wherever you are in the app.
@@ -118,6 +140,14 @@ export function SessionBar() {
  * Three fields and a button. Empty is meaningful: an untouched field means "as
  * the placeholder says", which is how a set done exactly as planned is logged
  * with one tap and no typing.
+ *
+ * Each field says what it is, in mono above it. Three bare boxes with numbers
+ * ghosted in them is a puzzle at arm's length between sets — the placeholder
+ * tells you what will be logged, not what the box is for, and the two are only
+ * the same thing to somebody who already knew. §10.5 puts a unit *inside* a
+ * field, and that is right for a field on its own; a row of three at 375px has
+ * no room for it, which is why the day screen labels its columns once above
+ * them and this does the same.
  */
 function SetEntry({
   expected,
@@ -152,30 +182,33 @@ function SetEntry({
 
   return (
     <>
-      <form onSubmit={submit} className="mt-1 flex items-center gap-2" noValidate>
-        <input
-          aria-label={labels.reps}
-          inputMode="numeric"
-          value={reps}
-          placeholder={expected.reps}
-          onChange={(event) => setReps(event.target.value)}
-          className={`${FIELD} flex-1`}
-        />
-        <input
-          aria-label={labels.weight}
-          inputMode="decimal"
-          value={weight}
-          placeholder={expected.weight}
-          onChange={(event) => setWeight(event.target.value)}
-          className={`${FIELD} flex-1`}
-        />
-        <input
-          aria-label={labels.rir}
-          inputMode="numeric"
-          value={rir}
-          onChange={(event) => setRir(event.target.value)}
-          className={`${FIELD} w-14 shrink-0`}
-        />
+      <form onSubmit={submit} className="mt-2 flex items-end gap-2" noValidate>
+        <Field label={labels.reps} className="flex-1">
+          <input
+            inputMode="numeric"
+            value={reps}
+            placeholder={expected.reps}
+            onChange={(event) => setReps(event.target.value)}
+            className={FIELD}
+          />
+        </Field>
+        <Field label="kg" className="flex-1">
+          <input
+            inputMode="decimal"
+            value={weight}
+            placeholder={expected.weight}
+            onChange={(event) => setWeight(event.target.value)}
+            className={FIELD}
+          />
+        </Field>
+        <Field label={labels.rir} className="w-12 shrink-0">
+          <input
+            inputMode="numeric"
+            value={rir}
+            onChange={(event) => setRir(event.target.value)}
+            className={FIELD}
+          />
+        </Field>
         <Button type="submit" variant="primary" size="small" pending={pending} className="shrink-0">
           {pending ? labels.logging : labels.log}
         </Button>

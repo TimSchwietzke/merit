@@ -6,7 +6,8 @@ import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/EmptyState'
 import { Panel } from '@/components/Panel'
-import { Row, Rows } from '@/components/Rows'
+import { Row, RowBody, Rows } from '@/components/Rows'
+import { SwipeRow } from '@/components/SwipeRow'
 import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
 import { Button } from '@/components/ui/button'
@@ -45,7 +46,7 @@ export default function WeekPage() {
   const [selected, setSelected] = useState(today)
   const week = useMemo(() => weekOf(selected), [selected])
 
-  const { routines, status: routinesStatus, create } = useRoutines()
+  const { routines, status: routinesStatus, create, remove, restore } = useRoutines()
   const planned = useMemo(() => plannable(routines), [routines])
   const { days, overrides, status, apply } = useSchedule(week[0], week[6], planned)
 
@@ -53,6 +54,17 @@ export default function WeekPage() {
   const [pending, setPending] = useState<{ a: Marked; b: Marked } | null>(null)
 
   const day = days.find((entry) => entry.date === selected)
+
+  async function addRoutine() {
+    const id = await create(t('pages.routines.defaultName'))
+    if (!id) {
+      toast(t('pages.routines.createFailed'))
+      return
+    }
+    // `new`: the editor starts on step one with the name field waiting, and a
+    // cancel there takes this row back out again.
+    navigate(`/training/routines/${id}?new=1`)
+  }
 
   function onMove(date: string, session: DaySession) {
     const mine = { routineId: session.routine.id, date, name: session.routine.name }
@@ -100,23 +112,30 @@ export default function WeekPage() {
           marked={moving}
           onMove={onMove}
           onPut={(routineId) => apply(addTo(overrides, routineId, selected))}
+          onNew={() => void addRoutine()}
         />
       )}
 
-      <RoutineList routines={routines} status={routinesStatus} locale={locale} />
-
-      <AddRoutine
-        onAdd={async () => {
-          const id = await create(t('pages.routines.defaultName'))
-          if (!id) {
-            toast(t('pages.routines.createFailed'))
-            return
-          }
-          // `new`: the editor puts the cursor in the name field, because the
-          // name is the one thing a routine created this way does not have yet.
-          navigate(`/training/routines/${id}?new=1`)
+      <RoutineList
+        routines={routines}
+        status={routinesStatus}
+        locale={locale}
+        onRemove={async (routine) => {
+          if (!(await remove(routine.id))) return
+          toast(t('pages.routines.deleted', { name: routine.name }), {
+            action: {
+              label: t('common.undo'),
+              onClick: () => {
+                void restore(routine).then((ok) => {
+                  if (!ok) toast(t('pages.routines.undoFailed'))
+                })
+              },
+            },
+          })
         }}
       />
+
+      <AddRoutine onAdd={addRoutine} />
 
       <Confirm
         open={pending !== null}
@@ -270,6 +289,7 @@ function DayCard({
   marked,
   onMove,
   onPut,
+  onNew,
 }: {
   day: ScheduleDay | undefined
   today: string
@@ -278,6 +298,7 @@ function DayCard({
   marked: Marked | null
   onMove: (date: string, session: DaySession) => void
   onPut: (routineId: string) => Promise<boolean>
+  onNew: () => void
 }) {
   const { t } = useTranslation()
   const [picking, setPicking] = useState(false)
@@ -333,7 +354,15 @@ function DayCard({
           day.sessions.map((session) => (
             <Link
               key={session.routine.id}
-              to={`/training/session?date=${day.date}&routine=${session.routine.id}`}
+              // A day that has been started leads to the session itself, not to
+              // a preview of what it was going to be. Walking back in through
+              // the training tab is how you get to the set you are on after
+              // going off to look something up, and one hop is the whole point.
+              to={
+                session.workoutId
+                  ? `/training/day?date=${day.date}`
+                  : `/training/session?date=${day.date}&routine=${session.routine.id}`
+              }
               className="-mx-4 flex items-center gap-3 px-4 py-2 transition-colors
                          [transition-duration:140ms] hover:bg-surface-2 active:bg-surface-2
                          active:[transition-duration:0ms]"
@@ -343,14 +372,19 @@ function DayCard({
                   {session.routine.name}
                 </span>
                 <span className="mt-0.5 block truncate font-mono text-2xs text-ink-muted">
-                  {session.totalSets === 0
-                    ? t('pages.training.week.open')
-                    : session.loggedSets > 0
-                      ? t('pages.training.week.progress', {
-                          logged: session.loggedSets,
-                          total: session.totalSets,
-                        })
-                      : t('pages.training.week.setCount', { count: session.totalSets })}
+                  {session.workoutId && session.loggedSets < session.totalSets
+                    ? `${t('pages.training.week.resume')} · ${t('pages.training.week.progress', {
+                        logged: session.loggedSets,
+                        total: session.totalSets,
+                      })}`
+                    : session.totalSets === 0
+                      ? t('pages.training.week.open')
+                      : session.loggedSets > 0
+                        ? t('pages.training.week.progress', {
+                            logged: session.loggedSets,
+                            total: session.totalSets,
+                          })
+                        : t('pages.training.week.setCount', { count: session.totalSets })}
                 </span>
               </span>
               <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
@@ -379,6 +413,21 @@ function DayCard({
               <span className="min-w-0 flex-1 truncate">{routine.name}</span>
             </Row>
           ))}
+          {/* Last, and in the same shape as the rest: the day you are looking
+              at is often the reason you want a routine that does not exist yet,
+              and sending you back to the screen behind the sheet to make one is
+              a dead end with extra steps. */}
+          <Row
+            onClick={() => {
+              setPicking(false)
+              onNew()
+            }}
+          >
+            <Plus size={15} strokeWidth={1.75} aria-hidden className="shrink-0 text-accent" />
+            <span className="min-w-0 flex-1 truncate text-accent">
+              {t('pages.training.week.putNew')}
+            </span>
+          </Row>
         </Rows>
       </Sheet>
     </>
@@ -399,12 +448,15 @@ function RoutineList({
   routines,
   status,
   locale,
+  onRemove,
 }: {
   routines: Routine[]
   status: 'loading' | 'ready' | 'error'
   locale: string
+  onRemove: (routine: Routine) => void
 }) {
   const { t } = useTranslation()
+  const [open, setOpen] = useState<string | null>(null)
 
   return (
     <section className="mt-8 pb-16">
@@ -412,6 +464,10 @@ function RoutineList({
         label={t('pages.routines.label')}
         hint={status === 'ready' ? String(routines.length) : undefined}
       />
+
+      {/* §10.1: a delete 8px from a value in a 52px row gets hit by accident,
+          so it costs a deliberate sideways drag — the same gesture the food log
+          uses, and the same undo behind it (§17). */}
 
       {status === 'error' ? (
         <p role="alert" className="text-sm text-danger">
@@ -424,23 +480,42 @@ function RoutineList({
       ) : (
         <Rows>
           {routines.map((routine) => (
-            <Row key={routine.id} to={`/training/routines/${routine.id}`}>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate">{routine.name}</span>
-                <span className="block truncate font-mono text-2xs text-ink-faint">
-                  {routine.exercises.length === 0
-                    ? t('pages.routines.unfinished')
-                    : `${t('pages.routines.exerciseCount', { count: routine.exercises.length })} · ${
-                        routine.weekdays.length > 0
-                          ? routine.weekdays.map((day) => weekdayLabel(day, locale)).join(' ')
-                          : t('pages.routines.noWeekday')
-                      }`}
+            <SwipeRow
+              key={routine.id}
+              open={open === routine.id}
+              onOpenChange={(next) => setOpen(next ? routine.id : null)}
+              label={t('pages.routines.swipe')}
+              actions={
+                <button
+                  type="button"
+                  onClick={() => {
+                    setOpen(null)
+                    onRemove(routine)
+                  }}
+                  className="flex w-full items-center justify-center bg-danger px-3 text-sm font-medium text-bg"
+                >
+                  {t('pages.routines.delete')}
+                </button>
+              }
+            >
+              <RowBody to={`/training/routines/${routine.id}`}>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate">{routine.name}</span>
+                  <span className="block truncate font-mono text-2xs text-ink-faint">
+                    {routine.exercises.length === 0
+                      ? t('pages.routines.unfinished')
+                      : `${t('pages.routines.exerciseCount', { count: routine.exercises.length })} · ${
+                          routine.weekdays.length > 0
+                            ? routine.weekdays.map((day) => weekdayLabel(day, locale)).join(' ')
+                            : t('pages.routines.noWeekday')
+                        }`}
+                  </span>
                 </span>
-              </span>
-              <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
-                →
-              </span>
-            </Row>
+                <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
+                  →
+                </span>
+              </RowBody>
+            </SwipeRow>
           ))}
         </Rows>
       )}

@@ -93,21 +93,28 @@ const toRoutine = (row: Row): Routine => ({
     })),
 })
 
+/** One exercise of a routine as the editor holds it, before it has been saved. */
+export interface DraftExercise {
+  exerciseId: string
+  setReps: number[]
+}
+
 export interface RoutinesState {
   routines: Routine[]
   status: 'loading' | 'ready' | 'error'
   create: (name: string) => Promise<string | null>
   rename: (id: string, name: string) => Promise<boolean>
   remove: (id: string) => Promise<boolean>
+  restore: (routine: Routine) => Promise<boolean>
   setWeekdays: (id: string, weekdays: number[]) => Promise<boolean>
-  addExercise: (routineId: string, exerciseId: string) => Promise<boolean>
+  /** Replace a routine's exercises with this list, in order, in one write. */
+  saveExercises: (routineId: string, exercises: readonly DraftExercise[]) => Promise<boolean>
   updateExercise: (id: string, setReps: number[]) => Promise<boolean>
   removeExercise: (id: string) => Promise<boolean>
-  moveExercise: (routineId: string, id: string, by: -1 | 1) => Promise<boolean>
 }
 
 /** What a new exercise starts at, so adding one needs no typing. */
-const DEFAULT_SET_REPS = [8, 8, 8]
+export const DEFAULT_SET_REPS = [8, 8, 8]
 
 export function useRoutines(): RoutinesState {
   const { session } = useSession()
@@ -174,6 +181,46 @@ export function useRoutines(): RoutinesState {
     [reload],
   )
 
+  /**
+   * Put a deleted routine back, with its days and its exercises.
+   *
+   * A new row rather than the old one: the delete cascaded, so there is nothing
+   * left to revive. Nothing outside the routine refers to those ids — a started
+   * session copies the plan onto the workout — so a restored routine is the
+   * same routine to everything that can see it.
+   */
+  const restore = useCallback(
+    async (routine: Routine) => {
+      if (!userId) return false
+      const { data, error } = await supabase
+        .from('routines')
+        .insert({ user_id: userId, name: routine.name, position: routine.position })
+        .select('id')
+        .single()
+      if (!data || error) return false
+
+      if (routine.weekdays.length > 0) {
+        const days = await supabase
+          .from('routine_days')
+          .insert(routine.weekdays.map((weekday) => ({ routine_id: data.id, weekday })))
+        if (days.error) return false
+      }
+      if (routine.exercises.length > 0) {
+        const rpc = await supabase.rpc('set_routine_exercises', {
+          routine: data.id,
+          items: routine.exercises.map((entry) => ({
+            exercise_id: entry.exerciseId,
+            set_reps: entry.setReps,
+          })),
+        })
+        if (rpc.error) return false
+      }
+      reload()
+      return true
+    },
+    [userId, reload],
+  )
+
   const remove = useCallback(
     async (id: string) => {
       const { data, error } = await supabase.from('routines').delete().eq('id', id).select('id').single()
@@ -203,20 +250,20 @@ export function useRoutines(): RoutinesState {
     [reload],
   )
 
-  const addExercise = useCallback(
-    async (routineId: string, exerciseId: string) => {
-      const routine = routines.find((r) => r.id === routineId)
-      const { error } = await supabase.from('routine_exercises').insert({
-        routine_id: routineId,
-        exercise_id: exerciseId,
-        position: routine ? routine.exercises.length : 0,
-        set_reps: DEFAULT_SET_REPS,
+  const saveExercises = useCallback(
+    async (routineId: string, exercises: readonly DraftExercise[]) => {
+      const { error } = await supabase.rpc('set_routine_exercises', {
+        routine: routineId,
+        items: exercises.map((entry) => ({
+          exercise_id: entry.exerciseId,
+          set_reps: entry.setReps,
+        })),
       })
       if (error) return false
       reload()
       return true
     },
-    [routines, reload],
+    [reload],
   )
 
   const updateExercise = useCallback(
@@ -249,34 +296,6 @@ export function useRoutines(): RoutinesState {
     [reload],
   )
 
-  const moveExercise = useCallback(
-    async (routineId: string, id: string, by: -1 | 1) => {
-      const routine = routines.find((r) => r.id === routineId)
-      if (!routine) return false
-      const index = routine.exercises.findIndex((entry) => entry.id === id)
-      const swap = routine.exercises[index + by]
-      if (index < 0 || !swap) return false
-
-      // Two updates rather than a stored procedure. The unique on
-      // (routine_id, position) is deferrable for exactly this: the pair passes
-      // through a state where both hold the same number.
-      const mine = routine.exercises[index]
-      const first = await supabase
-        .from('routine_exercises')
-        .update({ position: swap.position })
-        .eq('id', mine.id)
-      const second = await supabase
-        .from('routine_exercises')
-        .update({ position: mine.position })
-        .eq('id', swap.id)
-
-      if (first.error || second.error) return false
-      reload()
-      return true
-    },
-    [routines, reload],
-  )
-
   const status: RoutinesState['status'] = failed ? 'error' : loaded ? 'ready' : 'loading'
 
   return {
@@ -285,10 +304,10 @@ export function useRoutines(): RoutinesState {
     create,
     rename,
     remove,
+    restore,
     setWeekdays,
-    addExercise,
+    saveExercises,
     updateExercise,
     removeExercise,
-    moveExercise,
   }
 }

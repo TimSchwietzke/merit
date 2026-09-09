@@ -334,6 +334,11 @@ export async function stubBackend(
     route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
   )
 
+  // Saving a routine's exercises is one call, so the stub is one too.
+  await page.route('**/rest/v1/rpc/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: 'null' }),
+  )
+
   await page.route('**/rest/v1/scheduled_sessions*', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
   )

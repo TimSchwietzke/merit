@@ -524,6 +524,10 @@ export type Database = {
         Args: { high: number; low: number; numbers: number[] }
         Returns: boolean
       }
+      set_routine_exercises: {
+        Args: { items: Json; routine: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

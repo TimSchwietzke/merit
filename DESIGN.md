@@ -829,6 +829,27 @@ mid-afternoon more often than at midnight.
   pulled 4px past it and its gap drops to the mosaic's 2px. The mark is a fixed 24px, not the tile's
   width: on a desktop column the tile is 100px and a mark that fills it stops being a mark.
 
+- **Multi-step form** — a screen that asks for several things of different sizes splits into steps
+  named by a §10.7 segmented control at the top, `1 · name & days` / `2 · exercises`. The control is
+  the way back as well as the progress: a stepper you cannot walk backwards through is a wizard, and
+  wizards are how people get stuck.
+
+  **Order the steps the way somebody thinks, not the way the schema is shaped.** Naming a thing and
+  saying when it happens is one small decision; filling it with content is a long one. Asking for the
+  long one first, and gating the short one behind it, is the arrangement that made the routine editor
+  feel wrong even though every field on it was correct.
+
+  Each step ends in a pair of buttons, the way out on the left and the way on on the right — `Cancel`
+  / `Next`, then `Back` / `Save`. A step's `Next` is disabled until that step is answered; `Save` is
+  disabled while the thing would be invalid, with the reason in mono `text-2xs` beneath it rather
+  than in a toast after the tap.
+
+  **A form with a Save button holds a draft and writes nothing before it.** This is the condition, not
+  a preference: a screen that saves each field as it is touched has nothing for Cancel to undo, which
+  is how one ends up offering Delete and a back link instead — the two things you are left with when
+  arriving somewhere has already changed the data. Where the draft is a list, it goes over in one
+  call so a save cannot half-apply.
+
 - **Floating add** — the one place Merit floats a control over the page instead of putting it in the
   flow: adding to the list a screen is *about*, on a screen you scroll. 56px, `accent` on `bg`, a
   lucide `+` at 22px, `radius-md` and square — a circle is a pill and §6 allows exactly two of those.
