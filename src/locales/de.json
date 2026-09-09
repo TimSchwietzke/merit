@@ -18,7 +18,8 @@
     "notFound": "nicht gefunden",
     "loading": "wird geladen",
     "undo": "Rückgängig",
-    "add": "hinzufügen"
+    "add": "hinzufügen",
+    "clearFilters": "zurücksetzen"
   },
   "auth": {
     "signIn": {
@@ -103,7 +104,9 @@
         "noResults": "kein treffer",
         "addYourself": "Selbst eintragen",
         "searchFailed": "Die Suche ist nicht durchgekommen. Prüfe dein Netz und versuche es noch einmal.",
-        "back": "Zurück zum Tag"
+        "back": "Zurück zum Tag",
+        "recent": "zuletzt benutzt",
+        "catalogue": "katalog"
       },
       "portion": {
         "quantity": "menge",
@@ -184,7 +187,21 @@
         "searching": "wird gesucht",
         "noResults": "keine Übung gefunden",
         "back": "Zurück zum Tag",
-        "searchFailed": "Die Suche ist nicht durchgekommen. Prüfe dein Netz und versuche es noch einmal."
+        "searchFailed": "Die Suche ist nicht durchgekommen. Prüfe dein Netz und versuche es noch einmal.",
+        "recent": "zuletzt benutzt",
+        "filterEquipment": "gerät",
+        "noMatch": "Nichts passt zu {{filters}}.",
+        "noMatchSearch": "Nichts passt zu „{{query}}“.",
+        "equipment": {
+          "barbell": "langhantel",
+          "dumbbell": "kurzhantel",
+          "machine": "maschine",
+          "cable": "kabel",
+          "bodyweight": "körpergewicht",
+          "kettlebell": "kettlebell",
+          "band": "band",
+          "other": "sonstiges"
+        }
       },
       "groups": {
         "chest": "brust",
