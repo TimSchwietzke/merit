@@ -62,6 +62,7 @@ export const ROUTES: Route[] = [
   { name: 'food-scan', path: '/food/add?scan=1' },
   { name: 'goals', path: '/goals' },
   { name: 'training-add', path: '/training/add' },
+  { name: 'training-routines', path: '/training/routines' },
   { name: 'not-found', path: '/nowhere' },
   { name: 'sign-in', path: '/sign-in', signedOut: true },
 ]
@@ -238,12 +239,13 @@ export async function stubBackend(
       d.setDate(d.getDate() - back)
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     }
-    const set = (id: string, exercise: (typeof EXERCISES)[number], n: number, reps: number, kg: number, date: string, rir: number | null = null) => ({
+    const set = (id: string, exercise: (typeof EXERCISES)[number], n: number, reps: number, kg: number, date: string, rir: number | null = null, done = true) => ({
       id,
       set_number: n,
       reps,
       weight_kg: kg,
       rir,
+      done,
       exercise_id: exercise.id,
       workouts: { date },
       exercises: exercise,
@@ -258,9 +260,54 @@ export async function stubBackend(
         set('s4', EXERCISES[0], 1, 8, 62.5, day(0), 2),
         set('s5', EXERCISES[0], 2, 8, 62.5, day(0), 1),
         set('s6', EXERCISES[2], 1, 10, 55, day(0)),
+        // One planned and not yet done, so the tick, the faint row and the
+        // done-count all have something to show.
+        set('s7', EXERCISES[2], 2, 10, 55, day(0), null, false),
       ]),
     })
   })
+
+  // One routine, planned for Monday and Thursday, so the start screen and the
+  // routine list both have something to show.
+  await page.route('**/rest/v1/routines*', (route) => {
+    if (route.request().method() !== 'GET') {
+      return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'r1' }) })
+    }
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([
+        {
+          id: 'r1',
+          name: 'Oberkörper 1',
+          position: 0,
+          routine_days: [{ weekday: 1 }, { weekday: 4 }],
+          routine_exercises: [
+            {
+              id: 're1',
+              exercise_id: 'x1',
+              position: 0,
+              target_sets: 3,
+              target_reps: 8,
+              exercises: EXERCISES[0],
+            },
+            {
+              id: 're2',
+              exercise_id: 'x3',
+              position: 1,
+              target_sets: 3,
+              target_reps: 10,
+              exercises: EXERCISES[2],
+            },
+          ],
+        },
+      ]),
+    })
+  })
+
+  await page.route('**/rest/v1/routine_*', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
+  )
 
   await page.route('**/rest/v1/workouts*', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'w1' }) }),
@@ -295,6 +342,7 @@ export async function stubBackend(
         sex: 'male',
         activity_level: 'moderate',
         goal: 'lose',
+        plan_paused_until: null,
       }),
     }),
   )
