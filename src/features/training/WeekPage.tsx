@@ -3,10 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowUpDown } from 'lucide-react'
 
-import { Row, Rows } from '@/components/Rows'
 import { ScreenTitle } from '@/components/ScreenTitle'
-import { Statement } from '@/components/Statement'
-import { Sheet } from '@/components/ui/sheet'
 import { SectionHead } from '@/components/SectionHead'
 import { Button } from '@/components/ui/button'
 import { Confirm } from '@/components/ui/confirm'
@@ -33,9 +30,7 @@ export default function WeekPage() {
   const today = todayKey()
   const week = weekOf(today)
   const { days, routines, overrides, status, apply } = useSchedule(week[0], week[6])
-  const dueToday = days.find((day) => day.date === today)?.sessions[0] ?? null
 
-  const [pickOpen, setPickOpen] = useState(false)
   const [moving, setMoving] = useState<{ routineId: string; date: string; name: string } | null>(null)
   const [pending, setPending] = useState<
     { a: { routineId: string; date: string; name: string }; b: { routineId: string; date: string; name: string } } | null
@@ -53,10 +48,24 @@ export default function WeekPage() {
     <>
       <ScreenTitle>{t('nav.training')}</ScreenTitle>
 
-      {status === 'ready' ? <Today days={days} today={today} /> : null}
+      {status === 'ready' ? (
+        <NextSession days={days} routines={routines} today={today} locale={locale} />
+      ) : null}
 
       <section className="mt-6">
-        <SectionHead label={t('pages.training.week.label')} />
+        <SectionHead
+          label={t('pages.training.week.label')}
+          hint={
+            // `inline-flex min-h-11` per §5.2: the hit area reaches 44px, the
+            // text and its underline stay where they were.
+            <Link
+              to="/training/routines"
+              className="-my-3 inline-flex min-h-11 items-center text-accent underline decoration-1 underline-offset-2"
+            >
+              {t('pages.training.week.manage')}
+            </Link>
+          }
+        />
 
         {moving ? (
           <div className="mb-3 flex items-center justify-between gap-3 rounded-md border border-accent bg-accent-soft px-3 py-2">
@@ -148,49 +157,6 @@ export default function WeekPage() {
         )}
       </section>
 
-      {/* One way in. A session due today starts by name; on any other day the
-          same button asks which one — there is no reason a rest day should be
-          a dead end, and no separate "free session" for it to be a dead end
-          next to. */}
-      <div className="mt-6 flex flex-col gap-3 md:flex-row">
-        {routines.length === 0 ? (
-          <Button asChild variant="primary">
-            <Link to="/training/routines">{t('pages.training.week.make')}</Link>
-          </Button>
-        ) : (
-          <Button variant="primary" onClick={() => setPickOpen(true)}>
-            {dueToday
-              ? t('pages.training.week.startToday', { name: dueToday.routine.name })
-              : t('pages.training.week.startAnything')}
-          </Button>
-        )}
-        <Button asChild variant="quiet">
-          <Link to="/training/routines">{t('pages.training.week.manage')}</Link>
-        </Button>
-      </div>
-
-      <Sheet
-        open={pickOpen}
-        onOpenChange={setPickOpen}
-        title={t('pages.training.week.pick')}
-        closeLabel={t('common.close')}
-      >
-        <Rows>
-          {routines.map((routine) => (
-            <Row
-              key={routine.id}
-              onClick={() => navigate(`/training/session?date=${today}&routine=${routine.id}`)}
-            >
-              <span className="min-w-0 flex-1 truncate">{routine.name}</span>
-              {routine.weekdays.length > 0 ? (
-                <span className="shrink-0 font-mono text-2xs text-ink-faint">
-                  {routine.weekdays.map((day) => weekdayLabel(day, locale)).join(' ')}
-                </span>
-              ) : null}
-            </Row>
-          ))}
-        </Rows>
-      </Sheet>
 
       <Confirm
         open={pending !== null}
@@ -216,22 +182,82 @@ export default function WeekPage() {
 }
 
 /**
- * What today is, in one sentence, before the grid rather than left to be read
- * out of it. GOAL.md §6 asks the dashboard for exactly this; the training tab
- * is the other place somebody looks for it.
+ * The one thing this screen exists to answer: what is next, and when.
+ *
+ * It is the way in as well as the answer — the card is the link to the preview,
+ * so there is no button under the week competing with it. A free session is
+ * rare enough not to earn a slab of its own: it is a planned day with its
+ * exercises changed, which the preview already does.
  */
-function Today({ days, today }: { days: ScheduleDay[]; today: string }) {
+function NextSession({
+  days,
+  routines,
+  today,
+  locale,
+}: {
+  days: ScheduleDay[]
+  routines: { id: string; name: string }[]
+  today: string
+  locale: string
+}) {
   const { t } = useTranslation()
-  const sessions = days.find((day) => day.date === today)?.sessions ?? []
-  const done = sessions.find((session) => session.loggedSets > 0)
+
+  // Today first, then forward through the week.
+  const upcoming = days.filter((day) => day.date >= today && day.sessions.length > 0)
+  const next = upcoming[0]
+  const session = next?.sessions[0]
+
+  if (routines.length === 0) {
+    return (
+      <Link
+        to="/training/routines"
+        className="block rounded-lg border border-accent bg-accent-soft px-4 py-5"
+      >
+        <p className="font-mono text-2xs text-accent">{t('pages.training.week.nextLabel')}</p>
+        <p className="mt-2 max-w-[40ch] text-ink">{t('pages.training.week.none')}</p>
+        <p className="mt-3 font-mono text-2xs text-accent">
+          {t('pages.training.week.make')} →
+        </p>
+      </Link>
+    )
+  }
+
+  if (!next || !session) {
+    return (
+      <div className="rounded-lg border border-line bg-surface px-4 py-5">
+        <p className="font-mono text-2xs text-ink-faint">{t('pages.training.week.nextLabel')}</p>
+        <p className="mt-2 text-ink">{t('pages.training.week.nowhere')}</p>
+      </div>
+    )
+  }
+
+  const isToday = next.date === today
+  const done = session.loggedSets > 0
 
   return (
-    <Statement>
-      {done
-        ? t('pages.training.week.doneToday', { name: done.routine.name })
-        : sessions.length > 0
-          ? t('pages.training.week.dueToday', { name: sessions[0].routine.name })
-          : t('pages.training.week.restToday')}
-    </Statement>
+    <Link
+      to={`/training/session?date=${next.date}&routine=${session.routine.id}`}
+      className="block rounded-lg border border-accent bg-accent-soft px-4 py-5
+                 transition-colors [transition-duration:140ms] active:bg-accent-soft/70"
+    >
+      <p className="font-mono text-2xs text-accent">
+        {isToday
+          ? t('pages.training.week.todayLabel')
+          : `${weekdayLabel(isoWeekday(next.date), locale)} · ${formatDayShort(next.date, locale)}`}
+      </p>
+
+      <p className="mt-2 text-xl font-semibold tracking-tight text-ink">{session.routine.name}</p>
+
+      <p className="mt-1 font-mono text-2xs text-ink-muted">
+        {session.totalSets === 0
+          ? t('pages.training.week.open')
+          : done
+            ? t('pages.training.week.progress', {
+                logged: session.loggedSets,
+                total: session.totalSets,
+              })
+            : t('pages.training.week.setCount', { count: session.totalSets })}
+      </p>
+    </Link>
   )
 }

@@ -266,7 +266,12 @@
         "startAnything": "Einheit starten",
         "pick": "Welcher Trainingstag?",
         "none": "Noch kein Trainingstag. Leg einen an, dann steht er in der Woche.",
-        "make": "Trainingstag anlegen"
+        "make": "Trainingstag anlegen",
+        "nextLabel": "nächste einheit",
+        "todayLabel": "heute",
+        "nowhere": "nichts eingeplant",
+        "setCount": "{{count}} Sätze",
+        "progress": "{{logged}} von {{total}} Sätzen erledigt"
       },
       "session": {
         "label": "die einheit",
@@ -293,7 +298,10 @@
         "scopePickHint": "Für eine Zeit, in der du weniger Zeit hast.",
         "pickTitle": "Welche Tage?",
         "pickDone": "Auf {{count}} Tage anwenden",
-        "saveFailed": "Die Änderung wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal."
+        "saveFailed": "Die Änderung wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+        "moveHere": "Stattdessen heute trainieren?",
+        "moveHereBody": "{{name}} ist für {{day}} geplant. Wenn du jetzt startest, wird die Einheit auf heute verschoben.",
+        "moveConfirm": "Auf heute verschieben"
       },
       "bar": {
         "title": "Einheit läuft",

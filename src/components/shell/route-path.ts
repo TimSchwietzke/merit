@@ -49,8 +49,21 @@ const PATHS: Record<string, PathSegment[]> = {
 
 const NOT_FOUND: PathSegment[] = [ROOT, { labelKey: 'common.notFound' }]
 
+/**
+ * Paths with an id in them — a routine, a logged portion — are not keys in the
+ * table above, so the longest listed path they sit under answers for them. A
+ * routine's editor is `merit / training / routines`, which is where it is,
+ * rather than "not found", which is what an exact-match lookup called it.
+ */
 export function pathSegments(pathname: string): PathSegment[] {
-  return PATHS[pathname] ?? NOT_FOUND
+  const exact = PATHS[pathname]
+  if (exact) return exact
+
+  const parent = Object.keys(PATHS)
+    .filter((path) => path !== '/' && pathname.startsWith(`${path}/`))
+    .sort((a, b) => b.length - a.length)[0]
+
+  return parent ? PATHS[parent] : NOT_FOUND
 }
 
 /**

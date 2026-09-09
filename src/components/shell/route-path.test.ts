@@ -46,3 +46,28 @@ describe('screenLabelKey', () => {
     expect(screenLabelKey('/nowhere')).toBe('common.notFound')
   })
 })
+
+describe('paths with an id in them', () => {
+  it('answer as the screen they sit under, not as not-found', () => {
+    // `/training/routines/<uuid>` is not a key in the table, and an exact-match
+    // lookup called the routine editor "not found" in its own header.
+    expect(pathSegments('/training/routines/abc-123').map((s) => s.labelKey)).toEqual([
+      'app.name',
+      'nav.training',
+      'nav.routines',
+    ])
+    expect(screenLabelKey('/training/routines/abc-123')).toBe('nav.routines')
+  })
+
+  it('take the longest path they sit under, not the first', () => {
+    // `/training` and `/training/routines` both match; the deeper one is right.
+    expect(pathSegments('/training/routines/x').at(-1)?.labelKey).toBe('nav.routines')
+  })
+
+  it('still fall back to not-found for an address under nothing', () => {
+    expect(pathSegments('/nowhere/deeper').map((s) => s.labelKey)).toEqual([
+      'app.name',
+      'common.notFound',
+    ])
+  })
+})

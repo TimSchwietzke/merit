@@ -52,6 +52,70 @@ export default function RoutinesPage() {
     <>
       <PageHeader title={t('pages.routines.title')} lead={t('pages.routines.lead')} />
 
+      {/* With none of them, making one is the whole point of the screen and
+          goes first; with some, the list is what you came for. */}
+      {routines.length === 0 ? (
+        <>
+      <section>
+        <form onSubmit={submit} noValidate>
+          <Panel className="flex flex-col gap-4 p-4">
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="routine-name">{t('pages.routines.newName')}</Label>
+              <Input
+                id="routine-name"
+                value={name}
+                onChange={(event) => setName(event.target.value)}
+                placeholder={t('pages.routines.newPlaceholder')}
+                aria-invalid={error ? true : undefined}
+              />
+            </div>
+            {error ? (
+              <p role="alert" className="text-sm text-danger">
+                {error}
+              </p>
+            ) : null}
+            <Button type="submit" variant="primary" pending={pending}>
+              {pending ? t('pages.routines.creating') : t('pages.routines.create')}
+            </Button>
+          </Panel>
+        </form>
+      </section>
+
+      <section className="mt-8">
+        <SectionHead label={t('pages.routines.label')} />
+        {status === 'error' ? (
+          <p role="alert" className="text-sm text-danger">
+            {t('pages.routines.loadFailed')}
+          </p>
+        ) : status === 'loading' ? (
+          <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
+        ) : routines.length === 0 ? (
+          <EmptyState>{t('pages.routines.empty')}</EmptyState>
+        ) : (
+          <Rows>
+            {routines.map((routine) => (
+              <Row key={routine.id} to={`/training/routines/${routine.id}`}>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate">{routine.name}</span>
+                  <span className="block truncate font-mono text-2xs text-ink-faint">
+                    {t('pages.routines.exerciseCount', { count: routine.exercises.length })}
+                    {routine.weekdays.length > 0
+                      ? ` · ${routine.weekdays.map((day) => weekdayLabel(day, locale)).join(' ')}`
+                      : ` · ${t('pages.routines.noWeekday')}`}
+                  </span>
+                </span>
+                <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
+                  →
+                </span>
+              </Row>
+            ))}
+          </Rows>
+        )}
+      </section>
+
+        </>
+      ) : (
+        <>
       <section>
         <SectionHead label={t('pages.routines.label')} />
         {status === 'error' ? (
@@ -108,6 +172,9 @@ export default function RoutinesPage() {
           </Panel>
         </form>
       </section>
+
+        </>
+      )}
 
       <Link
         to="/training"

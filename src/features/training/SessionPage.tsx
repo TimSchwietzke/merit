@@ -8,13 +8,14 @@ import { PageHeader } from '@/components/PageHeader'
 import { Row, Rows } from '@/components/Rows'
 import { SectionHead } from '@/components/SectionHead'
 import { Button } from '@/components/ui/button'
+import { Confirm } from '@/components/ui/confirm'
 import { Sheet } from '@/components/ui/sheet'
 import { useRoutines } from '@/features/routines/useRoutines'
 import { useSchedule } from '@/features/training/useSchedule'
 import { useWorkout } from '@/features/training/useWorkout'
 import { todayKey } from '@/lib/date'
 import { formatDayShort } from '@/lib/format'
-import { replaceOn, upcomingInstances, weekOf } from '@/lib/schedule'
+import { addTo, removeFrom, replaceOn, upcomingInstances, weekOf } from '@/lib/schedule'
 
 /**
  * A session before it starts.
@@ -61,6 +62,7 @@ export default function SessionPage() {
   const [pickOpen, setPickOpen] = useState(false)
   const [picked, setPicked] = useState<string[]>([])
   const [swapOpen, setSwapOpen] = useState(false)
+  const [moveOpen, setMoveOpen] = useState(false)
   const [pending, setPending] = useState(false)
   const [failed, setFailed] = useState(false)
 
@@ -145,8 +147,31 @@ export default function SessionPage() {
     reload()
   }
 
-  /** The one button. It asks about scope first, but only if there is one. */
+  /**
+   * Starting a session planned for another day moves it to today — which is the
+   * ordinary case of "I could not go on Monday". It asks first, because it
+   * takes the session off the day it was on.
+   */
+  async function moveHere() {
+    const moved = await apply([
+      ...removeFrom(overrides, routineId as string, date),
+      ...addTo(overrides, routineId as string, today),
+    ])
+    if (!moved) {
+      setFailed(true)
+      return
+    }
+    const ok = await startRoutine({ routineId: routineId as string, exercises: asPlan(), forDate: today })
+    if (!ok) {
+      setFailed(true)
+      return
+    }
+    navigate(`/training/day?date=${today}`)
+  }
+
+  /** The one button. It asks first only when there is something to ask about. */
   function primary() {
+    if (date !== today) return setMoveOpen(true)
     if (changed) return setScopeOpen(true)
     void commit('today')
   }
@@ -260,17 +285,8 @@ export default function SessionPage() {
         ) : null}
 
         <div className="mt-6 flex flex-col gap-3">
-          <Button
-            variant="primary"
-            pending={pending}
-            disabled={date !== today && !changed}
-            onClick={primary}
-          >
-            {pending
-              ? t('pages.training.session.starting')
-              : date === today
-                ? t('pages.training.session.start')
-                : t('pages.training.session.save')}
+          <Button variant="primary" pending={pending} onClick={primary}>
+            {pending ? t('pages.training.session.starting') : t('pages.training.session.start')}
           </Button>
           <Button variant="quiet" onClick={() => setSwapOpen(true)}>
             {t('pages.training.session.changeRoutine')}
@@ -287,6 +303,22 @@ export default function SessionPage() {
 
       {/* Which routine this day runs. Replacing drops the displaced one from
           this date only; the pattern is untouched, so it is back next week. */}
+      <Confirm
+        open={moveOpen}
+        onOpenChange={setMoveOpen}
+        question={t('pages.training.session.moveHere')}
+        confirmLabel={t('pages.training.session.moveConfirm')}
+        cancelLabel={t('common.close')}
+        onConfirm={() => void moveHere()}
+      >
+        <p className="mt-2 max-w-[46ch] text-sm text-ink-muted">
+          {t('pages.training.session.moveHereBody', {
+            name: routine.name,
+            day: formatDayShort(date, locale),
+          })}
+        </p>
+      </Confirm>
+
       <Sheet
         open={swapOpen}
         onOpenChange={setSwapOpen}

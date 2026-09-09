@@ -266,7 +266,12 @@
         "startAnything": "Start a session",
         "pick": "Which training day?",
         "none": "No training day yet. Make one and it lands in the week.",
-        "make": "Make a training day"
+        "make": "Make a training day",
+        "nextLabel": "next session",
+        "todayLabel": "today",
+        "nowhere": "nothing planned in",
+        "setCount": "{{count}} sets",
+        "progress": "{{logged}} of {{total}} sets done"
       },
       "session": {
         "label": "the session",
@@ -293,7 +298,10 @@
         "scopePickHint": "For a stretch where you have less time.",
         "pickTitle": "Which days?",
         "pickDone": "Apply to {{count}} days",
-        "saveFailed": "That change did not save. Check your connection and try again."
+        "saveFailed": "That change did not save. Check your connection and try again.",
+        "moveHere": "Train today instead?",
+        "moveHereBody": "{{name}} is planned for {{day}}. Starting it now moves it to today.",
+        "moveConfirm": "Move it to today"
       },
       "bar": {
         "title": "Session running",

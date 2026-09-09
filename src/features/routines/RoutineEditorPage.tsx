@@ -75,9 +75,20 @@ export default function RoutineEditorPage() {
               {t('pages.routines.editor.weekdays')}
               <span className="text-ink-faint">{t('pages.routines.editor.weekdaysHint')}</span>
             </p>
-            {/* Several at once, so chips rather than a segmented control
-                (§10.11). A day with no weekday is started on demand. */}
-            <div role="group" aria-label={t('pages.routines.editor.weekdays')} className="flex flex-wrap gap-2">
+            {/* Seven segments in one row, not chips that wrap to six and a
+                stray. A weekday strip that breaks its line has to be read
+                twice, and the seventh day looks like a different kind of
+                thing. Flush children with a divider, the segmented control's
+                shape (§10.7) — several can be on at once, which is the only
+                way it differs. */}
+            <div
+              role="group"
+              aria-label={t('pages.routines.editor.weekdays')}
+              // Pulled 8px wider than the panel's padding: seven segments plus
+              // their dividers left the last one 43px, and §5.2's floor is 44.
+              className="-mx-2 flex w-[calc(100%+1rem)] divide-x divide-line overflow-hidden
+                         rounded-md border border-line"
+            >
               {WEEKDAYS.map((day) => {
                 const on = routine.weekdays.includes(day)
                 return (
@@ -91,12 +102,12 @@ export default function RoutineEditorPage() {
                         on ? routine.weekdays.filter((d) => d !== day) : [...routine.weekdays, day],
                       ).then(fail)
                     }
-                    className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border px-3
-                                font-mono text-2xs transition-colors [transition-duration:140ms]
+                    className={`min-h-11 flex-1 font-mono text-2xs transition-colors
+                                [transition-duration:140ms] active:[transition-duration:0ms]
                                 ${
                                   on
-                                    ? 'border-accent bg-accent-soft text-accent'
-                                    : 'border-line bg-surface-2 text-ink-muted active:bg-surface'
+                                    ? 'bg-accent-soft font-medium text-accent'
+                                    : 'text-ink-faint active:bg-surface-2'
                                 }`}
                   >
                     {weekdayLabel(day, locale)}
