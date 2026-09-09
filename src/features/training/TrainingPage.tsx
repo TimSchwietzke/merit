@@ -12,10 +12,12 @@ import { SwipeRow } from '@/components/SwipeRow'
 import { Button } from '@/components/ui/button'
 import { useRoutines, type Routine } from '@/features/routines/useRoutines'
 import { useExercise } from '@/features/training/useExercise'
+import { useActiveSession } from '@/features/training/useActiveSession'
 import { useWorkout, type ExerciseRef } from '@/features/training/useWorkout'
 import { addDays, parseDateKey, todayKey } from '@/lib/date'
 import { formatDayLong, formatNumber, parseDecimalInput, weekdayLabel } from '@/lib/format'
 import {
+  firstOutstandingOf,
   groupSets,
   lastSessionFor,
   repeatOf,
@@ -55,8 +57,12 @@ export default function TrainingPage() {
 
   const today = todayKey()
   const date = params.get('date') ?? today
+  // The bar and this list read the same query through the same revision, so
+  // logging a set from the bar cannot leave the list behind it showing older
+  // figures.
+  const { revision, active, choose } = useActiveSession()
   const { sets, exercises, history, status, addSet, updateSet, removeSet, startRoutine } =
-    useWorkout(date)
+    useWorkout(date, revision)
   const [openRow, setOpenRow] = useState<string | null>(null)
 
   const pickedId = params.get('exercise')
@@ -136,6 +142,8 @@ export default function TrainingPage() {
                 date={date}
                 locale={locale}
                 openRow={openRow}
+                activeSetId={active?.id ?? null}
+                onChoose={choose}
                 onOpenRow={setOpenRow}
                 onRemove={onRemove}
                 onAdd={addSet}
@@ -279,6 +287,8 @@ function Exercise({
   date,
   locale,
   openRow,
+  activeSetId,
+  onChoose,
   onOpenRow,
   onRemove,
   onAdd,
@@ -290,6 +300,8 @@ function Exercise({
   date: string
   locale: string
   openRow: string | null
+  activeSetId: string | null
+  onChoose: (setId: string) => void
   onOpenRow: (id: string | null) => void
   onRemove: (set: LoggedSet) => void
   onAdd: (set: {
@@ -333,12 +345,22 @@ function Exercise({
     // row list and three bordered inputs per set — ten hairlines of equal
     // weight, so nothing announced where one exercise ended and the next began.
     <section className="mb-6 overflow-hidden rounded-lg border border-line bg-surface last:mb-0">
-      <div className="flex items-baseline justify-between gap-4 border-b border-line bg-surface-2 px-4 py-3">
+      {/* Tapping the card moves the active set to this exercise's first
+          outstanding one, which is what "I am doing this one now" means. */}
+      <button
+        type="button"
+        onClick={() => {
+          const first = firstOutstandingOf(sets, exercise!.id)
+          if (first) onChoose(first.id)
+        }}
+        className="flex w-full items-baseline justify-between gap-4 border-b border-line
+                   bg-surface-2 px-4 py-3 text-left"
+      >
         <h2 className="min-w-0 truncate text-base font-medium text-ink">{name}</h2>
         <span className="shrink-0 font-mono text-2xs text-ink-faint">
           {t('pages.training.volume', { volume: formatNumber(volume(sets), locale, 0) })}
         </span>
-      </div>
+      </button>
 
       {/* The columns are named once, above the rows, instead of a label beside
           every field. Four exercises of three sets is thirty-six labels
@@ -377,6 +399,8 @@ function Exercise({
               index={index}
               exerciseName={name}
               locale={locale}
+              state={set.done ? 'logged' : set.id === activeSetId ? 'active' : 'todo'}
+              onChoose={() => onChoose(set.id)}
               onCommit={(values) => void onUpdate(set.id, values)}
             />
           </SwipeRow>
@@ -429,6 +453,8 @@ function SetRow({
   index,
   exerciseName,
   locale,
+  state,
+  onChoose,
   onCommit,
 }: {
   set: LoggedSet
@@ -437,6 +463,9 @@ function SetRow({
    *  exercise it belongs to, and repeats once per block. */
   exerciseName: string
   locale: string
+  /** `active` is the one being done, `logged` is behind you, `todo` is ahead. */
+  state: 'active' | 'todo' | 'logged'
+  onChoose: () => void
   onCommit: (values: { reps: number; weightKg: number; rir: number | null }) => void
 }) {
   const { t } = useTranslation()
@@ -470,11 +499,29 @@ function SetRow({
   const field =
     `min-h-11 min-w-0 rounded-md px-2 text-right font-mono text-input tabular-nums text-ink
      transition-colors [transition-duration:140ms] md:min-h-9 md:text-sm ` +
-    (invalid ? 'bg-danger/10 text-danger' : 'bg-surface-2')
+    (invalid
+      ? 'bg-danger/10 text-danger'
+      : state === 'logged'
+        ? 'bg-surface-2 text-ink-faint'
+        : 'bg-surface-2')
 
   return (
-    <div className="flex items-center gap-2 px-4 py-1.5">
-      <span className="w-4 shrink-0 font-mono text-2xs tabular-nums text-ink-faint">{index + 1}</span>
+    // Three states told apart by emphasis, not by a second colour (§2.4): the
+    // one being done carries the accent tint, the ones behind you go faint, and
+    // the ones ahead read normally.
+    <div
+      onPointerDown={state === 'logged' ? undefined : onChoose}
+      className={`flex items-center gap-2 px-4 py-1.5 ${
+        state === 'active' ? 'bg-accent-soft' : ''
+      }`}
+    >
+      <span
+        className={`w-4 shrink-0 font-mono text-2xs tabular-nums ${
+          state === 'active' ? 'text-accent' : 'text-ink-faint'
+        }`}
+      >
+        {index + 1}
+      </span>
 
       <input
         aria-label={`${exerciseName} ${t('pages.training.set.reps')} ${index + 1}`}

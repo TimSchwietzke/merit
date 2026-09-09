@@ -289,6 +289,17 @@
         "pickTitle": "Which days?",
         "pickDone": "Apply to {{count}} days",
         "saveFailed": "That change did not save. Check your connection and try again."
+      },
+      "bar": {
+        "title": "Session running",
+        "setOf": "Set {{n}} of {{total}}",
+        "log": "Log set",
+        "logging": "Logging…",
+        "expand": "Show the session",
+        "collapse": "Hide the session",
+        "finish": "End the session",
+        "finished": "Everything logged.",
+        "invalid": "Enter reps and a weight."
       }
     },
     "more": {

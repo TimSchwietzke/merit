@@ -5,6 +5,9 @@ import { AppHeader } from '@/components/shell/AppHeader'
 import { Nav } from '@/components/shell/Nav'
 import { Toaster } from '@/components/ui/sonner'
 import { PreferencesProvider } from '@/features/settings/PreferencesProvider'
+import { ActiveSessionProvider } from '@/features/training/ActiveSession'
+import { SessionBar } from '@/features/training/SessionBar'
+import { useActiveSession } from '@/features/training/useActiveSession'
 
 /**
  * The frame every route renders inside. `dvh`, never `vh` — mobile browser
@@ -23,13 +26,33 @@ export function AppShell() {
     // Owns the theme (and so keeps the document in step with the OS while the
     // preference is "system") as well as the locale, for every signed-in route.
     <PreferencesProvider>
+      {/* Above the router: the session bar has to survive walking off to
+          another tab mid-workout, which is the reason it is a bar. */}
+      <ActiveSessionProvider>
+        <Frame />
+      </ActiveSessionProvider>
+    </PreferencesProvider>
+  )
+}
+
+/** Inside the provider, so the content can make room for the bar when there is
+ *  one. A fixed element takes no space in the flow and would otherwise sit on
+ *  top of the last thing on the page. */
+function Frame() {
+  const { running } = useActiveSession()
+
+  return (
+    <>
       <div className="min-h-[100dvh] lg:flex">
         <Nav />
         <div className="flex min-w-0 flex-1 flex-col">
           <AppHeader />
           <main
-            className="mx-auto w-full max-w-[860px] px-4 pt-5 md:px-6 md:pt-6
-                       pb-[calc(56px+1.5rem+env(safe-area-inset-bottom))] lg:pb-6"
+            className={`mx-auto w-full max-w-[860px] px-4 pt-5 md:px-6 md:pt-6 lg:pb-6 ${
+              running
+                ? 'pb-[calc(56px+9rem+env(safe-area-inset-bottom))]'
+                : 'pb-[calc(56px+1.5rem+env(safe-area-inset-bottom))]'
+            }`}
           >
             {/* No spinner: the split chunk arrives in a frame or two on any
                 connection that got this far, and a flash of one is worse than
@@ -40,7 +63,8 @@ export function AppShell() {
           </main>
         </div>
       </div>
+      <SessionBar />
       <Toaster />
-    </PreferencesProvider>
+    </>
   )
 }

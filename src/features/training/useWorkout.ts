@@ -35,10 +35,11 @@ export interface WorkoutState {
     reps: number
     weightKg: number
     rir: number | null
+    done?: boolean
   }) => Promise<boolean>
   updateSet: (
     id: string,
-    values: { reps: number; weightKg: number; rir: number | null },
+    values: { reps: number; weightKg: number; rir: number | null; done?: boolean },
   ) => Promise<boolean>
   removeSet: (id: string) => Promise<boolean>
   /** Write a routine's planned sets onto a day — this one unless told another. */
@@ -52,7 +53,7 @@ export interface WorkoutState {
 /** How far back the comparison line is allowed to reach. */
 const WINDOW_DAYS = 180
 
-const SELECT = `id, set_number, reps, weight_kg, rir, exercise_id,
+const SELECT = `id, set_number, reps, weight_kg, rir, done, exercise_id,
   workouts!inner (date),
   exercises!inner (id, name_en, name_de, muscle_group, equipment)`
 
@@ -62,6 +63,7 @@ type Row = {
   reps: number
   weight_kg: number
   rir: number | null
+  done: boolean
   exercise_id: string
   workouts: { date: string }
   exercises: {
@@ -80,9 +82,10 @@ const toSet = (row: Row): LoggedSet => ({
   reps: row.reps,
   weightKg: row.weight_kg,
   rir: row.rir,
+  done: row.done,
 })
 
-export function useWorkout(date: string): WorkoutState {
+export function useWorkout(date: string, revision = 0): WorkoutState {
   const { session } = useSession()
   const userId = session?.user.id
 
@@ -118,7 +121,7 @@ export function useWorkout(date: string): WorkoutState {
     return () => {
       active = false
     }
-  }, [userId, date, reloads])
+  }, [userId, date, reloads, revision])
 
   const current = rows?.date === date ? rows.rows : null
   const status: WorkoutState['status'] = failed ? 'error' : current === null ? 'loading' : 'ready'
@@ -145,7 +148,13 @@ export function useWorkout(date: string): WorkoutState {
   const history: SessionSets[] = [...byDate].map(([day, daySets]) => ({ date: day, sets: daySets }))
 
   const addSet = useCallback(
-    async (set: { exerciseId: string; reps: number; weightKg: number; rir: number | null }) => {
+    async (set: {
+      exerciseId: string
+      reps: number
+      weightKg: number
+      rir: number | null
+      done?: boolean
+    }) => {
       if (!userId) return false
 
       // The day's workout is created on the first set rather than when the
@@ -173,6 +182,8 @@ export function useWorkout(date: string): WorkoutState {
         reps: set.reps,
         weight_kg: set.weightKg,
         rir: set.rir,
+        // A set added by hand is one being done now, not one being planned.
+        done: set.done ?? true,
       })
 
       if (error) return false
@@ -183,7 +194,10 @@ export function useWorkout(date: string): WorkoutState {
   )
 
   const updateSet = useCallback(
-    async (id: string, values: { reps: number; weightKg: number; rir: number | null }) => {
+    async (
+      id: string,
+      values: { reps: number; weightKg: number; rir: number | null; done?: boolean },
+    ) => {
       if (!userId) return false
       const { data, error } = await supabase
         .from('workout_sets')
@@ -191,6 +205,7 @@ export function useWorkout(date: string): WorkoutState {
           reps: values.reps,
           weight_kg: values.weightKg,
           rir: values.rir,
+          ...(values.done === undefined ? {} : { done: values.done }),
         })
         .eq('id', id)
         .eq('user_id', userId)
@@ -249,7 +264,7 @@ export function useWorkout(date: string): WorkoutState {
 
       const lastWeight = (exerciseId: string): number => {
         const earlier = rowsRef.current
-          .filter((row) => row.exercise_id === exerciseId && row.workouts.date < on)
+          .filter((row) => row.exercise_id === exerciseId && row.done && row.workouts.date < on)
           .sort((a, b) => b.workouts.date.localeCompare(a.workouts.date))
         return earlier[0]?.weight_kg ?? 0
       }
@@ -263,6 +278,8 @@ export function useWorkout(date: string): WorkoutState {
           reps: entry.targetReps,
           weight_kg: lastWeight(entry.exerciseId),
           rir: null,
+          // Planned, not performed. It becomes true when it is logged.
+          done: false,
         })),
       )
 

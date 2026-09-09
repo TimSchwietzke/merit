@@ -289,6 +289,17 @@
         "pickTitle": "Welche Tage?",
         "pickDone": "Auf {{count}} Tage anwenden",
         "saveFailed": "Die Änderung wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal."
+      },
+      "bar": {
+        "title": "Einheit läuft",
+        "setOf": "Satz {{n}} von {{total}}",
+        "log": "Satz eintragen",
+        "logging": "Wird eingetragen …",
+        "expand": "Einheit anzeigen",
+        "collapse": "Einheit ausblenden",
+        "finish": "Einheit beenden",
+        "finished": "Alles eingetragen.",
+        "invalid": "Trage Wiederholungen und ein Gewicht ein."
       }
     },
     "more": {
