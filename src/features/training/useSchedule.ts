@@ -8,9 +8,11 @@ import { scheduledOn } from '@/lib/schedule'
 /**
  * What is on each day of a stretch of time, and what has been done about it.
  *
- * Three reads: the routines and their weekly pattern, the exceptions to that
- * pattern in range, and the workouts in range. Everything the week screen shows
- * is derived from those; nothing about a day's status is stored.
+ * Two reads: the exceptions to the weekly pattern in range, and the workouts in
+ * range. The pattern itself comes from the caller, which already has the
+ * routines loaded for its own list — one query, not two of the same. Everything
+ * the week screen shows is derived from those three; nothing about a day's
+ * status is stored.
  */
 export interface DaySession {
   routine: PlannedRoutine
@@ -27,7 +29,6 @@ export interface ScheduleDay {
 
 export interface ScheduleState {
   days: ScheduleDay[]
-  routines: PlannedRoutine[]
   overrides: Override[]
   status: 'loading' | 'ready' | 'error'
   /** Apply the writes a `lib/schedule` operation asked for. */
@@ -42,11 +43,14 @@ type WorkoutRow = {
   workout_sets: { done: boolean }[]
 }
 
-export function useSchedule(from: string, to: string): ScheduleState {
+export function useSchedule(
+  from: string,
+  to: string,
+  routines: readonly PlannedRoutine[],
+): ScheduleState {
   const { session } = useSession()
   const userId = session?.user.id
 
-  const [routines, setRoutines] = useState<PlannedRoutine[]>([])
   const [overrides, setOverrides] = useState<Override[]>([])
   const [workouts, setWorkouts] = useState<WorkoutRow[]>([])
   const [failed, setFailed] = useState(false)
@@ -59,7 +63,6 @@ export function useSchedule(from: string, to: string): ScheduleState {
     let active = true
 
     void Promise.all([
-      supabase.from('routines').select('id, name, routine_days (weekday)').order('position'),
       supabase
         .from('scheduled_sessions')
         .select('routine_id, scheduled_date, status')
@@ -70,21 +73,14 @@ export function useSchedule(from: string, to: string): ScheduleState {
         .select('id, date, routine_id, workout_sets (done)')
         .gte('date', from)
         .lte('date', to),
-    ]).then(([routineRows, overrideRows, workoutRows]) => {
+    ]).then(([overrideRows, workoutRows]) => {
       if (!active) return
-      if (routineRows.error || overrideRows.error || workoutRows.error) {
+      if (overrideRows.error || workoutRows.error) {
         setFailed(true)
         setLoaded(true)
         return
       }
 
-      setRoutines(
-        (routineRows.data ?? []).map((row) => ({
-          id: row.id,
-          name: row.name,
-          weekdays: (row.routine_days as { weekday: number }[]).map((day) => day.weekday),
-        })),
-      )
       setOverrides(
         (overrideRows.data ?? []).map((row) => ({
           routineId: row.routine_id,
@@ -149,7 +145,7 @@ export function useSchedule(from: string, to: string): ScheduleState {
   }
 
   const status: ScheduleState['status'] = failed ? 'error' : loaded ? 'ready' : 'loading'
-  return { days, routines, overrides, status, apply, reload }
+  return { days, overrides, status, apply, reload }
 }
 
 /** Local helper so the loop above reads as a date range rather than as maths. */

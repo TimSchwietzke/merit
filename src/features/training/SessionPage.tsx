@@ -10,7 +10,7 @@ import { SectionHead } from '@/components/SectionHead'
 import { Button } from '@/components/ui/button'
 import { Confirm } from '@/components/ui/confirm'
 import { Sheet } from '@/components/ui/sheet'
-import { useRoutines } from '@/features/routines/useRoutines'
+import { plannable, useRoutines } from '@/features/routines/useRoutines'
 import { useSchedule } from '@/features/training/useSchedule'
 import { useWorkout } from '@/features/training/useWorkout'
 import { todayKey } from '@/lib/date'
@@ -51,7 +51,7 @@ export default function SessionPage() {
 
   const { routines, status, updateExercise, removeExercise } = useRoutines()
   const week = weekOf(date)
-  const { overrides, apply, reload } = useSchedule(week[0], week[6])
+  const { overrides, apply, reload } = useSchedule(week[0], week[6], plannable(routines))
   const { startRoutine } = useWorkout(date)
 
   const routine = routines.find((entry) => entry.id === routineId)

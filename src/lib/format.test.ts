@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   formatDayLong,
+  formatDayRange,
   formatDayShort,
   formatDelta,
   formatForInput,
@@ -112,5 +113,21 @@ describe('weekdayLabel', () => {
     expect(weekdayLabel(7, 'en')).toMatch(/^Sun/)
     expect(weekdayLabel(1, 'de')).toMatch(/^Mo/)
     expect(weekdayLabel(3, 'de')).toMatch(/^Mi/)
+  })
+})
+
+describe('formatDayRange', () => {
+  // ICU sets the dash with thin spaces around it; spelling them out here is
+  // what keeps a passing assertion from reading as a failing one.
+  const EN_DASH = '\u2009\u2013\u2009'
+
+  it('says the month once when a week does not straddle two', () => {
+    expect(formatDayRange('2026-09-07', '2026-09-13', 'en')).toBe(`Sep 7${EN_DASH}13`)
+    expect(formatDayRange('2026-09-07', '2026-09-13', 'de')).toBe('7.\u201313. Sept.')
+  })
+
+  it('says both when it does', () => {
+    expect(formatDayRange('2026-09-28', '2026-10-04', 'en')).toBe(`Sep 28${EN_DASH}Oct 4`)
+    expect(formatDayRange('2026-09-28', '2026-10-04', 'de')).toBe(`28. Sept.${EN_DASH}4. Okt.`)
   })
 })

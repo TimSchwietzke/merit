@@ -19,8 +19,8 @@ const REPS_LIMITS = { min: 1, max: 1000, decimals: 0 } as const
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7]
 
 /**
- * What a training day contains: its name, the weekdays it is planned for, and
- * its exercises in order with the sets and reps each plans for.
+ * What a routine contains: its name, the weekdays it is planned for, and its
+ * exercises in order with the sets and reps each plans for.
  *
  * Everything saves on change rather than behind a button. A screen with one
  * save button and eight fields is a screen that loses work when somebody backs
@@ -39,6 +39,7 @@ export default function RoutineEditorPage() {
   const [failed, setFailed] = useState(false)
   const fail = (ok: boolean) => setFailed(!ok)
 
+
   if (status === 'loading') {
     return <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
   }
@@ -49,6 +50,8 @@ export default function RoutineEditorPage() {
       </p>
     )
   }
+
+  const empty = routine.exercises.length === 0
 
   return (
     <>
@@ -73,7 +76,11 @@ export default function RoutineEditorPage() {
           <div className="flex flex-col items-start gap-2">
             <p className="font-mono text-2xs text-ink-faint">
               {t('pages.routines.editor.weekdays')}
-              <span className="text-ink-faint">{t('pages.routines.editor.weekdaysHint')}</span>
+              <span className="text-ink-faint">
+                {empty
+                  ? t('pages.routines.editor.weekdaysLocked')
+                  : t('pages.routines.editor.weekdaysHint')}
+              </span>
             </p>
             {/* Seven segments in one row, not chips that wrap to six and a
                 stray. A weekday strip that breaks its line has to be read
@@ -96,6 +103,10 @@ export default function RoutineEditorPage() {
                     key={day}
                     type="button"
                     aria-pressed={on}
+                    // An empty routine is never planned into a week
+                    // (`plannable`), so offering the days would be a promise
+                    // the week screen does not keep.
+                    disabled={empty}
                     onClick={() =>
                       void setWeekdays(
                         id,
@@ -104,6 +115,7 @@ export default function RoutineEditorPage() {
                     }
                     className={`min-h-11 flex-1 font-mono text-2xs transition-colors
                                 [transition-duration:140ms] active:[transition-duration:0ms]
+                                disabled:opacity-35
                                 ${
                                   on
                                     ? 'bg-accent-soft font-medium text-accent'
@@ -165,7 +177,7 @@ export default function RoutineEditorPage() {
               return
             }
             toast(t('pages.routines.editor.deleted', { name: routine.name }))
-            navigate('/training/routines')
+            navigate('/training')
           }}
         >
           {t('pages.routines.editor.deleteRoutine')}
@@ -173,10 +185,10 @@ export default function RoutineEditorPage() {
       </section>
 
       <Link
-        to="/training/routines"
+        to="/training"
         className="mt-8 inline-flex min-h-11 items-center font-mono text-2xs text-accent underline decoration-1 underline-offset-2"
       >
-        ← {t('pages.routines.title')}
+        ← {t('pages.routines.back')}
       </Link>
     </>
   )

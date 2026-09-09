@@ -810,6 +810,25 @@ mid-afternoon more often than at midnight.
   centred reticle drawn in `line-strong`, and one mono line of instruction beneath. No overlay
   animation, no scanning laser. On failure it falls through to manual entry in the same sheet, not on
   a different screen.
+- **Week strip** — the training screen's top block: seven tiles, Monday to Sunday, above the detail
+  for whichever one is selected. A tile is a weekday in mono `text-2xs`, the day of the month in mono
+  below it, and a 4px mosaic mark beneath that. The mark is the consistency heatmap's vocabulary
+  applied to one week and told apart by fill density rather than hue: half-strength `accent` for a
+  session that is planned, full `accent` for one that has been started, **nothing at all** for a rest
+  day. The heatmap draws its empty state because a grid with holes stops being a grid; a row of seven
+  does not, and a week of faint marks with two solid ones in it reads as five things you failed to
+  do.
+
+  Selection is `accent` border on `accent-soft`; today, unselected, is `line-strong` with its weekday
+  label in `accent`. It is a `radiogroup` — exactly one day is being looked at, and the arrow keys
+  should walk the week. **Choosing a day changes the block below it and nothing else**: no route, no
+  push, no back button. That is the whole reason the strip exists rather than a list of seven rows,
+  which cost a screen of height to say the same thing and made the day you cared about scroll.
+
+  Seven tiles inside 375px do not clear the 44px floor at the panel's own padding, so the strip is
+  pulled 4px past it and its gap drops to the mosaic's 2px. The mark is a fixed 24px, not the tile's
+  width: on a desktop column the tile is 100px and a mark that fills it stops being a mark.
+
 - **Rest-day / next-session line** — one sentence, sans, `ink-muted`, on the dashboard, naming when
   the next session is due.
 - **Streak / consistency mark** — a mono `text-2xs` line with the significant number promoted to

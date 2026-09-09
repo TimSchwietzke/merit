@@ -119,3 +119,45 @@ test('a filter narrows the catalogue and leaves recently-used alone', async ({ p
   await expect(recent).toContainText('2')
 
 })
+
+test('the week strip changes the day below it without leaving the screen', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+  await page.goto('/training')
+  await waitForScreen(page)
+
+  // The tiles are Monday to Sunday whatever day it is, and the fixture plans
+  // one routine on Mon/Thu and the other on Tue/Fri — so the week reads the
+  // same however long this test outlives the day it was written on.
+  const days = page.getByRole('radio')
+  // The day's own link, not the routine of the same name further down the
+  // screen: the card is the way into the session and says so in its href.
+  const card = page.locator('a[href*="/training/session"]')
+
+  await days.nth(0).click()
+  await expect(card).toHaveText(/Oberkörper 1/)
+
+  // Wednesday has nothing on it, and saying so is a change in place: the strip
+  // exists so that looking at another day is not a navigation.
+  await days.nth(2).click()
+  await expect(page.getByText('nichts geplant')).toBeVisible()
+  expect(new URL(page.url()).pathname).toBe('/training')
+
+  await days.nth(1).click()
+  await expect(card).toHaveText(/Unterkörper/)
+})
+
+test('a routine with no exercises is listed but never planned into the week', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+  await page.goto('/training')
+  await waitForScreen(page)
+
+  // It is in the list, marked for what it is.
+  await expect(page.getByRole('link', { name: /Nacken & Schultern/ })).toBeVisible()
+  await expect(page.getByText('noch keine Übungen')).toBeVisible()
+
+  // And its editor will not let it be planned until it holds something.
+  await page.getByRole('link', { name: /Nacken & Schultern/ }).click()
+  await expect(page.getByRole('button', { name: 'Mo', exact: true })).toBeDisabled()
+})

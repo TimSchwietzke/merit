@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useSession } from '@/features/auth/useSession'
 import { supabase } from '@/lib/supabase'
 import type { ExerciseRef } from '@/features/training/useWorkout'
+import type { PlannedRoutine } from '@/lib/schedule'
 
 /**
  * The user's training days (GOAL.md §5).
@@ -29,6 +30,19 @@ export interface Routine {
   weekdays: number[]
   exercises: RoutineExercise[]
 }
+
+/**
+ * The routines the week is built from.
+ *
+ * A routine with no exercises is a name and nothing else, so it is never
+ * planned into a week — otherwise a day announces a session that turns out to
+ * be empty when you open it. It stays in the list, marked unfinished, until it
+ * has something in it.
+ */
+export const plannable = (routines: readonly Routine[]): PlannedRoutine[] =>
+  routines
+    .filter((routine) => routine.exercises.length > 0)
+    .map(({ id, name, weekdays }) => ({ id, name, weekdays }))
 
 const SELECT = `id, name, position,
   routine_days (weekday),

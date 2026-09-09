@@ -62,8 +62,8 @@ export const ROUTES: Route[] = [
   { name: 'food-scan', path: '/food/add?scan=1' },
   { name: 'goals', path: '/goals' },
   { name: 'training-add', path: '/training/add' },
-  { name: 'training-routines', path: '/training/routines' },
   { name: 'training-routine', path: '/training/routines/r1' },
+  { name: 'training-routine-empty', path: '/training/routines/r3' },
   { name: 'training-session', path: '/training/session?routine=r1' },
   { name: 'training-day', path: '/training/day' },
   { name: 'not-found', path: '/nowhere' },
@@ -271,8 +271,9 @@ export async function stubBackend(
     })
   })
 
-  // One routine, planned for Monday and Thursday, so the start screen and the
-  // routine list both have something to show.
+  // Three routines: two with exercises on opposite halves of the week, and one
+  // with none at all — which is the case the list marks `unfinished` and the
+  // week is not allowed to plan.
   await page.route('**/rest/v1/routines*', (route) => {
     if (route.request().method() !== 'GET') {
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'r1' }) })
@@ -302,6 +303,28 @@ export async function stubBackend(
               exercises: EXERCISES[2],
             },
           ],
+        },
+        {
+          id: 'r2',
+          name: 'Unterkörper',
+          position: 1,
+          routine_days: [{ weekday: 2 }, { weekday: 5 }],
+          routine_exercises: [
+            {
+              id: 're3',
+              exercise_id: 'x3',
+              position: 0,
+              set_reps: [12, 10, 8],
+              exercises: EXERCISES[2],
+            },
+          ],
+        },
+        {
+          id: 'r3',
+          name: 'Nacken & Schultern',
+          position: 2,
+          routine_days: [],
+          routine_exercises: [],
         },
       ]),
     })

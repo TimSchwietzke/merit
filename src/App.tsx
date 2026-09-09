@@ -16,7 +16,6 @@ import WeekPage from '@/features/training/WeekPage'
 import SessionPage from '@/features/training/SessionPage'
 import TrainingPage from '@/features/training/TrainingPage'
 import AddExercisePage from '@/features/training/AddExercisePage'
-import RoutinesPage from '@/features/routines/RoutinesPage'
 import RoutineEditorPage from '@/features/routines/RoutineEditorPage'
 
 // Weight is the only screen that pulls in Recharts, which is a third of the
@@ -42,7 +41,6 @@ const router = createBrowserRouter([
           { path: '/training/day', element: <TrainingPage /> },
           { path: '/training/session', element: <SessionPage /> },
           { path: '/training/add', element: <AddExercisePage /> },
-          { path: '/training/routines', element: <RoutinesPage /> },
           { path: '/training/routines/:id', element: <RoutineEditorPage /> },
           { path: '/more', element: <MorePage /> },
           { path: '/weight', element: <WeightPage /> },
