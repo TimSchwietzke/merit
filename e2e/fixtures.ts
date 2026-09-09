@@ -61,6 +61,7 @@ export const ROUTES: Route[] = [
   { name: 'food-add', path: '/food/add' },
   { name: 'food-scan', path: '/food/add?scan=1' },
   { name: 'goals', path: '/goals' },
+  { name: 'training-add', path: '/training/add' },
   { name: 'not-found', path: '/nowhere' },
   { name: 'sign-in', path: '/sign-in', signedOut: true },
 ]
@@ -207,6 +208,64 @@ export async function stubBackend(
 
   // A target in force, so the day view renders its progress rather than its
   // "set a target" state, and the goals screen has something to show.
+  const EXERCISES = [
+    { id: 'x1', name_en: 'Bench press', name_de: 'Bankdrücken', muscle_group: 'chest', equipment: 'barbell' },
+    { id: 'x2', name_en: 'Barbell back squat', name_de: 'Kniebeuge mit Langhantel', muscle_group: 'legs', equipment: 'barbell' },
+    { id: 'x3', name_en: 'Lat pulldown', name_de: 'Latzug', muscle_group: 'back', equipment: 'cable' },
+  ]
+
+  await page.route('**/rest/v1/exercises*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify(
+        /id=eq\.(\w+)/.exec(route.request().url())
+          ? (EXERCISES.find((e) => e.id === /id=eq\.(\w+)/.exec(route.request().url())?.[1]) ?? null)
+          : EXERCISES,
+      ),
+    }),
+  )
+
+  // Today's sets and a session a few days back, so the comparison line under
+  // each exercise — the reason §10.10 gives for opening this tab — has
+  // something to compare against.
+  await page.route('**/rest/v1/workout_sets*', (route) => {
+    if (route.request().method() !== 'GET') {
+      return route.fulfill({ status: 201, contentType: 'application/json', body: '{}' })
+    }
+    const day = (back: number) => {
+      const d = new Date()
+      d.setDate(d.getDate() - back)
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+    }
+    const set = (id: string, exercise: (typeof EXERCISES)[number], n: number, reps: number, kg: number, date: string, rir: number | null = null) => ({
+      id,
+      set_number: n,
+      reps,
+      weight_kg: kg,
+      rir,
+      exercise_id: exercise.id,
+      workouts: { date },
+      exercises: exercise,
+    })
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify([
+        set('s1', EXERCISES[0], 1, 8, 60, day(3)),
+        set('s2', EXERCISES[0], 2, 8, 60, day(3)),
+        set('s3', EXERCISES[0], 3, 7, 60, day(3)),
+        set('s4', EXERCISES[0], 1, 8, 62.5, day(0), 2),
+        set('s5', EXERCISES[0], 2, 8, 62.5, day(0), 1),
+        set('s6', EXERCISES[2], 1, 10, 55, day(0)),
+      ]),
+    })
+  })
+
+  await page.route('**/rest/v1/workouts*', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'w1' }) }),
+  )
+
   await page.route('**/rest/v1/nutrition_goals*', (route) =>
     route.fulfill({
       status: 200,

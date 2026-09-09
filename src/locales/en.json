@@ -157,7 +157,45 @@
       }
     },
     "training": {
-      "planned": "Training goes here — your routines, the session for today, and the sets as you log them."
+      "loadFailed": "The day's sets could not be loaded. Check your connection and try again.",
+      "empty": "nothing logged yet",
+      "addExercise": "Add an exercise",
+      "deleted": "set removed",
+      "undoFailed": "That set could not be put back. Log it again.",
+      "swipe": "Swipe the row sideways to remove it.",
+      "remove": "Remove",
+      "lastTime": "last time",
+      "never": "first time",
+      "volume": "{{volume}} kg moved",
+      "set": {
+        "reps": "reps",
+        "weight": "weight",
+        "rir": "rir",
+        "rirHint": " · optional",
+        "add": "Log set",
+        "adding": "Logging…",
+        "invalid": "Enter reps and a weight. Zero is a weight; empty is not.",
+        "addFailed": "That set did not save. Check your connection and try again."
+      },
+      "add": {
+        "title": "Add an exercise",
+        "lead": "Pick from the catalogue everyone shares, or add one that is missing.",
+        "search": "search",
+        "searching": "searching",
+        "noResults": "no exercise matches",
+        "back": "Back to the day",
+        "searchFailed": "The search did not go through. Check your connection and try again."
+      },
+      "groups": {
+        "chest": "chest",
+        "back": "back",
+        "shoulders": "shoulders",
+        "arms": "arms",
+        "legs": "legs",
+        "glutes": "glutes",
+        "core": "core",
+        "full_body": "full body"
+      }
     },
     "more": {
       "planned": "Settings, data export and the legal pages go here.",
