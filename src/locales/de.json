@@ -113,7 +113,7 @@
         "title": "Barcode scannen",
         "open": "Barcode scannen",
         "viewport": "Kamera, auf einen Barcode gerichtet",
-        "instruction": "halte den Barcode in den Rahmen — er wird von selbst erkannt",
+        "instruction": "barcode in den rahmen",
         "looking": "wird nachgeschlagen",
         "barcode": "barcode",
         "look": "Nachschlagen",
