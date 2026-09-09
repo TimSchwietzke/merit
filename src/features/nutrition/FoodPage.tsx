@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
@@ -5,7 +6,8 @@ import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/EmptyState'
 import { Panel } from '@/components/Panel'
-import { Row, Rows } from '@/components/Rows'
+import { RowBody, Rows } from '@/components/Rows'
+import { SwipeRow } from '@/components/SwipeRow'
 import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
 import { Value } from '@/components/Value'
@@ -37,6 +39,7 @@ export default function FoodPage() {
   const today = todayKey()
   const date = params.get('date') ?? today
   const { entries, status, remove, restore } = useFoodLog(date)
+  const [openRow, setOpenRow] = useState<string | null>(null)
 
   const toPortion = (entry: LoggedFood): Portion => ({
     nutrients: entry.food.nutrients,
@@ -143,8 +146,11 @@ export default function FoodPage() {
             <Meal
               key={meal}
               meal={meal}
+              date={date}
               entries={entries.filter((entry) => entry.mealType === meal)}
               locale={locale}
+              openRow={openRow}
+              onOpenRow={setOpenRow}
               onRemove={onRemove}
             />
           ))
@@ -168,13 +174,19 @@ export default function FoodPage() {
 
 function Meal({
   meal,
+  date,
   entries,
   locale,
+  openRow,
+  onOpenRow,
   onRemove,
 }: {
   meal: MealType
+  date: string
   entries: LoggedFood[]
   locale: string
+  openRow: string | null
+  onOpenRow: (id: string | null) => void
   onRemove: (entry: LoggedFood) => void
 }) {
   const { t } = useTranslation()
@@ -190,26 +202,45 @@ function Meal({
       />
       <Rows>
         {entries.map((entry) => (
-          // Tapping a row removes it, and the toast undoes that. A visible
-          // delete control 8px from a value in a 52px row gets hit by accident
-          // (§10.1); an undo makes the tap safe (§14).
-          <Row key={entry.id} onClick={() => onRemove(entry)}>
-            <span className="min-w-0 flex-1">
-              <span className="block truncate">{entry.food.name}</span>
-              {entry.food.brand ? (
-                <span className="block truncate text-sm text-ink-muted">{entry.food.brand}</span>
-              ) : null}
-            </span>
-            <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
-              {formatNumber(entry.quantityG, locale, 0)} g
-            </span>
-            <span className="shrink-0">
-              <Value
-                n={formatNumber((entry.food.nutrients.kcal * entry.quantityG) / 100, locale, 0)}
-                unit="kcal"
-              />
-            </span>
-          </Row>
+          // Tapping opens the portion; removing it costs a deliberate sideways
+          // drag (§10.1). The screen the tap opens carries a delete button of
+          // its own, so the gesture is never the only way to reach it.
+          <SwipeRow
+            key={entry.id}
+            open={openRow === entry.id}
+            onOpenChange={(open) => onOpenRow(open ? entry.id : null)}
+            label={t('pages.food.log.swipe')}
+            actions={
+              <button
+                type="button"
+                onClick={() => {
+                  onOpenRow(null)
+                  onRemove(entry)
+                }}
+                className="flex w-full items-center justify-center bg-danger px-3 text-sm font-medium text-bg"
+              >
+                {t('pages.food.log.remove')}
+              </button>
+            }
+          >
+            <RowBody to={`/food/entry/${entry.id}?date=${date}`}>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate">{entry.food.name}</span>
+                {entry.food.brand ? (
+                  <span className="block truncate text-sm text-ink-muted">{entry.food.brand}</span>
+                ) : null}
+              </span>
+              <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
+                {formatNumber(entry.quantityG, locale, 0)} g
+              </span>
+              <span className="shrink-0">
+                <Value
+                  n={formatNumber((entry.food.nutrients.kcal * entry.quantityG) / 100, locale, 0)}
+                  unit="kcal"
+                />
+              </span>
+            </RowBody>
+          </SwipeRow>
         ))}
       </Rows>
     </section>

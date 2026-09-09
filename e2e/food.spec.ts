@@ -108,3 +108,47 @@ test('a barcode held in front of the camera resolves without anyone typing', asy
     await browser.close()
   }
 })
+
+test('a logged row opens on tap and only gives up its delete to a swipe', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+  await page.goto('/food')
+  await waitForScreen(page)
+
+  const row = page.getByRole('link', { name: /Skyr/ })
+  await expect(row).toBeVisible()
+  // Nothing destructive is on screen until it is asked for (§10.1).
+  await expect(page.getByRole('button', { name: 'Entfernen' })).toHaveCount(0)
+
+  const box = (await row.boundingBox())!
+  const y = box.y + box.height / 2
+  await page.mouse.move(box.x + 20, y)
+  await page.mouse.down()
+  // Past the slop, then past the latch, in steps so the axis is read as
+  // horizontal rather than as a page scroll.
+  await page.mouse.move(box.x + 100, y, { steps: 8 })
+  await page.mouse.up()
+
+  const remove = page.getByRole('button', { name: 'Entfernen' })
+  await expect(remove).toBeVisible()
+
+  // It stays open — the swipe is a latch, not a flick that springs back.
+  await page.waitForTimeout(400)
+  await expect(remove).toBeVisible()
+
+  await remove.click()
+  await expect(page.getByText('Rückgängig')).toBeVisible()
+  await expect(page.getByRole('link', { name: /Skyr/ })).toHaveCount(0)
+})
+
+test('tapping a logged row opens it for editing, not for deleting', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+  await page.goto('/food')
+  await waitForScreen(page)
+
+  await page.getByRole('link', { name: /Skyr/ }).click()
+  await expect(page.getByRole('heading', { name: 'Erfasste Portion' })).toBeVisible()
+  // The keyboard route to the same thing the swipe reveals.
+  await expect(page.getByRole('button', { name: 'Aus dem Tag entfernen' })).toBeVisible()
+})
