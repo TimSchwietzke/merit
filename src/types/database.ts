@@ -361,6 +361,41 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          routine_id: string
+          scheduled_date: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          routine_id: string
+          scheduled_date: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          routine_id?: string
+          scheduled_date?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_sessions_routine_id_fkey"
+            columns: ["routine_id"]
+            isOneToOne: false
+            referencedRelation: "routines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       weight_logs: {
         Row: {
           body_fat_pct: number | null
@@ -394,6 +429,7 @@ export type Database = {
       workout_sets: {
         Row: {
           created_at: string
+          done: boolean
           exercise_id: string
           id: string
           reps: number
@@ -406,6 +442,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          done?: boolean
           exercise_id: string
           id?: string
           reps: number
@@ -418,6 +455,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          done?: boolean
           exercise_id?: string
           id?: string
           reps?: number

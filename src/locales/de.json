@@ -243,6 +243,24 @@
         "planned": "geplant",
         "save": "Speichern",
         "editing": "Satz {{n}} bearbeiten"
+      },
+      "week": {
+        "label": "diese woche",
+        "today": "heute",
+        "rest": "Ruhetag",
+        "done": "{{logged}} von {{total}} Sätzen",
+        "open": "noch nicht gestartet",
+        "start": "Starten",
+        "swap": "Diese Einheit verschieben",
+        "swapping": "Wähle den Tag, mit dem {{name}} getauscht wird.",
+        "swapCancel": "Abbrechen",
+        "swapPast": "Ein Tag, der schon vorbei ist, lässt sich nicht verschieben.",
+        "swapConfirm": "{{a}} ({{aDay}}) mit {{b}} ({{bDay}}) tauschen?",
+        "confirm": "Tauschen",
+        "loadFailed": "Deine Woche konnte nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
+        "manage": "Trainingstage",
+        "free": "Freies Training",
+        "paused": "Plan pausiert bis {{date}}"
       }
     },
     "more": {

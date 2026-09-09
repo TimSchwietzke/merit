@@ -3,7 +3,7 @@ import { expect, stubBackend, test, waitForScreen } from './fixtures'
 test('the day shows what was done last time for each exercise', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await stubBackend(page, { theme: 'light', locale: 'de' })
-  await page.goto('/training')
+  await page.goto('/training/day')
   await waitForScreen(page)
 
   // §10.10 calls this the reason anyone opens this tab between sets.
@@ -17,7 +17,7 @@ test('the day shows what was done last time for each exercise', async ({ page })
 test('every figure is editable where it stands, with nothing to open first', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await stubBackend(page, { theme: 'light', locale: 'de' })
-  await page.goto('/training')
+  await page.goto('/training/day')
   await waitForScreen(page)
 
   // No edit mode and no tick: the row is the form. Both bench sets are already
@@ -45,7 +45,7 @@ test('a new set starts from the one before it, never from zero', async ({ page }
     return route.fallback()
   })
 
-  await page.goto('/training')
+  await page.goto('/training/day')
   await waitForScreen(page)
   await page.getByRole('button', { name: 'Satz hinzufügen' }).first().click()
   await expect.poll(() => posted.length).toBeGreaterThan(0)

@@ -183,7 +183,7 @@ export default function AddExercisePage() {
       navigate(`/training/routines/${routineId}`)
       return
     }
-    navigate(`/training?date=${date}&exercise=${id}`)
+    navigate(`/training/day?date=${date}&exercise=${id}`)
   }
 
   const list = (items: Found[]) => (
@@ -285,7 +285,7 @@ export default function AddExercisePage() {
       </section>
 
       <Link
-        to={routineId ? `/training/routines/${routineId}` : `/training?date=${date}`}
+        to={routineId ? `/training/routines/${routineId}` : `/training/day?date=${date}`}
         className="mt-4 inline-flex min-h-11 items-center font-mono text-2xs text-accent underline decoration-1 underline-offset-2"
       >
         ← {t('pages.training.add.back')}

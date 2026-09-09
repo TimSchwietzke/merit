@@ -306,9 +306,26 @@ export async function stubBackend(
     route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
   )
 
-  await page.route('**/rest/v1/workouts*', (route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'w1' }) }),
+  await page.route('**/rest/v1/scheduled_sessions*', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
   )
+
+  await page.route('**/rest/v1/workouts*', (route) => {
+    const url = route.request().url()
+    const json = (body: unknown) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) })
+
+    // The week screen asks for a range with the sets embedded; everything else
+    // wants the one row it just upserted.
+    if (url.includes('workout_sets')) {
+      const d = new Date()
+      const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      return json([
+        { id: 'w1', date: today, routine_id: 'r1', workout_sets: [{ done: true }, { done: false }, { done: false }] },
+      ])
+    }
+    return json({ id: 'w1' })
+  })
 
   await page.route('**/rest/v1/nutrition_goals*', (route) =>
     route.fulfill({

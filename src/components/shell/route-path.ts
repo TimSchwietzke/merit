@@ -20,6 +20,7 @@ export interface PathSegment {
     | 'nav.weight'
     | 'nav.goals'
     | 'nav.routines'
+    | 'common.today'
     | 'common.add'
     | 'common.today'
     | 'common.notFound'
@@ -36,6 +37,7 @@ const PATHS: Record<string, PathSegment[]> = {
   '/food/add': [ROOT, { labelKey: 'nav.food', to: '/food' }, { labelKey: 'common.add' }],
   '/training/add': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'common.add' }],
   '/training/routines': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'nav.routines' }],
+  '/training/day': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'common.today' }],
   '/more': [ROOT, { labelKey: 'nav.more' }],
   // Weight is reached through `more` rather than from a tab of its own (there
   // are four and four is the ceiling, §7), and the path says so.

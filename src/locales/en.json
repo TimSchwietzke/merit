@@ -243,6 +243,24 @@
         "planned": "planned",
         "save": "Save",
         "editing": "Editing set {{n}}"
+      },
+      "week": {
+        "label": "this week",
+        "today": "today",
+        "rest": "rest day",
+        "done": "{{logged}} of {{total}} sets",
+        "open": "not started",
+        "start": "Start",
+        "swap": "Move this session",
+        "swapping": "Pick the day to swap {{name}} with.",
+        "swapCancel": "Cancel",
+        "swapPast": "A day that has already happened cannot be moved.",
+        "swapConfirm": "Swap {{a}} ({{aDay}}) with {{b}} ({{bDay}})?",
+        "confirm": "Swap them",
+        "loadFailed": "Your week could not be loaded. Check your connection and try again.",
+        "manage": "Training days",
+        "free": "Free session",
+        "paused": "Plan paused until {{date}}"
       }
     },
     "more": {
