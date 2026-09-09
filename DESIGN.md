@@ -652,6 +652,15 @@ Base: shadcn `input` / `textarea`, restyled.
 global focus ring. A leading icon sits absolutely at `left: 12px`, 15px, `pointer-events: none`, and
 the input takes 36px of left padding.
 
+**Inside a bordered row, an input drops its border and takes a `surface-2` fill instead.** A set row
+carries three fields; bordered, that is three outlines inside the row's outline inside the panel's,
+and a screen of them reads as a mesh with nothing heavier than anything else — which is exactly the
+complaint that a card grid with shadows is usually reached for to fix. A filled cell on a bordered
+surface reads as a field and costs no lines, and it is the same `bg → surface → surface-2` ladder §6
+already uses for a nested plane. The focus ring is unchanged and does the work the border was doing.
+
+Outside that case the border stays: a lone field on a page has nothing around it to belong to.
+
 Textareas: `resize-y`, 2–3 rows, **save on blur, not on keystroke**.
 
 **The number field is Merit's most-used control and gets its own treatment.** A weight, a portion, a

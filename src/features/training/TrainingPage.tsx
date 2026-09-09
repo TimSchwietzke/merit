@@ -329,9 +329,12 @@ function Exercise({
   }
 
   return (
-    <section className="mb-6 last:mb-0">
-      <div className="mb-3 flex items-baseline justify-between gap-4 border-b border-line pb-2">
-        <h2 className="min-w-0 truncate text-sm text-ink">{name}</h2>
+    // One bordered envelope per exercise. The block used to be a header rule, a
+    // row list and three bordered inputs per set — ten hairlines of equal
+    // weight, so nothing announced where one exercise ended and the next began.
+    <section className="mb-6 overflow-hidden rounded-lg border border-line bg-surface last:mb-0">
+      <div className="flex items-baseline justify-between gap-4 border-b border-line bg-surface-2 px-4 py-3">
+        <h2 className="min-w-0 truncate text-base font-medium text-ink">{name}</h2>
         <span className="shrink-0 font-mono text-2xs text-ink-faint">
           {t('pages.training.volume', { volume: formatNumber(volume(sets), locale, 0) })}
         </span>
@@ -341,7 +344,7 @@ function Exercise({
           every field. Four exercises of three sets is thirty-six labels
           otherwise, saying the same three words. */}
       {sets.length > 0 ? (
-        <div className="mb-1 flex items-center gap-2 px-4 font-mono text-2xs text-ink-faint">
+        <div className="flex items-center gap-2 px-4 pt-3 font-mono text-2xs text-ink-faint">
           <span className="w-4 shrink-0" aria-hidden />
           <span className="flex-1 text-right">{t('pages.training.set.reps')}</span>
           <span className="flex-1 text-right">{t('pages.training.set.weight')}</span>
@@ -349,7 +352,7 @@ function Exercise({
         </div>
       ) : null}
 
-      <Rows>
+      <ul>
         {sets.map((set, index) => (
           <SwipeRow
             key={set.id}
@@ -384,7 +387,7 @@ function Exercise({
             type="button"
             onClick={() => void addOne()}
             disabled={adding}
-            className="flex min-h-[52px] w-full items-center gap-3 px-4 py-3 text-left font-mono text-2xs
+            className="flex min-h-11 w-full items-center gap-3 px-4 py-2 text-left font-mono text-2xs
                        text-ink-muted transition-colors hover:bg-surface-2 active:bg-surface-2
                        [transition-duration:140ms] active:[transition-duration:0ms] disabled:opacity-35"
           >
@@ -392,9 +395,10 @@ function Exercise({
             {t('pages.training.setRow.add')}
           </button>
         </li>
-      </Rows>
+      </ul>
 
-      <p className="mt-2 font-mono text-2xs text-ink-faint">
+      {/* Inside the card, because it is a fact about this exercise. */}
+      <p className="border-t border-line px-4 py-2.5 font-mono text-2xs text-ink-faint">
         {last ? (
           <>
             {t('pages.training.lastTime')}{' '}
@@ -457,15 +461,19 @@ function SetRow({
     onCommit({ reps: parsedReps, weightKg: parsedWeight, rir: parsedRir })
   }
 
-  // No `w-full` here: it fights the flex sizing below, and the field that has
-  // it wins the whole row while the others collapse to nothing.
+  // Filled rather than outlined (§10.5): three bordered fields inside a bordered
+  // row inside a bordered card is a mesh of hairlines with nothing heavier than
+  // anything else. The focus ring does the work the border was doing.
+  //
+  // No `w-full`: it fights the flex sizing below, and the field that has it
+  // wins the whole row while the others collapse to nothing.
   const field =
-    `min-h-11 min-w-0 rounded-md border bg-surface px-2 text-right font-mono text-input tabular-nums
-     text-ink transition-colors [transition-duration:140ms] focus-visible:border-accent
-     md:min-h-9 md:text-sm ` + (invalid ? 'border-danger' : 'border-line')
+    `min-h-11 min-w-0 rounded-md px-2 text-right font-mono text-input tabular-nums text-ink
+     transition-colors [transition-duration:140ms] md:min-h-9 md:text-sm ` +
+    (invalid ? 'bg-danger/10 text-danger' : 'bg-surface-2')
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2">
+    <div className="flex items-center gap-2 px-4 py-1.5">
       <span className="w-4 shrink-0 font-mono text-2xs tabular-nums text-ink-faint">{index + 1}</span>
 
       <input
