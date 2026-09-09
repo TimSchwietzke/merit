@@ -237,27 +237,6 @@ export default function AddFoodPage() {
     <>
       <PageHeader title={t('pages.food.add.title')} lead={t('pages.food.add.lead')} />
 
-      {/* Above the field, and not narrowed by it: on a screen whose job is
-          picking, the answer is usually something picked before (§10.11), and
-          GOAL.md §5 calls repeating a previous meal the feature that decides
-          whether the app gets used at all. */}
-      {recent.length > 0 ? (
-        <section className="mb-6">
-          <Collapsible
-            label={t('pages.food.add.recent')}
-            count={recent.length}
-            open={!folded.has('recent')}
-            onOpenChange={(open) => fold('recent', open)}
-          >
-            <FoodRows
-              foods={recent.map((entry) => entry.food)}
-              locale={locale}
-              onPick={setPicked}
-            />
-          </Collapsible>
-        </section>
-      ) : null}
-
       <div className="flex flex-col gap-2">
         <Label htmlFor="food-search">
           {t('pages.food.add.search')}
@@ -281,6 +260,24 @@ export default function AddFoodPage() {
       </Button>
 
       <section className="mt-6">
+        {/* First among the results and narrowed by nothing (§10.11). GOAL.md §5
+            calls repeating a previous meal the feature that decides whether the
+            app gets used daily. */}
+        {recent.length > 0 ? (
+          <Collapsible
+            label={t('pages.food.add.recent')}
+            count={recent.length}
+            open={!folded.has('recent')}
+            onOpenChange={(open) => fold('recent', open)}
+          >
+            <FoodRows
+              foods={recent.map((entry) => entry.food)}
+              locale={locale}
+              onPick={setPicked}
+            />
+          </Collapsible>
+        ) : null}
+
         {status === 'searching' ? (
           <p className="font-mono text-2xs text-ink-faint">{t('pages.food.add.searching')}</p>
         ) : null}

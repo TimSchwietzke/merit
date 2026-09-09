@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
+import { FilterButton } from '@/components/FilterButton'
 import { FilterChips } from '@/components/FilterChips'
 import { PageHeader } from '@/components/PageHeader'
 import { Row, Rows } from '@/components/Rows'
@@ -158,9 +159,36 @@ export default function AddExercisePage() {
     <>
       <PageHeader title={t('pages.training.add.title')} lead={t('pages.training.add.lead')} />
 
-      {/* Above the field and above the facets, and answering to neither. */}
-      {recent.length > 0 ? (
-        <section className="mb-6">
+      {/* The field is the control everybody reaches for first, so it sits at
+          the top; the facets ride beside it behind a button carrying how many
+          are on (§10.11). */}
+      <div className="flex flex-col gap-2">
+        <Label htmlFor="exercise-search">{t('pages.training.add.search')}</Label>
+        <div className="flex items-end gap-2">
+          <Input
+            id="exercise-search"
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+          />
+          <FilterButton active={equipment.length}>
+            <FilterChips
+              label={t('pages.training.add.filterEquipment')}
+              options={equipmentOptions}
+              active={equipment}
+              onChange={setEquipment}
+            />
+          </FilterButton>
+        </div>
+      </div>
+
+      <section className="mt-6">
+        {/* First among the results and answering to neither the field above nor
+            the facets beside it (§10.11). */}
+        {recent.length > 0 ? (
           <Collapsible
             label={t('pages.training.add.recent')}
             count={recent.length}
@@ -169,32 +197,8 @@ export default function AddExercisePage() {
           >
             {list(recent.slice(0, 8))}
           </Collapsible>
-        </section>
-      ) : null}
+        ) : null}
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="exercise-search">{t('pages.training.add.search')}</Label>
-        <Input
-          id="exercise-search"
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          autoComplete="off"
-          autoCapitalize="none"
-          spellCheck={false}
-        />
-      </div>
-
-      <div className="mt-4">
-        <FilterChips
-          label={t('pages.training.add.filterEquipment')}
-          options={equipmentOptions}
-          active={equipment}
-          onChange={setEquipment}
-        />
-      </div>
-
-      <section className="mt-6">
         {failed ? (
           <p role="alert" className="text-sm text-danger">
             {t('pages.training.add.searchFailed')}

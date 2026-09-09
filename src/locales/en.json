@@ -19,7 +19,10 @@
     "loading": "loading",
     "undo": "Undo",
     "add": "add",
-    "clearFilters": "clear"
+    "clearFilters": "clear",
+    "filters": "Filters",
+    "filtersOpen": "Filters, {{count}} active",
+    "close": "Close"
   },
   "auth": {
     "signIn": {

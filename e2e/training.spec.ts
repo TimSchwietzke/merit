@@ -67,10 +67,16 @@ test('a filter narrows the catalogue and leaves recently-used alone', async ({ p
   await page.goto('/training/add')
   await waitForScreen(page)
 
-  // Nothing is filtered, so there is no way back to offer yet.
-  await expect(page.getByRole('button', { name: 'zurücksetzen' })).toHaveCount(0)
+  // The count rides on the button, so the state is readable without opening it
+  // — the condition §10.11 attaches to putting facets behind a control.
+  const filters = page.getByRole('button', { name: 'Filter' })
+  await expect(filters).toBeVisible()
 
+  await filters.click()
   await page.getByRole('button', { name: 'kabel', exact: true }).click()
+  await page.getByRole('button', { name: 'Schließen' }).click()
+
+  await expect(page.getByRole('button', { name: /Filter, 1 aktiv/ })).toBeVisible()
 
   // Cable leaves the back group; legs and chest are barbell and go.
   await expect(page.getByRole('button', { name: /^rücken/ })).toBeVisible()
@@ -82,5 +88,4 @@ test('a filter narrows the catalogue and leaves recently-used alone', async ({ p
   await expect(recent).toBeVisible()
   await expect(recent).toContainText('2')
 
-  await expect(page.getByRole('button', { name: 'zurücksetzen' })).toBeVisible()
 })
