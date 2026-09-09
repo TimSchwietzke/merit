@@ -84,7 +84,14 @@ export function parseDecimalInput(
   { min, max, decimals }: { min: number; max: number; decimals: number },
 ): number | null {
   const normalised = raw.trim().replace(',', '.')
-  if (!new RegExp(`^\\d{1,4}(\\.\\d{1,${decimals}})?$`).test(normalised)) return null
+
+  // Shape first, then precision, then range — rather than one regex built from
+  // the arguments. The built one had two faults: `decimals: 0` produced the
+  // quantifier `{1,0}`, which throws rather than failing to match, and the
+  // integer part was fixed at four digits, so no caller could ever accept a
+  // value of 10000 whatever its `max` said.
+  if (!/^\d+(\.\d+)?$/.test(normalised)) return null
+  if ((normalised.split('.')[1] ?? '').length > decimals) return null
 
   const value = Number(normalised)
   if (!Number.isFinite(value) || value < min || value > max) return null

@@ -66,6 +66,23 @@ describe('parseDecimalInput', () => {
     expect(parseDecimalInput('12.34', { min: 1, max: 75, decimals: 1 })).toBeNull()
   })
 
+  it('accepts whole numbers only where no decimals are allowed', () => {
+    // `decimals: 0` built the quantifier `{1,0}`, which throws rather than
+    // failing to match — so the first screen to want whole numbers crashed on
+    // render instead of refusing the input.
+    const whole = { min: 500, max: 10000, decimals: 0 }
+    expect(parseDecimalInput('2100', whole)).toBe(2100)
+    expect(parseDecimalInput('2100.5', whole)).toBeNull()
+    expect(parseDecimalInput('2100,5', whole)).toBeNull()
+  })
+
+  it('accepts a value as long as its range allows, not as long as four digits', () => {
+    // The integer part was fixed at four digits, so a max of 10000 could never
+    // be reached however the caller set it.
+    expect(parseDecimalInput('10000', { min: 500, max: 10000, decimals: 0 })).toBe(10000)
+    expect(parseDecimalInput('10001', { min: 500, max: 10000, decimals: 0 })).toBeNull()
+  })
+
   it('rejects values outside the range the table would refuse anyway', () => {
     expect(parseDecimalInput('8.2', kg)).toBeNull()
     expect(parseDecimalInput('820', kg)).toBeNull()
