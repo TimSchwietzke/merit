@@ -75,7 +75,7 @@ test('no horizontal scroll at any width, in German', async ({ page }) => {
   // as well — and it leaves the time budget to actually wait for the screen to
   // finish rendering. Measuring straight after `goto` measures the skeleton,
   // which is how a 544px-wide table got past this probe.
-  for (const path of ['/', '/food', '/food/add', '/training', '/more', '/weight']) {
+  for (const path of ['/', '/food', '/food/add', '/training', '/more', '/weight', '/goals']) {
     await page.setViewportSize({ width: 375, height: 800 })
     await page.goto(path)
     await waitForScreen(page)
