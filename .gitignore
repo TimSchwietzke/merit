@@ -57,6 +57,11 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
+# ── Agent tooling ───────────────────────────────────────────────────
+# Installed per-machine by whoever is using it. Project rules that everyone
+# shares live in CLAUDE.md and DESIGN.md, which are committed.
+.claude/
+
 # ── Editors ─────────────────────────────────────────────────────────
 .vscode/*
 !.vscode/extensions.json
