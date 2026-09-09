@@ -3,12 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { FilterButton } from '@/components/FilterButton'
-import { FilterChips } from '@/components/FilterChips'
+import { FilterList } from '@/components/FilterList'
 import { PageHeader } from '@/components/PageHeader'
 import { Row, Rows } from '@/components/Rows'
 import { Collapsible } from '@/components/ui/collapsible'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { useRoutines } from '@/features/routines/useRoutines'
 import { useWorkout } from '@/features/training/useWorkout'
 import { todayKey } from '@/lib/date'
 import { supabase } from '@/lib/supabase'
@@ -56,9 +57,13 @@ export default function AddExercisePage() {
   const navigate = useNavigate()
   const [params] = useSearchParams()
   const date = params.get('date') ?? todayKey()
+  // The same picker serves the day and the routine editor; which one changes
+  // only where the choice is written.
+  const routineId = params.get('routine')
 
   const [query, setQuery] = useState('')
   const [equipment, setEquipment] = useState<string[]>([])
+  const [muscles, setMuscles] = useState<string[]>([])
   const [all, setAll] = useState<Found[]>([])
   const [failed, setFailed] = useState(false)
   const [, rerender] = useState(0)
@@ -114,25 +119,55 @@ export default function AddExercisePage() {
     return seen.map((id) => all.find((exercise) => exercise.id === id)).filter((x): x is Found => !!x)
   }, [history, all])
 
+  // Union within a facet, intersection across them (§10.11): chest and back
+  // shows both, chest and barbell shows the overlap.
   const matches = useMemo(() => {
     const needle = query.trim().toLowerCase()
     return all.filter((exercise) => {
       if (equipment.length > 0 && !equipment.includes(exercise.equipment)) return false
+      if (muscles.length > 0 && !muscles.includes(exercise.muscleGroup)) return false
       if (needle === '') return true
       return `${exercise.nameEn} ${exercise.nameDe}`.toLowerCase().includes(needle)
     })
-  }, [all, equipment, query])
+  }, [all, equipment, muscles, query])
 
-  // Only equipment the catalogue actually contains, so no chip returns nothing.
+  // Each option carries what it would leave, counted against the *other* facet
+  // so the numbers describe what tapping it actually does. Options with nothing
+  // behind them are not offered.
+  const countBy = (
+    field: 'equipment' | 'muscleGroup',
+    value: string,
+    otherActive: string[],
+    otherField: 'equipment' | 'muscleGroup',
+  ) =>
+    all.filter(
+      (exercise) =>
+        exercise[field] === value &&
+        (otherActive.length === 0 || otherActive.includes(exercise[otherField])),
+    ).length
+
   const equipmentOptions = useMemo(
     () =>
-      [...new Set(all.map((exercise) => exercise.equipment))]
-        .sort()
-        .map((value) => ({
+      [...new Set(all.map((exercise) => exercise.equipment))].sort().map((value) => ({
+        value,
+        label: t(`pages.training.add.equipment.${value}` as 'pages.training.add.equipment.barbell'),
+        count: countBy('equipment', value, muscles, 'muscleGroup'),
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [all, muscles, t],
+  )
+
+  const groupOptions = useMemo(
+    () =>
+      GROUP_ORDER.filter((group) => all.some((exercise) => exercise.muscleGroup === group)).map(
+        (value) => ({
           value,
-          label: t(`pages.training.add.equipment.${value}` as 'pages.training.add.equipment.barbell'),
-        })),
-    [all, t],
+          label: t(`pages.training.groups.${value}` as 'pages.training.groups.chest'),
+          count: countBy('muscleGroup', value, equipment, 'equipment'),
+        }),
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [all, equipment, t],
   )
 
   const groups = GROUP_ORDER.map((group) => ({
@@ -140,12 +175,21 @@ export default function AddExercisePage() {
     items: matches.filter((exercise) => exercise.muscleGroup === group),
   })).filter((entry) => entry.items.length > 0)
 
-  const pick = (id: string) => navigate(`/training?date=${date}&exercise=${id}`)
+  const { addExercise } = useRoutines()
+
+  async function pick(id: string) {
+    if (routineId) {
+      await addExercise(routineId, id)
+      navigate(`/training/routines/${routineId}`)
+      return
+    }
+    navigate(`/training?date=${date}&exercise=${id}`)
+  }
 
   const list = (items: Found[]) => (
     <Rows>
       {items.map((exercise) => (
-        <Row key={exercise.id} onClick={() => pick(exercise.id)}>
+        <Row key={exercise.id} onClick={() => void pick(exercise.id)}>
           <span className="min-w-0 flex-1 truncate">{name(exercise)}</span>
           <span className="shrink-0 font-mono text-2xs text-ink-faint">
             {t(`pages.training.add.equipment.${exercise.equipment}` as 'pages.training.add.equipment.barbell')}
@@ -174,8 +218,14 @@ export default function AddExercisePage() {
             autoCapitalize="none"
             spellCheck={false}
           />
-          <FilterButton active={equipment.length}>
-            <FilterChips
+          <FilterButton active={equipment.length + muscles.length}>
+            <FilterList
+              label={t('pages.training.add.filterGroup')}
+              options={groupOptions}
+              active={muscles}
+              onChange={setMuscles}
+            />
+            <FilterList
               label={t('pages.training.add.filterEquipment')}
               options={equipmentOptions}
               active={equipment}
@@ -209,11 +259,14 @@ export default function AddExercisePage() {
             {query.trim() !== ''
               ? t('pages.training.add.noMatchSearch', { query: query.trim() })
               : t('pages.training.add.noMatch', {
-                  filters: equipment
-                    .map((value) =>
+                  filters: [
+                    ...muscles.map((value) =>
+                      t(`pages.training.groups.${value}` as 'pages.training.groups.chest'),
+                    ),
+                    ...equipment.map((value) =>
                       t(`pages.training.add.equipment.${value}` as 'pages.training.add.equipment.barbell'),
-                    )
-                    .join(', '),
+                    ),
+                  ].join(', '),
                 })}
           </p>
         ) : (
@@ -232,7 +285,7 @@ export default function AddExercisePage() {
       </section>
 
       <Link
-        to={`/training?date=${date}`}
+        to={routineId ? `/training/routines/${routineId}` : `/training?date=${date}`}
         className="mt-4 inline-flex min-h-11 items-center font-mono text-2xs text-accent underline decoration-1 underline-offset-2"
       >
         ← {t('pages.training.add.back')}

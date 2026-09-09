@@ -1,0 +1,268 @@
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Link, useNavigate, useParams } from 'react-router-dom'
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import { toast } from 'sonner'
+
+import { EmptyState } from '@/components/EmptyState'
+import { NumberField } from '@/components/NumberField'
+import { PageHeader } from '@/components/PageHeader'
+import { Panel } from '@/components/Panel'
+import { SectionHead } from '@/components/SectionHead'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { useRoutines, type RoutineExercise } from '@/features/routines/useRoutines'
+import { parseDecimalInput, weekdayLabel } from '@/lib/format'
+
+const SETS_LIMITS = { min: 1, max: 20, decimals: 0 } as const
+const REPS_LIMITS = { min: 1, max: 1000, decimals: 0 } as const
+
+const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7]
+
+/**
+ * What a training day contains: its name, the weekdays it is planned for, and
+ * its exercises in order with the sets and reps each plans for.
+ *
+ * Everything saves on change rather than behind a button. A screen with one
+ * save button and eight fields is a screen that loses work when somebody backs
+ * out of it, and every field here is a single value with an obvious meaning.
+ */
+export default function RoutineEditorPage() {
+  const { t, i18n } = useTranslation()
+  const locale = i18n.language
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+
+  const { routines, status, rename, remove, setWeekdays, updateExercise, removeExercise, moveExercise } =
+    useRoutines()
+  const routine = routines.find((entry) => entry.id === id)
+
+  const [failed, setFailed] = useState(false)
+  const fail = (ok: boolean) => setFailed(!ok)
+
+  if (status === 'loading') {
+    return <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
+  }
+  if (!routine || !id) {
+    return (
+      <p role="alert" className="text-sm text-danger">
+        {t('pages.routines.loadFailed')}
+      </p>
+    )
+  }
+
+  return (
+    <>
+      <PageHeader title={routine.name} />
+
+      <section>
+        <Panel className="flex flex-col gap-5 p-4">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="routine-name">{t('pages.routines.editor.name')}</Label>
+            <Input
+              id="routine-name"
+              defaultValue={routine.name}
+              // On blur, not on keystroke: a rename is one decision, and saving
+              // per character writes eight rows for one change (§10.5).
+              onBlur={(event) => {
+                const next = event.target.value.trim()
+                if (next && next !== routine.name) void rename(id, next).then(fail)
+              }}
+            />
+          </div>
+
+          <div className="flex flex-col items-start gap-2">
+            <p className="font-mono text-2xs text-ink-faint">
+              {t('pages.routines.editor.weekdays')}
+              <span className="text-ink-faint">{t('pages.routines.editor.weekdaysHint')}</span>
+            </p>
+            {/* Several at once, so chips rather than a segmented control
+                (§10.11). A day with no weekday is started on demand. */}
+            <div role="group" aria-label={t('pages.routines.editor.weekdays')} className="flex flex-wrap gap-2">
+              {WEEKDAYS.map((day) => {
+                const on = routine.weekdays.includes(day)
+                return (
+                  <button
+                    key={day}
+                    type="button"
+                    aria-pressed={on}
+                    onClick={() =>
+                      void setWeekdays(
+                        id,
+                        on ? routine.weekdays.filter((d) => d !== day) : [...routine.weekdays, day],
+                      ).then(fail)
+                    }
+                    className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-md border px-3
+                                font-mono text-2xs transition-colors [transition-duration:140ms]
+                                ${
+                                  on
+                                    ? 'border-accent bg-accent-soft text-accent'
+                                    : 'border-line bg-surface-2 text-ink-muted active:bg-surface'
+                                }`}
+                  >
+                    {weekdayLabel(day, locale)}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </Panel>
+      </section>
+
+      <section className="mt-8">
+        <SectionHead
+          label={t('pages.routines.editor.exercises')}
+          hint={String(routine.exercises.length)}
+        />
+
+        {routine.exercises.length === 0 ? (
+          <EmptyState>{t('pages.routines.editor.empty')}</EmptyState>
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {routine.exercises.map((entry, index) => (
+              <PlannedExercise
+                key={entry.id}
+                entry={entry}
+                locale={locale}
+                first={index === 0}
+                last={index === routine.exercises.length - 1}
+                onUpdate={(values) => void updateExercise(entry.id, values).then(fail)}
+                onMove={(by) => void moveExercise(id, entry.id, by).then(fail)}
+                onRemove={() => void removeExercise(entry.id).then(fail)}
+              />
+            ))}
+          </ul>
+        )}
+
+        {failed ? (
+          <p role="alert" className="mt-3 text-sm text-danger">
+            {t('pages.routines.editor.saveFailed')}
+          </p>
+        ) : null}
+
+        <Button asChild variant="tinted" className="mt-4 w-full md:w-auto">
+          <Link to={`/training/add?routine=${id}`}>{t('pages.routines.editor.addExercise')}</Link>
+        </Button>
+      </section>
+
+      <section className="mt-8">
+        <Button
+          variant="quiet"
+          className="text-danger hover:border-danger"
+          onClick={async () => {
+            if (!(await remove(id))) {
+              setFailed(true)
+              return
+            }
+            toast(t('pages.routines.editor.deleted', { name: routine.name }))
+            navigate('/training/routines')
+          }}
+        >
+          {t('pages.routines.editor.deleteRoutine')}
+        </Button>
+      </section>
+
+      <Link
+        to="/training/routines"
+        className="mt-8 inline-flex min-h-11 items-center font-mono text-2xs text-accent underline decoration-1 underline-offset-2"
+      >
+        ← {t('pages.routines.title')}
+      </Link>
+    </>
+  )
+}
+
+function PlannedExercise({
+  entry,
+  locale,
+  first,
+  last,
+  onUpdate,
+  onMove,
+  onRemove,
+}: {
+  entry: RoutineExercise
+  locale: string
+  first: boolean
+  last: boolean
+  onUpdate: (values: { targetSets: number; targetReps: number }) => void
+  onMove: (by: -1 | 1) => void
+  onRemove: () => void
+}) {
+  const { t } = useTranslation()
+  const [sets, setSets] = useState(String(entry.targetSets))
+  const [reps, setReps] = useState(String(entry.targetReps))
+
+  const commit = (nextSets: string, nextReps: string) => {
+    const parsedSets = parseDecimalInput(nextSets, SETS_LIMITS)
+    const parsedReps = parseDecimalInput(nextReps, REPS_LIMITS)
+    if (parsedSets === null || parsedReps === null) return
+    if (parsedSets === entry.targetSets && parsedReps === entry.targetReps) return
+    onUpdate({ targetSets: parsedSets, targetReps: parsedReps })
+  }
+
+  return (
+    <li>
+      <Panel className="p-4">
+        <div className="flex items-baseline justify-between gap-3">
+          <p className="min-w-0 flex-1 truncate text-sm text-ink">
+            {locale === 'de' ? entry.exercise.nameDe : entry.exercise.nameEn}
+          </p>
+          {/* Up and down rather than a drag handle: a drag on a phone fights
+              the scroll it lives inside, and reordering five rows is not worth
+              the gesture. */}
+          <span className="flex shrink-0 gap-1">
+            <Button
+              variant="bare"
+              size="icon"
+              aria-label={t('pages.routines.editor.up')}
+              disabled={first}
+              onClick={() => onMove(-1)}
+            >
+              <ChevronUp />
+            </Button>
+            <Button
+              variant="bare"
+              size="icon"
+              aria-label={t('pages.routines.editor.down')}
+              disabled={last}
+              onClick={() => onMove(1)}
+            >
+              <ChevronDown />
+            </Button>
+          </span>
+        </div>
+
+        <div className="mt-3 flex gap-3">
+          <div className="flex-1">
+            <NumberField
+              id={`sets-${entry.id}`}
+              label={t('pages.routines.editor.sets')}
+              unit="×"
+              value={sets}
+              inputMode="numeric"
+              onChange={(event) => setSets(event.target.value)}
+              onBlur={() => commit(sets, reps)}
+            />
+          </div>
+          <div className="flex-1">
+            <NumberField
+              id={`reps-${entry.id}`}
+              label={t('pages.routines.editor.reps')}
+              unit=""
+              value={reps}
+              inputMode="numeric"
+              onChange={(event) => setReps(event.target.value)}
+              onBlur={() => commit(sets, reps)}
+            />
+          </div>
+        </div>
+
+        <Button variant="bare" className="mt-2 text-danger" onClick={onRemove}>
+          {t('pages.routines.editor.remove')}
+        </Button>
+      </Panel>
+    </li>
+  )
+}

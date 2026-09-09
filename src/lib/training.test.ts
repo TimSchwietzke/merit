@@ -2,6 +2,9 @@ import { describe, expect, it } from 'vitest'
 
 import {
   groupSets,
+  isoWeekday,
+  nextSession,
+  planPaused,
   lastSessionFor,
   nextSetNumber,
   repeatOf,
@@ -117,5 +120,57 @@ describe('repeatOf', () => {
 
   it('is null with nothing to repeat', () => {
     expect(repeatOf([], 'bench')).toBeNull()
+  })
+})
+
+describe('nextSession', () => {
+  // 2026-09-07 is a Monday.
+  const plan = [
+    { id: 'upper', name: 'Oberkörper 1', weekdays: [1, 4] },
+    { id: 'legs', name: 'Beine', weekdays: [6] },
+  ]
+
+  it('counts a session due today as nought days away', () => {
+    expect(nextSession(plan, '2026-09-07')).toMatchObject({ inDays: 0, day: { id: 'upper' } })
+  })
+
+  it('finds the next one across the rest of the week', () => {
+    expect(nextSession(plan, '2026-09-08')).toMatchObject({ inDays: 2, day: { id: 'upper' } })
+    // The 4th is a Friday; legs sit on Saturday.
+    expect(nextSession(plan, '2026-09-04')).toMatchObject({ inDays: 1, day: { id: 'legs' } })
+  })
+
+  it('wraps into next week', () => {
+    // Sunday with nothing on it; the next is Monday.
+    expect(nextSession(plan, '2026-09-13')).toMatchObject({ inDays: 1, day: { id: 'upper' } })
+  })
+
+  it('is null when nothing is planned at all', () => {
+    expect(nextSession([], '2026-09-07')).toBeNull()
+    expect(nextSession([{ id: 'x', name: 'x', weekdays: [] }], '2026-09-07')).toBeNull()
+  })
+})
+
+describe('isoWeekday', () => {
+  it('starts the week on Monday, not on Sunday', () => {
+    expect(isoWeekday('2026-09-07')).toBe(1)
+    expect(isoWeekday('2026-09-13')).toBe(7)
+  })
+})
+
+describe('planPaused', () => {
+  it('is paused up to and including the last day', () => {
+    expect(planPaused('2026-09-20', '2026-09-09')).toBe(true)
+    expect(planPaused('2026-09-20', '2026-09-20')).toBe(true)
+    expect(planPaused('2026-09-20', '2026-09-21')).toBe(false)
+  })
+
+  it('is not paused when nothing was set, however the nothing arrives', () => {
+    // A profile row read before the column existed comes back with the field
+    // missing, and `undefined !== null` is true — which is how an undefined
+    // reached a date parser and took the dashboard down.
+    expect(planPaused(null, '2026-09-09')).toBe(false)
+    expect(planPaused(undefined, '2026-09-09')).toBe(false)
+    expect(planPaused('', '2026-09-09')).toBe(false)
   })
 })

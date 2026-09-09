@@ -10,7 +10,8 @@
     "training": "training",
     "more": "mehr",
     "weight": "gewicht",
-    "goals": "ziele"
+    "goals": "ziele",
+    "routines": "trainingstage"
   },
   "common": {
     "notBuiltYet": "noch nicht gebaut",
@@ -53,7 +54,14 @@
       "logFood": "Essen erfassen",
       "training": {
         "label": "training",
-        "planned": "Hier steht später, ob heute eine Einheit ansteht und wann die nächste fällig ist."
+        "due": "{{name}} steht heute an.",
+        "doneToday": "{{name}} erledigt.",
+        "rest": "Heute ist Ruhetag.",
+        "next": "Als Nächstes {{name}} am {{day}}.",
+        "nextTomorrow": "Als Nächstes {{name}} morgen.",
+        "nothingPlanned": "Noch kein Trainingstag eingeplant.",
+        "paused": "Plan pausiert bis {{date}}.",
+        "open": "Training"
       },
       "loadFailed": "Der heutige Tag konnte nicht geladen werden. Prüfe dein Netz und versuche es noch einmal."
     },
@@ -204,7 +212,8 @@
           "kettlebell": "kettlebell",
           "band": "band",
           "other": "sonstiges"
-        }
+        },
+        "filterGroup": "muskelgruppe"
       },
       "groups": {
         "chest": "brust",
@@ -215,6 +224,25 @@
         "glutes": "gesäß",
         "core": "rumpf",
         "full_body": "ganzkörper"
+      },
+      "start": {
+        "label": "einheit starten",
+        "due": "heute dran",
+        "other": "deine anderen tage",
+        "free": "Freies Training",
+        "freeHint": "Übungen unterwegs wählen",
+        "manage": "Trainingstage",
+        "starting": "Wird gestartet …",
+        "startFailed": "Die Einheit wurde nicht gestartet. Prüfe dein Netz und versuche es noch einmal.",
+        "paused": "Plan pausiert bis {{date}}"
+      },
+      "setRow": {
+        "add": "Satz hinzufügen",
+        "done": "Als erledigt markieren",
+        "undone": "Als offen markieren",
+        "planned": "geplant",
+        "save": "Speichern",
+        "editing": "Satz {{n}} bearbeiten"
       }
     },
     "more": {
@@ -361,6 +389,42 @@
           "invalid": "Trage eine Zahl ein."
         }
       }
+    },
+    "routines": {
+      "title": "Trainingstage",
+      "lead": "Ein Trainingstag, den du wieder starten kannst: die Übungen der Reihe nach, mit Sätzen und Wiederholungen.",
+      "label": "deine tage",
+      "empty": "noch kein trainingstag",
+      "newName": "name",
+      "newPlaceholder": "Oberkörper 1",
+      "create": "Trainingstag anlegen",
+      "creating": "Wird angelegt …",
+      "createFailed": "Das wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+      "nameInvalid": "Gib dem Tag einen Namen.",
+      "exerciseCount": "{{count}} Übungen",
+      "noWeekday": "nicht fest eingeplant",
+      "loadFailed": "Deine Trainingstage konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
+      "back": "Zurück zum Training",
+      "editor": {
+        "name": "name",
+        "weekdays": "eingeplant für",
+        "weekdaysHint": " · leer lassen, um ihn jederzeit zu starten",
+        "exercises": "übungen",
+        "addExercise": "Übung hinzufügen",
+        "empty": "noch keine Übungen",
+        "sets": "sätze",
+        "reps": "wdh",
+        "up": "Nach oben",
+        "down": "Nach unten",
+        "remove": "Entfernen",
+        "deleteRoutine": "Diesen Trainingstag löschen",
+        "deleted": "{{name}} gelöscht",
+        "saveFailed": "Die Änderung wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal."
+      },
+      "pauseLabel": "plan pausieren",
+      "pauseUntil": "bis",
+      "pauseHint": " · währenddessen steht nichts an",
+      "pauseClear": "Plan fortsetzen"
     }
   }
 }
