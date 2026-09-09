@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/EmptyState'
+import { Progress } from '@/components/Progress'
 import { Panel } from '@/components/Panel'
 import { RowBody, Rows } from '@/components/Rows'
 import { SwipeRow } from '@/components/SwipeRow'
@@ -12,7 +13,9 @@ import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
 import { Value } from '@/components/Value'
 import { Button } from '@/components/ui/button'
+import { useGoalHistory } from '@/features/goals/useGoalHistory'
 import { useFoodLog, type LoggedFood } from '@/features/nutrition/useFoodLog'
+import { goalOn, progress } from '@/lib/goals'
 import { addDays, todayKey } from '@/lib/date'
 import { formatDayLong, formatNumber } from '@/lib/format'
 import {
@@ -40,6 +43,8 @@ export default function FoodPage() {
   const date = params.get('date') ?? today
   const { entries, status, remove, restore } = useFoodLog(date)
   const [openRow, setOpenRow] = useState<string | null>(null)
+  const { goals } = useGoalHistory()
+  const goal = goalOn(goals, date)
 
   const toPortion = (entry: LoggedFood): Portion => ({
     nutrients: entry.food.nutrients,
@@ -91,6 +96,43 @@ export default function FoodPage() {
         <SectionHead label={t('pages.food.totals.label')} />
         <Panel className="px-4 py-3.5">
           <Value n={formatNumber(totals.kcal.value, locale, 0)} unit="kcal" size="xl" />
+
+          {/* A number with a comparison, never a bare figure (§14). Without a
+              target there is nothing to compare against, so the line says how
+              to get one rather than pretending the day is complete. */}
+          <div className="mt-3">
+            {goal ? (
+              <Progress
+                total={totals.kcal.value}
+                target={goal.kcal}
+                ariaLabel={t('pages.food.totals.ariaCalories')}
+                label={
+                  <>
+                    <span className="text-ink">{formatNumber(totals.kcal.value, locale, 0)}</span> /{' '}
+                    {formatNumber(goal.kcal, locale, 0)} kcal ·{' '}
+                    {progress(totals.kcal.value, goal.kcal).over > 0 ? (
+                      <span className="font-medium text-ink">
+                        {t('pages.food.totals.over', {
+                          over: formatNumber(totals.kcal.value - goal.kcal, locale, 0),
+                        })}
+                      </span>
+                    ) : (
+                      t('pages.food.totals.left', {
+                        left: formatNumber(goal.kcal - totals.kcal.value, locale, 0),
+                      })
+                    )}
+                  </>
+                }
+              />
+            ) : (
+              <Link
+                to="/goals"
+                className="inline-flex min-h-11 items-center font-mono text-2xs text-accent underline decoration-1 underline-offset-2"
+              >
+                {t('pages.food.totals.noTarget')} →
+              </Link>
+            )}
+          </div>
 
           {/* EU label order, so the screen reads like the packaging (§10.10).
               No bars yet — a bar needs a target, and targets are their own

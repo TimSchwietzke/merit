@@ -23,8 +23,9 @@ export function Progress({
 }: {
   total: number
   target: number
-  /** The line beneath, already formatted. */
-  label: React.ReactNode
+  /** The line beneath, already formatted. Omitted where the row around the bar
+   *  already carries the figures — the nutrient panel, for one. */
+  label?: React.ReactNode
   ariaLabel: string
 }) {
   const { fraction, overshoot } = progress(total, target)
@@ -62,7 +63,7 @@ export function Progress({
         ) : null}
       </div>
 
-      <p className="mt-2 font-mono text-2xs text-ink-faint">{label}</p>
+      {label ? <p className="mt-2 font-mono text-2xs text-ink-faint">{label}</p> : null}
     </div>
   )
 }

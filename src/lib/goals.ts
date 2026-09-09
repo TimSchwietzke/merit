@@ -1,4 +1,5 @@
 import { daysBetween } from '@/lib/date'
+import { ATWATER } from '@/lib/nutrition'
 
 /**
  * Daily targets, and the arithmetic behind the calculated one.
@@ -170,4 +171,45 @@ export function progress(total: number, target: number): Progress {
     fraction,
     overshoot: Math.max(0, total / target - 1),
   }
+}
+
+/**
+ * Starting points for the macro split, both editable on screen.
+ *
+ * 1.8 g of protein per kilogram and 30% of energy from fat are the reference
+ * points these calculators conventionally use — protein scaled to body mass,
+ * fat as a share of the day. Neither is Merit telling anybody what to eat: they
+ * are the two knobs of an arithmetic split, shown next to the result, and the
+ * three figures they produce stay editable afterwards.
+ */
+export const MACRO_DEFAULTS = { proteinPerKg: 1.8, fatShare: 0.3 } as const
+
+export interface MacroSplitInputs {
+  kcal: number
+  weightKg: number
+  /** Grams of protein per kilogram of body weight. */
+  proteinPerKg: number
+  /** Share of the day's energy from fat, 0–1. */
+  fatShare: number
+}
+
+/**
+ * Protein from body weight, fat from a share of the energy, carbohydrate from
+ * whatever is left. Converted through the Atwater factors, which is the same
+ * arithmetic the macro ring uses to split a day.
+ *
+ * Carbohydrate cannot go below zero: a high protein-per-kilogram against a low
+ * calorie target can spend the whole day before any carbohydrate is reached,
+ * and a negative gram figure is not a target anybody can log against.
+ */
+export function calculateMacros({
+  kcal,
+  weightKg,
+  proteinPerKg,
+  fatShare,
+}: MacroSplitInputs): { proteinG: number; fatG: number; carbsG: number } {
+  const proteinG = weightKg * proteinPerKg
+  const fatG = (kcal * fatShare) / ATWATER.fat
+  const spent = proteinG * ATWATER.protein + fatG * ATWATER.fat
+  return { proteinG, fatG, carbsG: Math.max(0, (kcal - spent) / ATWATER.carbs) }
 }
