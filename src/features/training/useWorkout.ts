@@ -35,14 +35,24 @@ export interface WorkoutState {
     reps: number
     weightKg: number
     rir: number | null
+    done?: boolean
   }) => Promise<boolean>
+  updateSet: (
+    id: string,
+    values: { reps: number; weightKg: number; rir: number | null; done: boolean },
+  ) => Promise<boolean>
   removeSet: (id: string) => Promise<boolean>
+  /** Write a routine's planned sets onto the day. Resolves false if any failed. */
+  startRoutine: (plan: {
+    routineId: string
+    exercises: { exerciseId: string; targetSets: number; targetReps: number }[]
+  }) => Promise<boolean>
 }
 
 /** How far back the comparison line is allowed to reach. */
 const WINDOW_DAYS = 180
 
-const SELECT = `id, set_number, reps, weight_kg, rir, exercise_id,
+const SELECT = `id, set_number, reps, weight_kg, rir, done, exercise_id,
   workouts!inner (date),
   exercises!inner (id, name_en, name_de, muscle_group, equipment)`
 
@@ -52,6 +62,7 @@ type Row = {
   reps: number
   weight_kg: number
   rir: number | null
+  done: boolean
   exercise_id: string
   workouts: { date: string }
   exercises: {
@@ -70,6 +81,7 @@ const toSet = (row: Row): LoggedSet => ({
   reps: row.reps,
   weightKg: row.weight_kg,
   rir: row.rir,
+  done: row.done,
 })
 
 export function useWorkout(date: string): WorkoutState {
@@ -135,7 +147,13 @@ export function useWorkout(date: string): WorkoutState {
   const history: SessionSets[] = [...byDate].map(([day, daySets]) => ({ date: day, sets: daySets }))
 
   const addSet = useCallback(
-    async (set: { exerciseId: string; reps: number; weightKg: number; rir: number | null }) => {
+    async (set: {
+      exerciseId: string
+      reps: number
+      weightKg: number
+      rir: number | null
+      done?: boolean
+    }) => {
       if (!userId) return false
 
       // The day's workout is created on the first set rather than when the
@@ -163,9 +181,90 @@ export function useWorkout(date: string): WorkoutState {
         reps: set.reps,
         weight_kg: set.weightKg,
         rir: set.rir,
+        done: set.done ?? true,
       })
 
       if (error) return false
+      setReloads((n) => n + 1)
+      return true
+    },
+    [userId, date],
+  )
+
+  const updateSet = useCallback(
+    async (
+      id: string,
+      values: { reps: number; weightKg: number; rir: number | null; done: boolean },
+    ) => {
+      if (!userId) return false
+      const { data, error } = await supabase
+        .from('workout_sets')
+        .update({
+          reps: values.reps,
+          weight_kg: values.weightKg,
+          rir: values.rir,
+          done: values.done,
+        })
+        .eq('id', id)
+        .eq('user_id', userId)
+        .select('id')
+        .single()
+
+      if (!data || error) return false
+      setReloads((n) => n + 1)
+      return true
+    },
+    [userId],
+  )
+
+  /**
+   * Materialise a routine's plan as real, not-yet-done sets.
+   *
+   * Weight comes from the last time each exercise was actually performed, so
+   * the session opens as something to confirm rather than something to fill in
+   * — and so progress is visible at the moment of lifting rather than looked up
+   * afterwards. An exercise never done before starts at zero, which is a real
+   * weight and the right one for a bodyweight movement.
+   */
+  const startRoutine = useCallback(
+    async (plan: {
+      routineId: string
+      exercises: { exerciseId: string; targetSets: number; targetReps: number }[]
+    }) => {
+      if (!userId) return false
+
+      const workout = await supabase
+        .from('workouts')
+        .upsert({ user_id: userId, date, routine_id: plan.routineId }, { onConflict: 'user_id,date' })
+        .select('id')
+        .single()
+      if (!workout.data || workout.error) return false
+
+      const lastWeight = (exerciseId: string): number => {
+        const done = rowsRef.current
+          .filter((row) => row.exercise_id === exerciseId && row.done)
+          .sort((a, b) => b.workouts.date.localeCompare(a.workouts.date))
+        return done[0]?.weight_kg ?? 0
+      }
+
+      const rows = plan.exercises.flatMap((entry) =>
+        Array.from({ length: entry.targetSets }, (_, index) => ({
+          workout_id: workout.data.id,
+          user_id: userId,
+          exercise_id: entry.exerciseId,
+          set_number: index + 1,
+          reps: entry.targetReps,
+          weight_kg: lastWeight(entry.exerciseId),
+          rir: null,
+          done: false,
+        })),
+      )
+
+      if (rows.length > 0) {
+        const { error } = await supabase.from('workout_sets').insert(rows)
+        if (error) return false
+      }
+
       setReloads((n) => n + 1)
       return true
     },
@@ -190,5 +289,5 @@ export function useWorkout(date: string): WorkoutState {
     [userId],
   )
 
-  return { sets, exercises, history, status, addSet, removeSet }
+  return { sets, exercises, history, status, addSet, updateSet, removeSet, startRoutine }
 }

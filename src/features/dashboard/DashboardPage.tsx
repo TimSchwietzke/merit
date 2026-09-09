@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-import { NotBuiltYet } from '@/components/NotBuiltYet'
 import { Panel } from '@/components/Panel'
+import { Statement } from '@/components/Statement'
 import { Progress } from '@/components/Progress'
 import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
@@ -10,10 +10,14 @@ import { Button } from '@/components/ui/button'
 import { CalorieRing } from '@/features/dashboard/CalorieRing'
 import { useGoalHistory } from '@/features/goals/useGoalHistory'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
-import { todayKey } from '@/lib/date'
-import { formatNumber } from '@/lib/format'
+import { usePlanPause } from '@/features/routines/usePlanPause'
+import { useRoutines } from '@/features/routines/useRoutines'
+import { useWorkout } from '@/features/training/useWorkout'
+import { addDays, todayKey } from '@/lib/date'
+import { formatDayLong, formatNumber, weekdayLabel } from '@/lib/format'
 import { goalOn } from '@/lib/goals'
 import { sumPortions } from '@/lib/nutrition'
+import { isoWeekday, nextSession, performed, planPaused } from '@/lib/training'
 
 /**
  * What the day looks like, top to bottom (GOAL.md §6): a calm summary, then
@@ -108,10 +112,71 @@ export default function DashboardPage() {
 
       <section className="mt-8">
         <SectionHead label={t('pages.dashboard.training.label')} />
-        <NotBuiltYet label={t('common.notBuiltYet')}>
-          {t('pages.dashboard.training.planned')}
-        </NotBuiltYet>
+        <TrainingLine locale={locale} />
       </section>
+    </>
+  )
+}
+
+/**
+ * Today's training, in one sentence (GOAL.md §6).
+ *
+ * Due and done is acknowledged once and quietly; due and not done is stated as
+ * a fact; nothing due names when the next one is. §14 is explicit that a missed
+ * session is a fact and not a rebuke, so none of these three sentences is
+ * written to make anybody feel anything.
+ *
+ * The accent edge is the one piece of pure voice on the screen (§6), and there
+ * is one per screen — this is it.
+ */
+function TrainingLine({ locale }: { locale: string }) {
+  const { t } = useTranslation()
+  const today = todayKey()
+  const { routines, status } = useRoutines()
+  const { sets } = useWorkout(today)
+  const { pausedUntil } = usePlanPause()
+
+  if (status === 'loading') {
+    return <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
+  }
+
+  const plan = routines.map((routine) => ({
+    id: routine.id,
+    name: routine.name,
+    weekdays: routine.weekdays,
+  }))
+  const weekday = isoWeekday(today)
+  const due = plan.find((entry) => entry.weekdays.includes(weekday))
+  const trained = performed(sets).length > 0
+
+  const sentence = () => {
+    // A paused plan reports nothing as due, and says so rather than going
+    // quiet — otherwise it looks like the plan was forgotten.
+    if (planPaused(pausedUntil, today)) {
+      return t('pages.dashboard.training.paused', {
+        date: formatDayLong(pausedUntil as string, locale),
+      })
+    }
+    if (due && trained) return t('pages.dashboard.training.doneToday', { name: due.name })
+    if (due) return t('pages.dashboard.training.due', { name: due.name })
+
+    const next = nextSession(plan, today)
+    if (!next) return t('pages.dashboard.training.nothingPlanned')
+    if (next.inDays === 1) {
+      return `${t('pages.dashboard.training.rest')} ${t('pages.dashboard.training.nextTomorrow', { name: next.day.name })}`
+    }
+    return `${t('pages.dashboard.training.rest')} ${t('pages.dashboard.training.next', {
+      name: next.day.name,
+      day: weekdayLabel(isoWeekday(addDays(today, next.inDays)), locale),
+    })}`
+  }
+
+  return (
+    <>
+      <Statement>{sentence()}</Statement>
+      <Button asChild variant="quiet" className="mt-4">
+        <Link to="/training">{t('pages.dashboard.training.open')}</Link>
+      </Button>
     </>
   )
 }
