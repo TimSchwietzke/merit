@@ -230,7 +230,6 @@ export type Database = {
           goal: string | null
           height_cm: number | null
           locale: string
-          plan_paused_until: string | null
           sex: string | null
           theme: string
           updated_at: string
@@ -244,7 +243,6 @@ export type Database = {
           goal?: string | null
           height_cm?: number | null
           locale?: string
-          plan_paused_until?: string | null
           sex?: string | null
           theme?: string
           updated_at?: string
@@ -258,7 +256,6 @@ export type Database = {
           goal?: string | null
           height_cm?: number | null
           locale?: string
-          plan_paused_until?: string | null
           sex?: string | null
           theme?: string
           updated_at?: string
@@ -296,8 +293,7 @@ export type Database = {
           id: string
           position: number
           routine_id: string
-          target_reps: number
-          target_sets: number
+          set_reps: number[]
         }
         Insert: {
           created_at?: string
@@ -305,8 +301,7 @@ export type Database = {
           id?: string
           position: number
           routine_id: string
-          target_reps: number
-          target_sets: number
+          set_reps: number[]
         }
         Update: {
           created_at?: string
@@ -314,8 +309,7 @@ export type Database = {
           id?: string
           position?: number
           routine_id?: string
-          target_reps?: number
-          target_sets?: number
+          set_reps?: number[]
         }
         Relationships: [
           {
@@ -526,7 +520,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      all_between: {
+        Args: { high: number; low: number; numbers: number[] }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

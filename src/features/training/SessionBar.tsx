@@ -41,12 +41,18 @@ export function SessionBar() {
   const doneHere = performed(mine)
 
   return (
+    // A notification, not a strip welded to the bottom edge: inset from the
+    // sides, fully rounded corners, floating over the page. §6 allows a shadow
+    // on something that genuinely floats, and this does.
     <div
       data-session-bar
-      className="fixed inset-x-0 bottom-[calc(56px+env(safe-area-inset-bottom))] z-30 border-t
-                 border-line bg-surface lg:bottom-0"
+      className="pointer-events-none fixed inset-x-0 bottom-[calc(56px+0.75rem+env(safe-area-inset-bottom))]
+                 z-30 px-3 lg:bottom-3"
     >
-      <div className="mx-auto w-full max-w-[860px] px-4 py-2 md:px-6">
+      <div
+        className="pointer-events-auto mx-auto w-full max-w-[520px] rounded-[14px] border border-line
+                   bg-surface/95 px-4 py-3 shadow-lg backdrop-blur"
+      >
         <div className="flex items-center justify-between gap-3">
           <p className="min-w-0 truncate font-mono text-2xs text-ink-faint">
             <span className="text-ink">{name}</span> ·{' '}

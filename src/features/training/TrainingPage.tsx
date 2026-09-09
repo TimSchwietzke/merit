@@ -5,17 +5,14 @@ import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/EmptyState'
-import { RowBody, Rows } from '@/components/Rows'
 import { ScreenTitle } from '@/components/ScreenTitle'
-import { SectionHead } from '@/components/SectionHead'
 import { SwipeRow } from '@/components/SwipeRow'
 import { Button } from '@/components/ui/button'
-import { useRoutines, type Routine } from '@/features/routines/useRoutines'
 import { useExercise } from '@/features/training/useExercise'
 import { useActiveSession } from '@/features/training/useActiveSession'
 import { useWorkout, type ExerciseRef } from '@/features/training/useWorkout'
-import { addDays, parseDateKey, todayKey } from '@/lib/date'
-import { formatDayLong, formatNumber, parseDecimalInput, weekdayLabel } from '@/lib/format'
+import { addDays, todayKey } from '@/lib/date'
+import { formatDayLong, formatNumber, parseDecimalInput } from '@/lib/format'
 import {
   firstOutstandingOf,
   groupSets,
@@ -61,8 +58,10 @@ export default function TrainingPage() {
   // logging a set from the bar cannot leave the list behind it showing older
   // figures.
   const { revision, active, choose } = useActiveSession()
-  const { sets, exercises, history, status, addSet, updateSet, removeSet, startRoutine } =
-    useWorkout(date, revision)
+  const { sets, exercises, history, status, addSet, updateSet, removeSet } = useWorkout(
+    date,
+    revision,
+  )
   const [openRow, setOpenRow] = useState<string | null>(null)
 
   const pickedId = params.get('exercise')
@@ -128,7 +127,7 @@ export default function TrainingPage() {
         ) : status === 'loading' ? (
           <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
         ) : order.length === 0 ? (
-          <StartSession date={date} locale={locale} onStart={startRoutine} />
+          <EmptyState>{t('pages.training.empty')}</EmptyState>
         ) : (
           <>
             {order.map((exerciseId) => (
@@ -151,131 +150,13 @@ export default function TrainingPage() {
               />
             ))}
 
-            <Button asChild variant="primary" className="mt-6 w-full md:w-auto">
-              <Link to={`/training/add?date=${date}`}>{t('pages.training.addExercise')}</Link>
-            </Button>
           </>
         )}
+
+        <Button asChild variant="primary" className="mt-6 w-full md:w-auto">
+          <Link to={`/training/add?date=${date}`}>{t('pages.training.addExercise')}</Link>
+        </Button>
       </div>
-    </>
-  )
-}
-
-/**
- * What a day with nothing on it offers: the training day that is due, the
- * others, and a session with no plan at all — which §7 of GOAL.md requires stay
- * possible.
- */
-function StartSession({
-  date,
-  locale,
-  onStart,
-}: {
-  date: string
-  locale: string
-  onStart: (plan: {
-    routineId: string
-    exercises: { exerciseId: string; targetSets: number; targetReps: number }[]
-  }) => Promise<boolean>
-}) {
-  const { t } = useTranslation()
-  const { routines, status } = useRoutines()
-  const [pending, setPending] = useState<string | null>(null)
-  const [failed, setFailed] = useState(false)
-
-  // ISO weekday of the day being looked at, 1 = Monday.
-  const weekday = ((parseDateKey(date).getDay() + 6) % 7) + 1
-  const due = routines.filter((routine) => routine.weekdays.includes(weekday))
-  const others = routines.filter((routine) => !routine.weekdays.includes(weekday))
-
-  async function start(routine: Routine) {
-    setPending(routine.id)
-    setFailed(false)
-    const ok = await onStart({
-      routineId: routine.id,
-      exercises: routine.exercises.map((entry) => ({
-        exerciseId: entry.exerciseId,
-        targetSets: entry.targetSets,
-        targetReps: entry.targetReps,
-      })),
-    })
-    setPending(null)
-    if (!ok) setFailed(true)
-  }
-
-  const row = (routine: Routine) => (
-    <li key={routine.id}>
-      <RowBody onClick={() => void start(routine)}>
-        <span className="min-w-0 flex-1">
-          <span className="block truncate">{routine.name}</span>
-          <span className="block truncate font-mono text-2xs text-ink-faint">
-            {t('pages.routines.exerciseCount', { count: routine.exercises.length })}
-            {routine.weekdays.length > 0
-              ? ` · ${routine.weekdays.map((day) => weekdayLabel(day, locale)).join(' ')}`
-              : ''}
-          </span>
-        </span>
-        <span className="shrink-0 font-mono text-2xs text-ink-faint">
-          {pending === routine.id ? t('pages.training.start.starting') : '→'}
-        </span>
-      </RowBody>
-    </li>
-  )
-
-  return (
-    <>
-      {status === 'loading' ? (
-        <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
-      ) : (
-        <>
-          {due.length > 0 ? (
-            <section className="mb-6">
-              <SectionHead label={t('pages.training.start.due')} />
-              <Rows>{due.map(row)}</Rows>
-            </section>
-          ) : null}
-
-          {others.length > 0 ? (
-            <section className="mb-6">
-              <SectionHead
-                label={due.length > 0 ? t('pages.training.start.other') : t('pages.training.start.label')}
-              />
-              <Rows>{others.map(row)}</Rows>
-            </section>
-          ) : null}
-
-          {routines.length === 0 ? (
-            <section className="mb-6">
-              <SectionHead label={t('pages.training.start.label')} />
-              <EmptyState>{t('pages.routines.empty')}</EmptyState>
-            </section>
-          ) : null}
-
-          {failed ? (
-            <p role="alert" className="mb-3 text-sm text-danger">
-              {t('pages.training.start.startFailed')}
-            </p>
-          ) : null}
-
-          {/* Starting a training day is the way this screen is meant to be
-              used, so with none defined the primary action is defining one.
-              Once they exist the rows above *are* the primary action and
-              neither button claims it (§10.4). Free logging stays a
-              first-class way in either way (GOAL.md §7). */}
-          <div className="flex flex-col gap-3 md:flex-row">
-            <Button asChild variant={routines.length === 0 ? 'primary' : 'quiet'}>
-              <Link to="/training/routines">
-                {routines.length === 0
-                  ? t('pages.routines.create')
-                  : t('pages.training.start.manage')}
-              </Link>
-            </Button>
-            <Button asChild variant="quiet">
-              <Link to={`/training/add?date=${date}`}>{t('pages.training.start.free')}</Link>
-            </Button>
-          </div>
-        </>
-      )}
     </>
   )
 }

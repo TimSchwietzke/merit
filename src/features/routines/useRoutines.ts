@@ -16,8 +16,8 @@ export interface RoutineExercise {
   id: string
   exerciseId: string
   position: number
-  targetSets: number
-  targetReps: number
+  /** Reps for each set, in order. Its length is how many sets there are. */
+  setReps: number[]
   exercise: ExerciseRef
 }
 
@@ -33,7 +33,7 @@ export interface Routine {
 const SELECT = `id, name, position,
   routine_days (weekday),
   routine_exercises (
-    id, exercise_id, position, target_sets, target_reps,
+    id, exercise_id, position, set_reps,
     exercises!inner (id, name_en, name_de, muscle_group, equipment)
   )`
 
@@ -46,8 +46,7 @@ type Row = {
     id: string
     exercise_id: string
     position: number
-    target_sets: number
-    target_reps: number
+    set_reps: number[]
     exercises: {
       id: string
       name_en: string
@@ -69,8 +68,7 @@ const toRoutine = (row: Row): Routine => ({
       id: entry.id,
       exerciseId: entry.exercise_id,
       position: entry.position,
-      targetSets: entry.target_sets,
-      targetReps: entry.target_reps,
+      setReps: entry.set_reps,
       exercise: {
         id: entry.exercises.id,
         nameEn: entry.exercises.name_en,
@@ -89,17 +87,13 @@ export interface RoutinesState {
   remove: (id: string) => Promise<boolean>
   setWeekdays: (id: string, weekdays: number[]) => Promise<boolean>
   addExercise: (routineId: string, exerciseId: string) => Promise<boolean>
-  updateExercise: (
-    id: string,
-    values: { targetSets: number; targetReps: number },
-  ) => Promise<boolean>
+  updateExercise: (id: string, setReps: number[]) => Promise<boolean>
   removeExercise: (id: string) => Promise<boolean>
   moveExercise: (routineId: string, id: string, by: -1 | 1) => Promise<boolean>
 }
 
 /** What a new exercise starts at, so adding one needs no typing. */
-const DEFAULT_SETS = 3
-const DEFAULT_REPS = 8
+const DEFAULT_SET_REPS = [8, 8, 8]
 
 export function useRoutines(): RoutinesState {
   const { session } = useSession()
@@ -202,8 +196,7 @@ export function useRoutines(): RoutinesState {
         routine_id: routineId,
         exercise_id: exerciseId,
         position: routine ? routine.exercises.length : 0,
-        target_sets: DEFAULT_SETS,
-        target_reps: DEFAULT_REPS,
+        set_reps: DEFAULT_SET_REPS,
       })
       if (error) return false
       reload()
@@ -213,10 +206,10 @@ export function useRoutines(): RoutinesState {
   )
 
   const updateExercise = useCallback(
-    async (id: string, values: { targetSets: number; targetReps: number }) => {
+    async (id: string, setReps: number[]) => {
       const { data, error } = await supabase
         .from('routine_exercises')
-        .update({ target_sets: values.targetSets, target_reps: values.targetReps })
+        .update({ set_reps: setReps })
         .eq('id', id)
         .select('id')
         .single()

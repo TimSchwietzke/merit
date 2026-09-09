@@ -3,16 +3,18 @@ import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import { ArrowUpDown } from 'lucide-react'
 
+import { Row, Rows } from '@/components/Rows'
 import { ScreenTitle } from '@/components/ScreenTitle'
+import { Statement } from '@/components/Statement'
+import { Sheet } from '@/components/ui/sheet'
 import { SectionHead } from '@/components/SectionHead'
 import { Button } from '@/components/ui/button'
 import { Confirm } from '@/components/ui/confirm'
-import { usePlanPause } from '@/features/routines/usePlanPause'
-import { useSchedule, type DaySession } from '@/features/training/useSchedule'
+import { useSchedule, type DaySession, type ScheduleDay } from '@/features/training/useSchedule'
 import { todayKey } from '@/lib/date'
 import { formatDayShort, weekdayLabel } from '@/lib/format'
 import { isPast, swap, weekOf } from '@/lib/schedule'
-import { isoWeekday, planPaused } from '@/lib/training'
+import { isoWeekday } from '@/lib/training'
 
 /**
  * The week (GOAL.md §5, §6): what is on each day, what has been done, and the
@@ -30,9 +32,10 @@ export default function WeekPage() {
 
   const today = todayKey()
   const week = weekOf(today)
-  const { days, overrides, status, apply } = useSchedule(week[0], week[6])
-  const { pausedUntil } = usePlanPause()
+  const { days, routines, overrides, status, apply } = useSchedule(week[0], week[6])
+  const dueToday = days.find((day) => day.date === today)?.sessions[0] ?? null
 
+  const [pickOpen, setPickOpen] = useState(false)
   const [moving, setMoving] = useState<{ routineId: string; date: string; name: string } | null>(null)
   const [pending, setPending] = useState<
     { a: { routineId: string; date: string; name: string }; b: { routineId: string; date: string; name: string } } | null
@@ -50,15 +53,10 @@ export default function WeekPage() {
     <>
       <ScreenTitle>{t('nav.training')}</ScreenTitle>
 
-      <section>
-        <SectionHead
-          label={t('pages.training.week.label')}
-          hint={
-            planPaused(pausedUntil, today)
-              ? t('pages.training.week.paused', { date: formatDayShort(pausedUntil as string, locale) })
-              : null
-          }
-        />
+      {status === 'ready' ? <Today days={days} today={today} /> : null}
+
+      <section className="mt-6">
+        <SectionHead label={t('pages.training.week.label')} />
 
         {moving ? (
           <div className="mb-3 flex items-center justify-between gap-3 rounded-md border border-accent bg-accent-soft px-3 py-2">
@@ -150,14 +148,49 @@ export default function WeekPage() {
         )}
       </section>
 
+      {/* One way in. A session due today starts by name; on any other day the
+          same button asks which one — there is no reason a rest day should be
+          a dead end, and no separate "free session" for it to be a dead end
+          next to. */}
       <div className="mt-6 flex flex-col gap-3 md:flex-row">
+        {routines.length === 0 ? (
+          <Button asChild variant="primary">
+            <Link to="/training/routines">{t('pages.training.week.make')}</Link>
+          </Button>
+        ) : (
+          <Button variant="primary" onClick={() => setPickOpen(true)}>
+            {dueToday
+              ? t('pages.training.week.startToday', { name: dueToday.routine.name })
+              : t('pages.training.week.startAnything')}
+          </Button>
+        )}
         <Button asChild variant="quiet">
           <Link to="/training/routines">{t('pages.training.week.manage')}</Link>
         </Button>
-        <Button asChild variant="quiet">
-          <Link to={`/training/add?date=${today}`}>{t('pages.training.week.free')}</Link>
-        </Button>
       </div>
+
+      <Sheet
+        open={pickOpen}
+        onOpenChange={setPickOpen}
+        title={t('pages.training.week.pick')}
+        closeLabel={t('common.close')}
+      >
+        <Rows>
+          {routines.map((routine) => (
+            <Row
+              key={routine.id}
+              onClick={() => navigate(`/training/session?date=${today}&routine=${routine.id}`)}
+            >
+              <span className="min-w-0 flex-1 truncate">{routine.name}</span>
+              {routine.weekdays.length > 0 ? (
+                <span className="shrink-0 font-mono text-2xs text-ink-faint">
+                  {routine.weekdays.map((day) => weekdayLabel(day, locale)).join(' ')}
+                </span>
+              ) : null}
+            </Row>
+          ))}
+        </Rows>
+      </Sheet>
 
       <Confirm
         open={pending !== null}
@@ -179,5 +212,26 @@ export default function WeekPage() {
         }}
       />
     </>
+  )
+}
+
+/**
+ * What today is, in one sentence, before the grid rather than left to be read
+ * out of it. GOAL.md §6 asks the dashboard for exactly this; the training tab
+ * is the other place somebody looks for it.
+ */
+function Today({ days, today }: { days: ScheduleDay[]; today: string }) {
+  const { t } = useTranslation()
+  const sessions = days.find((day) => day.date === today)?.sessions ?? []
+  const done = sessions.find((session) => session.loggedSets > 0)
+
+  return (
+    <Statement>
+      {done
+        ? t('pages.training.week.doneToday', { name: done.routine.name })
+        : sessions.length > 0
+          ? t('pages.training.week.dueToday', { name: sessions[0].routine.name })
+          : t('pages.training.week.restToday')}
+    </Statement>
   )
 }

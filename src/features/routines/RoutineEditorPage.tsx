@@ -1,11 +1,10 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { ChevronDown, ChevronUp } from 'lucide-react'
+import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/EmptyState'
-import { NumberField } from '@/components/NumberField'
 import { PageHeader } from '@/components/PageHeader'
 import { Panel } from '@/components/Panel'
 import { SectionHead } from '@/components/SectionHead'
@@ -15,7 +14,6 @@ import { Label } from '@/components/ui/label'
 import { useRoutines, type RoutineExercise } from '@/features/routines/useRoutines'
 import { parseDecimalInput, weekdayLabel } from '@/lib/format'
 
-const SETS_LIMITS = { min: 1, max: 20, decimals: 0 } as const
 const REPS_LIMITS = { min: 1, max: 1000, decimals: 0 } as const
 
 const WEEKDAYS = [1, 2, 3, 4, 5, 6, 7]
@@ -127,7 +125,7 @@ export default function RoutineEditorPage() {
                 locale={locale}
                 first={index === 0}
                 last={index === routine.exercises.length - 1}
-                onUpdate={(values) => void updateExercise(entry.id, values).then(fail)}
+                onUpdate={(setReps) => void updateExercise(entry.id, setReps).then(fail)}
                 onMove={(by) => void moveExercise(id, entry.id, by).then(fail)}
                 onRemove={() => void removeExercise(entry.id).then(fail)}
               />
@@ -186,20 +184,22 @@ function PlannedExercise({
   locale: string
   first: boolean
   last: boolean
-  onUpdate: (values: { targetSets: number; targetReps: number }) => void
+  onUpdate: (setReps: number[]) => void
   onMove: (by: -1 | 1) => void
   onRemove: () => void
 }) {
   const { t } = useTranslation()
-  const [sets, setSets] = useState(String(entry.targetSets))
-  const [reps, setReps] = useState(String(entry.targetReps))
+  // One field per set, because a routine that can only say `3 × 8` cannot say
+  // 12/10/8 — which is what most people actually write down.
+  const [reps, setReps] = useState(entry.setReps.map(String))
 
-  const commit = (nextSets: string, nextReps: string) => {
-    const parsedSets = parseDecimalInput(nextSets, SETS_LIMITS)
-    const parsedReps = parseDecimalInput(nextReps, REPS_LIMITS)
-    if (parsedSets === null || parsedReps === null) return
-    if (parsedSets === entry.targetSets && parsedReps === entry.targetReps) return
-    onUpdate({ targetSets: parsedSets, targetReps: parsedReps })
+  function commit(next: string[]) {
+    setReps(next)
+    const parsed = next.map((value) => parseDecimalInput(value, REPS_LIMITS))
+    if (parsed.some((value) => value === null) || parsed.length === 0) return
+    const numbers = parsed as number[]
+    if (numbers.join() === entry.setReps.join()) return
+    onUpdate(numbers)
   }
 
   return (
@@ -210,8 +210,7 @@ function PlannedExercise({
             {locale === 'de' ? entry.exercise.nameDe : entry.exercise.nameEn}
           </p>
           {/* Up and down rather than a drag handle: a drag on a phone fights
-              the scroll it lives inside, and reordering five rows is not worth
-              the gesture. */}
+              the scroll it lives inside. */}
           <span className="flex shrink-0 gap-1">
             <Button
               variant="bare"
@@ -234,34 +233,49 @@ function PlannedExercise({
           </span>
         </div>
 
-        <div className="mt-3 flex gap-3">
-          <div className="flex-1">
-            <NumberField
-              id={`sets-${entry.id}`}
-              label={t('pages.routines.editor.sets')}
-              unit="×"
-              value={sets}
-              inputMode="numeric"
-              onChange={(event) => setSets(event.target.value)}
-              onBlur={() => commit(sets, reps)}
-            />
-          </div>
-          <div className="flex-1">
-            <NumberField
-              id={`reps-${entry.id}`}
-              label={t('pages.routines.editor.reps')}
-              unit=""
-              value={reps}
-              inputMode="numeric"
-              onChange={(event) => setReps(event.target.value)}
-              onBlur={() => commit(sets, reps)}
-            />
-          </div>
-        </div>
+        <ul className="mt-3 flex flex-col gap-2">
+          {reps.map((value, index) => (
+            <li key={index} className="flex items-center gap-2">
+              <span className="w-12 shrink-0 font-mono text-2xs text-ink-faint">
+                {t('pages.routines.editor.setN', { n: index + 1 })}
+              </span>
+              <input
+                aria-label={t('pages.routines.editor.setN', { n: index + 1 })}
+                inputMode="numeric"
+                value={value}
+                onChange={(event) =>
+                  setReps(reps.map((r, i) => (i === index ? event.target.value : r)))
+                }
+                onBlur={() => commit(reps)}
+                className="min-h-11 min-w-0 flex-1 rounded-md bg-surface-2 px-2 text-right font-mono
+                           text-input tabular-nums text-ink md:min-h-9 md:text-sm"
+              />
+              <Button
+                variant="bare"
+                size="icon"
+                aria-label={t('pages.routines.editor.removeSet', { n: index + 1 })}
+                disabled={reps.length <= 1}
+                onClick={() => commit(reps.filter((_, i) => i !== index))}
+              >
+                <X />
+              </Button>
+            </li>
+          ))}
+        </ul>
 
-        <Button variant="bare" className="mt-2 text-danger" onClick={onRemove}>
-          {t('pages.routines.editor.remove')}
-        </Button>
+        <div className="mt-3 flex items-center justify-between gap-3">
+          <Button
+            variant="bare"
+            size="small"
+            onClick={() => commit([...reps, reps[reps.length - 1] ?? '8'])}
+          >
+            <Plus size={15} strokeWidth={1.75} aria-hidden />
+            {t('pages.routines.editor.addSet')}
+          </Button>
+          <Button variant="bare" size="small" className="text-danger" onClick={onRemove}>
+            {t('pages.routines.editor.remove')}
+          </Button>
+        </div>
       </Panel>
     </li>
   )

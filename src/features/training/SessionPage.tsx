@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Minus, Plus } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 
 import { EmptyState } from '@/components/EmptyState'
 import { PageHeader } from '@/components/PageHeader'
@@ -32,8 +32,8 @@ interface PlannedExercise {
   routineExerciseId: string
   exerciseId: string
   name: string
-  sets: number
-  reps: number
+  /** Reps per set, in order. Dropping a set is dropping one of these. */
+  setReps: number[]
 }
 
 type Scope = 'today' | 'always' | 'pick'
@@ -82,8 +82,7 @@ export default function SessionPage() {
       routineExerciseId: entry.id,
       exerciseId: entry.exerciseId,
       name: locale === 'de' ? entry.exercise.nameDe : entry.exercise.nameEn,
-      sets: entry.targetSets,
-      reps: entry.targetReps,
+      setReps: entry.setReps,
     }))
 
   const edit = (next: PlannedExercise[]) => {
@@ -92,11 +91,7 @@ export default function SessionPage() {
   }
 
   const asPlan = () =>
-    current.map((entry) => ({
-      exerciseId: entry.exerciseId,
-      targetSets: entry.sets,
-      targetReps: entry.reps,
-    }))
+    current.map((entry) => ({ exerciseId: entry.exerciseId, setReps: entry.setReps }))
 
   /**
    * Write the adjusted plan as far as the chosen scope reaches, then start the
@@ -111,10 +106,7 @@ export default function SessionPage() {
 
     if (scope === 'always') {
       for (const entry of current) {
-        await updateExercise(entry.routineExerciseId, {
-          targetSets: entry.sets,
-          targetReps: entry.reps,
-        })
+        await updateExercise(entry.routineExerciseId, entry.setReps)
       }
       const dropped = routine!.exercises.filter(
         (entry) => !current.some((kept) => kept.routineExerciseId === entry.id),
@@ -181,62 +173,81 @@ export default function SessionPage() {
         ) : (
           <ul className="flex flex-col gap-3">
             {current.map((entry) => (
-              // The name gets the width; the controls sit under it. Three of
-              // them beside a German compound leaves `Bankdrück…`.
               <li
                 key={entry.routineExerciseId}
-                className="rounded-lg border border-line bg-surface px-4 py-3"
+                className="overflow-hidden rounded-lg border border-line bg-surface"
               >
-                <p className="text-sm text-ink">{entry.name}</p>
-                <p className="mt-0.5 font-mono text-2xs text-ink-faint">
-                  {t('pages.training.session.sets', { sets: entry.sets, reps: entry.reps })}
-                </p>
+                <div className="flex items-center gap-3 border-b border-line bg-surface-2 px-4 py-3">
+                  <p className="min-w-0 flex-1 truncate text-sm font-medium text-ink">
+                    {entry.name}
+                  </p>
+                  {/* An icon, not a sentence. "Not today" was two words doing
+                      what one glyph does, on a row that has no space for it. */}
+                  <Button
+                    variant="bare"
+                    size="icon"
+                    aria-label={t('pages.training.session.removeExercise')}
+                    onClick={() =>
+                      edit(current.filter((row) => row.routineExerciseId !== entry.routineExerciseId))
+                    }
+                  >
+                    <X />
+                  </Button>
+                </div>
 
-                <div className="mt-2 flex items-center justify-end gap-1">
-                <Button
-                  variant="bare"
-                  size="icon"
-                  aria-label={t('pages.training.session.removeSet')}
-                  disabled={entry.sets <= 1}
-                  onClick={() =>
-                    edit(
-                      current.map((row) =>
-                        row.routineExerciseId === entry.routineExerciseId
-                          ? { ...row, sets: row.sets - 1 }
-                          : row,
-                      ),
-                    )
-                  }
-                >
-                  <Minus />
-                </Button>
-                <Button
-                  variant="bare"
-                  size="icon"
-                  aria-label={t('pages.training.session.addSet')}
-                  onClick={() =>
-                    edit(
-                      current.map((row) =>
-                        row.routineExerciseId === entry.routineExerciseId
-                          ? { ...row, sets: row.sets + 1 }
-                          : row,
-                      ),
-                    )
-                  }
-                >
-                  <Plus />
-                </Button>
+                <ul>
+                  {entry.setReps.map((reps, index) => (
+                    <li
+                      key={index}
+                      className="flex items-center gap-3 border-b border-line px-4 py-2 last:border-b-0"
+                    >
+                      <span className="w-12 shrink-0 font-mono text-2xs text-ink-faint">
+                        {t('pages.routines.editor.setN', { n: index + 1 })}
+                      </span>
+                      <span className="min-w-0 flex-1 font-mono text-sm tabular-nums text-ink">
+                        {reps}
+                      </span>
+                      <Button
+                        variant="bare"
+                        size="icon"
+                        aria-label={t('pages.routines.editor.removeSet', { n: index + 1 })}
+                        disabled={entry.setReps.length <= 1}
+                        onClick={() =>
+                          edit(
+                            current.map((row) =>
+                              row.routineExerciseId === entry.routineExerciseId
+                                ? { ...row, setReps: row.setReps.filter((_, i) => i !== index) }
+                                : row,
+                            ),
+                          )
+                        }
+                      >
+                        <X />
+                      </Button>
+                    </li>
+                  ))}
+                </ul>
+
                 <Button
                   variant="bare"
                   size="small"
-                  className="shrink-0 text-danger"
+                  className="m-2"
                   onClick={() =>
-                    edit(current.filter((row) => row.routineExerciseId !== entry.routineExerciseId))
+                    edit(
+                      current.map((row) =>
+                        row.routineExerciseId === entry.routineExerciseId
+                          ? {
+                              ...row,
+                              setReps: [...row.setReps, row.setReps[row.setReps.length - 1] ?? 8],
+                            }
+                          : row,
+                      ),
+                    )
                   }
                 >
-                  {t('pages.training.session.removeExercise')}
+                  <Plus size={15} strokeWidth={1.75} aria-hidden />
+                  {t('pages.training.session.addSet')}
                 </Button>
-                </div>
               </li>
             ))}
           </ul>

@@ -1,4 +1,4 @@
-import { addDays, daysBetween, parseDateKey } from '@/lib/date'
+import { addDays, parseDateKey } from '@/lib/date'
 /**
  * The training maths (CLAUDE.md, Code).
  *
@@ -134,18 +134,6 @@ export function nextSession(
   return null
 }
 
-/**
- * Whether the plan is paused on a given day. The date is the last day of the
- * pause, so a fortnight away is not a fortnight of missed sessions.
- */
-export function planPaused(pausedUntil: string | null | undefined, date: string): boolean {
-  // Any absent value, not just `null`. A profile row read before this column
-  // existed comes back with the field missing, and `undefined !== null` is
-  // true — which sent an undefined into a date parser and took the dashboard
-  // down with it.
-  if (!pausedUntil) return false
-  return daysBetween(date, pausedUntil) >= 0
-}
 
 /**
  * Which set is the one being done.
@@ -162,10 +150,18 @@ export function nextActive(sets: readonly LoggedSet[], after?: LoggedSet | null)
   if (outstanding.length === 0) return null
 
   if (after) {
-    const sameExercise = outstanding.find(
+    // The next one down this exercise…
+    const below = outstanding.find(
       (set) => set.exerciseId === after.exerciseId && set.setNumber > after.setNumber,
     )
-    if (sameExercise) return sameExercise.id
+    if (below) return below.id
+
+    // …and if there is none, anything still outstanding *in this exercise*
+    // before moving on. Skipping to another exercise while sets three and four
+    // are done but one and two are not is how somebody logs a set, looks down,
+    // and finds the highlight somewhere else entirely.
+    const remaining = outstanding.find((set) => set.exerciseId === after.exerciseId)
+    if (remaining) return remaining.id
   }
 
   return outstanding[0].id

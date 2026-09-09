@@ -10,9 +10,7 @@ import { SectionHead } from '@/components/SectionHead'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { usePlanPause } from '@/features/routines/usePlanPause'
 import { useRoutines } from '@/features/routines/useRoutines'
-import { todayKey } from '@/lib/date'
 import { weekdayLabel } from '@/lib/format'
 
 /**
@@ -27,7 +25,6 @@ export default function RoutinesPage() {
   const locale = i18n.language
   const navigate = useNavigate()
   const { routines, status, create } = useRoutines()
-  const { pausedUntil, setPausedUntil } = usePlanPause()
 
   const [name, setName] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -110,31 +107,6 @@ export default function RoutinesPage() {
             </Button>
           </Panel>
         </form>
-      </section>
-
-      <section className="mt-8">
-        <SectionHead label={t('pages.routines.pauseLabel')} />
-        <Panel className="flex flex-col gap-3 p-4">
-          <div className="flex flex-col gap-2">
-            <Label htmlFor="plan-pause">
-              {t('pages.routines.pauseUntil')}
-              <span className="text-ink-faint">{t('pages.routines.pauseHint')}</span>
-            </Label>
-            <Input
-              id="plan-pause"
-              type="date"
-              min={todayKey()}
-              value={pausedUntil ?? ''}
-              onChange={(event) => void setPausedUntil(event.target.value || null)}
-              className="font-mono [&::-webkit-calendar-picker-indicator]:opacity-60 dark:[&::-webkit-calendar-picker-indicator]:invert"
-            />
-          </div>
-          {pausedUntil ? (
-            <Button variant="quiet" onClick={() => void setPausedUntil(null)}>
-              {t('pages.routines.pauseClear')}
-            </Button>
-          ) : null}
-        </Panel>
       </section>
 
       <Link

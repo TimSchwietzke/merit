@@ -10,14 +10,13 @@ import { Button } from '@/components/ui/button'
 import { CalorieRing } from '@/features/dashboard/CalorieRing'
 import { useGoalHistory } from '@/features/goals/useGoalHistory'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
-import { usePlanPause } from '@/features/routines/usePlanPause'
 import { useRoutines } from '@/features/routines/useRoutines'
 import { useWorkout } from '@/features/training/useWorkout'
 import { addDays, todayKey } from '@/lib/date'
-import { formatDayLong, formatNumber, weekdayLabel } from '@/lib/format'
+import { formatNumber, weekdayLabel } from '@/lib/format'
 import { goalOn } from '@/lib/goals'
 import { sumPortions } from '@/lib/nutrition'
-import { isoWeekday, nextSession, planPaused } from '@/lib/training'
+import { isoWeekday, nextSession } from '@/lib/training'
 
 /**
  * What the day looks like, top to bottom (GOAL.md §6): a calm summary, then
@@ -134,7 +133,6 @@ function TrainingLine({ locale }: { locale: string }) {
   const today = todayKey()
   const { routines, status } = useRoutines()
   const { sets } = useWorkout(today)
-  const { pausedUntil } = usePlanPause()
 
   if (status === 'loading') {
     return <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
@@ -150,13 +148,6 @@ function TrainingLine({ locale }: { locale: string }) {
   const trained = sets.length > 0
 
   const sentence = () => {
-    // A paused plan reports nothing as due, and says so rather than going
-    // quiet — otherwise it looks like the plan was forgotten.
-    if (planPaused(pausedUntil, today)) {
-      return t('pages.dashboard.training.paused', {
-        date: formatDayLong(pausedUntil as string, locale),
-      })
-    }
     if (due && trained) return t('pages.dashboard.training.doneToday', { name: due.name })
     if (due) return t('pages.dashboard.training.due', { name: due.name })
 

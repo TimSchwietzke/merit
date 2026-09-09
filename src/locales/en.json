@@ -61,7 +61,6 @@
         "next": "Next is {{name}} on {{day}}.",
         "nextTomorrow": "Next is {{name}} tomorrow.",
         "nothingPlanned": "No training day is planned in yet.",
-        "paused": "Plan paused until {{date}}.",
         "open": "Training"
       },
       "loadFailed": "Today could not be loaded. Check your connection and try again."
@@ -234,8 +233,7 @@
         "freeHint": "pick exercises as you go",
         "manage": "Training days",
         "starting": "Starting…",
-        "startFailed": "That session did not start. Check your connection and try again.",
-        "paused": "plan paused until {{date}}"
+        "startFailed": "That session did not start. Check your connection and try again."
       },
       "setRow": {
         "add": "Add a set",
@@ -261,7 +259,14 @@
         "loadFailed": "Your week could not be loaded. Check your connection and try again.",
         "manage": "Training days",
         "free": "Free session",
-        "paused": "Plan paused until {{date}}"
+        "dueToday": "{{name}} today.",
+        "doneToday": "{{name}} done.",
+        "restToday": "Nothing due today.",
+        "startToday": "Start {{name}}",
+        "startAnything": "Start a session",
+        "pick": "Which training day?",
+        "none": "No training day yet. Make one and it lands in the week.",
+        "make": "Make a training day"
       },
       "session": {
         "label": "the session",
@@ -476,12 +481,11 @@
         "remove": "Remove",
         "deleteRoutine": "Delete this training day",
         "deleted": "{{name}} deleted",
-        "saveFailed": "That change did not save. Check your connection and try again."
-      },
-      "pauseLabel": "pause the plan",
-      "pauseUntil": "until",
-      "pauseHint": " · nothing is due while paused",
-      "pauseClear": "Resume the plan"
+        "saveFailed": "That change did not save. Check your connection and try again.",
+        "setN": "set {{n}}",
+        "addSet": "One set more",
+        "removeSet": "Remove set {{n}}"
+      }
     }
   }
 }

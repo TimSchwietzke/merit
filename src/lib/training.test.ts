@@ -7,7 +7,6 @@ import {
   nextActive,
   isoWeekday,
   nextSession,
-  planPaused,
   lastSessionFor,
   nextSetNumber,
   repeatOf,
@@ -162,23 +161,6 @@ describe('isoWeekday', () => {
   })
 })
 
-describe('planPaused', () => {
-  it('is paused up to and including the last day', () => {
-    expect(planPaused('2026-09-20', '2026-09-09')).toBe(true)
-    expect(planPaused('2026-09-20', '2026-09-20')).toBe(true)
-    expect(planPaused('2026-09-20', '2026-09-21')).toBe(false)
-  })
-
-  it('is not paused when nothing was set, however the nothing arrives', () => {
-    // A profile row read before the column existed comes back with the field
-    // missing, and `undefined !== null` is true — which is how an undefined
-    // reached a date parser and took the dashboard down.
-    expect(planPaused(null, '2026-09-09')).toBe(false)
-    expect(planPaused(undefined, '2026-09-09')).toBe(false)
-    expect(planPaused('', '2026-09-09')).toBe(false)
-  })
-})
-
 describe('the active set', () => {
   const bench = (n: number, done = false) => ({ ...set(n, 8, 60, 'bench'), done })
   const row = (n: number, done = false) => ({ ...set(n, 10, 55, 'row'), done })
@@ -247,5 +229,23 @@ describe('a planned set counts for nothing until it is logged', () => {
 
   it('still shows in the list, which is how it gets done', () => {
     expect(groupSets([set(1, 8, 60), planned(2)])).toEqual([{ sets: 2, reps: 8, weightKg: 60 }])
+  })
+})
+
+describe('the active set, when sets were done out of order', () => {
+  const bench = (n: number, done = false) => ({ ...set(n, 8, 60, 'bench'), done })
+  const row = (n: number, done = false) => ({ ...set(n, 10, 55, 'row'), done })
+
+  it('finishes the exercise it is in before moving to another one', () => {
+    // Tapping set 3 and logging it used to jump to another exercise while sets
+    // one and two of this one were still outstanding — you log a set, look
+    // down, and the highlight is somewhere else entirely.
+    const sets = [bench(1), bench(2), bench(3, true), row(1)]
+    expect(nextActive(sets, sets[2])).toBe('bench-1')
+  })
+
+  it('still leaves once the exercise really is finished', () => {
+    const sets = [bench(1, true), bench(2, true), row(1)]
+    expect(nextActive(sets, sets[1])).toBe('row-1')
   })
 })

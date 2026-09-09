@@ -61,7 +61,6 @@
         "next": "Als Nächstes {{name}} am {{day}}.",
         "nextTomorrow": "Als Nächstes {{name}} morgen.",
         "nothingPlanned": "Noch kein Trainingstag eingeplant.",
-        "paused": "Plan pausiert bis {{date}}.",
         "open": "Training"
       },
       "loadFailed": "Der heutige Tag konnte nicht geladen werden. Prüfe dein Netz und versuche es noch einmal."
@@ -234,8 +233,7 @@
         "freeHint": "Übungen unterwegs wählen",
         "manage": "Trainingstage",
         "starting": "Wird gestartet …",
-        "startFailed": "Die Einheit wurde nicht gestartet. Prüfe dein Netz und versuche es noch einmal.",
-        "paused": "Plan pausiert bis {{date}}"
+        "startFailed": "Die Einheit wurde nicht gestartet. Prüfe dein Netz und versuche es noch einmal."
       },
       "setRow": {
         "add": "Satz hinzufügen",
@@ -261,7 +259,14 @@
         "loadFailed": "Deine Woche konnte nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
         "manage": "Trainingstage",
         "free": "Freies Training",
-        "paused": "Plan pausiert bis {{date}}"
+        "dueToday": "Heute {{name}}.",
+        "doneToday": "{{name}} erledigt.",
+        "restToday": "Heute steht nichts an.",
+        "startToday": "{{name}} starten",
+        "startAnything": "Einheit starten",
+        "pick": "Welcher Trainingstag?",
+        "none": "Noch kein Trainingstag. Leg einen an, dann steht er in der Woche.",
+        "make": "Trainingstag anlegen"
       },
       "session": {
         "label": "die einheit",
@@ -476,12 +481,11 @@
         "remove": "Entfernen",
         "deleteRoutine": "Diesen Trainingstag löschen",
         "deleted": "{{name}} gelöscht",
-        "saveFailed": "Die Änderung wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal."
-      },
-      "pauseLabel": "plan pausieren",
-      "pauseUntil": "bis",
-      "pauseHint": " · währenddessen steht nichts an",
-      "pauseClear": "Plan fortsetzen"
+        "saveFailed": "Die Änderung wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+        "setN": "satz {{n}}",
+        "addSet": "Ein Satz mehr",
+        "removeSet": "Satz {{n}} entfernen"
+      }
     }
   }
 }

@@ -45,7 +45,8 @@ export interface WorkoutState {
   /** Write a routine's planned sets onto a day — this one unless told another. */
   startRoutine: (plan: {
     routineId: string
-    exercises: { exerciseId: string; targetSets: number; targetReps: number }[]
+    /** Reps per set, in order — the plan says what each set is, not how many. */
+    exercises: { exerciseId: string; setReps: number[] }[]
     forDate?: string
   }) => Promise<boolean>
 }
@@ -231,7 +232,7 @@ export function useWorkout(date: string, revision = 0): WorkoutState {
   const startRoutine = useCallback(
     async (plan: {
       routineId: string
-      exercises: { exerciseId: string; targetSets: number; targetReps: number }[]
+      exercises: { exerciseId: string; setReps: number[] }[]
       forDate?: string
     }) => {
       if (!userId) return false
@@ -270,12 +271,12 @@ export function useWorkout(date: string, revision = 0): WorkoutState {
       }
 
       const rows = plan.exercises.flatMap((entry) =>
-        Array.from({ length: entry.targetSets }, (_, index) => ({
+        entry.setReps.map((reps, index) => ({
           workout_id: workoutId,
           user_id: userId,
           exercise_id: entry.exerciseId,
           set_number: index + 1,
-          reps: entry.targetReps,
+          reps,
           weight_kg: lastWeight(entry.exerciseId),
           rir: null,
           // Planned, not performed. It becomes true when it is logged.
