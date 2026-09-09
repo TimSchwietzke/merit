@@ -15,7 +15,9 @@ import { formatForInput, formatNumber, parseDecimalInput } from '@/lib/format'
 import {
   ACTIVITY_LEVELS,
   calculateEnergy,
+  calculateMacros,
   DIRECTIONS,
+  MACRO_DEFAULTS,
   DIRECTION_SHIFT,
   goalOn,
   missingInputs,
@@ -39,6 +41,8 @@ const MISSING_LABEL = {
 const HEIGHT_LIMITS = { min: 100, max: 250, decimals: 1 } as const
 const KCAL_LIMITS = { min: 500, max: 10000, decimals: 0 } as const
 const MACRO_LIMITS = { min: 0, max: 1000, decimals: 0 } as const
+const PER_KG_LIMITS = { min: 0.5, max: 4, decimals: 2 } as const
+const SHARE_LIMITS = { min: 5, max: 70, decimals: 0 } as const
 
 /**
  * What a day is measured against.
@@ -398,6 +402,18 @@ function TargetsSection({
             </div>
           )}
 
+          <MacroCalculator
+            kcal={effectiveKcal}
+            weightKg={weightKg}
+            locale={locale}
+            onFill={({ proteinG, fatG, carbsG }) => {
+              setProtein(String(Math.round(proteinG)))
+              setFat(String(Math.round(fatG)))
+              setCarbs(String(Math.round(carbsG)))
+              setErrors({})
+            }}
+          />
+
           <NumberField
             id="target-protein"
             label={t('pages.goals.targets.protein')}
@@ -442,5 +458,98 @@ function TargetsSection({
         </Panel>
       </form>
     </section>
+  )
+}
+
+/**
+ * The macro split, worked out rather than guessed at.
+ *
+ * Protein comes from body weight, fat from a share of the day's energy, and
+ * carbohydrate from what is left. Both knobs are on screen with their defaults
+ * filled in, and the three figures it produces stay editable — the arithmetic
+ * is the app's, the decision is not.
+ */
+function MacroCalculator({
+  kcal,
+  weightKg,
+  locale,
+  onFill,
+}: {
+  kcal: number | null
+  weightKg: number | null
+  locale: string
+  onFill: (macros: { proteinG: number; fatG: number; carbsG: number }) => void
+}) {
+  const { t } = useTranslation()
+  const [perKg, setPerKg] = useState(formatForInput(MACRO_DEFAULTS.proteinPerKg, locale, 2))
+  const [share, setShare] = useState(String(Math.round(MACRO_DEFAULTS.fatShare * 100)))
+  const [error, setError] = useState<string | null>(null)
+
+  const blocked =
+    weightKg === null
+      ? t('pages.goals.targets.calc.needsWeight')
+      : kcal === null
+        ? t('pages.goals.targets.calc.needsKcal')
+        : null
+
+  function fill() {
+    const proteinPerKg = parseDecimalInput(perKg, PER_KG_LIMITS)
+    const fatPercent = parseDecimalInput(share, SHARE_LIMITS)
+    if (proteinPerKg === null || fatPercent === null) {
+      setError(t('pages.goals.targets.calc.invalid'))
+      return
+    }
+    setError(null)
+    onFill(
+      calculateMacros({
+        kcal: kcal as number,
+        weightKg: weightKg as number,
+        proteinPerKg,
+        fatShare: fatPercent / 100,
+      }),
+    )
+  }
+
+  return (
+    <div className="rounded-md border border-line bg-surface-2 p-3">
+      <p className="font-mono text-2xs text-ink-faint">{t('pages.goals.targets.calc.label')}</p>
+
+      {blocked ? (
+        <p className="mt-2 font-mono text-2xs text-ink-faint">{blocked}</p>
+      ) : (
+        <>
+          <div className="mt-3 flex flex-col gap-4 md:flex-row">
+            <div className="flex-1">
+              <NumberField
+                id="calc-per-kg"
+                label={t('pages.goals.targets.calc.proteinPerKg')}
+                unit="g"
+                value={perKg}
+                onChange={(event) => setPerKg(event.target.value)}
+              />
+            </div>
+            <div className="flex-1">
+              <NumberField
+                id="calc-fat-share"
+                label={t('pages.goals.targets.calc.fatShare')}
+                unit="%"
+                value={share}
+                onChange={(event) => setShare(event.target.value)}
+              />
+            </div>
+          </div>
+
+          {error ? (
+            <p role="alert" className="mt-2 text-sm text-danger">
+              {error}
+            </p>
+          ) : null}
+
+          <Button type="button" variant="quiet" className="mt-4 w-full" onClick={fill}>
+            {t('pages.goals.targets.calc.apply')}
+          </Button>
+        </>
+      )}
+    </div>
   )
 }

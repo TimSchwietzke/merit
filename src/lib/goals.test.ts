@@ -4,6 +4,7 @@ import {
   ACTIVITY_FACTORS,
   ageOn,
   calculateEnergy,
+  calculateMacros,
   goalOn,
   maintenanceEnergy,
   missingInputs,
@@ -155,5 +156,38 @@ describe('progress', () => {
 
   it('is empty rather than infinite when there is no target', () => {
     expect(progress(1500, 0)).toEqual({ over: 0, fraction: 0, overshoot: 0 })
+  })
+})
+
+describe('calculateMacros', () => {
+  const split = { kcal: 2400, weightKg: 80, proteinPerKg: 1.8, fatShare: 0.3 }
+
+  it('scales protein by body weight and fat by the energy share', () => {
+    const { proteinG, fatG } = calculateMacros(split)
+    expect(proteinG).toBe(144)
+    // 30% of 2400 kcal is 720, at 9 kcal per gram.
+    expect(fatG).toBeCloseTo(80, 10)
+  })
+
+  it('gives the rest of the day to carbohydrate, and the three add back up', () => {
+    const { proteinG, fatG, carbsG } = calculateMacros(split)
+    const energy = proteinG * 4 + fatG * 9 + carbsG * 4
+    expect(energy).toBeCloseTo(split.kcal, 6)
+  })
+
+  it('never returns a negative gram figure', () => {
+    // A high protein-per-kilogram against a low target spends the whole day
+    // before any carbohydrate is reached. Zero is a target; −40 g is not.
+    const { carbsG } = calculateMacros({ ...split, kcal: 900, proteinPerKg: 2.5 })
+    expect(carbsG).toBe(0)
+  })
+
+  it('moves the split when either knob moves', () => {
+    const leaner = calculateMacros({ ...split, fatShare: 0.2 })
+    expect(leaner.fatG).toBeLessThan(calculateMacros(split).fatG)
+    expect(leaner.carbsG).toBeGreaterThan(calculateMacros(split).carbsG)
+
+    const stronger = calculateMacros({ ...split, proteinPerKg: 2.2 })
+    expect(stronger.proteinG).toBeGreaterThan(calculateMacros(split).proteinG)
   })
 })
