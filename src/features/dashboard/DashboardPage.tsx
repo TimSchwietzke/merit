@@ -17,7 +17,7 @@ import { addDays, todayKey } from '@/lib/date'
 import { formatDayLong, formatNumber, weekdayLabel } from '@/lib/format'
 import { goalOn } from '@/lib/goals'
 import { sumPortions } from '@/lib/nutrition'
-import { isoWeekday, nextSession, performed, planPaused } from '@/lib/training'
+import { isoWeekday, nextSession, planPaused } from '@/lib/training'
 
 /**
  * What the day looks like, top to bottom (GOAL.md §6): a calm summary, then
@@ -147,7 +147,7 @@ function TrainingLine({ locale }: { locale: string }) {
   }))
   const weekday = isoWeekday(today)
   const due = plan.find((entry) => entry.weekdays.includes(weekday))
-  const trained = performed(sets).length > 0
+  const trained = sets.length > 0
 
   const sentence = () => {
     // A paused plan reports nothing as due, and says so rather than going

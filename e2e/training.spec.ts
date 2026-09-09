@@ -14,33 +14,45 @@ test('the day shows what was done last time for each exercise', async ({ page })
   await expect(page.getByText('zum ersten Mal')).toBeVisible()
 })
 
-test('a set opens for editing where it stands, carrying its own figures', async ({ page }) => {
+test('every figure is editable where it stands, with nothing to open first', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await stubBackend(page, { theme: 'light', locale: 'de' })
   await page.goto('/training')
   await waitForScreen(page)
 
-  // No form per exercise any more: the row is the thing you change. Tapping
-  // the second bench set opens it with its own reps and weight already in it.
-  await page.getByText('8 × 62,5 kg').last().click()
+  // No edit mode and no tick: the row is the form. Both bench sets are already
+  // fields carrying their own figures.
+  await expect(page.getByRole('textbox', { name: 'Bankdrücken wdh 1' })).toHaveValue('8')
+  await expect(page.getByRole('textbox', { name: 'Bankdrücken gewicht 1' })).toHaveValue('62,5')
+  await expect(page.getByRole('textbox', { name: 'Bankdrücken wdh 2' })).toHaveValue('8')
 
-  await expect(page.getByRole('textbox', { name: 'wdh' })).toHaveValue('8')
-  await expect(page.getByRole('textbox', { name: 'gewicht' })).toHaveValue('62,5')
+  // And they take a change without anything being opened.
+  const reps = page.getByRole('textbox', { name: 'Bankdrücken wdh 1' })
+  await reps.fill('6')
+  await expect(reps).toHaveValue('6')
 })
 
-test('a planned set is faint and unticked until it is done', async ({ page }) => {
+test('a new set starts from the one before it, never from zero', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 812 })
   await stubBackend(page, { theme: 'light', locale: 'de' })
+
+  const posted: Record<string, unknown>[] = []
+  await page.route('**/rest/v1/workout_sets*', async (route) => {
+    if (route.request().method() === 'POST') {
+      posted.push(JSON.parse(route.request().postData() ?? '{}'))
+      return route.fulfill({ status: 201, contentType: 'application/json', body: '{}' })
+    }
+    return route.fallback()
+  })
+
   await page.goto('/training')
   await waitForScreen(page)
+  await page.getByRole('button', { name: 'Satz hinzufügen' }).first().click()
+  await expect.poll(() => posted.length).toBeGreaterThan(0)
 
-  // The harness seeds one set the routine planned and nobody performed.
-  const tick = page.getByRole('button', { name: 'Als erledigt markieren' })
-  await expect(tick).toHaveCount(1)
-  await expect(tick).toHaveAttribute('aria-pressed', 'false')
-
-  // And the done ones say so, which is what the count in the head reports.
-  await expect(page.getByRole('button', { name: 'Als offen markieren' })).toHaveCount(3)
+  // 8 × 62,5 was the last bench set. Zero reps at zero kilos is not a set
+  // anybody did, and it is not what the next one should offer.
+  expect(posted[0]).toMatchObject({ reps: 8, weight_kg: 62.5 })
 })
 
 test('picking an exercise opens its block with nothing logged in it', async ({ page }) => {

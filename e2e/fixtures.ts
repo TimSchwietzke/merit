@@ -239,13 +239,12 @@ export async function stubBackend(
       d.setDate(d.getDate() - back)
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     }
-    const set = (id: string, exercise: (typeof EXERCISES)[number], n: number, reps: number, kg: number, date: string, rir: number | null = null, done = true) => ({
+    const set = (id: string, exercise: (typeof EXERCISES)[number], n: number, reps: number, kg: number, date: string, rir: number | null = null) => ({
       id,
       set_number: n,
       reps,
       weight_kg: kg,
       rir,
-      done,
       exercise_id: exercise.id,
       workouts: { date },
       exercises: exercise,
@@ -260,9 +259,7 @@ export async function stubBackend(
         set('s4', EXERCISES[0], 1, 8, 62.5, day(0), 2),
         set('s5', EXERCISES[0], 2, 8, 62.5, day(0), 1),
         set('s6', EXERCISES[2], 1, 10, 55, day(0)),
-        // One planned and not yet done, so the tick, the faint row and the
-        // done-count all have something to show.
-        set('s7', EXERCISES[2], 2, 10, 55, day(0), null, false),
+        set('s7', EXERCISES[2], 2, 10, 55, day(0)),
       ]),
     })
   })

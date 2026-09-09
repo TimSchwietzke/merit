@@ -13,25 +13,14 @@ import {
   type SessionSets,
 } from '@/lib/training'
 
-const set = (
-  setNumber: number,
-  reps: number,
-  weightKg: number,
-  exerciseId = 'bench',
-  done = true,
-): LoggedSet => ({
+const set = (setNumber: number, reps: number, weightKg: number, exerciseId = 'bench'): LoggedSet => ({
   id: `${exerciseId}-${setNumber}`,
   exerciseId,
   setNumber,
   reps,
   weightKg,
   rir: null,
-  done,
 })
-
-/** A set a routine planned and nobody has performed. */
-const planned = (setNumber: number, reps: number, weightKg: number, exerciseId = 'bench') =>
-  set(setNumber, reps, weightKg, exerciseId, false)
 
 describe('groupSets', () => {
   it('says what people say out loud', () => {
@@ -131,36 +120,6 @@ describe('repeatOf', () => {
 
   it('is null with nothing to repeat', () => {
     expect(repeatOf([], 'bench')).toBeNull()
-  })
-})
-
-describe('planned sets count for nothing until they are done', () => {
-  it('is left out of the volume', () => {
-    // A plan is not an achievement. Counting it would report a session as
-    // trained the moment it was started.
-    expect(volume([set(1, 8, 60), planned(2, 8, 60)])).toBe(480)
-  })
-
-  it('is left out of the comparison line', () => {
-    const sessions: SessionSets[] = [
-      { date: '2026-09-01', sets: [set(1, 8, 55)] },
-      { date: '2026-09-05', sets: [planned(1, 8, 60), planned(2, 8, 60)] },
-    ]
-    // The fifth was started and abandoned; last time is still the first.
-    expect(lastSessionFor(sessions, 'bench', '2026-09-09')?.date).toBe('2026-09-01')
-  })
-
-  it('is not what the next set repeats', () => {
-    // Repeating a set nobody did would offer the plan back as though it had
-    // been performed.
-    expect(repeatOf([set(1, 8, 60), planned(2, 10, 70)], 'bench')).toMatchObject({ reps: 8 })
-    expect(repeatOf([planned(1, 8, 60)], 'bench')).toBeNull()
-  })
-
-  it('still shows in the set list, which is how it gets performed', () => {
-    expect(groupSets([set(1, 8, 60), planned(2, 8, 60)])).toEqual([
-      { sets: 2, reps: 8, weightKg: 60 },
-    ])
   })
 })
 

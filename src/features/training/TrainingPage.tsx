@@ -1,11 +1,10 @@
-import { useState, type FormEvent } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
-import { Check, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/EmptyState'
-import { NumberField } from '@/components/NumberField'
 import { RowBody, Rows } from '@/components/Rows'
 import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
@@ -19,7 +18,6 @@ import { formatDayLong, formatNumber, parseDecimalInput, weekdayLabel } from '@/
 import {
   groupSets,
   lastSessionFor,
-  performed,
   repeatOf,
   volume,
   type LoggedSet,
@@ -81,7 +79,6 @@ export default function TrainingPage() {
             reps: set.reps,
             weightKg: set.weightKg,
             rir: set.rir,
-            done: set.done,
           }).then((ok) => {
             if (!ok) toast(t('pages.training.undoFailed'))
           })
@@ -239,7 +236,12 @@ function StartSession({
             </section>
           ) : null}
 
-          {routines.length === 0 ? <EmptyState>{t('pages.training.empty')}</EmptyState> : null}
+          {routines.length === 0 ? (
+            <section className="mb-6">
+              <SectionHead label={t('pages.training.start.label')} />
+              <EmptyState>{t('pages.routines.empty')}</EmptyState>
+            </section>
+          ) : null}
 
           {failed ? (
             <p role="alert" className="mb-3 text-sm text-danger">
@@ -247,13 +249,21 @@ function StartSession({
             </p>
           ) : null}
 
+          {/* Starting a training day is the way this screen is meant to be
+              used, so with none defined the primary action is defining one.
+              Once they exist the rows above *are* the primary action and
+              neither button claims it (§10.4). Free logging stays a
+              first-class way in either way (GOAL.md §7). */}
           <div className="flex flex-col gap-3 md:flex-row">
-            {/* Free logging stays a first-class way in (GOAL.md §7). */}
-            <Button asChild variant="primary">
-              <Link to={`/training/add?date=${date}`}>{t('pages.training.start.free')}</Link>
+            <Button asChild variant={routines.length === 0 ? 'primary' : 'quiet'}>
+              <Link to="/training/routines">
+                {routines.length === 0
+                  ? t('pages.routines.create')
+                  : t('pages.training.start.manage')}
+              </Link>
             </Button>
             <Button asChild variant="quiet">
-              <Link to="/training/routines">{t('pages.training.start.manage')}</Link>
+              <Link to={`/training/add?date=${date}`}>{t('pages.training.start.free')}</Link>
             </Button>
           </div>
         </>
@@ -287,33 +297,33 @@ function Exercise({
     reps: number
     weightKg: number
     rir: number | null
-    done?: boolean
   }) => Promise<boolean>
   onUpdate: (
     id: string,
-    values: { reps: number; weightKg: number; rir: number | null; done: boolean },
+    values: { reps: number; weightKg: number; rir: number | null },
   ) => Promise<boolean>
 }) {
   const { t } = useTranslation()
-  const [editing, setEditing] = useState<string | null>(null)
   const [adding, setAdding] = useState(false)
 
   if (!exercise) return null
 
   const name = locale === 'de' ? exercise.nameDe : exercise.nameEn
   const last = lastSessionFor(history, exercise.id, date)
-  const doneCount = performed(sets).length
 
+  /**
+   * A new set starts from the one before it, because that is what usually
+   * happens next — and never from zero, which is a weight nobody lifts and a
+   * rep count nobody does.
+   */
   async function addOne() {
-    const previous = repeatOf(sets, exercise!.id) ?? sets[sets.length - 1] ?? null
+    const previous = repeatOf(sets, exercise!.id)
     setAdding(true)
     await onAdd({
       exerciseId: exercise!.id,
       reps: previous?.reps ?? 8,
       weightKg: previous?.weightKg ?? 0,
-      rir: null,
-      // A set added by hand is one being done now, not one being planned.
-      done: true,
+      rir: previous?.rir ?? null,
     })
     setAdding(false)
   }
@@ -323,9 +333,21 @@ function Exercise({
       <div className="mb-3 flex items-baseline justify-between gap-4 border-b border-line pb-2">
         <h2 className="min-w-0 truncate text-sm text-ink">{name}</h2>
         <span className="shrink-0 font-mono text-2xs text-ink-faint">
-          {doneCount}/{sets.length} · {t('pages.training.volume', { volume: formatNumber(volume(sets), locale, 0) })}
+          {t('pages.training.volume', { volume: formatNumber(volume(sets), locale, 0) })}
         </span>
       </div>
+
+      {/* The columns are named once, above the rows, instead of a label beside
+          every field. Four exercises of three sets is thirty-six labels
+          otherwise, saying the same three words. */}
+      {sets.length > 0 ? (
+        <div className="mb-1 flex items-center gap-2 px-4 font-mono text-2xs text-ink-faint">
+          <span className="w-4 shrink-0" aria-hidden />
+          <span className="flex-1 text-right">{t('pages.training.set.reps')}</span>
+          <span className="flex-1 text-right">{t('pages.training.set.weight')}</span>
+          <span className="w-16 shrink-0 text-right">{t('pages.training.set.rir')}</span>
+        </div>
+      ) : null}
 
       <Rows>
         {sets.map((set, index) => (
@@ -347,65 +369,16 @@ function Exercise({
               </button>
             }
           >
-            {editing === set.id ? (
-              <SetEditor
-                set={set}
-                index={index}
-                locale={locale}
-                onCancel={() => setEditing(null)}
-                onSave={async (values) => {
-                  await onUpdate(set.id, values)
-                  setEditing(null)
-                }}
-              />
-            ) : (
-              <div className="flex items-stretch">
-                {/* One tap for the common case: the set as planned, done. */}
-                <button
-                  type="button"
-                  aria-label={t(set.done ? 'pages.training.setRow.undone' : 'pages.training.setRow.done')}
-                  aria-pressed={set.done}
-                  onClick={() =>
-                    void onUpdate(set.id, {
-                      reps: set.reps,
-                      weightKg: set.weightKg,
-                      rir: set.rir,
-                      done: !set.done,
-                    })
-                  }
-                  className="flex min-h-[52px] w-12 shrink-0 items-center justify-center"
-                >
-                  <span
-                    className={`flex h-5 w-5 items-center justify-center rounded-sm border
-                                ${set.done ? 'border-accent bg-accent text-bg' : 'border-line-strong text-transparent'}`}
-                  >
-                    <Check size={13} strokeWidth={2.5} aria-hidden />
-                  </span>
-                </button>
-
-                <RowBody onClick={() => setEditing(set.id)}>
-                  <span className="w-4 shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
-                    {index + 1}
-                  </span>
-                  {/* A planned set is stated in `ink-faint`; doing it promotes
-                      it. No second colour, no badge (§2.4). */}
-                  <span
-                    className={`min-w-0 flex-1 font-mono text-sm tabular-nums ${
-                      set.done ? 'text-ink' : 'text-ink-faint'
-                    }`}
-                  >
-                    {set.reps} × {formatNumber(set.weightKg, locale, set.weightKg % 1 === 0 ? 0 : 1)} kg
-                    {set.rir === null ? null : (
-                      <span className="ml-2 text-2xs text-ink-faint">rir {set.rir}</span>
-                    )}
-                  </span>
-                </RowBody>
-              </div>
-            )}
+            <SetRow
+              set={set}
+              index={index}
+              exerciseName={name}
+              locale={locale}
+              onCommit={(values) => void onUpdate(set.id, values)}
+            />
           </SwipeRow>
         ))}
 
-        {/* The `+` that replaced the form. */}
         <li>
           <button
             type="button"
@@ -435,93 +408,90 @@ function Exercise({
   )
 }
 
-/** The row, turned into its own editor. */
-function SetEditor({
+/**
+ * A set, as three fields.
+ *
+ * There is no edit mode and nothing to open: every figure on this screen can be
+ * changed where it stands. An editor that replaced the row meant the layout
+ * moved under the thumb that opened it, and it meant reaching every set through
+ * a tap that did nothing but make the row editable — which it may as well have
+ * been all along.
+ *
+ * Committed on blur rather than on keystroke (§10.5). A value is written once
+ * it is finished, not eight times while it is being typed.
+ */
+function SetRow({
   set,
   index,
+  exerciseName,
   locale,
-  onSave,
-  onCancel,
+  onCommit,
 }: {
   set: LoggedSet
   index: number
+  /** Named in every field's label: `wdh 1` alone says nothing about which
+   *  exercise it belongs to, and repeats once per block. */
+  exerciseName: string
   locale: string
-  onSave: (values: { reps: number; weightKg: number; rir: number | null; done: boolean }) => void
-  onCancel: () => void
+  onCommit: (values: { reps: number; weightKg: number; rir: number | null }) => void
 }) {
   const { t } = useTranslation()
-  const [reps, setReps] = useState(String(set.reps))
-  const [weight, setWeight] = useState(
-    formatNumber(set.weightKg, locale, set.weightKg % 1 === 0 ? 0 : 1),
-  )
-  const [rir, setRir] = useState(set.rir === null ? '' : String(set.rir))
-  const [error, setError] = useState(false)
+  const asTyped = (value: number) => formatNumber(value, locale, value % 1 === 0 ? 0 : 1)
 
-  function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
+  const [reps, setReps] = useState(String(set.reps))
+  const [weight, setWeight] = useState(asTyped(set.weightKg))
+  const [rir, setRir] = useState(set.rir === null ? '' : String(set.rir))
+  const [invalid, setInvalid] = useState(false)
+
+  function commit() {
     const parsedReps = parseDecimalInput(reps, REPS_LIMITS)
     const parsedWeight = parseDecimalInput(weight, WEIGHT_LIMITS)
     const parsedRir = rir.trim() === '' ? null : parseDecimalInput(rir, RIR_LIMITS)
 
     if (parsedReps === null || parsedWeight === null || (rir.trim() !== '' && parsedRir === null)) {
-      setError(true)
+      setInvalid(true)
       return
     }
-    // Saving a set is also doing it: nobody edits a set they have not performed
-    // and leaves it outstanding.
-    onSave({ reps: parsedReps, weightKg: parsedWeight, rir: parsedRir, done: true })
+    setInvalid(false)
+    if (parsedReps === set.reps && parsedWeight === set.weightKg && parsedRir === set.rir) return
+    onCommit({ reps: parsedReps, weightKg: parsedWeight, rir: parsedRir })
   }
 
+  // No `w-full` here: it fights the flex sizing below, and the field that has
+  // it wins the whole row while the others collapse to nothing.
+  const field =
+    `min-h-11 min-w-0 rounded-md border bg-surface px-2 text-right font-mono text-input tabular-nums
+     text-ink transition-colors [transition-duration:140ms] focus-visible:border-accent
+     md:min-h-9 md:text-sm ` + (invalid ? 'border-danger' : 'border-line')
+
   return (
-    <form onSubmit={submit} className="bg-surface-2 px-4 py-3" noValidate>
-      <p className="sr-only">{t('pages.training.setRow.editing', { n: index + 1 })}</p>
-      <div className="flex gap-2">
-        <div className="flex-1">
-          <NumberField
-            id={`edit-reps-${set.id}`}
-            label={t('pages.training.set.reps')}
-            unit="×"
-            value={reps}
-            inputMode="numeric"
-            onChange={(event) => setReps(event.target.value)}
-            autoFocus
-          />
-        </div>
-        <div className="flex-1">
-          <NumberField
-            id={`edit-weight-${set.id}`}
-            label={t('pages.training.set.weight')}
-            unit="kg"
-            value={weight}
-            onChange={(event) => setWeight(event.target.value)}
-          />
-        </div>
-        <div className="w-16">
-          <NumberField
-            id={`edit-rir-${set.id}`}
-            label={t('pages.training.set.rir')}
-            unit=""
-            value={rir}
-            inputMode="numeric"
-            onChange={(event) => setRir(event.target.value)}
-          />
-        </div>
-      </div>
+    <div className="flex items-center gap-2 px-4 py-2">
+      <span className="w-4 shrink-0 font-mono text-2xs tabular-nums text-ink-faint">{index + 1}</span>
 
-      {error ? (
-        <p role="alert" className="mt-2 text-sm text-danger">
-          {t('pages.training.set.invalid')}
-        </p>
-      ) : null}
-
-      <div className="mt-3 flex gap-2">
-        <Button type="submit" variant="primary" size="small">
-          {t('pages.training.setRow.save')}
-        </Button>
-        <Button type="button" variant="bare" size="small" onClick={onCancel}>
-          {t('common.close')}
-        </Button>
-      </div>
-    </form>
+      <input
+        aria-label={`${exerciseName} ${t('pages.training.set.reps')} ${index + 1}`}
+        inputMode="numeric"
+        value={reps}
+        onChange={(event) => setReps(event.target.value)}
+        onBlur={commit}
+        className={`${field} flex-1`}
+      />
+      <input
+        aria-label={`${exerciseName} ${t('pages.training.set.weight')} ${index + 1}`}
+        inputMode="decimal"
+        value={weight}
+        onChange={(event) => setWeight(event.target.value)}
+        onBlur={commit}
+        className={`${field} flex-1`}
+      />
+      <input
+        aria-label={`${exerciseName} ${t('pages.training.set.rir')} ${index + 1}`}
+        inputMode="numeric"
+        value={rir}
+        onChange={(event) => setRir(event.target.value)}
+        onBlur={commit}
+        className={`${field} w-16 shrink-0`}
+      />
+    </div>
   )
 }

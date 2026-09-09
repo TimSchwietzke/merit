@@ -394,7 +394,6 @@ export type Database = {
       workout_sets: {
         Row: {
           created_at: string
-          done: boolean
           exercise_id: string
           id: string
           reps: number
@@ -407,7 +406,6 @@ export type Database = {
         }
         Insert: {
           created_at?: string
-          done?: boolean
           exercise_id: string
           id?: string
           reps: number
@@ -420,7 +418,6 @@ export type Database = {
         }
         Update: {
           created_at?: string
-          done?: boolean
           exercise_id?: string
           id?: string
           reps?: number

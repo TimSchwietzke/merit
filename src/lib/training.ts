@@ -14,8 +14,6 @@ export interface LoggedSet {
   reps: number
   weightKg: number
   rir: number | null
-  /** False for a set a routine planned that has not been performed yet. */
-  done: boolean
 }
 
 export interface SessionSets {
@@ -30,9 +28,6 @@ export interface SetGroup {
   reps: number
   weightKg: number
 }
-
-/** Only what actually happened. A plan is not an achievement. */
-export const performed = (sets: readonly LoggedSet[]) => sets.filter((set) => set.done)
 
 /**
  * Collapse a list of sets into the shape people say out loud — `3 × 8 @ 60 kg`.
@@ -69,7 +64,7 @@ export function lastSessionFor(
 
   for (const session of sessions) {
     if (session.date >= date) continue
-    const sets = session.sets.filter((set) => set.exerciseId === exerciseId && set.done)
+    const sets = session.sets.filter((set) => set.exerciseId === exerciseId)
     if (sets.length === 0) continue
     if (!best || session.date > best.date) best = { date: session.date, sets }
   }
@@ -82,7 +77,7 @@ export function lastSessionFor(
  * was, and the only one that needs no assumptions about anybody's maximum.
  */
 export function volume(sets: readonly LoggedSet[]): number {
-  return performed(sets).reduce((total, set) => total + set.reps * set.weightKg, 0)
+  return sets.reduce((total, set) => total + set.reps * set.weightKg, 0)
 }
 
 /** The next set number for an exercise: one past the highest already logged. */
@@ -98,7 +93,7 @@ export function nextSetNumber(sets: readonly LoggedSet[], exerciseId: string): n
  * form opens on it and typing is only needed when something changed.
  */
 export function repeatOf(sets: readonly LoggedSet[], exerciseId: string): LoggedSet | null {
-  const mine = performed(sets).filter((set) => set.exerciseId === exerciseId)
+  const mine = sets.filter((set) => set.exerciseId === exerciseId)
   if (mine.length === 0) return null
   return mine.reduce((latest, set) => (set.setNumber > latest.setNumber ? set : latest))
 }
