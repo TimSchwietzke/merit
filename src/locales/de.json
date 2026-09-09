@@ -72,7 +72,9 @@
       "log": {
         "label": "erfasst",
         "empty": "noch nichts erfasst",
-        "add": "Lebensmittel hinzufügen"
+        "add": "Lebensmittel hinzufügen",
+        "swipe": "Wische die Zeile zur Seite, um sie zu entfernen.",
+        "remove": "Entfernen"
       },
       "add": {
         "title": "Lebensmittel hinzufügen",
@@ -128,6 +130,12 @@
         "torchOn": "Licht einschalten",
         "torchOff": "Licht ausschalten",
         "or": "oder nummer eintippen"
+      },
+      "entry": {
+        "title": "Erfasste Portion",
+        "save": "Änderungen speichern",
+        "saving": "Wird gespeichert …",
+        "delete": "Aus dem Tag entfernen"
       }
     },
     "training": {

@@ -72,7 +72,9 @@
       "log": {
         "label": "logged",
         "empty": "nothing logged yet",
-        "add": "Add food"
+        "add": "Add food",
+        "swipe": "Swipe the row sideways to remove it.",
+        "remove": "Remove"
       },
       "add": {
         "title": "Add food",
@@ -128,6 +130,12 @@
         "torchOn": "Turn the light on",
         "torchOff": "Turn the light off",
         "or": "or type the number"
+      },
+      "entry": {
+        "title": "Logged portion",
+        "save": "Save changes",
+        "saving": "Saving…",
+        "delete": "Remove from the day"
       }
     },
     "training": {

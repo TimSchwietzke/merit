@@ -25,6 +25,8 @@ export interface FoodLog {
   entries: LoggedFood[]
   status: 'loading' | 'ready' | 'error'
   add: (entry: { foodId: string; mealType: MealType; quantityG: number }) => Promise<boolean>
+  /** Change a logged portion's quantity or the meal it belongs to. */
+  update: (id: string, portion: { mealType: MealType; quantityG: number }) => Promise<boolean>
   remove: (id: string) => Promise<boolean>
   restore: (entry: LoggedFood) => Promise<boolean>
 }
@@ -144,6 +146,36 @@ export function useFoodLog(date: string): FoodLog {
     [apply, date, userId],
   )
 
+  const update = useCallback(
+    async (id: string, portion: { mealType: MealType; quantityG: number }) => {
+      if (!userId) return false
+      const previous = loadedRef.current.entries
+
+      apply(
+        (current) =>
+          current.map((entry) =>
+            entry.id === id
+              ? { ...entry, mealType: portion.mealType, quantityG: portion.quantityG }
+              : entry,
+          ),
+        date,
+      )
+
+      const { data, error } = await supabase
+        .from('food_logs')
+        .update({ meal_type: portion.mealType, quantity_g: portion.quantityG })
+        .eq('id', id)
+        .eq('user_id', userId)
+        .select('id')
+        .single()
+
+      if (data && !error) return true
+      apply(() => previous, date)
+      return false
+    },
+    [apply, date, userId],
+  )
+
   const remove = useCallback(
     async (id: string) => {
       if (!userId) return false
@@ -173,5 +205,5 @@ export function useFoodLog(date: string): FoodLog {
     [add],
   )
 
-  return { entries, status, add, remove, restore }
+  return { entries, status, add, update, remove, restore }
 }
