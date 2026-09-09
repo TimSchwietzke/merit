@@ -126,7 +126,17 @@ test('a logged row opens on tap and only gives up its delete to a swipe', async 
   await page.mouse.down()
   // Past the slop, then past the latch, in steps so the axis is read as
   // horizontal rather than as a page scroll.
-  await page.mouse.move(box.x + 100, y, { steps: 8 })
+  await page.mouse.move(box.x + 80, y, { steps: 8 })
+
+  // Mid-drag, still held: the row is where the finger is. A transition left on
+  // during the gesture, or a re-render per pointermove, shows up here as the
+  // row trailing the pointer — which is what "unsmooth" actually is.
+  const held = await row.evaluate(
+    (el) => new DOMMatrix(getComputedStyle(el.parentElement!).transform).m41,
+  )
+  expect(held, 'the row follows the pointer').toBeGreaterThan(50)
+
+  await page.mouse.move(box.x + 100, y, { steps: 4 })
   await page.mouse.up()
 
   const remove = page.getByRole('button', { name: 'Entfernen' })
