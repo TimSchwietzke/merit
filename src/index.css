@@ -140,6 +140,25 @@
   }
 }
 
+/* ── Disclosure ──────────────────────────────────────────────────────
+   The one height animation DESIGN.md §13 permits, and the only property that
+   can do it: Radix measures the panel and publishes the height as a variable,
+   because `auto` is not a value CSS can interpolate from. 150ms, matching the
+   chevron beside it. */
+@keyframes collapse-down {
+  from { height: 0; }
+  to   { height: var(--radix-collapsible-content-height); }
+}
+@keyframes collapse-up {
+  from { height: var(--radix-collapsible-content-height); }
+  to   { height: 0; }
+}
+
+@theme {
+  --animate-collapse-down: collapse-down 150ms ease-out;
+  --animate-collapse-up: collapse-up 150ms ease-out;
+}
+
 /* Long-form copy (privacy policy, imprint). Thirty lines, kept under control
    rather than pulling in the typography plugin. */
 .prose-app { font-size: var(--text-prose); line-height: 1.7; }

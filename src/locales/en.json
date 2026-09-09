@@ -18,7 +18,11 @@
     "notFound": "not found",
     "loading": "loading",
     "undo": "Undo",
-    "add": "add"
+    "add": "add",
+    "clearFilters": "clear",
+    "filters": "Filters",
+    "filtersOpen": "Filters, {{count}} active",
+    "close": "Close"
   },
   "auth": {
     "signIn": {
@@ -103,7 +107,9 @@
         "noResults": "no food matches",
         "addYourself": "Add it yourself",
         "searchFailed": "The search did not go through. Check your connection and try again.",
-        "back": "Back to the day"
+        "back": "Back to the day",
+        "recent": "recently used",
+        "catalogue": "catalogue"
       },
       "portion": {
         "quantity": "quantity",
@@ -184,7 +190,21 @@
         "searching": "searching",
         "noResults": "no exercise matches",
         "back": "Back to the day",
-        "searchFailed": "The search did not go through. Check your connection and try again."
+        "searchFailed": "The search did not go through. Check your connection and try again.",
+        "recent": "recently used",
+        "filterEquipment": "equipment",
+        "noMatch": "Nothing matches {{filters}}.",
+        "noMatchSearch": "Nothing matches “{{query}}”.",
+        "equipment": {
+          "barbell": "barbell",
+          "dumbbell": "dumbbell",
+          "machine": "machine",
+          "cable": "cable",
+          "bodyweight": "bodyweight",
+          "kettlebell": "kettlebell",
+          "band": "band",
+          "other": "other"
+        }
       },
       "groups": {
         "chest": "chest",

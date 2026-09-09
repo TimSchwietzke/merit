@@ -4,6 +4,7 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { PageHeader } from '@/components/PageHeader'
 import { Row, Rows } from '@/components/Rows'
+import { Collapsible } from '@/components/ui/collapsible'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -12,6 +13,7 @@ import { resolveBarcode } from '@/features/nutrition/resolve-barcode'
 import { PortionForm } from '@/features/nutrition/PortionForm'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
 import { useFoodSearch, type CatalogueFood } from '@/features/nutrition/useFoodSearch'
+import { useRecentFoods } from '@/features/nutrition/useRecentFoods'
 import { useSession } from '@/features/auth/useSession'
 import { todayKey } from '@/lib/date'
 import { formatNumber } from '@/lib/format'
@@ -55,6 +57,17 @@ export default function AddFoodPage() {
 
   const [query, setQuery] = useState('')
   const { results, status } = useFoodSearch(query)
+  const recent = useRecentFoods()
+  const [folded, setFolded] = useState<Set<string>>(new Set())
+
+  function fold(key: string, open: boolean) {
+    setFolded((current) => {
+      const next = new Set(current)
+      if (open) next.delete(key)
+      else next.add(key)
+      return next
+    })
+  }
 
   const [picked, setPicked] = useState<CatalogueFood | null>(null)
   const [creating, setCreating] = useState(false)
@@ -247,6 +260,24 @@ export default function AddFoodPage() {
       </Button>
 
       <section className="mt-6">
+        {/* First among the results and narrowed by nothing (§10.11). GOAL.md §5
+            calls repeating a previous meal the feature that decides whether the
+            app gets used daily. */}
+        {recent.length > 0 ? (
+          <Collapsible
+            label={t('pages.food.add.recent')}
+            count={recent.length}
+            open={!folded.has('recent')}
+            onOpenChange={(open) => fold('recent', open)}
+          >
+            <FoodRows
+              foods={recent.map((entry) => entry.food)}
+              locale={locale}
+              onPick={setPicked}
+            />
+          </Collapsible>
+        ) : null}
+
         {status === 'searching' ? (
           <p className="font-mono text-2xs text-ink-faint">{t('pages.food.add.searching')}</p>
         ) : null}
@@ -258,21 +289,14 @@ export default function AddFoodPage() {
         ) : null}
 
         {status === 'ready' && results.length > 0 ? (
-          <Rows>
-            {results.map((food) => (
-              <Row key={food.id} onClick={() => setPicked(food)}>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate">{food.name}</span>
-                  {food.brand ? (
-                    <span className="block truncate text-sm text-ink-muted">{food.brand}</span>
-                  ) : null}
-                </span>
-                <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
-                  {formatNumber(food.nutrients.kcal, locale, 0)} kcal / 100 g
-                </span>
-              </Row>
-            ))}
-          </Rows>
+          <Collapsible
+            label={t('pages.food.add.catalogue')}
+            count={results.length}
+            open={!folded.has('catalogue')}
+            onOpenChange={(open) => fold('catalogue', open)}
+          >
+            <FoodRows foods={results} locale={locale} onPick={setPicked} />
+          </Collapsible>
         ) : null}
 
         {/* The most important empty state in the app: it is the path by which
@@ -326,5 +350,37 @@ function Attribution() {
         {ATTRIBUTION_URL.replace('https://', '')}
       </a>
     </p>
+  )
+}
+
+/**
+ * The row a food gets in either group. Two call sites in one file, so it stays
+ * here rather than becoming a component nobody else imports.
+ */
+function FoodRows({
+  foods,
+  locale,
+  onPick,
+}: {
+  foods: CatalogueFood[]
+  locale: string
+  onPick: (food: CatalogueFood) => void
+}) {
+  return (
+    <Rows>
+      {foods.map((food) => (
+        <Row key={food.id} onClick={() => onPick(food)}>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate">{food.name}</span>
+            {food.brand ? (
+              <span className="block truncate text-sm text-ink-muted">{food.brand}</span>
+            ) : null}
+          </span>
+          <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
+            {formatNumber(food.nutrients.kcal, locale, 0)} kcal / 100 g
+          </span>
+        </Row>
+      ))}
+    </Rows>
   )
 }

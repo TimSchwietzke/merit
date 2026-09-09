@@ -833,6 +833,13 @@ single-choice *setting*, not a filter.
 The active count is visible without opening anything, and there is always a way back to everything —
 a `clear` chip that appears only when something is filtered, never a permanently disabled control.
 
+**The chips may live behind a control, and on a phone they usually should.** Fourteen chips at the
+44px floor is four wrapped rows and a quarter of a 375px screen spent before the first result. A
+filter button beside the search field, opening a sheet (§8), costs one tap and gives that space
+back. The condition is the sentence above it: **the active count rides on the button** as a mono
+numeral, so the state is still readable without opening anything. A filter control that hides *how
+many* filters are on is the `select` this section rejected, wearing an icon.
+
 **Grouping is structure, not decoration.** Results in a long list are grouped under §10.3 heads —
 muscle group for exercises, meal for a day's food. A group states how many rows it holds, in mono
 `text-2xs`, because that is the number that tells a reader whether to bother opening it.
@@ -846,9 +853,13 @@ app on the next visit is not a control, it is a suggestion.
 The header is a button: `aria-expanded`, the chevron rotating 150ms, the panel animating its own
 height over the same 150ms (§13). No cross-fade, no slide.
 
-**Recently used comes first and is never filtered away.** On a screen whose job is picking, the
-answer is usually something picked before. That group sits above the facets and above the search
-field, it ignores whatever filters are set, and it is the one group allowed to be short.
+**Recently used comes first among the results and is never filtered away.** On a screen whose job is
+picking, the answer is usually something picked before, so it is the first group in the list and it
+ignores whatever filters and search terms are set. It is the one group allowed to be short.
+
+It sits *below* the search field, not above it. The field is the one control everybody reaches for
+first and it belongs at the top where a thumb finds it; pushing it down the screen behind a group of
+results is a worse trade than the prominence recently-used gains by being first.
 
 **Search narrows, it does not replace.** The field filters the same grouped, faceted list rather
 than swapping it for a flat set of results — otherwise typing one letter destroys the structure the
