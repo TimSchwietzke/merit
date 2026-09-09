@@ -33,6 +33,7 @@ const PATHS: Record<string, PathSegment[]> = {
   '/food': [ROOT, { labelKey: 'nav.food', to: '/food' }, { labelKey: 'common.today' }],
   '/training': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'common.today' }],
   '/food/add': [ROOT, { labelKey: 'nav.food', to: '/food' }, { labelKey: 'common.add' }],
+  '/training/add': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'common.add' }],
   '/more': [ROOT, { labelKey: 'nav.more' }],
   // Weight is reached through `more` rather than from a tab of its own (there
   // are four and four is the ceiling, §7), and the path says so.

@@ -144,7 +144,45 @@
       }
     },
     "training": {
-      "planned": "Hier steht das Training — deine Trainingstage, die Einheit für heute und die Sätze, während du sie protokollierst."
+      "loadFailed": "Die Sätze des Tages konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
+      "empty": "noch nichts erfasst",
+      "addExercise": "Übung hinzufügen",
+      "deleted": "Satz entfernt",
+      "undoFailed": "Der Satz konnte nicht wiederhergestellt werden. Trage ihn noch einmal ein.",
+      "swipe": "Wische die Zeile zur Seite, um sie zu entfernen.",
+      "remove": "Entfernen",
+      "lastTime": "letztes Mal",
+      "never": "zum ersten Mal",
+      "volume": "{{volume}} kg bewegt",
+      "set": {
+        "reps": "wdh",
+        "weight": "gewicht",
+        "rir": "rir",
+        "rirHint": " · optional",
+        "add": "Satz eintragen",
+        "adding": "Wird eingetragen …",
+        "invalid": "Trage Wiederholungen und ein Gewicht ein. Null ist ein Gewicht, leer nicht.",
+        "addFailed": "Der Satz wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal."
+      },
+      "add": {
+        "title": "Übung hinzufügen",
+        "lead": "Wähle aus dem gemeinsamen Katalog oder lege eine fehlende Übung an.",
+        "search": "suche",
+        "searching": "wird gesucht",
+        "noResults": "keine Übung gefunden",
+        "back": "Zurück zum Tag",
+        "searchFailed": "Die Suche ist nicht durchgekommen. Prüfe dein Netz und versuche es noch einmal."
+      },
+      "groups": {
+        "chest": "brust",
+        "back": "rücken",
+        "shoulders": "schultern",
+        "arms": "arme",
+        "legs": "beine",
+        "glutes": "gesäß",
+        "core": "rumpf",
+        "full_body": "ganzkörper"
+      }
     },
     "more": {
       "planned": "Hier stehen Einstellungen, Datenexport und die rechtlichen Seiten.",

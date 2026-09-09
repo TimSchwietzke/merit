@@ -1,0 +1,194 @@
+import { useCallback, useEffect, useRef, useState } from 'react'
+
+import { useSession } from '@/features/auth/useSession'
+import { addDays } from '@/lib/date'
+import { supabase } from '@/lib/supabase'
+import type { LoggedSet, SessionSets } from '@/lib/training'
+
+/**
+ * A training day, and enough history behind it to answer "what did I do last
+ * time" without a second round trip.
+ *
+ * One query covers both. The comparison line needs the previous session for
+ * every exercise on screen, and fetching that per exercise would be a request
+ * per block on a gym connection — so a window of recent sets comes back at once
+ * and the maths slices it (`lastSessionFor`).
+ */
+export interface ExerciseRef {
+  id: string
+  nameEn: string
+  nameDe: string
+  muscleGroup: string
+  equipment: string
+}
+
+export interface WorkoutState {
+  /** Today's sets, in the order they were logged. */
+  sets: LoggedSet[]
+  /** Every exercise appearing in the window, by id. */
+  exercises: Map<string, ExerciseRef>
+  /** Earlier days, for the comparison line. */
+  history: SessionSets[]
+  status: 'loading' | 'ready' | 'error'
+  addSet: (set: {
+    exerciseId: string
+    reps: number
+    weightKg: number
+    rir: number | null
+  }) => Promise<boolean>
+  removeSet: (id: string) => Promise<boolean>
+}
+
+/** How far back the comparison line is allowed to reach. */
+const WINDOW_DAYS = 180
+
+const SELECT = `id, set_number, reps, weight_kg, rir, exercise_id,
+  workouts!inner (date),
+  exercises!inner (id, name_en, name_de, muscle_group, equipment)`
+
+type Row = {
+  id: string
+  set_number: number
+  reps: number
+  weight_kg: number
+  rir: number | null
+  exercise_id: string
+  workouts: { date: string }
+  exercises: {
+    id: string
+    name_en: string
+    name_de: string
+    muscle_group: string
+    equipment: string
+  }
+}
+
+const toSet = (row: Row): LoggedSet => ({
+  id: row.id,
+  exerciseId: row.exercise_id,
+  setNumber: row.set_number,
+  reps: row.reps,
+  weightKg: row.weight_kg,
+  rir: row.rir,
+})
+
+export function useWorkout(date: string): WorkoutState {
+  const { session } = useSession()
+  const userId = session?.user.id
+
+  const [rows, setRows] = useState<{ date: string; rows: Row[] } | null>(null)
+  const [failed, setFailed] = useState(false)
+  // Bumped after a write, which is what re-runs the query. A reload function
+  // called from the effect would be a state write the effect owns; a token is
+  // the same reload expressed as a dependency.
+  const [reloads, setReloads] = useState(0)
+  const rowsRef = useRef<Row[]>([])
+
+  useEffect(() => {
+    if (!userId) return
+    let active = true
+
+    void supabase
+      .from('workout_sets')
+      .select(SELECT)
+      .gte('workouts.date', addDays(date, -WINDOW_DAYS))
+      .lte('workouts.date', date)
+      .order('created_at')
+      .then(({ data, error }) => {
+        if (!active) return
+        if (error || !data) {
+          setFailed(true)
+          return
+        }
+        rowsRef.current = data as unknown as Row[]
+        setRows({ date, rows: rowsRef.current })
+        setFailed(false)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [userId, date, reloads])
+
+  const current = rows?.date === date ? rows.rows : null
+  const status: WorkoutState['status'] = failed ? 'error' : current === null ? 'loading' : 'ready'
+
+  const sets = (current ?? []).filter((row) => row.workouts.date === date).map(toSet)
+
+  const exercises = new Map<string, ExerciseRef>()
+  for (const row of current ?? []) {
+    exercises.set(row.exercises.id, {
+      id: row.exercises.id,
+      nameEn: row.exercises.name_en,
+      nameDe: row.exercises.name_de,
+      muscleGroup: row.exercises.muscle_group,
+      equipment: row.exercises.equipment,
+    })
+  }
+
+  const byDate = new Map<string, LoggedSet[]>()
+  for (const row of current ?? []) {
+    const day = byDate.get(row.workouts.date) ?? []
+    day.push(toSet(row))
+    byDate.set(row.workouts.date, day)
+  }
+  const history: SessionSets[] = [...byDate].map(([day, daySets]) => ({ date: day, sets: daySets }))
+
+  const addSet = useCallback(
+    async (set: { exerciseId: string; reps: number; weightKg: number; rir: number | null }) => {
+      if (!userId) return false
+
+      // The day's workout is created on the first set rather than when the
+      // screen opens, so browsing a day never leaves an empty session behind.
+      const workout = await supabase
+        .from('workouts')
+        .upsert({ user_id: userId, date }, { onConflict: 'user_id,date' })
+        .select('id')
+        .single()
+
+      if (!workout.data || workout.error) return false
+
+      const existing = rowsRef.current.filter(
+        (row) => row.workouts.date === date && row.exercise_id === set.exerciseId,
+      )
+      const setNumber = existing.reduce((highest, row) => Math.max(highest, row.set_number), 0) + 1
+
+      const { error } = await supabase.from('workout_sets').insert({
+        workout_id: workout.data.id,
+        // Overwritten by a trigger from the workout's owner; sent because the
+        // column is not null.
+        user_id: userId,
+        exercise_id: set.exerciseId,
+        set_number: setNumber,
+        reps: set.reps,
+        weight_kg: set.weightKg,
+        rir: set.rir,
+      })
+
+      if (error) return false
+      setReloads((n) => n + 1)
+      return true
+    },
+    [userId, date],
+  )
+
+  const removeSet = useCallback(
+    async (id: string) => {
+      if (!userId) return false
+      const { data, error } = await supabase
+        .from('workout_sets')
+        .delete()
+        .eq('id', id)
+        .eq('user_id', userId)
+        .select('id')
+        .single()
+
+      if (!data || error) return false
+      setReloads((n) => n + 1)
+      return true
+    },
+    [userId],
+  )
+
+  return { sets, exercises, history, status, addSet, removeSet }
+}
