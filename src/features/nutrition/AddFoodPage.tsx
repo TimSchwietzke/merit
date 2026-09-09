@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -8,12 +8,14 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { NewFoodForm, type NewFood } from '@/features/nutrition/NewFoodForm'
+import { resolveBarcode } from '@/features/nutrition/resolve-barcode'
 import { PortionForm } from '@/features/nutrition/PortionForm'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
 import { useFoodSearch, type CatalogueFood } from '@/features/nutrition/useFoodSearch'
 import { useSession } from '@/features/auth/useSession'
 import { todayKey } from '@/lib/date'
 import { formatNumber } from '@/lib/format'
+import { ATTRIBUTION_URL } from '@/lib/off'
 import { supabase } from '@/lib/supabase'
 import type { MealType } from '@/lib/nutrition'
 
@@ -31,6 +33,15 @@ import type { MealType } from '@/lib/nutrition'
  * two and three and slot in between, at the point where the search comes back
  * with nothing.
  */
+/**
+ * The decoder is a third of the bundle gzipped and only this one state needs
+ * it, so it is fetched when somebody opens the scanner rather than by everyone
+ * on every page load.
+ */
+const BarcodeScanner = lazy(() =>
+  import('@/features/nutrition/BarcodeScanner').then((m) => ({ default: m.BarcodeScanner })),
+)
+
 export default function AddFoodPage() {
   const { t } = useTranslation()
   const { i18n } = useTranslation()
@@ -47,8 +58,11 @@ export default function AddFoodPage() {
 
   const [picked, setPicked] = useState<CatalogueFood | null>(null)
   const [creating, setCreating] = useState(false)
+  const [scanning, setScanning] = useState(params.get('scan') === '1')
   const [pending, setPending] = useState(false)
   const [failed, setFailed] = useState(false)
+  const [scanResult, setScanResult] = useState<'missing' | 'offline' | null>(null)
+  const [scannedBarcode, setScannedBarcode] = useState<string | null>(null)
 
   const { add } = useFoodLog(date)
 
@@ -62,6 +76,25 @@ export default function AddFoodPage() {
     else setFailed(true)
   }
 
+  async function onCode(code: string) {
+    if (!session || pending) return
+    setPending(true)
+    setScanResult(null)
+
+    const resolved = await resolveBarcode(code, session.user.id)
+    setPending(false)
+
+    if (resolved.kind === 'found') {
+      setScanning(false)
+      setPicked(resolved.food)
+      return
+    }
+    // Not an error dialog: a barcode that did not resolve is an empty state,
+    // and the next step is offered in place (§10.8, §14).
+    setScanResult(resolved.kind)
+    if (resolved.kind === 'missing') setScannedBarcode(resolved.barcode)
+  }
+
   async function createFood(food: NewFood) {
     if (!session) return
     setPending(true)
@@ -72,6 +105,9 @@ export default function AddFoodPage() {
       .insert({
         name: food.name,
         brand: food.brand,
+        // Carried over when the food is being added because a scan found
+        // nothing: the next person to scan it then gets a hit (GOAL.md §4).
+        barcode: scannedBarcode,
         kcal_100g: food.values.kcal ?? 0,
         fat_100g: food.values.fat ?? 0,
         carbs_100g: food.values.carbs ?? 0,
@@ -135,6 +171,43 @@ export default function AddFoodPage() {
     )
   }
 
+  if (scanning) {
+    return (
+      <>
+        <PageHeader title={t('pages.food.scan.title')} />
+        <Suspense
+          fallback={<p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>}
+        >
+          <BarcodeScanner onCode={onCode} busy={pending} />
+        </Suspense>
+
+        {scanResult ? (
+          <div className="mt-6 rounded-lg border border-line bg-surface px-4 py-6 text-center">
+            <p className="text-sm text-ink-muted">{t(`pages.food.scan.${scanResult}`)}</p>
+            {scanResult === 'missing' ? (
+              <Button
+                variant="tinted"
+                className="mt-4"
+                onClick={() => {
+                  setScanning(false)
+                  setCreating(true)
+                }}
+              >
+                {t('pages.food.scan.addYourself')}
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
+
+        <Attribution />
+
+        <Button variant="bare" className="mt-4" onClick={() => setScanning(false)}>
+          ← {t('pages.food.add.search')}
+        </Button>
+      </>
+    )
+  }
+
   if (creating) {
     return (
       <>
@@ -166,6 +239,12 @@ export default function AddFoodPage() {
           spellCheck={false}
         />
       </div>
+
+      {/* The fastest path to a packaged product, so it is not buried under the
+          search results (GOAL.md §5: repeating a log must be one tap). */}
+      <Button variant="tinted" className="mt-4 w-full md:w-auto" onClick={() => setScanning(true)}>
+        {t('pages.food.scan.open')}
+      </Button>
 
       <section className="mt-6">
         {status === 'searching' ? (
@@ -215,6 +294,8 @@ export default function AddFoodPage() {
         ) : null}
       </section>
 
+      <Attribution />
+
       <Link
         to={`/food?date=${date}`}
         className="mt-8 inline-flex min-h-11 items-center font-mono text-2xs text-accent underline decoration-1 underline-offset-2"
@@ -222,5 +303,28 @@ export default function AddFoodPage() {
         ← {t('pages.food.add.back')}
       </Link>
     </>
+  )
+}
+
+/**
+ * Open Food Facts is ODbL, which requires the source to be named and linked
+ * wherever its data is shown (GOAL.md §4, §8). One quiet mono line.
+ */
+function Attribution() {
+  const { t } = useTranslation()
+  return (
+    <p className="mt-8 font-mono text-2xs text-ink-faint">
+      {t('pages.food.scan.attribution')}{' '}
+      {/* `inline-flex min-h-11` per §5.2: the hit area grows to 44px, the text
+          and its underline stay exactly where they were. */}
+      <a
+        href={ATTRIBUTION_URL}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex min-h-11 items-center text-accent underline decoration-1 underline-offset-2"
+      >
+        {ATTRIBUTION_URL.replace('https://', '')}
+      </a>
+    </p>
   )
 }

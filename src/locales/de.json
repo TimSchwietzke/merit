@@ -72,7 +72,9 @@
       "log": {
         "label": "erfasst",
         "empty": "noch nichts erfasst",
-        "add": "Lebensmittel hinzufügen"
+        "add": "Lebensmittel hinzufügen",
+        "swipe": "Wische die Zeile zur Seite, um sie zu entfernen.",
+        "remove": "Entfernen"
       },
       "add": {
         "title": "Lebensmittel hinzufügen",
@@ -108,6 +110,32 @@
         "save": "In den Katalog aufnehmen",
         "saving": "Wird angelegt …",
         "saveFailed": "Das Lebensmittel wurde nicht angelegt. Prüfe dein Netz und versuche es noch einmal."
+      },
+      "scan": {
+        "title": "Barcode scannen",
+        "open": "Barcode scannen",
+        "viewport": "Kamera, auf einen Barcode gerichtet",
+        "instruction": "barcode in den rahmen",
+        "looking": "wird nachgeschlagen",
+        "barcode": "barcode",
+        "look": "Nachschlagen",
+        "barcodeInvalid": "Das ist kein Barcode. Prüfe die Ziffern und versuche es noch einmal.",
+        "denied": "Merit hat keinen Zugriff auf die Kamera. Erlaube ihn im Browser und versuche es noch einmal — oder tippe die Nummer unten ein.",
+        "missing": "kein Produkt zu diesem Barcode",
+        "offline": "Open Food Facts war nicht erreichbar. Prüfe dein Netz oder trage das Lebensmittel selbst ein.",
+        "addYourself": "Selbst eintragen",
+        "attribution": "Produktdaten von Open Food Facts, unter der ODbL.",
+        "starting": "kamera startet",
+        "retry": "Kamera erneut versuchen",
+        "torchOn": "Licht einschalten",
+        "torchOff": "Licht ausschalten",
+        "or": "oder nummer eintippen"
+      },
+      "entry": {
+        "title": "Erfasste Portion",
+        "save": "Änderungen speichern",
+        "saving": "Wird gespeichert …",
+        "delete": "Aus dem Tag entfernen"
       }
     },
     "training": {

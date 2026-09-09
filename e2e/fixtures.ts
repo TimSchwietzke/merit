@@ -59,6 +59,7 @@ export const ROUTES: Route[] = [
   { name: 'more', path: '/more' },
   { name: 'weight', path: '/weight' },
   { name: 'food-add', path: '/food/add' },
+  { name: 'food-scan', path: '/food/add?scan=1' },
   { name: 'not-found', path: '/nowhere' },
   { name: 'sign-in', path: '/sign-in', signedOut: true },
 ]
@@ -122,19 +123,19 @@ export async function stubBackend(
   // — the whole point of the missing-is-not-zero rule — is in every capture.
   const FOODS = [
     {
-      id: 'f1', name: 'Skyr, natur', brand: 'Arla', source: 'off',
+      id: 'f1', name: 'Skyr, natur', brand: 'Arla', source: 'off', barcode: '5711953068881',
       serving_size_g: null, serving_label: null,
       kcal_100g: 63, fat_100g: 0.2, carbs_100g: 4, protein_100g: 11,
       saturated_fat_100g: 0.1, sugars_100g: 4, fibre_100g: 0, salt_100g: 0.1,
     },
     {
-      id: 'f2', name: 'Haferflocken, kernig', brand: null, source: 'community',
+      id: 'f2', name: 'Haferflocken, kernig', brand: null, source: 'community', barcode: null,
       serving_size_g: 60, serving_label: 'Portion',
       kcal_100g: 372, fat_100g: 7, carbs_100g: 59, protein_100g: 13,
       saturated_fat_100g: 1.3, sugars_100g: 1.1, fibre_100g: 10, salt_100g: 0.02,
     },
     {
-      id: 'f3', name: 'Banane', brand: null, source: 'usda',
+      id: 'f3', name: 'Banane', brand: null, source: 'usda', barcode: null,
       serving_size_g: null, serving_label: null,
       kcal_100g: 89, fat_100g: 0.3, carbs_100g: 23, protein_100g: 1.1,
       saturated_fat_100g: null, sugars_100g: 12, fibre_100g: null, salt_100g: null,
@@ -153,8 +154,54 @@ export async function stubBackend(
     }),
   )
 
-  await page.route('**/rest/v1/foods*', (route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(FOODS) }),
+  // The catalogue answers three different questions on the same path, so the
+  // stub reads the request rather than returning the same list to all of them:
+  // a barcode lookup wants one row or none, an insert echoes the row back, and
+  // a name search wants the list.
+  await page.route('**/rest/v1/foods*', (route) => {
+    const request = route.request()
+    const json = (body: unknown) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) })
+
+    if (request.method() === 'POST') {
+      const sent = JSON.parse(request.postData() ?? '{}')
+      return json({ ...FOODS[0], ...sent, id: 'new-food' })
+    }
+
+    const barcode = /barcode=eq\.(\d+)/.exec(request.url())?.[1]
+    if (barcode) return json(FOODS.find((food) => food.barcode === barcode) ?? null)
+
+    return json(FOODS)
+  })
+
+  // Open Food Facts, answered locally: the harness never leaves the machine,
+  // and their fifteen-per-minute limit is not something a test suite should be
+  // spending.
+  await page.route('**/world.openfoodfacts.org/**', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        status: 1,
+        product: {
+          code: '3017620422003',
+          product_name: 'Nutella',
+          product_name_de: 'Nutella',
+          brands: 'Ferrero',
+          serving_size: '15 g',
+          serving_quantity: 15,
+          nutriments: {
+            'energy-kcal_100g': 539,
+            fat_100g: 30.9,
+            'saturated-fat_100g': 10.6,
+            carbohydrates_100g: 57.5,
+            sugars_100g: 56.3,
+            proteins_100g: 6.3,
+            salt_100g: 0.107,
+          },
+        },
+      }),
+    }),
   )
 
   await page.route('**/rest/v1/profiles*', (route) =>

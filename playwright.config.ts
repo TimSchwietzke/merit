@@ -23,6 +23,12 @@ export default defineConfig({
     baseURL: 'http://127.0.0.1:5173',
     ...devices['Desktop Chrome'],
     channel: 'chromium-headless-shell',
+    // A synthetic camera, auto-granted. Without it the scanner screen only ever
+    // captures its no-permission state, and the viewport chrome — the frame and
+    // the reticle §10.10 specifies — is never actually looked at.
+    launchOptions: {
+      args: ['--use-fake-ui-for-media-stream', '--use-fake-device-for-media-stream'],
+    },
   },
   webServer: {
     command: 'npx vite --port 5173 --strictPort',

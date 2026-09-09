@@ -72,7 +72,9 @@
       "log": {
         "label": "logged",
         "empty": "nothing logged yet",
-        "add": "Add food"
+        "add": "Add food",
+        "swipe": "Swipe the row sideways to remove it.",
+        "remove": "Remove"
       },
       "add": {
         "title": "Add food",
@@ -108,6 +110,32 @@
         "save": "Add to the catalogue",
         "saving": "Adding…",
         "saveFailed": "That food was not added. Check your connection and try again."
+      },
+      "scan": {
+        "title": "Scan a barcode",
+        "open": "Scan a barcode",
+        "viewport": "Camera, pointed at a barcode",
+        "instruction": "barcode in the frame",
+        "looking": "looking it up",
+        "barcode": "barcode",
+        "look": "Look up",
+        "barcodeInvalid": "That is not a barcode. Check the digits and try again.",
+        "denied": "Merit has no access to the camera. Allow it in the browser, then try again — or type the number below.",
+        "missing": "no product for this barcode",
+        "offline": "Open Food Facts could not be reached. Check your connection, or add the food yourself.",
+        "addYourself": "Add it yourself",
+        "attribution": "Product data from Open Food Facts, under the ODbL.",
+        "starting": "starting the camera",
+        "retry": "Try the camera again",
+        "torchOn": "Turn the light on",
+        "torchOff": "Turn the light off",
+        "or": "or type the number"
+      },
+      "entry": {
+        "title": "Logged portion",
+        "save": "Save changes",
+        "saving": "Saving…",
+        "delete": "Remove from the day"
       }
     },
     "training": {
