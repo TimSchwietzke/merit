@@ -113,7 +113,7 @@
         "title": "Scan a barcode",
         "open": "Scan a barcode",
         "viewport": "Camera, pointed at a barcode",
-        "instruction": "hold the barcode inside the frame",
+        "instruction": "hold the barcode inside the frame — it reads on its own",
         "looking": "looking it up",
         "barcode": "barcode",
         "look": "Look up",
@@ -126,7 +126,8 @@
         "starting": "starting the camera",
         "retry": "Try the camera again",
         "torchOn": "Turn the light on",
-        "torchOff": "Turn the light off"
+        "torchOff": "Turn the light off",
+        "or": "or type the number"
       }
     },
     "training": {

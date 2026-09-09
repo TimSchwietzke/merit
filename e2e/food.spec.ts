@@ -1,3 +1,6 @@
+import { chromium } from '@playwright/test'
+
+import { writeBarcodeVideo } from './barcode-video'
 import { expect, stubBackend, test, waitForScreen } from './fixtures'
 
 /**
@@ -73,4 +76,35 @@ test('the torch appears only where the camera has one, and toggles', async ({ pa
     () => (window as unknown as { torchApplied: MediaTrackConstraints[] }).torchApplied,
   )
   expect(applied.at(-1)).toEqual({ advanced: [{ torch: true }] })
+})
+
+test('a barcode held in front of the camera resolves without anyone typing', async ({ page: _unused }, testInfo) => {
+  test.slow()
+  // The one question worth asking of a scanner. Chromium's own synthetic camera
+  // is a rolling colour pattern, so it is replaced with a file containing an
+  // actual EAN-13 — which needs its own browser, because the flag is a launch
+  // option and every other test wants the ordinary fake camera.
+  const video = testInfo.outputPath('ean13.y4m')
+  writeBarcodeVideo(video, '3017620422003')
+
+  const browser = await chromium.launch({
+    args: [
+      '--use-fake-ui-for-media-stream',
+      '--use-fake-device-for-media-stream',
+      `--use-file-for-fake-video-capture=${video}`,
+    ],
+  })
+
+  try {
+    const page = await browser.newPage({ viewport: { width: 375, height: 812 } })
+    await stubBackend(page, { theme: 'light', locale: 'de' })
+    await page.goto('http://127.0.0.1:5173/food/add?scan=1')
+    await waitForScreen(page)
+
+    // Nothing is typed and nothing is pressed: the camera is the interface.
+    await expect(page.getByText('Nutella')).toBeVisible({ timeout: 20_000 })
+    await expect(page.getByRole('textbox', { name: /menge/i })).toBeVisible()
+  } finally {
+    await browser.close()
+  }
 })

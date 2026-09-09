@@ -24,6 +24,18 @@ import { hasValidCheckDigit } from '@/lib/barcode'
  * scuffed past reading.
  */
 
+/**
+ * The camera Merit asks for. 1280x720 rather than whatever the phone defaults
+ * to: a barcode is thin parallel lines, and at 640x480 the bars on a small
+ * package fall below one pixel each and stop being readable at arm's length.
+ * All `ideal`, so a device that cannot manage it degrades instead of failing.
+ */
+const VIDEO: MediaTrackConstraints = {
+  facingMode: { ideal: 'environment' },
+  width: { ideal: 1280 },
+  height: { ideal: 720 },
+}
+
 /** The 1D symbologies on food packaging. Narrowing them speeds up every frame. */
 const FORMATS = [
   BarcodeFormat.EAN_13,
@@ -82,34 +94,43 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
 
     const hints = new Map()
     hints.set(DecodeHintType.POSSIBLE_FORMATS, FORMATS)
+    // Without this the 1D readers only sample a few horizontal lines through
+    // the middle of the frame, so a barcode that is slightly high, low or
+    // tilted never reads — which looks exactly like a camera that is not
+    // scanning at all. It costs frames; a phone held over a packet has them.
+    hints.set(DecodeHintType.TRY_HARDER, true)
     const reader = new BrowserMultiFormatReader(hints, { delayBetweenScanAttempts: 250 })
 
     let stream: MediaStream | null = null
 
     async function start() {
       try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          // The camera on the back of the phone, which is the one pointing at
-          // the packet. `ideal` rather than `exact`: a laptop has one camera
-          // and `exact` fails outright there.
-          video: { facingMode: { ideal: 'environment' } },
-        })
+        stream = await navigator.mediaDevices.getUserMedia({ video: VIDEO })
         if (stopped) return
 
         const video = videoRef.current
         if (!video) return
         video.srcObject = stream
         trackRef.current = stream.getVideoTracks()[0] ?? null
+        // Safari will not start a stream it was merely handed, and a paused
+        // video decodes nothing while showing a picture — which is the exact
+        // shape of "the camera works but it never scans".
+        video.playsInline = true
+        video.muted = true
+        await video.play()
 
         controls = await reader.decodeFromVideoElement(
           video,
           (result) => {
             if (stopped || !result) return
-            // A misread is far more likely than a code with a valid check
-            // digit, so this is the filter that keeps a wrong product off the
-            // screen.
-            const code = result.getText()
-            if (hasValidCheckDigit(code)) onCodeRef.current(code)
+            // No check-digit filter here. ZXing's 1D readers validate the
+            // checksum themselves before returning a result, so this would only
+            // ever reject something they had already accepted — and it does:
+            // a UPC-E check digit is computed over the expanded twelve-digit
+            // form, not over the eight digits that come back, so every UPC-E
+            // read was being dropped in silence. The typed field keeps the
+            // check, where nothing else is validating.
+            onCodeRef.current(result.getText())
           },
         )
         if (stopped) {
@@ -228,7 +249,16 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
         </div>
       ) : null}
 
-      {/* In place, not on another screen (§10.10). */}
+      {/* In place, not on another screen (§10.10) — but plainly the other way
+          of doing this, not the button that works the camera. Without the rule
+          and the word on it, a field with a button beside it sitting under a
+          viewport reads as "press here to scan". */}
+      <div className="flex items-center gap-3" aria-hidden>
+        <span className="h-px flex-1 bg-line" />
+        <span className="font-mono text-2xs text-ink-faint">{t('pages.food.scan.or')}</span>
+        <span className="h-px flex-1 bg-line" />
+      </div>
+
       <form onSubmit={submitTyped} className="flex flex-col gap-2" noValidate>
         <Label htmlFor="barcode">{t('pages.food.scan.barcode')}</Label>
         <div className="flex gap-2">
@@ -241,7 +271,9 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
             className="font-mono tabular-nums"
             aria-invalid={typedError ? true : undefined}
           />
-          <Button type="submit" variant="quiet" pending={busy}>
+          {/* Disabled while empty: pressing it then answered "that is not a
+              barcode", which is a strange thing to say about nothing. */}
+          <Button type="submit" variant="quiet" pending={busy} disabled={typed.trim() === ''}>
             {t('pages.food.scan.look')}
           </Button>
         </div>
