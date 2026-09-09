@@ -829,6 +829,20 @@ mid-afternoon more often than at midnight.
   pulled 4px past it and its gap drops to the mosaic's 2px. The mark is a fixed 24px, not the tile's
   width: on a desktop column the tile is 100px and a mark that fills it stops being a mark.
 
+- **Floating add** — the one place Merit floats a control over the page instead of putting it in the
+  flow: adding to the list a screen is *about*, on a screen you scroll. 56px, `accent` on `bg`, a
+  lucide `+` at 22px, `radius-md` and square — a circle is a pill and §6 allows exactly two of those.
+  It takes the shadow the session bar takes, on the same licence: it genuinely floats.
+
+  It sits 12px above the tab bar, right-aligned, and **the list beneath it carries the padding to
+  clear it** — a fixed element takes no space in the flow and will otherwise sit on the last row.
+  **Only one floating thing at a time**: where the session bar can appear, the button hides. Two
+  targets fighting for the corner a thumb rests on is how the wrong one gets hit between sets.
+
+  It is not a general licence for a FAB. A screen with a single obvious action puts it in the flow
+  under the thing it acts on; this is for a list that grows, where the action outlives the scroll
+  position.
+
 - **Rest-day / next-session line** — one sentence, sans, `ink-muted`, on the dashboard, naming when
   the next session is due.
 - **Streak / consistency mark** — a mono `text-2xs` line with the significant number promoted to

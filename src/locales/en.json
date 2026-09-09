@@ -444,12 +444,9 @@
     "routines": {
       "label": "routines",
       "empty": "no routine yet",
-      "newName": "name",
-      "newPlaceholder": "Upper body 1",
+      "defaultName": "New routine",
       "create": "Add a routine",
-      "creating": "Adding…",
       "createFailed": "That did not save. Check your connection and try again.",
-      "nameInvalid": "Give the routine a name.",
       "exerciseCount_one": "{{count}} exercise",
       "exerciseCount_other": "{{count}} exercises",
       "unfinished": "no exercises yet",
@@ -458,6 +455,7 @@
       "back": "training",
       "editor": {
         "name": "name",
+        "namePlaceholder": "Upper body 1",
         "weekdays": "planned for",
         "weekdaysHint": " · leave empty to start it whenever",
         "weekdaysLocked": " · add an exercise first",

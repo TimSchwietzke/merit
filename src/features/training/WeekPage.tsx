@@ -1,7 +1,8 @@
-import { useMemo, useState, type FormEvent } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowUpDown, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowUpDown, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/EmptyState'
 import { Panel } from '@/components/Panel'
@@ -10,10 +11,9 @@ import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
 import { Button } from '@/components/ui/button'
 import { Confirm } from '@/components/ui/confirm'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Sheet } from '@/components/ui/sheet'
 import { plannable, useRoutines, type Routine } from '@/features/routines/useRoutines'
+import { useActiveSession } from '@/features/training/useActiveSession'
 import { useSchedule, type DaySession, type ScheduleDay } from '@/features/training/useSchedule'
 import { addDays, todayKey } from '@/lib/date'
 import { formatDayLong, formatDayRange, formatDayShort, weekdayLabel } from '@/lib/format'
@@ -103,12 +103,19 @@ export default function WeekPage() {
         />
       )}
 
-      <RoutineList
-        routines={routines}
-        status={routinesStatus}
-        locale={locale}
-        onCreate={create}
-        onCreated={(id) => navigate(`/training/routines/${id}`)}
+      <RoutineList routines={routines} status={routinesStatus} locale={locale} />
+
+      <AddRoutine
+        onAdd={async () => {
+          const id = await create(t('pages.routines.defaultName'))
+          if (!id) {
+            toast(t('pages.routines.createFailed'))
+            return
+          }
+          // `new`: the editor puts the cursor in the name field, because the
+          // name is the one thing a routine created this way does not have yet.
+          navigate(`/training/routines/${id}?new=1`)
+        }}
       />
 
       <Confirm
@@ -383,46 +390,24 @@ function DayCard({
  *
  * They were behind a link for one release and that was one release too many: a
  * routine is the thing this feature is made of, and the week above is only a
- * projection of it. Adding one is a name and a button, and lands straight in
- * the editor, because a routine with nothing in it is not a routine yet.
+ * projection of it.
+ *
+ * The bottom padding is for the button floating over this list — a fixed
+ * element takes no space in the flow and would otherwise sit on the last row.
  */
 function RoutineList({
   routines,
   status,
   locale,
-  onCreate,
-  onCreated,
 }: {
   routines: Routine[]
   status: 'loading' | 'ready' | 'error'
   locale: string
-  onCreate: (name: string) => Promise<string | null>
-  onCreated: (id: string) => void
 }) {
   const { t } = useTranslation()
-  const [name, setName] = useState('')
-  const [error, setError] = useState<string | null>(null)
-  const [pending, setPending] = useState(false)
-
-  async function submit(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault()
-    if (name.trim() === '') {
-      setError(t('pages.routines.nameInvalid'))
-      return
-    }
-    setError(null)
-    setPending(true)
-    const id = await onCreate(name)
-    setPending(false)
-    if (!id) {
-      setError(t('pages.routines.createFailed'))
-      return
-    }
-    onCreated(id)
-  }
 
   return (
-    <section className="mt-8">
+    <section className="mt-8 pb-16">
       <SectionHead
         label={t('pages.routines.label')}
         hint={status === 'ready' ? String(routines.length) : undefined}
@@ -459,28 +444,50 @@ function RoutineList({
           ))}
         </Rows>
       )}
-
-      <form onSubmit={submit} noValidate className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-end">
-        <div className="flex min-w-0 flex-1 flex-col gap-2 sm:max-w-xs">
-          <Label htmlFor="routine-name">{t('pages.routines.newName')}</Label>
-          <Input
-            id="routine-name"
-            value={name}
-            onChange={(event) => setName(event.target.value)}
-            placeholder={t('pages.routines.newPlaceholder')}
-            aria-invalid={error ? true : undefined}
-          />
-        </div>
-        <Button type="submit" variant="tinted" pending={pending} className="shrink-0">
-          {pending ? t('pages.routines.creating') : t('pages.routines.create')}
-        </Button>
-      </form>
-
-      {error ? (
-        <p role="alert" className="mt-3 text-sm text-danger">
-          {error}
-        </p>
-      ) : null}
     </section>
+  )
+}
+
+/**
+ * Adding a routine, floating over the screen it belongs to.
+ *
+ * A name field and a button at the bottom of the page put the least-used
+ * control on the screen in permanent view and made you scroll past the list to
+ * reach it. This is one target in the corner the thumb is already at, and the
+ * name is asked for once, in the editor it lands in, rather than twice.
+ *
+ * It is hidden while a session is running: the set you are on owns the bottom
+ * of the screen then, and two floating things fighting for that corner is how
+ * the wrong one gets tapped between sets.
+ *
+ * Square with a 5px radius, not a circle — §6 allows a pill for a progress
+ * track and a sheet's drag handle, and nothing else. §6 does allow the shadow:
+ * this genuinely floats, which is the same licence the session bar has.
+ */
+function AddRoutine({ onAdd }: { onAdd: () => Promise<void> }) {
+  const { t } = useTranslation()
+  const { running } = useActiveSession()
+  const [pending, setPending] = useState(false)
+
+  if (running) return null
+
+  return (
+    <button
+      type="button"
+      aria-label={t('pages.routines.create')}
+      disabled={pending}
+      onClick={async () => {
+        setPending(true)
+        await onAdd()
+        setPending(false)
+      }}
+      className="fixed bottom-[calc(56px+0.75rem+env(safe-area-inset-bottom))] right-4 z-30 flex
+                 h-14 w-14 items-center justify-center rounded-md bg-accent text-bg shadow-lg
+                 transition-opacity [transition-duration:140ms] hover:opacity-90
+                 active:opacity-90 active:[transition-duration:0ms] disabled:opacity-35
+                 lg:bottom-4"
+    >
+      <Plus size={22} strokeWidth={2} aria-hidden />
+    </button>
   )
 }

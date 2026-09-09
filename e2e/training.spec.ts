@@ -161,3 +161,27 @@ test('a routine with no exercises is listed but never planned into the week', as
   await page.getByRole('link', { name: /Nacken & Schultern/ }).click()
   await expect(page.getByRole('button', { name: 'Mo', exact: true })).toBeDisabled()
 })
+
+test('adding a routine is one target, and it yields the corner while a session runs', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+  await page.goto('/training')
+  await waitForScreen(page)
+
+  // The fixture leaves sets outstanding, so the bar owns the bottom of the
+  // screen and the button that would sit under it is not rendered at all.
+  const add = page.getByRole('button', { name: 'Routine anlegen' })
+  await expect(add).toBeHidden()
+
+  await page.getByRole('button', { name: 'Einheit anzeigen' }).click()
+  await page.getByRole('button', { name: 'Einheit beenden' }).click()
+  await expect(add).toBeVisible()
+
+  // And it lands in the editor with the name field waiting, rather than asking
+  // for the name on the way in.
+  await add.click()
+  await expect(page.getByLabel('name')).toBeFocused()
+  await expect(page.getByLabel('name')).toHaveValue('')
+})

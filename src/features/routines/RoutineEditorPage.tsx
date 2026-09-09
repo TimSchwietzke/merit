@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { ChevronDown, ChevronUp, Plus, X } from 'lucide-react'
 import { toast } from 'sonner'
 
@@ -30,7 +30,28 @@ export default function RoutineEditorPage() {
   const { t, i18n } = useTranslation()
   const locale = i18n.language
   const { id } = useParams<{ id: string }>()
+  const [params] = useSearchParams()
   const navigate = useNavigate()
+
+  // Arrived from the `+`, so the routine is carrying a stand-in name and
+  // naming it is the first thing to do. The field starts empty rather than
+  // holding that stand-in for you to clear — iOS will not always open the
+  // keyboard for a focus it did not see you ask for, and a selection that is
+  // lost to the tap which fixes that leaves you deleting `Neue Routine` by
+  // hand. Blank with its placeholder showing costs nothing if the focus lands
+  // and nothing if it does not, and the row keeps the stand-in until something
+  // is typed over it.
+  //
+  // A callback ref rather than `autoFocus`: the field mounts only once the
+  // routine has loaded, which is long after the attribute would have had its
+  // say.
+  const isNew = params.get('new') === '1'
+  const nameField = useCallback(
+    (node: HTMLInputElement | null) => {
+      if (node && isNew) node.focus()
+    },
+    [isNew],
+  )
 
   const { routines, status, rename, remove, setWeekdays, updateExercise, removeExercise, moveExercise } =
     useRoutines()
@@ -63,7 +84,9 @@ export default function RoutineEditorPage() {
             <Label htmlFor="routine-name">{t('pages.routines.editor.name')}</Label>
             <Input
               id="routine-name"
-              defaultValue={routine.name}
+              ref={nameField}
+              defaultValue={isNew ? '' : routine.name}
+              placeholder={t('pages.routines.editor.namePlaceholder')}
               // On blur, not on keystroke: a rename is one decision, and saving
               // per character writes eight rows for one change (§10.5).
               onBlur={(event) => {

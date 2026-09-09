@@ -444,12 +444,9 @@
     "routines": {
       "label": "routinen",
       "empty": "noch keine routine",
-      "newName": "name",
-      "newPlaceholder": "Oberkörper 1",
+      "defaultName": "Neue Routine",
       "create": "Routine anlegen",
-      "creating": "Wird angelegt …",
       "createFailed": "Das wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
-      "nameInvalid": "Gib der Routine einen Namen.",
       "exerciseCount_one": "{{count}} Übung",
       "exerciseCount_other": "{{count}} Übungen",
       "unfinished": "noch keine Übungen",
@@ -458,6 +455,7 @@
       "back": "training",
       "editor": {
         "name": "name",
+        "namePlaceholder": "Oberkörper 1",
         "weekdays": "eingeplant für",
         "weekdaysHint": " · leer lassen, um sie jederzeit zu starten",
         "weekdaysLocked": " · erst eine Übung hinzufügen",
