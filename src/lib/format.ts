@@ -97,3 +97,17 @@ export function parseDecimalInput(
   if (!Number.isFinite(value) || value < min || value > max) return null
   return value
 }
+
+/**
+ * A short weekday name for an ISO weekday, 1 = Monday.
+ *
+ * Formatted data rather than seven translated strings per language: `Intl`
+ * already knows what Monday is called, and a hand-written list is one more
+ * place for `Mo`/`Mon`/`Montag` to disagree between the two locales.
+ */
+export function weekdayLabel(weekday: number, locale: string): string {
+  // 2026-01-05 is a Monday, so ISO 1..7 lands on the 5th..11th.
+  return new Intl.DateTimeFormat(locale, { weekday: 'short' }).format(
+    new Date(2026, 0, 4 + weekday),
+  )
+}
