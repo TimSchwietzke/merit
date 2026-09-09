@@ -43,6 +43,12 @@ export default function MorePage() {
       <section className="mt-8">
         <SectionHead label={t('pages.more.tracking.label')} />
         <Rows>
+          <Row to="/goals">
+            <span className="min-w-0 flex-1 truncate">{t('nav.goals')}</span>
+            <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
+              →
+            </span>
+          </Row>
           <Row to="/weight">
             {/* `nav.weight`, not a label of its own: the tab bar, the path bar
                 and this row are one vocabulary, and a second copy is how two

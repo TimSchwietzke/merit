@@ -85,7 +85,7 @@ export function PortionForm({
 
         {/* Four options is the ceiling for a segmented control (§10.7), and
             there are exactly four meals. */}
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col items-start gap-2">
           <p className="font-mono text-2xs text-ink-faint">{t('pages.food.portion.meal')}</p>
           <SegmentedControl<MealType>
             label={t('pages.food.portion.meal')}

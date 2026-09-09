@@ -9,7 +9,8 @@
     "food": "food",
     "training": "training",
     "more": "more",
-    "weight": "weight"
+    "weight": "weight",
+    "goals": "goals"
   },
   "common": {
     "notBuiltYet": "not built yet",
@@ -67,7 +68,11 @@
       "totals": {
         "label": "the day",
         "partial": "partial · {{known}} of {{total}} foods",
-        "none": "no data"
+        "none": "no data",
+        "left": "{{left}} left",
+        "over": "{{over}} over",
+        "noTarget": "set a calorie target",
+        "ariaCalories": "Calories today against your target"
       },
       "log": {
         "label": "logged",
@@ -165,7 +170,8 @@
         "signingOut": "Signing out…"
       },
       "tracking": {
-        "label": "tracking"
+        "label": "tracking",
+        "goals": "goals"
       }
     },
     "notFound": {
@@ -219,6 +225,61 @@
         "empty": "nothing logged yet",
         "editing": "editing",
         "emptyRange": "nothing logged in this range"
+      }
+    },
+    "goals": {
+      "loadFailed": "Your targets could not be loaded. Check your connection and try again.",
+      "body": {
+        "label": "you",
+        "lead": "Used to work out what a day costs you. Nothing here is shown to anyone else.",
+        "height": "height",
+        "birthDate": "date of birth",
+        "sex": "sex",
+        "sexes": {
+          "female": "female",
+          "male": "male"
+        },
+        "activity": "activity",
+        "activities": {
+          "sedentary": "sitting",
+          "light": "light",
+          "moderate": "moderate",
+          "active": "active",
+          "very_active": "very active"
+        },
+        "direction": "weight",
+        "directions": {
+          "lose": "lose",
+          "maintain": "hold",
+          "gain": "gain"
+        },
+        "weight": "from your last weigh-in",
+        "weightMissing": "no weigh-in logged yet",
+        "heightInvalid": "Enter a height in centimetres, like 181.",
+        "save": "Save",
+        "saving": "Saving…",
+        "saveFailed": "That did not save. Check your connection and try again."
+      },
+      "targets": {
+        "label": "targets",
+        "mode": "calorie target",
+        "modes": {
+          "manual": "entered",
+          "calculated": "calculated"
+        },
+        "kcal": "calories",
+        "protein": "protein",
+        "fat": "fat",
+        "carbs": "carbohydrate",
+        "resting": "at rest",
+        "maintenance": "to hold your weight",
+        "needs": "Fill in {{fields}} above to calculate a target.",
+        "kcalInvalid": "Enter a calorie target between 500 and 10000.",
+        "macroInvalid": "Enter a value in grams.",
+        "save": "Save targets",
+        "saving": "Saving…",
+        "saveFailed": "Those targets did not save. Check your connection and try again.",
+        "appliesFrom": "applies from today; earlier days keep the target they had"
       }
     }
   }

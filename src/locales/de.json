@@ -9,7 +9,8 @@
     "food": "ernährung",
     "training": "training",
     "more": "mehr",
-    "weight": "gewicht"
+    "weight": "gewicht",
+    "goals": "ziele"
   },
   "common": {
     "notBuiltYet": "noch nicht gebaut",
@@ -67,7 +68,11 @@
       "totals": {
         "label": "der tag",
         "partial": "unvollständig · {{known}} von {{total}}",
-        "none": "keine angabe"
+        "none": "keine angabe",
+        "left": "noch {{left}}",
+        "over": "{{over}} darüber",
+        "noTarget": "kalorienziel festlegen",
+        "ariaCalories": "Kalorien heute im Verhältnis zu deinem Ziel"
       },
       "log": {
         "label": "erfasst",
@@ -165,7 +170,8 @@
         "signingOut": "Wird abgemeldet …"
       },
       "tracking": {
-        "label": "erfassung"
+        "label": "erfassung",
+        "goals": "ziele"
       }
     },
     "notFound": {
@@ -219,6 +225,61 @@
         "empty": "noch nichts eingetragen",
         "editing": "wird bearbeitet",
         "emptyRange": "in diesem Zeitraum nichts eingetragen"
+      }
+    },
+    "goals": {
+      "loadFailed": "Deine Ziele konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
+      "body": {
+        "label": "du",
+        "lead": "Dient dazu auszurechnen, was ein Tag dich kostet. Nichts davon sieht sonst jemand.",
+        "height": "größe",
+        "birthDate": "geburtsdatum",
+        "sex": "geschlecht",
+        "sexes": {
+          "female": "weiblich",
+          "male": "männlich"
+        },
+        "activity": "bewegung",
+        "activities": {
+          "sedentary": "sitzend",
+          "light": "leicht",
+          "moderate": "mittel",
+          "active": "aktiv",
+          "very_active": "sehr aktiv"
+        },
+        "direction": "gewicht",
+        "directions": {
+          "lose": "abnehmen",
+          "maintain": "halten",
+          "gain": "zunehmen"
+        },
+        "weight": "aus deiner letzten Wiegung",
+        "weightMissing": "noch keine Wiegung eingetragen",
+        "heightInvalid": "Trage die Größe in Zentimetern ein, zum Beispiel 181.",
+        "save": "Speichern",
+        "saving": "Wird gespeichert …",
+        "saveFailed": "Das wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal."
+      },
+      "targets": {
+        "label": "ziele",
+        "mode": "kalorienziel",
+        "modes": {
+          "manual": "eingetragen",
+          "calculated": "berechnet"
+        },
+        "kcal": "kalorien",
+        "protein": "eiweiß",
+        "fat": "fett",
+        "carbs": "kohlenhydrate",
+        "resting": "in Ruhe",
+        "maintenance": "um dein Gewicht zu halten",
+        "needs": "Trage oben {{fields}} ein, um ein Ziel zu berechnen.",
+        "kcalInvalid": "Trage ein Kalorienziel zwischen 500 und 10000 ein.",
+        "macroInvalid": "Trage einen Wert in Gramm ein.",
+        "save": "Ziele speichern",
+        "saving": "Wird gespeichert …",
+        "saveFailed": "Die Ziele wurden nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+        "appliesFrom": "gilt ab heute; frühere Tage behalten ihr damaliges Ziel"
       }
     }
   }
