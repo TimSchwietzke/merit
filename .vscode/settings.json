@@ -1,0 +1,13 @@
+{
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.expand": false,
+  "explorer.fileNesting.patterns": {
+    "package.json": "package-lock.json, .oxlintrc.json, components.json, vercel.json, playwright.config.ts, vite.config.ts, tsconfig*.json",
+    "README.md": "LICENSE, CLAUDE.md, DESIGN.md",
+    ".env.example": ".env, .env.*"
+  },
+  "files.exclude": {
+    "node_modules": true,
+    "dist": true
+  }
+}

@@ -36,7 +36,16 @@ export interface WorkoutState {
     weightKg: number
     rir: number | null
   }) => Promise<boolean>
+  updateSet: (
+    id: string,
+    values: { reps: number; weightKg: number; rir: number | null },
+  ) => Promise<boolean>
   removeSet: (id: string) => Promise<boolean>
+  /** Write a routine's planned sets onto the day. Resolves false if any failed. */
+  startRoutine: (plan: {
+    routineId: string
+    exercises: { exerciseId: string; targetSets: number; targetReps: number }[]
+  }) => Promise<boolean>
 }
 
 /** How far back the comparison line is allowed to reach. */
@@ -172,6 +181,81 @@ export function useWorkout(date: string): WorkoutState {
     [userId, date],
   )
 
+  const updateSet = useCallback(
+    async (id: string, values: { reps: number; weightKg: number; rir: number | null }) => {
+      if (!userId) return false
+      const { data, error } = await supabase
+        .from('workout_sets')
+        .update({
+          reps: values.reps,
+          weight_kg: values.weightKg,
+          rir: values.rir,
+        })
+        .eq('id', id)
+        .eq('user_id', userId)
+        .select('id')
+        .single()
+
+      if (!data || error) return false
+      setReloads((n) => n + 1)
+      return true
+    },
+    [userId],
+  )
+
+  /**
+   * Materialise a routine's plan as real, not-yet-done sets.
+   *
+   * Weight comes from the last time each exercise was actually performed, so
+   * the session opens as something to confirm rather than something to fill in
+   * — and so progress is visible at the moment of lifting rather than looked up
+   * afterwards. An exercise never done before starts at zero, which is a real
+   * weight and the right one for a bodyweight movement.
+   */
+  const startRoutine = useCallback(
+    async (plan: {
+      routineId: string
+      exercises: { exerciseId: string; targetSets: number; targetReps: number }[]
+    }) => {
+      if (!userId) return false
+
+      const workout = await supabase
+        .from('workouts')
+        .upsert({ user_id: userId, date, routine_id: plan.routineId }, { onConflict: 'user_id,date' })
+        .select('id')
+        .single()
+      if (!workout.data || workout.error) return false
+
+      const lastWeight = (exerciseId: string): number => {
+        const earlier = rowsRef.current
+          .filter((row) => row.exercise_id === exerciseId && row.workouts.date < date)
+          .sort((a, b) => b.workouts.date.localeCompare(a.workouts.date))
+        return earlier[0]?.weight_kg ?? 0
+      }
+
+      const rows = plan.exercises.flatMap((entry) =>
+        Array.from({ length: entry.targetSets }, (_, index) => ({
+          workout_id: workout.data.id,
+          user_id: userId,
+          exercise_id: entry.exerciseId,
+          set_number: index + 1,
+          reps: entry.targetReps,
+          weight_kg: lastWeight(entry.exerciseId),
+          rir: null,
+        })),
+      )
+
+      if (rows.length > 0) {
+        const { error } = await supabase.from('workout_sets').insert(rows)
+        if (error) return false
+      }
+
+      setReloads((n) => n + 1)
+      return true
+    },
+    [userId, date],
+  )
+
   const removeSet = useCallback(
     async (id: string) => {
       if (!userId) return false
@@ -190,5 +274,5 @@ export function useWorkout(date: string): WorkoutState {
     [userId],
   )
 
-  return { sets, exercises, history, status, addSet, removeSet }
+  return { sets, exercises, history, status, addSet, updateSet, removeSet, startRoutine }
 }

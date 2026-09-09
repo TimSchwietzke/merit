@@ -7,6 +7,7 @@ import {
   formatForInput,
   formatNumber,
   parseDecimalInput,
+  weekdayLabel,
 } from '@/lib/format'
 
 describe('formatNumber', () => {
@@ -102,5 +103,14 @@ describe('formatForInput', () => {
 
   it('never groups thousands — the field has to parse back', () => {
     expect(formatForInput(1082.5, 'en', 2)).toBe('1082.5')
+  })
+})
+
+describe('weekdayLabel', () => {
+  it('names the ISO weekdays, 1 being Monday', () => {
+    expect(weekdayLabel(1, 'en')).toMatch(/^Mon/)
+    expect(weekdayLabel(7, 'en')).toMatch(/^Sun/)
+    expect(weekdayLabel(1, 'de')).toMatch(/^Mo/)
+    expect(weekdayLabel(3, 'de')).toMatch(/^Mi/)
   })
 })

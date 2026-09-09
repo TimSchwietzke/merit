@@ -1,3 +1,4 @@
+import { addDays, daysBetween, parseDateKey } from '@/lib/date'
 /**
  * The training maths (CLAUDE.md, Code).
  *
@@ -95,4 +96,48 @@ export function repeatOf(sets: readonly LoggedSet[], exerciseId: string): Logged
   const mine = sets.filter((set) => set.exerciseId === exerciseId)
   if (mine.length === 0) return null
   return mine.reduce((latest, set) => (set.setNumber > latest.setNumber ? set : latest))
+}
+
+/** ISO weekday of a day key: 1 = Monday … 7 = Sunday. */
+export function isoWeekday(date: string): number {
+  return ((parseDateKey(date).getDay() + 6) % 7) + 1
+}
+
+/** A routine and the weekdays it is planned for. */
+export interface PlannedDay {
+  id: string
+  name: string
+  weekdays: number[]
+}
+
+/**
+ * The next planned session on or after a day, and how many days away it is.
+ *
+ * Searches a fortnight, which is more than a weekly plan can need and stops the
+ * loop from running forever when nothing is planned at all. Today counts: a
+ * session due today is nought days away, not seven.
+ */
+export function nextSession(
+  plan: readonly PlannedDay[],
+  date: string,
+): { day: PlannedDay; inDays: number } | null {
+  for (let offset = 0; offset <= 14; offset += 1) {
+    const weekday = isoWeekday(addDays(date, offset))
+    const match = plan.find((entry) => entry.weekdays.includes(weekday))
+    if (match) return { day: match, inDays: offset }
+  }
+  return null
+}
+
+/**
+ * Whether the plan is paused on a given day. The date is the last day of the
+ * pause, so a fortnight away is not a fortnight of missed sessions.
+ */
+export function planPaused(pausedUntil: string | null | undefined, date: string): boolean {
+  // Any absent value, not just `null`. A profile row read before this column
+  // existed comes back with the field missing, and `undefined !== null` is
+  // true — which sent an undefined into a date parser and took the dashboard
+  // down with it.
+  if (!pausedUntil) return false
+  return daysBetween(date, pausedUntil) >= 0
 }

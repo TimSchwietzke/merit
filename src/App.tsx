@@ -14,6 +14,8 @@ import LoggedPortionPage from '@/features/nutrition/LoggedPortionPage'
 import GoalsPage from '@/features/goals/GoalsPage'
 import TrainingPage from '@/features/training/TrainingPage'
 import AddExercisePage from '@/features/training/AddExercisePage'
+import RoutinesPage from '@/features/routines/RoutinesPage'
+import RoutineEditorPage from '@/features/routines/RoutineEditorPage'
 
 // Weight is the only screen that pulls in Recharts, which is a third of the
 // bundle. Split out, it is fetched by the people who open it rather than by
@@ -36,6 +38,8 @@ const router = createBrowserRouter([
           { path: '/food/entry/:id', element: <LoggedPortionPage /> },
           { path: '/training', element: <TrainingPage /> },
           { path: '/training/add', element: <AddExercisePage /> },
+          { path: '/training/routines', element: <RoutinesPage /> },
+          { path: '/training/routines/:id', element: <RoutineEditorPage /> },
           { path: '/more', element: <MorePage /> },
           { path: '/weight', element: <WeightPage /> },
           { path: '/goals', element: <GoalsPage /> },
