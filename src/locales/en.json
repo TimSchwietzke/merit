@@ -38,7 +38,20 @@
   },
   "pages": {
     "dashboard": {
-      "planned": "The day's summary goes here — calories against your target, the macro split, and whether a session is due."
+      "summary": "today",
+      "left": "kcal left",
+      "over": "kcal over",
+      "ringAria": "{{total}} of {{target}} kcal today, {{remaining}} kcal from the target.",
+      "noTarget": "no calorie target yet",
+      "setTarget": "Set a target",
+      "nothingLogged": "nothing logged today",
+      "macros": "macros",
+      "logFood": "Log a food",
+      "training": {
+        "label": "training",
+        "planned": "Whether a session is due today, and when the next one is, goes here once training is built."
+      },
+      "loadFailed": "Today could not be loaded. Check your connection and try again."
     },
     "food": {
       "loadFailed": "The day's foods could not be loaded. Check your connection and try again.",
@@ -231,7 +244,7 @@
       "loadFailed": "Your targets could not be loaded. Check your connection and try again.",
       "body": {
         "label": "you",
-        "lead": "Used to work out what a day costs you. Nothing here is shown to anyone else.",
+        "lead": "Used to work out what a day costs you.",
         "height": "height",
         "birthDate": "date of birth",
         "sex": "sex",
@@ -279,7 +292,16 @@
         "save": "Save targets",
         "saving": "Saving…",
         "saveFailed": "Those targets did not save. Check your connection and try again.",
-        "appliesFrom": "applies from today; earlier days keep the target they had"
+        "appliesFrom": "applies from today; earlier days keep the target they had",
+        "calc": {
+          "label": "work the macros out",
+          "proteinPerKg": "protein per kg",
+          "fatShare": "fat share",
+          "apply": "Fill the three fields",
+          "needsWeight": "needs a weigh-in first",
+          "needsKcal": "needs a calorie target first",
+          "invalid": "Enter a number."
+        }
       }
     }
   }

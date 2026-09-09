@@ -38,7 +38,20 @@
   },
   "pages": {
     "dashboard": {
-      "planned": "Hier steht die Zusammenfassung des Tages — Kalorien im Verhältnis zu deinem Ziel, die Makroverteilung und ob heute eine Einheit ansteht."
+      "summary": "heute",
+      "left": "kcal übrig",
+      "over": "kcal darüber",
+      "ringAria": "{{total}} von {{target}} kcal heute, {{remaining}} kcal vom Ziel entfernt.",
+      "noTarget": "noch kein kalorienziel",
+      "setTarget": "Ziel festlegen",
+      "nothingLogged": "heute noch nichts erfasst",
+      "macros": "makros",
+      "logFood": "Essen erfassen",
+      "training": {
+        "label": "training",
+        "planned": "Hier steht später, ob heute eine Einheit ansteht und wann die nächste fällig ist."
+      },
+      "loadFailed": "Der heutige Tag konnte nicht geladen werden. Prüfe dein Netz und versuche es noch einmal."
     },
     "food": {
       "loadFailed": "Die Einträge des Tages konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
@@ -231,7 +244,7 @@
       "loadFailed": "Deine Ziele konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
       "body": {
         "label": "du",
-        "lead": "Dient dazu auszurechnen, was ein Tag dich kostet. Nichts davon sieht sonst jemand.",
+        "lead": "Dient dazu auszurechnen, was ein Tag dich kostet.",
         "height": "größe",
         "birthDate": "geburtsdatum",
         "sex": "geschlecht",
@@ -279,7 +292,16 @@
         "save": "Ziele speichern",
         "saving": "Wird gespeichert …",
         "saveFailed": "Die Ziele wurden nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
-        "appliesFrom": "gilt ab heute; frühere Tage behalten ihr damaliges Ziel"
+        "appliesFrom": "gilt ab heute; frühere Tage behalten ihr damaliges Ziel",
+        "calc": {
+          "label": "makros ausrechnen",
+          "proteinPerKg": "eiweiß je kg",
+          "fatShare": "fettanteil",
+          "apply": "Die drei Felder füllen",
+          "needsWeight": "braucht zuerst eine Wiegung",
+          "needsKcal": "braucht zuerst ein Kalorienziel",
+          "invalid": "Trage eine Zahl ein."
+        }
       }
     }
   }
