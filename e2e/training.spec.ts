@@ -90,7 +90,8 @@ test('a filter narrows the catalogue and leaves recently-used alone', async ({ p
   await expect(filters).toBeVisible()
 
   await filters.click()
-  await page.getByRole('button', { name: 'kabel', exact: true }).click()
+  // One option per row, grouped by facet, each carrying what it would leave.
+  await page.getByRole('checkbox', { name: /kabel/ }).click()
   await page.getByRole('button', { name: 'Schließen' }).click()
 
   await expect(page.getByRole('button', { name: /Filter, 1 aktiv/ })).toBeVisible()

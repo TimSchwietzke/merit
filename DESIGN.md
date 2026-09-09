@@ -840,6 +840,13 @@ back. The condition is the sentence above it: **the active count rides on the bu
 numeral, so the state is still readable without opening anything. A filter control that hides *how
 many* filters are on is the `select` this section rejected, wearing an icon.
 
+**Inside the sheet the facets are stacked lists, not chips.** A chip row exists to survive on a
+crowded screen; a sheet is not crowded, and the trade a chip makes — short label, wrapped into a
+block, several per line — buys nothing there and costs the scannability §10.1 gets from a column.
+So: one facet per section under a §10.3 head, one option per row at the 52px list height, with its
+state on the left where a column of them reads down. It is the same list primitive as everywhere
+else, and it is why the sheet can carry every facet at once where the inline row could carry one.
+
 **Grouping is structure, not decoration.** Results in a long list are grouped under §10.3 heads —
 muscle group for exercises, meal for a day's food. A group states how many rows it holds, in mono
 `text-2xs`, because that is the number that tells a reader whether to bother opening it.

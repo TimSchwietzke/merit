@@ -212,7 +212,8 @@
           "kettlebell": "kettlebell",
           "band": "band",
           "other": "other"
-        }
+        },
+        "filterGroup": "muscle group"
       },
       "groups": {
         "chest": "chest",

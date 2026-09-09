@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { FilterButton } from '@/components/FilterButton'
-import { FilterChips } from '@/components/FilterChips'
+import { FilterList } from '@/components/FilterList'
 import { PageHeader } from '@/components/PageHeader'
 import { Row, Rows } from '@/components/Rows'
 import { Collapsible } from '@/components/ui/collapsible'
@@ -63,6 +63,7 @@ export default function AddExercisePage() {
 
   const [query, setQuery] = useState('')
   const [equipment, setEquipment] = useState<string[]>([])
+  const [muscles, setMuscles] = useState<string[]>([])
   const [all, setAll] = useState<Found[]>([])
   const [failed, setFailed] = useState(false)
   const [, rerender] = useState(0)
@@ -118,25 +119,55 @@ export default function AddExercisePage() {
     return seen.map((id) => all.find((exercise) => exercise.id === id)).filter((x): x is Found => !!x)
   }, [history, all])
 
+  // Union within a facet, intersection across them (§10.11): chest and back
+  // shows both, chest and barbell shows the overlap.
   const matches = useMemo(() => {
     const needle = query.trim().toLowerCase()
     return all.filter((exercise) => {
       if (equipment.length > 0 && !equipment.includes(exercise.equipment)) return false
+      if (muscles.length > 0 && !muscles.includes(exercise.muscleGroup)) return false
       if (needle === '') return true
       return `${exercise.nameEn} ${exercise.nameDe}`.toLowerCase().includes(needle)
     })
-  }, [all, equipment, query])
+  }, [all, equipment, muscles, query])
 
-  // Only equipment the catalogue actually contains, so no chip returns nothing.
+  // Each option carries what it would leave, counted against the *other* facet
+  // so the numbers describe what tapping it actually does. Options with nothing
+  // behind them are not offered.
+  const countBy = (
+    field: 'equipment' | 'muscleGroup',
+    value: string,
+    otherActive: string[],
+    otherField: 'equipment' | 'muscleGroup',
+  ) =>
+    all.filter(
+      (exercise) =>
+        exercise[field] === value &&
+        (otherActive.length === 0 || otherActive.includes(exercise[otherField])),
+    ).length
+
   const equipmentOptions = useMemo(
     () =>
-      [...new Set(all.map((exercise) => exercise.equipment))]
-        .sort()
-        .map((value) => ({
+      [...new Set(all.map((exercise) => exercise.equipment))].sort().map((value) => ({
+        value,
+        label: t(`pages.training.add.equipment.${value}` as 'pages.training.add.equipment.barbell'),
+        count: countBy('equipment', value, muscles, 'muscleGroup'),
+      })),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [all, muscles, t],
+  )
+
+  const groupOptions = useMemo(
+    () =>
+      GROUP_ORDER.filter((group) => all.some((exercise) => exercise.muscleGroup === group)).map(
+        (value) => ({
           value,
-          label: t(`pages.training.add.equipment.${value}` as 'pages.training.add.equipment.barbell'),
-        })),
-    [all, t],
+          label: t(`pages.training.groups.${value}` as 'pages.training.groups.chest'),
+          count: countBy('muscleGroup', value, equipment, 'equipment'),
+        }),
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [all, equipment, t],
   )
 
   const groups = GROUP_ORDER.map((group) => ({
@@ -187,8 +218,14 @@ export default function AddExercisePage() {
             autoCapitalize="none"
             spellCheck={false}
           />
-          <FilterButton active={equipment.length}>
-            <FilterChips
+          <FilterButton active={equipment.length + muscles.length}>
+            <FilterList
+              label={t('pages.training.add.filterGroup')}
+              options={groupOptions}
+              active={muscles}
+              onChange={setMuscles}
+            />
+            <FilterList
               label={t('pages.training.add.filterEquipment')}
               options={equipmentOptions}
               active={equipment}
@@ -222,11 +259,14 @@ export default function AddExercisePage() {
             {query.trim() !== ''
               ? t('pages.training.add.noMatchSearch', { query: query.trim() })
               : t('pages.training.add.noMatch', {
-                  filters: equipment
-                    .map((value) =>
+                  filters: [
+                    ...muscles.map((value) =>
+                      t(`pages.training.groups.${value}` as 'pages.training.groups.chest'),
+                    ),
+                    ...equipment.map((value) =>
                       t(`pages.training.add.equipment.${value}` as 'pages.training.add.equipment.barbell'),
-                    )
-                    .join(', '),
+                    ),
+                  ].join(', '),
                 })}
           </p>
         ) : (
