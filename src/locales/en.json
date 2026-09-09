@@ -10,7 +10,8 @@
     "training": "training",
     "more": "more",
     "weight": "weight",
-    "goals": "goals"
+    "goals": "goals",
+    "routines": "routines"
   },
   "common": {
     "notBuiltYet": "not built yet",
@@ -53,7 +54,14 @@
       "logFood": "Log a food",
       "training": {
         "label": "training",
-        "planned": "Whether a session is due today, and when the next one is, goes here once training is built."
+        "due": "{{name}} is due today.",
+        "doneToday": "{{name}} done.",
+        "rest": "Rest day.",
+        "next": "Next is {{name}} on {{day}}.",
+        "nextTomorrow": "Next is {{name}} tomorrow.",
+        "nothingPlanned": "No training day is planned in yet.",
+        "paused": "Plan paused until {{date}}.",
+        "open": "Training"
       },
       "loadFailed": "Today could not be loaded. Check your connection and try again."
     },
@@ -215,6 +223,25 @@
         "glutes": "glutes",
         "core": "core",
         "full_body": "full body"
+      },
+      "start": {
+        "label": "start a session",
+        "due": "due today",
+        "other": "your other days",
+        "free": "Free session",
+        "freeHint": "pick exercises as you go",
+        "manage": "Training days",
+        "starting": "Starting…",
+        "startFailed": "That session did not start. Check your connection and try again.",
+        "paused": "plan paused until {{date}}"
+      },
+      "setRow": {
+        "add": "Add a set",
+        "done": "Mark done",
+        "undone": "Mark not done",
+        "planned": "planned",
+        "save": "Save",
+        "editing": "Editing set {{n}}"
       }
     },
     "more": {
@@ -361,6 +388,42 @@
           "invalid": "Enter a number."
         }
       }
+    },
+    "routines": {
+      "title": "Training days",
+      "lead": "A training day you can start again: the exercises, in order, with the sets and reps they plan for.",
+      "label": "your days",
+      "empty": "no training day yet",
+      "newName": "name",
+      "newPlaceholder": "Upper body 1",
+      "create": "Add a training day",
+      "creating": "Adding…",
+      "createFailed": "That did not save. Check your connection and try again.",
+      "nameInvalid": "Give the day a name.",
+      "exerciseCount": "{{count}} exercises",
+      "noWeekday": "not planned in",
+      "loadFailed": "Your training days could not be loaded. Check your connection and try again.",
+      "back": "Back to training",
+      "editor": {
+        "name": "name",
+        "weekdays": "planned for",
+        "weekdaysHint": " · leave empty to start it whenever",
+        "exercises": "exercises",
+        "addExercise": "Add an exercise",
+        "empty": "no exercises yet",
+        "sets": "sets",
+        "reps": "reps",
+        "up": "Move up",
+        "down": "Move down",
+        "remove": "Remove",
+        "deleteRoutine": "Delete this training day",
+        "deleted": "{{name}} deleted",
+        "saveFailed": "That change did not save. Check your connection and try again."
+      },
+      "pauseLabel": "pause the plan",
+      "pauseUntil": "until",
+      "pauseHint": " · nothing is due while paused",
+      "pauseClear": "Resume the plan"
     }
   }
 }
