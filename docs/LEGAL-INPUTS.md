@@ -1,9 +1,13 @@
 # Inputs for the legal texts
 
-The privacy notice and the imprint are **not written in this repository**. Use a
-maintained German generator — [e-recht24](https://www.e-recht24.de/),
-[Dr. Schwenke's Datenschutz-Generator](https://datenschutz-generator.de/) or an
-equivalent — and paste the result into `src/features/legal/documents.ts`.
+The privacy notice and the imprint now live in
+`src/features/legal/documents.ts`, written from an audit of the code rather
+than from a generator. The e-recht24 output was produced as a cross-check and
+contributed two sections (email enquiries, encryption); the rest of it was
+generic where this app needs to be specific, and wrong in three places.
+
+**The one thing still outstanding is a legal review.** Have the text read once
+before anybody outside the household is invited.
 
 This file exists because a generator's output is only as good as the answers fed
 into it, and those answers are facts about the software. They were established by
@@ -145,12 +149,26 @@ does not read or analyse them.
 ## 4. Processors and recipients
 
 Both need an Art. 28 agreement (AVV/DPA) in place before anybody is invited.
-**Check both are signed** — the generator will state that they exist.
+**Neither has to be signed.** Both DPAs are incorporated into the terms of
+service and bind on acceptance — Supabase: "acceptance of the Agreement shall
+have the same effect as signing the SCCs"; Vercel: "shall become legally binding
+upon Customer entering into the Agreement". What is required is a *copy*, for
+Art. 5(2): archive both DPAs and both sub-processor lists as PDFs with the date
+of retrieval, kept outside this repository.
+
+Full addresses, for the generator's hosting question:
+
+- Vercel Inc., 440 N Barranca Ave #4133, Covina, CA 91723, USA
+- Supabase Pte. Ltd, 65 Chulia Street #38-02/03, OCBC Centre, Singapore 049513
+
+Supabase's own sub-processor list includes OpenAI. That covers Supabase's
+in-dashboard AI features, which merit does not use — but it belongs in the
+Art. 30 record, and it is a reason to leave those features switched off.
 
 | Recipient | Role | Where | Note |
 |---|---|---|---|
-| Supabase | database, authentication | EU region, Frankfurt | US company; SCCs for third-country access |
-| Vercel | serving the application | edge | sees IP addresses; US company; SCCs |
+| Supabase Pte. Ltd | database, authentication | EU region, Frankfurt | Singapore; SCCs for third-country access |
+| Vercel Inc. | serving the application | edge | sees IP addresses; US company; SCCs |
 | Open Food Facts | barcode lookup | France (non-profit) | see below |
 
 **Open Food Facts is the only third party the browser itself contacts**, and
@@ -231,12 +249,14 @@ All of these are implemented in the app rather than by request:
 
 ## 8. Still to check, and not by me
 
-- [ ] Decide the imprint question above, and if an address is needed, pick a
-      route that is not your home.
-- [ ] Sign the **Supabase** DPA and the **Vercel** DPA; keep copies.
-- [ ] Write the **Verzeichnis von Verarbeitungstätigkeiten** (Art. 30). The
-      small-organisation exemption in Art. 30(5) does **not** apply here,
-      because Art. 9 data is processed.
+- [x] Imprint question decided: merit stays private, so no § 5 DDG imprint and
+      no postal address. The page carries a voluntary statement of who runs it.
+      **This holds only while merit stays invite-only, unlinked and noindex** —
+      a public demo account or a portfolio link ends it.
+- [x] Supabase DPA (v1, 1 Aug 2026) and sub-processor list (1 Jun 2026)
+      archived. *Still to do: the same two documents from Vercel.*
+- [x] **Verzeichnis von Verarbeitungstätigkeiten** (Art. 30) written:
+      `docs/ART-30.md`. Not published; produced on request.
 - [ ] Have the wording of the consent screen reviewed — it is a product screen,
       but what it asks for is legally operative. Its text is in
       `src/locales/{de,en}.json` under `pages.consent`.
