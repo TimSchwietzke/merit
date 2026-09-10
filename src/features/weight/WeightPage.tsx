@@ -4,6 +4,7 @@ import { toast } from 'sonner'
 
 import { Cells } from '@/components/Cells'
 import { Panel } from '@/components/Panel'
+import { Loading, RowsSkeleton, Skeleton } from '@/components/Skeleton'
 import { StatCard } from '@/components/StatCard'
 import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
@@ -113,6 +114,31 @@ export default function WeightPage() {
     toast(t('pages.weight.undoFailed'))
   }
 
+  if (status === 'loading') {
+    return (
+      <>
+        <ScreenTitle>{t('nav.weight')}</ScreenTitle>
+        <Loading label={t('common.loading')}>
+          <Skeleton className="h-3 w-24" />
+          <div className="mt-3 rounded-lg border border-line bg-surface px-4 py-3.5">
+            <Skeleton className="h-9 w-32" />
+            <Skeleton className="mt-2 h-3 w-40" />
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <Skeleton className="h-32 rounded-lg" />
+            <Skeleton className="h-32 rounded-lg" />
+          </div>
+          <Skeleton className="mt-8 h-3 w-20" />
+          <Skeleton className="mt-3 h-56 rounded-lg" />
+          <Skeleton className="mt-8 h-3 w-24" />
+          <div className="mt-3">
+            <RowsSkeleton rows={4} />
+          </div>
+        </Loading>
+      </>
+    )
+  }
+
   return (
     <>
       <ScreenTitle>{t('nav.weight')}</ScreenTitle>
@@ -147,7 +173,7 @@ export default function WeightPage() {
             </>
           ) : (
             <p className="font-mono text-2xs text-ink-faint">
-              {status === 'loading' ? t('common.loading') : t('pages.weight.latest.none')}
+              {t('pages.weight.latest.none')}
             </p>
           )}
         </Panel>
@@ -179,15 +205,11 @@ export default function WeightPage() {
 
       <section className="mt-8">
         <SectionHead label={t('pages.weight.chart.label')} hint={rangeControl} />
-        {status === 'loading' ? (
-          <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
-        ) : (
-          // In a panel like every other chart in the app. It sat bare on the
-          // page, which was the old hairline language showing through.
-          <Panel className="px-2 py-4">
-            <WeightChart points={points} locale={locale} />
-          </Panel>
-        )}
+        {/* In a panel like every other chart in the app. It sat bare on the
+            page, which was the old hairline language showing through. */}
+        <Panel className="px-2 py-4">
+          <WeightChart points={points} locale={locale} />
+        </Panel>
       </section>
 
       <section className="mt-8">
@@ -196,21 +218,17 @@ export default function WeightPage() {
           hint={selectedEntry ? t('pages.weight.form.correcting') : null}
         />
         {/* Keyed on the day so picking another one remounts the form with that
-            day's values rather than syncing state in an effect — which is also
-            why it waits for the rows: mounting before they arrive would leave
-            an empty field on a day that already has a weight. */}
-        {status === 'loading' ? (
-          <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
-        ) : (
-          <WeightForm
-            key={selected}
-            date={selected}
-            entry={selectedEntry}
-            onDateChange={setSelected}
-            onSave={save}
-            onDelete={onDelete}
-          />
-        )}
+            day's values rather than syncing state in an effect. The screen no
+            longer renders at all until the rows are in, so mounting it here
+            cannot leave an empty field on a day that already has a weight. */}
+        <WeightForm
+          key={selected}
+          date={selected}
+          entry={selectedEntry}
+          onDateChange={setSelected}
+          onSave={save}
+          onDelete={onDelete}
+        />
       </section>
 
       <section className="mt-8">

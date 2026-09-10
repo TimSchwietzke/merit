@@ -6,6 +6,7 @@ import { ScreenTitle } from '@/components/ScreenTitle'
 import { CalorieRing } from '@/features/dashboard/CalorieRing'
 import { Cells } from '@/components/Cells'
 import { Reveal } from '@/components/Reveal'
+import { DashboardSkeleton } from '@/features/dashboard/DashboardSkeleton'
 import { DomainCard } from '@/features/dashboard/DomainCard'
 import { MuscleRecency } from '@/features/dashboard/MuscleRecency'
 import { useGoalHistory } from '@/features/goals/useGoalHistory'
@@ -48,10 +49,23 @@ export default function DashboardPage() {
   const { entries, status } = useFoodLog(today)
   const { goals } = useGoalHistory()
   const goal = goalOn(goals, today)
+  const { status: workoutStatus } = useWorkout(today)
 
   const totals = sumPortions(
     entries.map((entry) => ({ nutrients: entry.food.nutrients, quantityG: entry.quantityG })),
   )
+
+  // The whole screen, or the shape of it. Showing the date and the body while
+  // the four readings are still empty rectangles is two arrivals rather than
+  // one, and the second is the one that moves the page.
+  if (status === 'loading' || workoutStatus === 'loading') {
+    return (
+      <>
+        <ScreenTitle>{t('nav.dashboard')}</ScreenTitle>
+        <DashboardSkeleton />
+      </>
+    )
+  }
 
   return (
     <>

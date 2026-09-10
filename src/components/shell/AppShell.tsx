@@ -3,6 +3,7 @@ import { Outlet, useLocation } from 'react-router-dom'
 
 import { AppHeader } from '@/components/shell/AppHeader'
 import { Nav } from '@/components/shell/Nav'
+import { RouteSkeleton } from '@/components/Skeleton'
 import { Toaster } from '@/components/ui/sonner'
 import { PreferencesProvider } from '@/features/settings/PreferencesProvider'
 import { ActiveSessionProvider } from '@/features/training/ActiveSession'
@@ -69,10 +70,12 @@ function Frame() {
                 : 'pb-[calc(56px+1.5rem+env(safe-area-inset-bottom))]'
             }`}
           >
-            {/* No spinner: the split chunk arrives in a frame or two on any
-                connection that got this far, and a flash of one is worse than
-                nothing (§17). */}
-            <Suspense fallback={null}>
+            {/* No spinner, and no longer nothing either. A split chunk arrives
+                in a frame or two on a good connection and in rather more on a
+                gym one, and a blank `main` for that long is the first half of
+                the flicker — the second being the screen's own data landing.
+                A shape holds the space for both. */}
+            <Suspense fallback={<RouteSkeleton />}>
               <Outlet />
             </Suspense>
           </main>

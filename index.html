@@ -31,9 +31,52 @@
         document.documentElement.dataset.theme = theme;
       })();
     </script>
+    <!--
+      First paint, before the bundle exists.
+
+      `#root` used to be empty, so the first thing this document painted was
+      nothing — and a browser reloading a page goes on showing the *previous*
+      document until the new one paints. On a phone that is most of a second of
+      either a white flash or the screen you just left, which is what made the
+      app look like it was showing the wrong page on open.
+
+      So the document paints Merit's own frame itself: the ground, a header
+      rule, and the shape of a screen. React replaces all of it the moment it
+      mounts. The four values below are duplicated from tokens.css for the same
+      reason the theme bootstrap above is — this has to run before anything can
+      be imported. They are the ground and the plane, and nothing else needs to
+      be right for one frame.
+    -->
+    <style>
+      :root { --boot-bg: #fdfcf9; --boot-plane: #f2efe8; --boot-line: #e5e0d5; }
+      :root[data-theme="dark"] { --boot-bg: #0e0e0f; --boot-plane: #202124; --boot-line: #2a2b2e; }
+      html, body { margin: 0; background: var(--boot-bg); }
+      #boot, #boot * { box-sizing: border-box; }
+      #boot { display: flex; flex-direction: column; min-height: 100dvh; }
+      #boot .bar { height: 45px; border-bottom: 1px solid var(--boot-line); }
+      #boot .col {
+        width: 100%; max-width: 860px; margin: 0 auto;
+        padding: 20px 16px; display: flex; flex-direction: column; gap: 12px;
+      }
+      #boot .b { background: var(--boot-plane); border-radius: 8px; }
+      #boot .tabs {
+        margin-top: auto; height: calc(56px + env(safe-area-inset-bottom));
+        border-top: 1px solid var(--boot-line);
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <div id="boot" aria-hidden="true">
+        <div class="bar"></div>
+        <div class="col">
+          <div class="b" style="height: 16px; width: 96px"></div>
+          <div class="b" style="height: 160px"></div>
+          <div class="b" style="height: 96px"></div>
+        </div>
+        <div class="tabs"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
