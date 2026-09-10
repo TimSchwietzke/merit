@@ -47,15 +47,17 @@ export function useConsent(): Consent {
 
   const give = useCallback(async () => {
     if (!userId) return false
-    // Upsert: an invited account may not have had a profile row written yet,
-    // and the consent must not be lost to that.
-    const { error } = await supabase
+    // Update, not upsert: `profiles` has no insert policy on purpose — the row
+    // is written by a trigger on auth.users — and PostgREST sends an upsert as
+    // INSERT … ON CONFLICT, which that policy refuses before it ever reaches
+    // the update. `select` so a write that matched no row is a failure here
+    // rather than a consent silently recorded nowhere.
+    const { data, error } = await supabase
       .from('profiles')
-      .upsert(
-        { user_id: userId, consent_at: new Date().toISOString(), consent_version: PRIVACY_VERSION },
-        { onConflict: 'user_id' },
-      )
-    if (error) return false
+      .update({ consent_at: new Date().toISOString(), consent_version: PRIVACY_VERSION })
+      .eq('user_id', userId)
+      .select('user_id')
+    if (error || data.length === 0) return false
     setStatus('given')
     return true
   }, [userId])
