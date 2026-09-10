@@ -5,7 +5,7 @@ import { Statement } from '@/components/Statement'
 import { ScreenTitle } from '@/components/ScreenTitle'
 import { CalorieRing } from '@/features/dashboard/CalorieRing'
 import { Cells } from '@/components/Cells'
-import { Carousel } from '@/components/Carousel'
+import { Reveal } from '@/components/Reveal'
 import { DomainCard } from '@/features/dashboard/DomainCard'
 import { MuscleRecency } from '@/features/dashboard/MuscleRecency'
 import { useGoalHistory } from '@/features/goals/useGoalHistory'
@@ -35,10 +35,10 @@ import { latestEntry, weeklyDelta } from '@/lib/weight'
  * things you swipe, and even those have no border.
  *
  * The rhythm is deliberately uneven. A date at display size, a body at the top
- * with nothing around it, a strip that runs off both edges of the screen, and
- * one sentence at the bottom. Four blocks of the same width in the same box is
- * a column somebody scrolls past; four different shapes is a screen somebody
- * looks at.
+ * with nothing around it, then four readings packed into four different shapes
+ * — a tall one holding a ring, two short ones beside it, a wide one under them
+ * — each arriving from the edge it sits against. Four blocks of one width in
+ * one column is something somebody scrolls past.
  */
 export default function DashboardPage() {
   const { t, i18n } = useTranslation()
@@ -73,11 +73,18 @@ export default function DashboardPage() {
           this screen can show, so it gets the room and nothing frames it. */}
       <Recency />
 
-      {/* Off both edges of the screen. A strip that stops at the gutter reads
-          as a row of cards; one that runs out of view reads as something you
-          move through. */}
-      <div className="mt-8">
-        <Carousel label={t('pages.dashboard.summary')}>
+      {/* Four readings in four different shapes, packed rather than stacked.
+          The day's eating is tall and holds a ring, so it takes the left column
+          across two rows; training and weight are one line each and sit beside
+          it; the run underneath is wide and short and takes the full width.
+          Nothing is the same size as anything else and nothing is centred, so
+          the block is uneven without being mostly air — the version before this
+          alternated sides and spent half the screen on the gaps.
+
+          Each still arrives from the edge it sits against, the first time it is
+          scrolled to. */}
+      <section aria-label={t('pages.dashboard.summary')} className="mt-8 grid grid-cols-2 gap-3">
+        <Reveal from="left" className="row-span-2">
           <NutritionCard
             entries={entries}
             goal={goal}
@@ -85,16 +92,25 @@ export default function DashboardPage() {
             totals={totals}
             locale={locale}
           />
+        </Reveal>
+
+        <Reveal from="right">
           <TrainingCard locale={locale} />
+        </Reveal>
+
+        <Reveal from="right">
           <WeightCard locale={locale} />
+        </Reveal>
+
+        <Reveal from="left" className="col-span-2">
           <StreakCard />
-        </Carousel>
-      </div>
+        </Reveal>
+      </section>
 
       {/* One sentence, last, in the one serif line per screen §4.1 allows and
           on the accent edge §6 calls the signature. Read once the picture has
           already said where you stand. */}
-      <div className="mt-10">
+      <div className="mt-8">
         <TrainingLine locale={locale} />
       </div>
     </>
@@ -134,7 +150,7 @@ function NutritionCard({
   return (
     <Link
       to="/food"
-      className="flex h-full flex-col gap-4 rounded-xl bg-surface p-5 transition-colors
+      className="flex h-full flex-col gap-4 rounded-xl bg-surface p-4 transition-colors
                  [transition-duration:140ms] hover:bg-surface-2 active:bg-surface-2
                  active:[transition-duration:0ms]"
     >

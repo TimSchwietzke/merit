@@ -8,6 +8,12 @@ import type { SessionSets } from '@/lib/training'
 /**
  * What the body has had lately, and what it has not.
  *
+ * The picture says it and nothing repeats it in words. A caption under a
+ * drawing this legible is the screen explaining its own illustration, and
+ * naming the coldest region in a sentence turns a glance into a verdict — which
+ * is the one thing this is not for. The sentence survives as the map's label,
+ * where somebody who cannot see the picture still gets it.
+ *
  * The one thing this screen can say that no tab can. Training shows what is
  * planned and what was done; neither notices that nothing has touched your legs
  * in nine days, because both are looking at a day or a routine and this is a
@@ -73,9 +79,6 @@ export function MuscleRecency({
         className="h-72"
       />
 
-      {line ? (
-        <p className="text-center font-mono text-2xs text-ink-muted">{line}</p>
-      ) : null}
     </div>
   )
 }

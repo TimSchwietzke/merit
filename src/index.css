@@ -146,12 +146,16 @@
   @keyframes merit-rise   { from { opacity: 0; transform: translateY(4px); } }
   @keyframes merit-left   { from { opacity: 0; transform: translateX(10px); } }
   @keyframes merit-right  { from { opacity: 0; transform: translateX(-10px); } }
+  @keyframes merit-from-left  { from { opacity: 0; transform: translateX(-28px); } }
+  @keyframes merit-from-right { from { opacity: 0; transform: translateX(28px); } }
 
   .merit-sweep,
   .merit-light,
   .merit-rise,
   .merit-left,
-  .merit-right {
+  .merit-right,
+  .merit-from-left,
+  .merit-from-right {
     animation-duration: 460ms;
     animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
     animation-fill-mode: both;
@@ -166,6 +170,10 @@
      on a shape rather than a length. `fill` is animatable on an SVG path,
      which is the one place a colour may be interpolated here. */
   .merit-light  { animation-name: merit-light; animation-duration: 620ms; }
+  /* A block arriving from the side the first time it is scrolled to. Further
+     than the state changes above travel — this one is meant to be noticed. */
+  .merit-from-left  { animation-name: merit-from-left;  animation-duration: 560ms; }
+  .merit-from-right { animation-name: merit-from-right; animation-duration: 560ms; }
   /* A row of days that travelled, in the direction it travelled. */
   .merit-left   { animation-name: merit-left;  animation-duration: 260ms; }
   .merit-right  { animation-name: merit-right; animation-duration: 260ms; }

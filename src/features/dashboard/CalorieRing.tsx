@@ -45,10 +45,18 @@ export function CalorieRing({
           target: formatNumber(target, locale, 0),
           remaining: formatNumber(Math.abs(over), locale, 0),
         })}
-        className="relative"
-        style={{ width: SIZE, height: SIZE }}
+        // Fluid, capped at its drawn size. It used to be a fixed 168px box,
+        // which was right when it had a full-width card to itself and clipped
+        // the moment it was given half a column. The geometry is still computed
+        // at `SIZE`; the SVG just scales to whatever it is handed.
+        className="relative aspect-square w-full"
+        style={{ maxWidth: SIZE }}
       >
-        <svg width={SIZE} height={SIZE} aria-hidden className="-rotate-90">
+        <svg
+          viewBox={`0 0 ${SIZE} ${SIZE}`}
+          aria-hidden
+          className="h-full w-full -rotate-90"
+        >
           <circle
             cx={SIZE / 2}
             cy={SIZE / 2}
@@ -91,7 +99,7 @@ export function CalorieRing({
         ) : null}
 
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <span className="font-mono text-3xl tabular-nums text-ink">
+          <span className="font-mono text-2xl tabular-nums text-ink sm:text-3xl">
             {formatNumber(Math.abs(over), locale, 0)}
           </span>
           <span className="mt-1 font-mono text-2xs text-ink-faint">
