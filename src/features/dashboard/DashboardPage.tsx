@@ -12,7 +12,7 @@ import { MuscleRecency } from '@/features/dashboard/MuscleRecency'
 import { useGoalHistory } from '@/features/goals/useGoalHistory'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
 import { useFoodHistory } from '@/features/nutrition/useFoodHistory'
-import { plannable, useRoutines } from '@/features/routines/useRoutines'
+import { plannable, useRoutines, type Routine } from '@/features/routines/useRoutines'
 import { useWorkout } from '@/features/training/useWorkout'
 import { useWeightLogs } from '@/features/weight/useWeightLogs'
 import { addDays, todayKey } from '@/lib/date'
@@ -22,8 +22,8 @@ import { sumPortions } from '@/lib/nutrition'
 import { plannedWeeks } from '@/lib/progress'
 import { scheduledOn } from '@/lib/schedule'
 import { dailyStreak, dayCells, weekCells, weeklyStreak } from '@/lib/streak'
-import { isoWeekday, nextSession } from '@/lib/training'
-import { latestEntry, weeklyDelta } from '@/lib/weight'
+import { isoWeekday, nextSession, type LoggedSet, type SessionSets } from '@/lib/training'
+import { latestEntry, weeklyDelta, type WeightEntry } from '@/lib/weight'
 
 /**
  * The way in.
@@ -46,10 +46,21 @@ export default function DashboardPage() {
   const locale = i18n.language
   const today = todayKey()
 
+  // Every query this screen needs, fetched once here and handed down.
+  //
+  // Each of these used to be called inside the card that wanted it, which meant
+  // `useWorkout` ran five times and `useRoutines` three — eight round trips for
+  // six answers, five of them the same 180-day query. Worse than the waste, each
+  // copy held its own state and resolved at its own moment, so the screen
+  // assembled in stages: the cards landed, then the body arrived underneath the
+  // date and shoved everything down. One fetch each means one arrival.
   const { entries, status } = useFoodLog(today)
-  const { goals } = useGoalHistory()
+  const { goals, status: goalStatus } = useGoalHistory()
   const goal = goalOn(goals, today)
-  const { status: workoutStatus } = useWorkout(today)
+  const workout = useWorkout(today)
+  const { routines, status: routineStatus } = useRoutines()
+  const { days: loggedDays } = useFoodHistory(today)
+  const { entries: weights, status: weightStatus } = useWeightLogs()
 
   const totals = sumPortions(
     entries.map((entry) => ({ nutrients: entry.food.nutrients, quantityG: entry.quantityG })),
@@ -58,7 +69,13 @@ export default function DashboardPage() {
   // The whole screen, or the shape of it. Showing the date and the body while
   // the four readings are still empty rectangles is two arrivals rather than
   // one, and the second is the one that moves the page.
-  if (status === 'loading' || workoutStatus === 'loading') {
+  if (
+    status === 'loading' ||
+    workout.status === 'loading' ||
+    routineStatus === 'loading' ||
+    weightStatus === 'loading' ||
+    goalStatus === 'loading'
+  ) {
     return (
       <>
         <ScreenTitle>{t('nav.dashboard')}</ScreenTitle>
@@ -85,7 +102,7 @@ export default function DashboardPage() {
 
       {/* The body, on the ground rather than in a box. It is the thing only
           this screen can show, so it gets the room and nothing frames it. */}
-      <Recency />
+      <MuscleRecency history={workout.history} exercises={workout.exercises} today={today} />
 
       {/* Four readings in four different shapes, packed rather than stacked.
           The day's eating is tall and holds a ring, so it takes the left column
@@ -109,15 +126,20 @@ export default function DashboardPage() {
         </Reveal>
 
         <Reveal from="right">
-          <TrainingCard locale={locale} />
+          <TrainingCard locale={locale} routines={routines} sets={workout.sets} />
         </Reveal>
 
         <Reveal from="right">
-          <WeightCard locale={locale} />
+          <WeightCard locale={locale} entries={weights} />
         </Reveal>
 
         <Reveal from="left" className="col-span-2">
-          <StreakCard />
+          <StreakCard
+            loggedDays={loggedDays}
+            routines={routines}
+            history={workout.history}
+            today={today}
+          />
         </Reveal>
       </section>
 
@@ -125,7 +147,7 @@ export default function DashboardPage() {
           on the accent edge §6 calls the signature. Read once the picture has
           already said where you stand. */}
       <div className="mt-8">
-        <TrainingLine locale={locale} />
+        <TrainingLine locale={locale} routines={routines} sets={workout.sets} />
       </div>
     </>
   )
@@ -190,19 +212,18 @@ function NutritionCard({
   )
 }
 
-/** What the body has had lately. Its own component so the query stays here. */
-function Recency() {
-  const today = todayKey()
-  const { history, exercises } = useWorkout(today)
-  return <MuscleRecency history={history} exercises={exercises} today={today} />
-}
-
 /** Today's session, or the next one. */
-function TrainingCard({ locale }: { locale: string }) {
+function TrainingCard({
+  locale,
+  routines,
+  sets,
+}: {
+  locale: string
+  routines: Routine[]
+  sets: LoggedSet[]
+}) {
   const { t } = useTranslation()
   const today = todayKey()
-  const { routines } = useRoutines()
-  const { sets } = useWorkout(today)
 
   const plan = plannable(routines)
   const due = scheduledOn(plan, [], today)[0]
@@ -235,9 +256,8 @@ function TrainingCard({ locale }: { locale: string }) {
 }
 
 /** The last weigh-in and where the week put it. */
-function WeightCard({ locale }: { locale: string }) {
+function WeightCard({ locale, entries }: { locale: string; entries: WeightEntry[] }) {
   const { t } = useTranslation()
-  const { entries } = useWeightLogs()
   const latest = latestEntry(entries)
   const delta = weeklyDelta(entries, todayKey())
 
@@ -262,12 +282,18 @@ function WeightCard({ locale }: { locale: string }) {
 }
 
 /** Whichever run is worth reporting. One card, because one is one swipe. */
-function StreakCard() {
+function StreakCard({
+  loggedDays,
+  routines,
+  history,
+  today,
+}: {
+  loggedDays: Set<string>
+  routines: Routine[]
+  history: SessionSets[]
+  today: string
+}) {
   const { t } = useTranslation()
-  const today = todayKey()
-  const { days: loggedDays } = useFoodHistory(today)
-  const { routines } = useRoutines()
-  const { history } = useWorkout(today)
 
   const days = dailyStreak(loggedDays, today)
   const weeks = plannedWeeks(history, plannable(routines), today, 12)
@@ -319,15 +345,17 @@ function StreakCard() {
  * is one per screen — this is it. It carries no button: every card below is a
  * way in, and a second one here would be the screen asking twice.
  */
-function TrainingLine({ locale }: { locale: string }) {
+function TrainingLine({
+  locale,
+  routines,
+  sets,
+}: {
+  locale: string
+  routines: Routine[]
+  sets: LoggedSet[]
+}) {
   const { t } = useTranslation()
   const today = todayKey()
-  const { routines, status } = useRoutines()
-  const { sets } = useWorkout(today)
-
-  if (status === 'loading') {
-    return <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
-  }
 
   const plan = routines.map((routine) => ({
     id: routine.id,

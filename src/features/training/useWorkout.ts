@@ -114,6 +114,47 @@ function subscribe(listener: () => void) {
   }
 }
 
+/**
+ * One request per day in flight, however many callers want it.
+ *
+ * The session bar's provider sits above the router and reads today's sets, and
+ * so does whichever screen is mounted — so every screen was fetching a hundred
+ * and eighty days of sets twice. This is the heaviest query in the app and
+ * PRODUCT.md's third principle is that the connection is bad, so the second
+ * copy is not a rounding error.
+ *
+ * Keyed by day *and* version, so a write invalidates it by moving the version
+ * rather than by anybody remembering to clear anything. Entries are dropped
+ * when they settle: this deduplicates concurrent callers, it is not a cache of
+ * answers, and holding rows here as well as in each hook is two truths.
+ */
+const inFlight = new Map<string, Promise<Row[]>>()
+
+function fetchSets(date: string, version: number): Promise<Row[]> {
+  const key = `${date}:${version}`
+  const running = inFlight.get(key)
+  if (running) return running
+
+  // `Promise.resolve`: PostgREST's builder is a thenable, not a Promise, so it
+  // has `.then` and nothing else.
+  const request = Promise.resolve(
+    supabase
+      .from('workout_sets')
+      .select(SELECT)
+      .gte('workouts.date', addDays(date, -WINDOW_DAYS))
+      .lte('workouts.date', date)
+      .order('created_at'),
+  )
+    .then(({ data, error }) => {
+      if (error || !data) throw error ?? new Error('no rows')
+      return data as unknown as Row[]
+    })
+    .finally(() => inFlight.delete(key))
+
+  inFlight.set(key, request)
+  return request
+}
+
 const SELECT = `id, set_number, reps, weight_kg, rir, done, exercise_id,
   workouts!inner (date, ended_at),
   exercises!inner (id, name_en, name_de, muscle_group, equipment,
@@ -165,22 +206,17 @@ export function useWorkout(date: string): WorkoutState {
     if (!userId) return
     let active = true
 
-    void supabase
-      .from('workout_sets')
-      .select(SELECT)
-      .gte('workouts.date', addDays(date, -WINDOW_DAYS))
-      .lte('workouts.date', date)
-      .order('created_at')
-      .then(({ data, error }) => {
+    void fetchSets(date, shared).then(
+      (data) => {
         if (!active) return
-        if (error || !data) {
-          setFailed(true)
-          return
-        }
-        rowsRef.current = data as unknown as Row[]
-        setRows({ date, rows: rowsRef.current })
+        rowsRef.current = data
+        setRows({ date, rows: data })
         setFailed(false)
-      })
+      },
+      () => {
+        if (active) setFailed(true)
+      },
+    )
 
     return () => {
       active = false
