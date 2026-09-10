@@ -31,6 +31,18 @@ for at least three months.
 | **Visualisation** | Charts for weight, calories/macros, and strength progression. |
 | **Settings** | Language (DE/EN), theme (light/dark), goal configuration, data export, account deletion. |
 
+### 2.1.1 First-run onboarding
+
+The first sign-in walks the user through setting up: display name, then the
+numbers the app needs to be useful (weight, height, birth date, sex, activity
+level, goal), then a short tour of what each screen does. Classic mobile-app
+introduction, skippable, resumable — a user who quits halfway is asked for the
+rest the next time rather than starting over.
+
+Everything it collects already exists as a field somewhere else; onboarding is
+a path through them, not a new data model. The point is that a new user should
+never meet an empty dashboard with no idea what to do first.
+
 ### 2.2 Next iteration (after MVP, in this order)
 
 1. Own recipes / composite meals (define once, log as a single item)
