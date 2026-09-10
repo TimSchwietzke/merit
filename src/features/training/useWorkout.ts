@@ -14,12 +14,40 @@ import type { LoggedSet, SessionSets } from '@/lib/training'
  * per block on a gym connection — so a window of recent sets comes back at once
  * and the maths slices it (`lastSessionFor`).
  */
+/** The columns every exercise query selects. One list, so none of them drifts. */
+export const EXERCISE_COLUMNS =
+  'id, name_en, name_de, muscle_group, equipment, primary_muscles, secondary_muscles'
+
+/** A row of those columns, in the shape the app uses. */
+export function toExerciseRef(row: {
+  id: string
+  name_en: string
+  name_de: string
+  muscle_group: string
+  equipment: string
+  primary_muscles: string[]
+  secondary_muscles: string[]
+}): ExerciseRef {
+  return {
+    id: row.id,
+    nameEn: row.name_en,
+    nameDe: row.name_de,
+    muscleGroup: row.muscle_group,
+    equipment: row.equipment,
+    primaryMuscles: row.primary_muscles,
+    secondaryMuscles: row.secondary_muscles,
+  }
+}
+
 export interface ExerciseRef {
   id: string
   nameEn: string
   nameDe: string
   muscleGroup: string
   equipment: string
+  /** Catalogue muscle names. `lib/muscles` turns them into body regions. */
+  primaryMuscles: string[]
+  secondaryMuscles: string[]
 }
 
 export interface WorkoutState {
@@ -84,7 +112,8 @@ function subscribe(listener: () => void) {
 
 const SELECT = `id, set_number, reps, weight_kg, rir, done, exercise_id,
   workouts!inner (date),
-  exercises!inner (id, name_en, name_de, muscle_group, equipment)`
+  exercises!inner (id, name_en, name_de, muscle_group, equipment,
+                   primary_muscles, secondary_muscles)`
 
 type Row = {
   id: string
@@ -101,6 +130,8 @@ type Row = {
     name_de: string
     muscle_group: string
     equipment: string
+    primary_muscles: string[]
+    secondary_muscles: string[]
   }
 }
 
@@ -159,13 +190,7 @@ export function useWorkout(date: string): WorkoutState {
 
   const exercises = new Map<string, ExerciseRef>()
   for (const row of current ?? []) {
-    exercises.set(row.exercises.id, {
-      id: row.exercises.id,
-      nameEn: row.exercises.name_en,
-      nameDe: row.exercises.name_de,
-      muscleGroup: row.exercises.muscle_group,
-      equipment: row.exercises.equipment,
-    })
+    exercises.set(row.exercises.id, toExerciseRef(row.exercises))
   }
 
   const byDate = new Map<string, LoggedSet[]>()

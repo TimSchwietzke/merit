@@ -233,9 +233,9 @@ export async function stubBackend(
   // A target in force, so the day view renders its progress rather than its
   // "set a target" state, and the goals screen has something to show.
   const EXERCISES = [
-    { id: 'x1', name_en: 'Bench press', name_de: 'Bankdrücken', muscle_group: 'chest', equipment: 'barbell' },
-    { id: 'x2', name_en: 'Barbell back squat', name_de: 'Kniebeuge mit Langhantel', muscle_group: 'legs', equipment: 'barbell' },
-    { id: 'x3', name_en: 'Lat pulldown', name_de: 'Latzug', muscle_group: 'back', equipment: 'cable' },
+    { id: 'x1', name_en: 'Bench press', name_de: 'Bankdrücken', muscle_group: 'chest', equipment: 'barbell', primary_muscles: ['chest'], secondary_muscles: ['triceps', 'shoulders'] },
+    { id: 'x2', name_en: 'Barbell back squat', name_de: 'Kniebeuge mit Langhantel', muscle_group: 'legs', equipment: 'barbell', primary_muscles: ['quadriceps'], secondary_muscles: ['glutes', 'hamstrings', 'lower back'] },
+    { id: 'x3', name_en: 'Lat pulldown', name_de: 'Latzug', muscle_group: 'back', equipment: 'cable', primary_muscles: ['lats'], secondary_muscles: ['biceps', 'middle back'] },
   ]
 
   await page.route('**/rest/v1/exercises*', (route) =>

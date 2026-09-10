@@ -49,6 +49,8 @@ export type Database = {
           muscle_group: string
           name_de: string
           name_en: string
+          primary_muscles: string[]
+          secondary_muscles: string[]
           source: string
           updated_at: string
         }
@@ -61,6 +63,8 @@ export type Database = {
           muscle_group: string
           name_de: string
           name_en: string
+          primary_muscles?: string[]
+          secondary_muscles?: string[]
           source: string
           updated_at?: string
         }
@@ -73,6 +77,8 @@ export type Database = {
           muscle_group?: string
           name_de?: string
           name_en?: string
+          primary_muscles?: string[]
+          secondary_muscles?: string[]
           source?: string
           updated_at?: string
         }

@@ -48,7 +48,8 @@ const SELECT = `id, name, position,
   routine_days (weekday),
   routine_exercises (
     id, exercise_id, position, set_reps,
-    exercises!inner (id, name_en, name_de, muscle_group, equipment)
+    exercises!inner (id, name_en, name_de, muscle_group, equipment,
+                     primary_muscles, secondary_muscles)
   )`
 
 type Row = {
@@ -67,6 +68,8 @@ type Row = {
       name_de: string
       muscle_group: string
       equipment: string
+      primary_muscles: string[]
+      secondary_muscles: string[]
     }
   }[]
 }
@@ -89,6 +92,8 @@ const toRoutine = (row: Row): Routine => ({
         nameDe: entry.exercises.name_de,
         muscleGroup: entry.exercises.muscle_group,
         equipment: entry.exercises.equipment,
+        primaryMuscles: entry.exercises.primary_muscles,
+        secondaryMuscles: entry.exercises.secondary_muscles,
       },
     })),
 })
