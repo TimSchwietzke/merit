@@ -14,12 +14,40 @@ import type { LoggedSet, SessionSets } from '@/lib/training'
  * per block on a gym connection — so a window of recent sets comes back at once
  * and the maths slices it (`lastSessionFor`).
  */
+/** The columns every exercise query selects. One list, so none of them drifts. */
+export const EXERCISE_COLUMNS =
+  'id, name_en, name_de, muscle_group, equipment, primary_muscles, secondary_muscles'
+
+/** A row of those columns, in the shape the app uses. */
+export function toExerciseRef(row: {
+  id: string
+  name_en: string
+  name_de: string
+  muscle_group: string
+  equipment: string
+  primary_muscles: string[]
+  secondary_muscles: string[]
+}): ExerciseRef {
+  return {
+    id: row.id,
+    nameEn: row.name_en,
+    nameDe: row.name_de,
+    muscleGroup: row.muscle_group,
+    equipment: row.equipment,
+    primaryMuscles: row.primary_muscles,
+    secondaryMuscles: row.secondary_muscles,
+  }
+}
+
 export interface ExerciseRef {
   id: string
   nameEn: string
   nameDe: string
   muscleGroup: string
   equipment: string
+  /** Catalogue muscle names. `lib/muscles` turns them into body regions. */
+  primaryMuscles: string[]
+  secondaryMuscles: string[]
 }
 
 export interface WorkoutState {
@@ -29,6 +57,10 @@ export interface WorkoutState {
   exercises: Map<string, ExerciseRef>
   /** Earlier days, for the comparison line. */
   history: SessionSets[]
+  /** When this day's session was finished, or null while it is still running. */
+  endedAt: string | null
+  /** Finish the day's session, or take it back up again. */
+  setEnded: (ended: boolean) => Promise<boolean>
   status: 'loading' | 'ready' | 'error'
   addSet: (set: {
     exerciseId: string
@@ -82,9 +114,51 @@ function subscribe(listener: () => void) {
   }
 }
 
+/**
+ * One request per day in flight, however many callers want it.
+ *
+ * The session bar's provider sits above the router and reads today's sets, and
+ * so does whichever screen is mounted — so every screen was fetching a hundred
+ * and eighty days of sets twice. This is the heaviest query in the app and
+ * PRODUCT.md's third principle is that the connection is bad, so the second
+ * copy is not a rounding error.
+ *
+ * Keyed by day *and* version, so a write invalidates it by moving the version
+ * rather than by anybody remembering to clear anything. Entries are dropped
+ * when they settle: this deduplicates concurrent callers, it is not a cache of
+ * answers, and holding rows here as well as in each hook is two truths.
+ */
+const inFlight = new Map<string, Promise<Row[]>>()
+
+function fetchSets(date: string, version: number): Promise<Row[]> {
+  const key = `${date}:${version}`
+  const running = inFlight.get(key)
+  if (running) return running
+
+  // `Promise.resolve`: PostgREST's builder is a thenable, not a Promise, so it
+  // has `.then` and nothing else.
+  const request = Promise.resolve(
+    supabase
+      .from('workout_sets')
+      .select(SELECT)
+      .gte('workouts.date', addDays(date, -WINDOW_DAYS))
+      .lte('workouts.date', date)
+      .order('created_at'),
+  )
+    .then(({ data, error }) => {
+      if (error || !data) throw error ?? new Error('no rows')
+      return data as unknown as Row[]
+    })
+    .finally(() => inFlight.delete(key))
+
+  inFlight.set(key, request)
+  return request
+}
+
 const SELECT = `id, set_number, reps, weight_kg, rir, done, exercise_id,
-  workouts!inner (date),
-  exercises!inner (id, name_en, name_de, muscle_group, equipment)`
+  workouts!inner (date, ended_at),
+  exercises!inner (id, name_en, name_de, muscle_group, equipment,
+                   primary_muscles, secondary_muscles)`
 
 type Row = {
   id: string
@@ -94,13 +168,15 @@ type Row = {
   rir: number | null
   done: boolean
   exercise_id: string
-  workouts: { date: string }
+  workouts: { date: string; ended_at: string | null }
   exercises: {
     id: string
     name_en: string
     name_de: string
     muscle_group: string
     equipment: string
+    primary_muscles: string[]
+    secondary_muscles: string[]
   }
 }
 
@@ -130,22 +206,17 @@ export function useWorkout(date: string): WorkoutState {
     if (!userId) return
     let active = true
 
-    void supabase
-      .from('workout_sets')
-      .select(SELECT)
-      .gte('workouts.date', addDays(date, -WINDOW_DAYS))
-      .lte('workouts.date', date)
-      .order('created_at')
-      .then(({ data, error }) => {
+    void fetchSets(date, shared).then(
+      (data) => {
         if (!active) return
-        if (error || !data) {
-          setFailed(true)
-          return
-        }
-        rowsRef.current = data as unknown as Row[]
-        setRows({ date, rows: rowsRef.current })
+        rowsRef.current = data
+        setRows({ date, rows: data })
         setFailed(false)
-      })
+      },
+      () => {
+        if (active) setFailed(true)
+      },
+    )
 
     return () => {
       active = false
@@ -155,17 +226,14 @@ export function useWorkout(date: string): WorkoutState {
   const current = rows?.date === date ? rows.rows : null
   const status: WorkoutState['status'] = failed ? 'error' : current === null ? 'loading' : 'ready'
 
-  const sets = (current ?? []).filter((row) => row.workouts.date === date).map(toSet)
+  const today = (current ?? []).filter((row) => row.workouts.date === date)
+  const sets = today.map(toSet)
+  // Every set of a day hangs off one workout, so the first row answers for it.
+  const endedAt = today[0]?.workouts.ended_at ?? null
 
   const exercises = new Map<string, ExerciseRef>()
   for (const row of current ?? []) {
-    exercises.set(row.exercises.id, {
-      id: row.exercises.id,
-      nameEn: row.exercises.name_en,
-      nameDe: row.exercises.name_de,
-      muscleGroup: row.exercises.muscle_group,
-      equipment: row.exercises.equipment,
-    })
+    exercises.set(row.exercises.id, toExerciseRef(row.exercises))
   }
 
   const byDate = new Map<string, LoggedSet[]>()
@@ -257,6 +325,28 @@ export function useWorkout(date: string): WorkoutState {
    * afterwards. An exercise never done before starts at zero, which is a real
    * weight and the right one for a bodyweight movement.
    */
+  /**
+   * Finish the day's session, or take it back up.
+   *
+   * A write, not a flag: the button used to set React state, so a reload
+   * recomputed "running" from the still-unlogged sets and the bar came back —
+   * which read as the button doing nothing.
+   */
+  const setEnded = useCallback(
+    async (ended: boolean) => {
+      if (!userId) return false
+      const { error } = await supabase
+        .from('workouts')
+        .update({ ended_at: ended ? new Date().toISOString() : null })
+        .eq('user_id', userId)
+        .eq('date', date)
+      if (error) return false
+      published()
+      return true
+    },
+    [userId, date],
+  )
+
   const startRoutine = useCallback(
     async (plan: {
       routineId: string
@@ -346,5 +436,16 @@ export function useWorkout(date: string): WorkoutState {
     [userId],
   )
 
-  return { sets, exercises, history, status, addSet, updateSet, removeSet, startRoutine }
+  return {
+    sets,
+    exercises,
+    history,
+    status,
+    endedAt,
+    setEnded,
+    addSet,
+    updateSet,
+    removeSet,
+    startRoutine,
+  }
 }

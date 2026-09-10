@@ -1,148 +1,229 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 
-import { Panel } from '@/components/Panel'
 import { Statement } from '@/components/Statement'
-import { Progress } from '@/components/Progress'
 import { ScreenTitle } from '@/components/ScreenTitle'
-import { SectionHead } from '@/components/SectionHead'
-import { Button } from '@/components/ui/button'
 import { CalorieRing } from '@/features/dashboard/CalorieRing'
 import { Cells } from '@/components/Cells'
+import { Reveal } from '@/components/Reveal'
+import { DashboardSkeleton } from '@/features/dashboard/DashboardSkeleton'
 import { DomainCard } from '@/features/dashboard/DomainCard'
+import { MuscleRecency } from '@/features/dashboard/MuscleRecency'
 import { useGoalHistory } from '@/features/goals/useGoalHistory'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
 import { useFoodHistory } from '@/features/nutrition/useFoodHistory'
-import { plannable, useRoutines } from '@/features/routines/useRoutines'
+import { plannable, useRoutines, type Routine } from '@/features/routines/useRoutines'
 import { useWorkout } from '@/features/training/useWorkout'
 import { useWeightLogs } from '@/features/weight/useWeightLogs'
 import { addDays, todayKey } from '@/lib/date'
-import { formatDelta, formatNumber, weekdayLabel } from '@/lib/format'
+import { formatDayShort, formatDelta, formatNumber, weekdayLabel } from '@/lib/format'
 import { goalOn } from '@/lib/goals'
 import { sumPortions } from '@/lib/nutrition'
 import { plannedWeeks } from '@/lib/progress'
 import { scheduledOn } from '@/lib/schedule'
 import { dailyStreak, dayCells, weekCells, weeklyStreak } from '@/lib/streak'
-import { isoWeekday, nextSession } from '@/lib/training'
-import { latestEntry, weeklyDelta } from '@/lib/weight'
+import { isoWeekday, nextSession, type LoggedSet, type SessionSets } from '@/lib/training'
+import { latestEntry, weeklyDelta, type WeightEntry } from '@/lib/weight'
 
 /**
- * What the day looks like, top to bottom (GOAL.md §6): a calm summary, then
- * today's nutrition, then today's training.
+ * The way in.
  *
- * The nutrition block is §10.10's day summary — the ring, then the three
- * nutrients that carry user-set targets. Fibre, sugars, saturates and salt are
- * deliberately absent: they use reference values and are off by default, and
- * most people do not want seven bars every morning.
+ * Not a report — a report is what every other screen already is, and stacking
+ * four of them in identical bordered rectangles is what made this one feel like
+ * a settings page. Almost nothing here is in a container: the ground is one
+ * continuous surface, and what separates a block from the one under it is space
+ * and type, the way it is in Fitness or Weather. The only fills are on the
+ * things you swipe, and even those have no border.
+ *
+ * The rhythm is deliberately uneven. A date at display size, a body at the top
+ * with nothing around it, then four readings packed into four different shapes
+ * — a tall one holding a ring, two short ones beside it, a wide one under them
+ * — each arriving from the edge it sits against. Four blocks of one width in
+ * one column is something somebody scrolls past.
  */
 export default function DashboardPage() {
   const { t, i18n } = useTranslation()
   const locale = i18n.language
   const today = todayKey()
 
+  // Every query this screen needs, fetched once here and handed down.
+  //
+  // Each of these used to be called inside the card that wanted it, which meant
+  // `useWorkout` ran five times and `useRoutines` three — eight round trips for
+  // six answers, five of them the same 180-day query. Worse than the waste, each
+  // copy held its own state and resolved at its own moment, so the screen
+  // assembled in stages: the cards landed, then the body arrived underneath the
+  // date and shoved everything down. One fetch each means one arrival.
   const { entries, status } = useFoodLog(today)
-  const { goals } = useGoalHistory()
+  const { goals, status: goalStatus } = useGoalHistory()
   const goal = goalOn(goals, today)
+  const workout = useWorkout(today)
+  const { routines, status: routineStatus } = useRoutines()
+  const { days: loggedDays } = useFoodHistory(today)
+  const { entries: weights, status: weightStatus } = useWeightLogs()
 
   const totals = sumPortions(
     entries.map((entry) => ({ nutrients: entry.food.nutrients, quantityG: entry.quantityG })),
   )
 
+  // The whole screen, or the shape of it. Showing the date and the body while
+  // the four readings are still empty rectangles is two arrivals rather than
+  // one, and the second is the one that moves the page.
+  if (
+    status === 'loading' ||
+    workout.status === 'loading' ||
+    routineStatus === 'loading' ||
+    weightStatus === 'loading' ||
+    goalStatus === 'loading'
+  ) {
+    return (
+      <>
+        <ScreenTitle>{t('nav.dashboard')}</ScreenTitle>
+        <DashboardSkeleton />
+      </>
+    )
+  }
+
   return (
     <>
       <ScreenTitle>{t('nav.dashboard')}</ScreenTitle>
 
-      {/* The day in one sentence, first, in the one serif line per screen §4.1
-          allows and on the accent edge §6 calls the signature. It used to sit
-          at the bottom under a heading with a button beneath it; the card below
-          is the way into training now, so the sentence only has to be true. */}
-      <TrainingLine locale={locale} />
+      {/* The date at display size, the way a large title opens a screen on this
+          platform. It is also the only thing here that has to be true before
+          anything has loaded. */}
+      <header className="mb-2">
+        <p className="font-mono text-2xs text-ink-faint">
+          {weekdayLabel(isoWeekday(today), locale)}
+        </p>
+        <h2 className="mt-1 text-4xl font-semibold tracking-tight text-ink">
+          {formatDayShort(today, locale)}
+        </h2>
+      </header>
 
-      <section className="mt-6">
-        <SectionHead label={t('pages.dashboard.summary')} />
-        <Panel className="px-4 py-6">
-          {status === 'error' ? (
-            <p role="alert" className="text-sm text-danger">
-              {t('pages.dashboard.loadFailed')}
-            </p>
-          ) : status === 'loading' ? (
-            <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
-          ) : !goal ? (
-            // No target means nothing to measure against, and a ring with no
-            // target is a decoration. Say what is missing and how to fix it.
-            <div className="text-center">
-              <p className="font-mono text-2xs text-ink-faint">{t('pages.dashboard.noTarget')}</p>
-              <Button asChild variant="tinted" className="mt-4">
-                <Link to="/goals">{t('pages.dashboard.setTarget')}</Link>
-              </Button>
-            </div>
-          ) : (
-            <>
-              <CalorieRing total={totals.kcal.value} target={goal.kcal} locale={locale} />
+      {/* The body, on the ground rather than in a box. It is the thing only
+          this screen can show, so it gets the room and nothing frames it. */}
+      <MuscleRecency history={workout.history} exercises={workout.exercises} today={today} />
 
-              {/* Only the three with user-set targets. No colour per nutrient:
-                  they are told apart by label and fixed position (§10.10). */}
-              <ul className="mt-6 flex flex-col gap-4">
-                {(
-                  [
-                    ['protein', totals.protein.value, goal.proteinG],
-                    ['fat', totals.fat.value, goal.fatG],
-                    ['carbs', totals.carbs.value, goal.carbsG],
-                  ] as const
-                ).map(([nutrient, value, target]) => (
-                  <li key={nutrient}>
-                    <div className="mb-1.5 flex items-baseline justify-between gap-3">
-                      <span className="min-w-0 truncate text-sm">
-                        {t(`pages.food.nutrients.${nutrient}`)}
-                      </span>
-                      <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
-                        <span className="text-ink">{formatNumber(value, locale, 0)}</span> /{' '}
-                        {formatNumber(target, locale, 0)} g
-                      </span>
-                    </div>
-                    <Progress
-                      total={value}
-                      target={target}
-                      ariaLabel={`${t(`pages.food.nutrients.${nutrient}`)} ${formatNumber(value, locale, 0)} / ${formatNumber(target, locale, 0)} g`}
-                    />
-                  </li>
-                ))}
-              </ul>
+      {/* Four readings in four different shapes, packed rather than stacked.
+          The day's eating is tall and holds a ring, so it takes the left column
+          across two rows; training and weight are one line each and sit beside
+          it; the run underneath is wide and short and takes the full width.
+          Nothing is the same size as anything else and nothing is centred, so
+          the block is uneven without being mostly air — the version before this
+          alternated sides and spent half the screen on the gaps.
 
-              {entries.length === 0 ? (
-                <p className="mt-6 text-center font-mono text-2xs text-ink-faint">
-                  {t('pages.dashboard.nothingLogged')}
-                </p>
-              ) : null}
+          Each still arrives from the edge it sits against, the first time it is
+          scrolled to. */}
+      <section aria-label={t('pages.dashboard.summary')} className="mt-8 grid grid-cols-2 gap-3">
+        <Reveal from="left" className="row-span-2">
+          <NutritionCard
+            entries={entries}
+            goal={goal}
+            status={status}
+            totals={totals}
+            locale={locale}
+          />
+        </Reveal>
 
-              <Button asChild variant="primary" className="mt-6 w-full">
-                <Link to="/food">{t('pages.dashboard.logFood')}</Link>
-              </Button>
-            </>
-          )}
-        </Panel>
+        <Reveal from="right">
+          <TrainingCard locale={locale} routines={routines} sets={workout.sets} />
+        </Reveal>
+
+        <Reveal from="right">
+          <WeightCard locale={locale} entries={weights} />
+        </Reveal>
+
+        <Reveal from="left" className="col-span-2">
+          <StreakCard
+            loggedDays={loggedDays}
+            routines={routines}
+            history={workout.history}
+            today={today}
+          />
+        </Reveal>
       </section>
 
-      {/* The other three domains, each in its own colour, each the way into
-          itself. This is the only screen where all four are on one page, and
-          it is the only reason it exists — everything on it is a pointer at a
-          tab that says it better. */}
-      <section className="mt-6 grid grid-cols-2 gap-3">
-        <TrainingCard locale={locale} />
-        <WeightCard locale={locale} />
-        <StreakCards />
-      </section>
-
+      {/* One sentence, last, in the one serif line per screen §4.1 allows and
+          on the accent edge §6 calls the signature. Read once the picture has
+          already said where you stand. */}
+      <div className="mt-8">
+        <TrainingLine locale={locale} routines={routines} sets={workout.sets} />
+      </div>
     </>
   )
 }
 
+/** The day's eating, as one card: the ring, and how much of the day is left. */
+function NutritionCard({
+  entries,
+  goal,
+  status,
+  totals,
+  locale,
+}: {
+  entries: unknown[]
+  goal: { kcal: number; proteinG: number; fatG: number; carbsG: number } | null
+  status: 'loading' | 'ready' | 'error'
+  totals: ReturnType<typeof sumPortions>
+  locale: string
+}) {
+  const { t } = useTranslation()
+
+  if (status !== 'ready' || !goal) {
+    return (
+      <DomainCard to={goal ? '/food' : '/goals'} label={t('nav.food')} value="—">
+        <p className="font-mono text-2xs text-ink-faint">
+          {status === 'error'
+            ? t('pages.dashboard.loadFailed')
+            : status === 'loading'
+              ? t('common.loading')
+              : t('pages.dashboard.noTarget')}
+        </p>
+      </DomainCard>
+    )
+  }
+
+  return (
+    <Link
+      to="/food"
+      className="flex h-full flex-col gap-4 rounded-xl bg-surface p-4 transition-colors
+                 [transition-duration:140ms] hover:bg-surface-2 active:bg-surface-2
+                 active:[transition-duration:0ms]"
+    >
+      <p className="flex items-center justify-between gap-2 font-mono text-2xs text-ink-faint">
+        {t('nav.food')}
+        <span aria-hidden className="text-accent">
+          →
+        </span>
+      </p>
+
+      <CalorieRing total={totals.kcal.value} target={goal.kcal} locale={locale} />
+
+      {/* The ring and nothing else. The three macro bars made this card twice
+          the height of the other three, and a carousel where every card is as
+          tall as the tallest turns that into dead space on all of them. The
+          bars are one tap away on the screen this links to. */}
+      {entries.length === 0 ? (
+        <p className="text-center font-mono text-2xs text-ink-faint">
+          {t('pages.dashboard.nothingLogged')}
+        </p>
+      ) : null}
+    </Link>
+  )
+}
+
 /** Today's session, or the next one. */
-function TrainingCard({ locale }: { locale: string }) {
+function TrainingCard({
+  locale,
+  routines,
+  sets,
+}: {
+  locale: string
+  routines: Routine[]
+  sets: LoggedSet[]
+}) {
   const { t } = useTranslation()
   const today = todayKey()
-  const { routines } = useRoutines()
-  const { sets } = useWorkout(today)
 
   const plan = plannable(routines)
   const due = scheduledOn(plan, [], today)[0]
@@ -175,9 +256,8 @@ function TrainingCard({ locale }: { locale: string }) {
 }
 
 /** The last weigh-in and where the week put it. */
-function WeightCard({ locale }: { locale: string }) {
+function WeightCard({ locale, entries }: { locale: string; entries: WeightEntry[] }) {
   const { t } = useTranslation()
-  const { entries } = useWeightLogs()
   const latest = latestEntry(entries)
   const delta = weeklyDelta(entries, todayKey())
 
@@ -201,45 +281,55 @@ function WeightCard({ locale }: { locale: string }) {
   )
 }
 
-/** Both runs, side by side, each in the colour of what it counts. */
-function StreakCards() {
+/** Whichever run is worth reporting. One card, because one is one swipe. */
+function StreakCard({
+  loggedDays,
+  routines,
+  history,
+  today,
+}: {
+  loggedDays: Set<string>
+  routines: Routine[]
+  history: SessionSets[]
+  today: string
+}) {
   const { t } = useTranslation()
-  const today = todayKey()
-  const { days: loggedDays } = useFoodHistory(today)
-  const { routines } = useRoutines()
-  const { history } = useWorkout(today)
 
   const days = dailyStreak(loggedDays, today)
-  const weeks = weeklyStreak(plannedWeeks(history, plannable(routines), today, 12), today)
+  const weeks = plannedWeeks(history, plannable(routines), today, 12)
+  const streak = weeklyStreak(weeks, today)
 
-  // Neither appears before there is a run to report (PRODUCT.md).
-  if (days === 0 && weeks === 0) return null
+  // The longer of the two, and neither before there is a run to report
+  // (PRODUCT.md). A card that says nothing is a card nobody should swipe to.
+  const showTraining = streak > 0 && streak * 7 >= days
 
-  return (
-    <>
-      {days > 1 ? (
-        <DomainCard
-          to="/food"
-          label={t('common.streak.nutrition')}
-          value={String(days)}
-          unit={t('common.streak.days', { count: days })}
-        >
-          <Cells cells={dayCells(loggedDays, today, 14)} />
-        </DomainCard>
-      ) : null}
+  if (days <= 1 && streak === 0) {
+    return (
+      <DomainCard to="/training" label={t('common.streak.training')} value="—">
+        <p className="font-mono text-2xs text-ink-faint">{t('common.streak.none')}</p>
+      </DomainCard>
+    )
+  }
 
-      {weeks > 0 ? (
-        <DomainCard
-          domain="training"
-          to="/training"
-          label={t('common.streak.training')}
-          value={String(weeks)}
-          unit={t('common.streak.weeks', { count: weeks })}
-        >
-          <Cells cells={weekCells(plannedWeeks(history, plannable(routines), today, 12), today, 12)} />
-        </DomainCard>
-      ) : null}
-    </>
+  return showTraining ? (
+    <DomainCard
+      domain="training"
+      to="/training"
+      label={t('common.streak.training')}
+      value={String(streak)}
+      unit={t('common.streak.weeks', { count: streak })}
+    >
+      <Cells cells={weekCells(weeks, today, 12)} />
+    </DomainCard>
+  ) : (
+    <DomainCard
+      to="/food"
+      label={t('common.streak.nutrition')}
+      value={String(days)}
+      unit={t('common.streak.days', { count: days })}
+    >
+      <Cells cells={dayCells(loggedDays, today, 14)} />
+    </DomainCard>
   )
 }
 
@@ -255,15 +345,17 @@ function StreakCards() {
  * is one per screen — this is it. It carries no button: every card below is a
  * way in, and a second one here would be the screen asking twice.
  */
-function TrainingLine({ locale }: { locale: string }) {
+function TrainingLine({
+  locale,
+  routines,
+  sets,
+}: {
+  locale: string
+  routines: Routine[]
+  sets: LoggedSet[]
+}) {
   const { t } = useTranslation()
   const today = todayKey()
-  const { routines, status } = useRoutines()
-  const { sets } = useWorkout(today)
-
-  if (status === 'loading') {
-    return <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
-  }
 
   const plan = routines.map((routine) => ({
     id: routine.id,

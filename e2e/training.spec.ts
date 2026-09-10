@@ -7,7 +7,7 @@ test('the day shows what was done last time for each exercise', async ({ page })
   await waitForScreen(page)
 
   // §10.10 calls this the reason anyone opens this tab between sets.
-  await expect(page.getByText(/letztes Mal/)).toBeVisible()
+  await expect(page.getByText(/letztes Mal/).first()).toBeVisible()
   await expect(page.getByText(/2 × 8 @ 60 kg/)).toBeVisible()
 
   // An exercise never done before says so rather than showing an empty line.
@@ -61,7 +61,7 @@ test('picking an exercise opens its block with nothing logged in it', async ({ p
   await page.goto('/training/add')
   await waitForScreen(page)
 
-  // Squats are in the catalogue but not in the day, so its block is new.
+  // Squats are in the catalogue and have never been done, so its block is new.
   await page.getByRole('button', { name: /Kniebeuge/ }).click()
   await expect(page.getByRole('heading', { name: 'Kniebeuge mit Langhantel' })).toBeVisible()
   await expect(page.getByText('zum ersten Mal').first()).toBeVisible()
@@ -116,7 +116,7 @@ test('a filter narrows the catalogue and leaves recently-used alone', async ({ p
   // barbell lift and is still there.
   const recent = page.getByRole('button', { name: /zuletzt benutzt/ })
   await expect(recent).toBeVisible()
-  await expect(recent).toContainText('2')
+  await expect(recent).toContainText('3')
 
 })
 
@@ -264,4 +264,23 @@ test('a write from one screen refetches for every reader, with no reload', async
   // Both readers, not just the one that made the write.
   await expect.poll(() => reads - before, { timeout: 5000 }).toBeGreaterThanOrEqual(2)
   await expect(page.locator('[data-session-bar]')).toBeVisible()
+})
+
+test('finishing a session survives a reload', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+  await page.goto('/training')
+  await waitForScreen(page)
+
+  // The fixture leaves sets outstanding, so a session is running.
+  await expect(page.locator('[data-session-bar]')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Einheit anzeigen' }).click()
+  await page.getByRole('button', { name: 'Einheit beenden' }).click()
+  await expect(page.locator('[data-session-bar]')).toBeHidden()
+
+  // It used to be React state, so this brought it straight back.
+  await page.reload()
+  await waitForScreen(page)
+  await expect(page.locator('[data-session-bar]')).toBeHidden()
 })

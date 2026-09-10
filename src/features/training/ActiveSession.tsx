@@ -17,9 +17,8 @@ import { activeSet, nextActive } from '@/lib/training'
 export function ActiveSessionProvider({ children }: { children: ReactNode }) {
   const today = todayKey()
   const [chosen, setChosen] = useState<string | null>(null)
-  const [ended, setEnded] = useState(false)
 
-  const { sets, exercises, updateSet } = useWorkout(today)
+  const { sets, exercises, updateSet, endedAt, setEnded } = useWorkout(today)
   const active = activeSet(sets, chosen)
 
   const log = useCallback(
@@ -43,17 +42,20 @@ export function ActiveSessionProvider({ children }: { children: ReactNode }) {
       sets,
       exercises,
       active,
-      // A session is running while today has a set nobody has logged yet.
-      running: !ended && sets.some((set) => !set.done),
-      ended,
+      // A session is running while today has a set nobody has logged yet and
+      // nobody has said it is over. Both halves are read from the database, so
+      // a reload finds the same answer the last tap left behind.
+      running: endedAt === null && sets.some((set) => !set.done),
+      ended: endedAt !== null,
+      // Choosing a set is taking the session back up, which un-ends it.
       choose: (setId: string) => {
         setChosen(setId)
-        setEnded(false)
+        if (endedAt !== null) void setEnded(false)
       },
       log,
-      end: () => setEnded(true),
+      end: () => void setEnded(true),
     }),
-    [sets, exercises, active, ended, log],
+    [sets, exercises, active, endedAt, setEnded, log],
   )
 
   return <ActiveSessionContext.Provider value={value}>{children}</ActiveSessionContext.Provider>

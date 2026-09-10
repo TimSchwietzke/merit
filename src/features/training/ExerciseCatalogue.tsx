@@ -7,7 +7,12 @@ import { Row, Rows } from '@/components/Rows'
 import { Collapsible } from '@/components/ui/collapsible'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { useWorkout } from '@/features/training/useWorkout'
+import {
+  EXERCISE_COLUMNS,
+  toExerciseRef,
+  useWorkout,
+  type ExerciseRef,
+} from '@/features/training/useWorkout'
 import { supabase } from '@/lib/supabase'
 
 /**
@@ -31,15 +36,8 @@ import { supabase } from '@/lib/supabase'
  * and forth through this screen to add four lifts was the flow it replaced, so
  * there it renders in a sheet and stays open.
  */
-export interface Found {
-  id: string
-  nameEn: string
-  nameDe: string
-  muscleGroup: string
-  equipment: string
-}
-
-const SELECT = 'id, name_en, name_de, muscle_group, equipment'
+/** What the catalogue hands back. The same shape everything else uses. */
+export type Found = ExerciseRef
 
 /** EU label order has no equivalent here; this is heaviest-to-lightest. */
 const GROUP_ORDER = ['legs', 'glutes', 'back', 'chest', 'shoulders', 'arms', 'core', 'full_body']
@@ -76,14 +74,14 @@ export function ExerciseCatalogue({
   }
 
   const { history } = useWorkout(date)
-  // The whole catalogue, once. It is a few hundred rows at worst, and holding
-  // it means filtering and searching are instant rather than a round trip per
+  // The whole catalogue, once — around nine hundred rows since the import, and
+  // roughly 130KB of JSON. Still one request rather than a round trip per
   // keystroke on a gym connection.
   useEffect(() => {
     let active = true
     void supabase
       .from('exercises')
-      .select(SELECT)
+      .select(EXERCISE_COLUMNS)
       .order(locale === 'de' ? 'name_de' : 'name_en')
       .then(({ data, error }) => {
         if (!active) return
@@ -92,15 +90,7 @@ export function ExerciseCatalogue({
           return
         }
         setFailed(false)
-        setAll(
-          data.map((row) => ({
-            id: row.id,
-            nameEn: row.name_en,
-            nameDe: row.name_de,
-            muscleGroup: row.muscle_group,
-            equipment: row.equipment,
-          })),
-        )
+        setAll(data.map(toExerciseRef))
       })
     return () => {
       active = false
@@ -179,7 +169,22 @@ export function ExerciseCatalogue({
     <Rows>
       {items.map((exercise) => (
         <Row key={exercise.id} onClick={() => onPick(exercise)}>
-          <span className="min-w-0 flex-1 truncate">{name(exercise)}</span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate">{name(exercise)}</span>
+            {/* What it works, as words rather than as a drawing. A body per row
+                is ninety paths per row, and this list runs to nine hundred of
+                them — the silhouette belongs where one exercise is being looked
+                at, not where they are being scanned. */}
+            {exercise.primaryMuscles.length > 0 ? (
+              <span className="block truncate font-mono text-2xs text-ink-faint">
+                {exercise.primaryMuscles
+                  .map((muscle) =>
+                    t(`pages.training.muscles.${muscle}` as 'pages.training.muscles.chest'),
+                  )
+                  .join(' · ')}
+              </span>
+            ) : null}
+          </span>
           <span className="shrink-0 font-mono text-2xs text-ink-faint">
             {t(`pages.training.add.equipment.${exercise.equipment}` as 'pages.training.add.equipment.barbell')}
           </span>

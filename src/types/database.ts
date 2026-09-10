@@ -49,6 +49,8 @@ export type Database = {
           muscle_group: string
           name_de: string
           name_en: string
+          primary_muscles: string[]
+          secondary_muscles: string[]
           source: string
           updated_at: string
         }
@@ -61,6 +63,8 @@ export type Database = {
           muscle_group: string
           name_de: string
           name_en: string
+          primary_muscles?: string[]
+          secondary_muscles?: string[]
           source: string
           updated_at?: string
         }
@@ -73,6 +77,8 @@ export type Database = {
           muscle_group?: string
           name_de?: string
           name_en?: string
+          primary_muscles?: string[]
+          secondary_muscles?: string[]
           source?: string
           updated_at?: string
         }
@@ -481,6 +487,7 @@ export type Database = {
         Row: {
           created_at: string
           date: string
+          ended_at: string | null
           id: string
           notes: string | null
           routine_id: string | null
@@ -490,6 +497,7 @@ export type Database = {
         Insert: {
           created_at?: string
           date: string
+          ended_at?: string | null
           id?: string
           notes?: string | null
           routine_id?: string | null
@@ -499,6 +507,7 @@ export type Database = {
         Update: {
           created_at?: string
           date?: string
+          ended_at?: string | null
           id?: string
           notes?: string | null
           routine_id?: string | null

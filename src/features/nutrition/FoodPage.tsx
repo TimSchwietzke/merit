@@ -5,6 +5,7 @@ import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/EmptyState'
 import { Panel } from '@/components/Panel'
+import { Loading, RowsSkeleton, Skeleton, StripSkeleton } from '@/components/Skeleton'
 import { Streak } from '@/components/Streak'
 import { Cells } from '@/components/Cells'
 import { StatCard } from '@/components/StatCard'
@@ -91,6 +92,35 @@ export default function FoodPage() {
         },
       },
     })
+  }
+
+  if (status === 'loading') {
+    return (
+      <>
+        <ScreenTitle>{t('nav.food')}</ScreenTitle>
+        <Loading label={t('common.loading')}>
+          <StripSkeleton />
+          <Skeleton className="mt-6 h-3 w-16" />
+          <div className="mt-3 rounded-lg border border-line bg-surface px-4 py-5">
+            <Skeleton className="mx-auto size-[168px] rounded-full" />
+            <Skeleton className="mx-auto mt-4 h-3 w-32" />
+            <div className="mt-6 flex flex-col gap-4">
+              {Array.from({ length: 4 }, (_, index) => (
+                <Skeleton key={index} className="h-4 w-full" />
+              ))}
+            </div>
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <Skeleton className="h-40 rounded-lg" />
+            <Skeleton className="h-40 rounded-lg" />
+          </div>
+          <Skeleton className="mt-8 h-3 w-20" />
+          <div className="mt-3">
+            <RowsSkeleton rows={2} />
+          </div>
+        </Loading>
+      </>
+    )
   }
 
   return (
@@ -234,8 +264,6 @@ export default function FoodPage() {
           <p role="alert" className="text-sm text-danger">
             {t('pages.food.loadFailed')}
           </p>
-        ) : status === 'loading' ? (
-          <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
         ) : entries.length === 0 ? (
           <EmptyState>{t('pages.food.log.empty')}</EmptyState>
         ) : (

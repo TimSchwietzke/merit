@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 
+import { EXERCISE_COLUMNS, toExerciseRef } from '@/features/training/useWorkout'
 import { supabase } from '@/lib/supabase'
 import type { ExerciseRef } from '@/features/training/useWorkout'
 
@@ -22,18 +23,12 @@ export function useExercise(id: string | null): ExerciseRef | null {
 
     void supabase
       .from('exercises')
-      .select('id, name_en, name_de, muscle_group, equipment')
+      .select(EXERCISE_COLUMNS)
       .eq('id', id)
       .maybeSingle()
       .then(({ data }) => {
         if (!active || !data) return
-        setFetched({
-          id: data.id,
-          nameEn: data.name_en,
-          nameDe: data.name_de,
-          muscleGroup: data.muscle_group,
-          equipment: data.equipment,
-        })
+        setFetched(toExerciseRef(data))
       })
 
     return () => {

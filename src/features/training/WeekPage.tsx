@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { EmptyState } from '@/components/EmptyState'
 import { Progress } from '@/components/Progress'
 import { Row, RowBody, Rows } from '@/components/Rows'
+import { Loading, RowsSkeleton, Skeleton, StripSkeleton } from '@/components/Skeleton'
 import { SwipeRow } from '@/components/SwipeRow'
 import { WeekStrip } from '@/components/WeekStrip'
 import { ScreenTitle } from '@/components/ScreenTitle'
@@ -78,6 +79,34 @@ export default function WeekPage() {
     if (moving.date === date && moving.routineId === session.routine.id) return setMoving(null)
     setPending({ a: moving, b: mine })
     setMoving(null)
+  }
+
+  // The whole shape at once. Showing the strip while the day beneath it is a
+  // loading line means the page arrives twice, and the second arrival is the
+  // one that moves everything.
+  if (status === 'loading' || routinesStatus === 'loading') {
+    return (
+      <>
+        <ScreenTitle>{t('nav.training')}</ScreenTitle>
+        <Loading label={t('common.loading')}>
+          <StripSkeleton />
+          <div className="mt-6 border-l-2 border-line py-1 pl-4">
+            <Skeleton className="h-3 w-12" />
+            <Skeleton className="mt-3 h-8 w-2/3" />
+            <Skeleton className="mt-4 h-1 w-full" />
+            <Skeleton className="mt-3 h-3 w-24" />
+          </div>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <Skeleton className="h-36 rounded-lg" />
+            <Skeleton className="h-36 rounded-lg" />
+          </div>
+          <Skeleton className="mt-8 h-3 w-20" />
+          <div className="mt-3">
+            <RowsSkeleton />
+          </div>
+        </Loading>
+      </>
+    )
   }
 
   return (

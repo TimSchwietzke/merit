@@ -233,9 +233,13 @@ export async function stubBackend(
   // A target in force, so the day view renders its progress rather than its
   // "set a target" state, and the goals screen has something to show.
   const EXERCISES = [
-    { id: 'x1', name_en: 'Bench press', name_de: 'Bankdrücken', muscle_group: 'chest', equipment: 'barbell' },
-    { id: 'x2', name_en: 'Barbell back squat', name_de: 'Kniebeuge mit Langhantel', muscle_group: 'legs', equipment: 'barbell' },
-    { id: 'x3', name_en: 'Lat pulldown', name_de: 'Latzug', muscle_group: 'back', equipment: 'cable' },
+    { id: 'x1', name_en: 'Bench press', name_de: 'Bankdrücken', muscle_group: 'chest', equipment: 'barbell', primary_muscles: ['chest'], secondary_muscles: ['triceps', 'shoulders'] },
+    { id: 'x2', name_en: 'Barbell back squat', name_de: 'Kniebeuge mit Langhantel', muscle_group: 'legs', equipment: 'barbell', primary_muscles: ['quadriceps'], secondary_muscles: ['glutes', 'hamstrings', 'lower back'] },
+    { id: 'x3', name_en: 'Lat pulldown', name_de: 'Latzug', muscle_group: 'back', equipment: 'cable', primary_muscles: ['lats'], secondary_muscles: ['biceps', 'middle back'] },
+    // Trained a few days back, so the recency map has legs at half strength.
+    // Squats stay untrained: a catalogue with nothing ever done in it is a case
+    // the day screen has to handle and one exercise has to keep covering.
+    { id: 'x4', name_en: 'Leg press', name_de: 'Beinpresse', muscle_group: 'legs', equipment: 'machine', primary_muscles: ['quadriceps'], secondary_muscles: ['glutes', 'hamstrings'] },
   ]
 
   await page.route('**/rest/v1/exercises*', (route) =>
@@ -253,6 +257,11 @@ export async function stubBackend(
   // Today's sets and a session a few days back, so the comparison line under
   // each exercise — the reason §10.10 gives for opening this tab — has
   // something to compare against.
+  //
+  // Ending a session is a real write, so the stub remembers it: the sets query
+  // reads `ended_at` back, and the bar has to stay gone across a reload.
+  let endedAt: string | null = null
+
   await page.route('**/rest/v1/workout_sets*', (route) => {
     if (route.request().method() !== 'GET') {
       return route.fulfill({ status: 201, contentType: 'application/json', body: '{}' })
@@ -270,13 +279,17 @@ export async function stubBackend(
       rir,
       done,
       exercise_id: exercise.id,
-      workouts: { date },
+      workouts: { date, ended_at: date === day(0) ? endedAt : null },
       exercises: exercise,
     })
     return route.fulfill({
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([
+        // A leg day five days back, so the recency map has a gradient rather
+        // than one bright week and darkness behind it.
+        set('s9', EXERCISES[3], 1, 10, 120, day(5)),
+        set('s10', EXERCISES[3], 2, 10, 120, day(5)),
         set('s1', EXERCISES[0], 1, 8, 60, day(3)),
         set('s2', EXERCISES[0], 2, 8, 60, day(3)),
         set('s3', EXERCISES[0], 3, 7, 60, day(3)),
@@ -367,6 +380,12 @@ export async function stubBackend(
     const url = route.request().url()
     const json = (body: unknown) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) })
+
+    if (route.request().method() === 'PATCH') {
+      const sent = JSON.parse(route.request().postData() ?? '{}')
+      endedAt = sent.ended_at ?? null
+      return json([{ id: 'w1' }])
+    }
 
     // The week screen asks for a range with the sets embedded; everything else
     // wants the one row it just upserted.

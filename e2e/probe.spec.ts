@@ -78,7 +78,8 @@ for (const theme of ['light', 'dark'] as const) {
 }
 
 test('no horizontal scroll at any width, in German', async ({ page }) => {
-  test.slow()
+  // The same sweep, times five widths.
+  test.setTimeout(180_000)
   await stubBackend(page, { theme: 'light', locale: 'de' })
   // Each screen is loaded once and then resized, rather than reloaded at every
   // width. Overflow is a layout property, so a resize answers the question just
@@ -121,9 +122,12 @@ test('page gutters never exceed 24px, and the column caps at 860px', async ({ pa
 })
 
 test('every touch target clears 44px at 375px, on every screen', async ({ page }) => {
-  // Every route in both languages, and the route list keeps growing. The 20s
-  // default is sized for one capture, not for a sweep.
-  test.slow()
+  // Every route in both languages, and the route list keeps growing: sixteen
+  // routes, twice, each loaded and let settle. That is about forty seconds on
+  // an idle machine and rather more against three other workers, so the budget
+  // is stated rather than left to `test.slow()`'s blunt tripling of a default
+  // sized for one capture.
+  test.setTimeout(180_000)
   const offenders: string[] = []
   for (const locale of ['de', 'en'] as const) {
     await stubBackend(page, { theme: 'light', locale })
@@ -131,6 +135,11 @@ test('every touch target clears 44px at 375px, on every screen', async ({ page }
     for (const route of ROUTES) {
       await page.goto(route.path)
       await waitForScreen(page)
+      // `waitForScreen` returns as soon as `main` has children, which is before
+      // the layout has settled — measured there, a 44px control reports 43.99
+      // and the probe fails on a screen that is fine. This asserts an invariant
+      // about the finished layout, so it waits for one.
+      await page.waitForTimeout(250)
       const small = await page.evaluate(() =>
         [...document.querySelectorAll('button, a, input, [role=radio]')]
           .map((el) => ({ el, r: el.getBoundingClientRect() }))

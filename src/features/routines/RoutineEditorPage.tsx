@@ -19,6 +19,7 @@ import {
   type RoutinesState,
 } from '@/features/routines/useRoutines'
 import { ExerciseCatalogue } from '@/features/training/ExerciseCatalogue'
+import { ExerciseFigure } from '@/features/training/ExerciseFigure'
 import type { ExerciseRef } from '@/features/training/useWorkout'
 import { todayKey } from '@/lib/date'
 import { parseDecimalInput, weekdayLabel } from '@/lib/format'
@@ -349,6 +350,8 @@ function Editor({
                         nameDe: exercise.nameDe,
                         muscleGroup: exercise.muscleGroup,
                         equipment: exercise.equipment,
+                        primaryMuscles: exercise.primaryMuscles,
+                        secondaryMuscles: exercise.secondaryMuscles,
                       },
                       setReps: DEFAULT_SET_REPS,
                     },
@@ -406,6 +409,14 @@ function PlannedExercise({
           <p className="min-w-0 flex-1 truncate text-sm text-ink">
             {locale === 'de' ? entry.exercise.nameDe : entry.exercise.nameEn}
           </p>
+          {/* Beside the name rather than above the sets: it says what this lift
+              is for, which is a thing you check while assembling a routine and
+              never while typing reps into one. */}
+          <ExerciseFigure
+            exercise={entry.exercise}
+            label={locale === 'de' ? entry.exercise.nameDe : entry.exercise.nameEn}
+            className="h-24 shrink-0"
+          />
           {/* Up and down rather than a drag handle: a drag on a phone fights
               the scroll it lives inside. */}
           <span className="flex shrink-0 gap-1">
