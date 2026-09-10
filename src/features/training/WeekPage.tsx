@@ -5,7 +5,7 @@ import { ArrowUpDown, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/EmptyState'
-import { Panel } from '@/components/Panel'
+import { Progress } from '@/components/Progress'
 import { Row, RowBody, Rows } from '@/components/Rows'
 import { SwipeRow } from '@/components/SwipeRow'
 import { ScreenTitle } from '@/components/ScreenTitle'
@@ -50,6 +50,8 @@ export default function WeekPage() {
   const planned = useMemo(() => plannable(routines), [routines])
   const { days, overrides, status, apply } = useSchedule(week[0], week[6], planned)
 
+  // Which way the last week change went. Nothing reads it but the animation.
+  const [direction, setDirection] = useState<-1 | 0 | 1>(0)
   const [moving, setMoving] = useState<Marked | null>(null)
   const [pending, setPending] = useState<{ a: Marked; b: Marked } | null>(null)
 
@@ -85,7 +87,11 @@ export default function WeekPage() {
         selected={selected}
         locale={locale}
         onSelect={setSelected}
-        onShift={(by) => setSelected(addDays(selected, by * 7))}
+        direction={direction}
+        onShift={(by) => {
+          setDirection(by)
+          setSelected(addDays(selected, by * 7))
+        }}
       />
 
       {moving ? (
@@ -187,6 +193,7 @@ function WeekStrip({
   locale,
   onSelect,
   onShift,
+  direction,
 }: {
   days: ScheduleDay[]
   week: string[]
@@ -195,13 +202,18 @@ function WeekStrip({
   locale: string
   onSelect: (date: string) => void
   onShift: (by: -1 | 1) => void
+  /** Which way the last week change went, so the row can arrive from there. */
+  direction: -1 | 0 | 1
 }) {
   const { t } = useTranslation()
 
   const range = formatDayRange(week[0], week[6], locale)
 
+  // Bare on the page, not inside a Panel. Three bordered boxes down a screen
+  // is three things claiming to be the subject; the week is reference, and
+  // reference does not need a frame.
   return (
-    <Panel className="p-2">
+    <div>
       <div className="flex items-center justify-between gap-2">
         <Button variant="bare" size="icon" aria-label={t('pages.training.week.prev')} onClick={() => onShift(-1)}>
           <ChevronLeft />
@@ -213,14 +225,16 @@ function WeekStrip({
       </div>
 
       {/* A radio group, not seven buttons: exactly one day is being looked at,
-          and arrow keys should walk the week (§10.7). */}
-      {/* Pulled 4px past the panel's padding and down to the mosaic's own 2px
-          gap: seven tiles inside 375px came out 43px wide, and §5.2's floor is
-          44. */}
+          and arrow keys should walk the week (§10.7).
+
+          Keyed on the week so a change of week remounts the row and it arrives
+          from the side it came from — the chevron says which way, and the row
+          agrees with it. */}
       <div
+        key={week[0]}
         role="radiogroup"
         aria-label={t('pages.training.week.label')}
-        className="-mx-1 mt-1 flex gap-0.5"
+        className={`-mx-1 mt-1 flex gap-0.5 ${direction === 0 ? '' : direction > 0 ? 'merit-left' : 'merit-right'}`}
       >
         {week.map((date) => {
           const day = days.find((entry) => entry.date === date)
@@ -270,16 +284,25 @@ function WeekStrip({
           )
         })}
       </div>
-    </Panel>
+    </div>
   )
 }
 
 /**
- * The selected day: what is on it, and the way into it.
+ * The selected day: what is on it, and the way into it. The subject of the
+ * screen, and the only thing on it allowed to be loud.
  *
- * The card is the link — there is no button under it repeating what tapping the
- * name already does. Everything a day can be is one of three shapes: it holds
- * sessions, it is empty, or it has not loaded.
+ * It carries the accent edge (§6) rather than a panel border. The edge is the
+ * house signature and this screen had quietly opted out of it, which is most of
+ * why the screen read flat: a week strip, a day and a routine list in three
+ * identical bordered boxes are three things all claiming to be the subject. One
+ * marked block against two plain ones needs no boxes at all. Its muted twin in
+ * `line-strong` — §6's own answer for something provisional — marks a rest day,
+ * so an empty day is visibly the same object in a quieter state rather than a
+ * different component.
+ *
+ * The card is the link: no button under it repeating what tapping the name
+ * already does.
  */
 function DayCard({
   day,
@@ -313,9 +336,16 @@ function DayCard({
       ? t('pages.training.week.today')
       : `${weekdayLabel(isoWeekday(day.date), locale)} · ${formatDayShort(day.date, locale)}`
 
+  const bare = day.sessions.length === 0
+
   return (
     <>
-      <Panel className="mt-3 px-4 py-3">
+      {/* Keyed on the date: picking another day replaces this block, and it
+          says so rather than swapping its text under you. */}
+      <div
+        key={day.date}
+        className={`merit-rise mt-6 border-l-2 py-1 pl-4 ${bare ? 'border-line-strong' : 'border-accent'}`}
+      >
         <div className="flex min-h-11 items-center justify-between gap-3">
           <p
             className={`font-mono text-2xs ${day.date === today ? 'text-accent' : 'text-ink-faint'}`}
@@ -336,11 +366,13 @@ function DayCard({
           ) : null}
         </div>
 
-        {day.sessions.length === 0 ? (
+        {bare ? (
           <>
-            <p className="text-ink-muted">{t('pages.training.week.nothing')}</p>
+            <p className="text-2xl font-semibold tracking-tight text-ink-faint">
+              {t('pages.training.week.nothing')}
+            </p>
             {routines.length > 0 ? (
-              <Button variant="quiet" className="mt-3 w-full md:w-auto" onClick={() => setPicking(true)}>
+              <Button variant="quiet" className="mt-4 w-full md:w-auto" onClick={() => setPicking(true)}>
                 {t('pages.training.week.put')}
               </Button>
             ) : null}
@@ -363,37 +395,55 @@ function DayCard({
                   ? `/training/day?date=${day.date}`
                   : `/training/session?date=${day.date}&routine=${session.routine.id}`
               }
-              className="-mx-4 flex items-center gap-3 px-4 py-2 transition-colors
-                         [transition-duration:140ms] hover:bg-surface-2 active:bg-surface-2
-                         active:[transition-duration:0ms]"
+              className="-ml-4 mt-1 flex items-center gap-3 rounded-r-md py-2 pl-4 pr-2
+                         transition-colors [transition-duration:140ms] hover:bg-surface-2
+                         active:bg-surface-2 active:[transition-duration:0ms]"
             >
               <span className="min-w-0 flex-1">
-                <span className="block truncate text-xl font-semibold tracking-tight text-ink">
+                {/* `text-2xl` is §4.2's in-app ceiling and the dashboard's
+                    primary number sits there. The subject of this screen has
+                    the same standing and was two steps below it. */}
+                <span className="block truncate text-2xl font-semibold tracking-tight text-ink">
                   {session.routine.name}
                 </span>
-                <span className="mt-0.5 block truncate font-mono text-2xs text-ink-muted">
-                  {session.workoutId && session.loggedSets < session.totalSets
-                    ? `${t('pages.training.week.resume')} · ${t('pages.training.week.progress', {
+
+                {session.totalSets > 0 ? (
+                  // The figures were a sentence where the system has a bar for
+                  // exactly this (§10.9), with the significant number promoted
+                  // out of `ink-faint`. A started session is the one thing on
+                  // this screen with a position against a target.
+                  <span className="mt-3 block">
+                    <Progress
+                      total={session.loggedSets}
+                      target={session.totalSets}
+                      ariaLabel={t('pages.training.week.progress', {
                         logged: session.loggedSets,
                         total: session.totalSets,
-                      })}`
-                    : session.totalSets === 0
-                      ? t('pages.training.week.open')
-                      : session.loggedSets > 0
-                        ? t('pages.training.week.progress', {
-                            logged: session.loggedSets,
-                            total: session.totalSets,
-                          })
-                        : t('pages.training.week.setCount', { count: session.totalSets })}
-                </span>
+                      })}
+                      // The measurement and nothing else. That the session is
+                      // under way is what the bar being there already says.
+                      label={
+                        <>
+                          <span className="text-ink">{session.loggedSets}</span>
+                          {' / '}
+                          {t('pages.training.week.setCount', { count: session.totalSets })}
+                        </>
+                      }
+                    />
+                  </span>
+                ) : (
+                  <span className="mt-1 block truncate font-mono text-2xs text-ink-faint">
+                    {t('pages.training.week.open')}
+                  </span>
+                )}
               </span>
-              <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
+              <span aria-hidden className="shrink-0 self-start pt-2 font-mono text-2xs text-ink-faint">
                 →
               </span>
             </Link>
           ))
         )}
-      </Panel>
+      </div>
 
       <Sheet
         open={picking}

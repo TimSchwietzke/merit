@@ -253,8 +253,7 @@
         "swapConfirm": "{{a}} ({{aDay}}) mit {{b}} ({{bDay}}) tauschen?",
         "confirm": "Tauschen",
         "loadFailed": "Deine Woche konnte nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
-        "putNew": "Neue Routine anlegen",
-        "resume": "Zurück zur Einheit"
+        "putNew": "Neue Routine anlegen"
       },
       "session": {
         "label": "die einheit",

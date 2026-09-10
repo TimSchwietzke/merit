@@ -130,6 +130,37 @@
     color: var(--color-ink);
   }
 
+  /* ── Merit's motion vocabulary (DESIGN.md §13) ──────────────────────
+     Four moves, each carrying information and then stopping. Nothing loops,
+     nothing repeats on scroll, nothing plays twice. `both` matters: under
+     `prefers-reduced-motion` the duration collapses to 0.01ms and the element
+     lands on its end state in the first frame rather than flashing through.
+
+     The easing is one exponential ease-out, shared by all four, so a screen
+     that moves in several places still moves like one thing. */
+  @keyframes merit-sweep  { from { transform: scaleX(0); } }
+  @keyframes merit-rise   { from { opacity: 0; transform: translateY(4px); } }
+  @keyframes merit-left   { from { opacity: 0; transform: translateX(10px); } }
+  @keyframes merit-right  { from { opacity: 0; transform: translateX(-10px); } }
+
+  .merit-sweep,
+  .merit-rise,
+  .merit-left,
+  .merit-right {
+    animation-duration: 460ms;
+    animation-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+    animation-fill-mode: both;
+  }
+
+  /* A bar filling from nothing to its value, once, on the thing the screen is
+     about. This is the authored moment; the other three are state changes. */
+  .merit-sweep  { animation-name: merit-sweep; transform-origin: left; }
+  /* A block that has been replaced in place, saying so. */
+  .merit-rise   { animation-name: merit-rise;  animation-duration: 200ms; }
+  /* A row of days that travelled, in the direction it travelled. */
+  .merit-left   { animation-name: merit-left;  animation-duration: 260ms; }
+  .merit-right  { animation-name: merit-right; animation-duration: 260ms; }
+
   /* Motion is feedback, never decoration. */
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {

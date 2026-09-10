@@ -417,6 +417,37 @@ a step or two of their mobile values. Interfaces that scale their own padding wi
 the single most reliable tell of a generated layout: everything breathes uniformly and nothing has a
 hierarchy. Density is the signature; keep it at every width.
 
+### 5.5 Composition — one thing wins
+
+Every screen has exactly one element that is the subject, and it must be obvious which one within a
+second of the screen appearing. This is the rule the rest of this file assumed and never wrote down,
+and its absence is a real failure mode with a signature: three `Panel`s down a screen, each with the
+same border, the same radius and the same fill, none of them louder than the others. Every component
+is correct and the screen is dead. The fix is never a shadow.
+
+The ladder, loudest first. **A screen uses one rung from the top two and nothing else does:**
+
+| Rung | Device | Where |
+|---|---|---|
+| Subject | The accent edge (§6) or the ring (§10.10), with its figure at `text-2xl` | Once. Never twice. |
+| Support | A `Panel`, a `Rows` list under a §10.3 head | As often as needed |
+| Reference | Bare on the page — no border, no fill, mono labels in `ink-faint` | As often as needed |
+
+Two consequences worth stating, because both were got wrong before this was written:
+
+- **A frame is not free.** Wrapping something in a `Panel` promotes it, and a screen where everything
+  is promoted has no subject. The week strip on `/training` is reference — it is what you consult to
+  change the subject, not the subject itself — so it sits bare on the page and the day it selects
+  takes the edge. Reach for `Panel` when a group needs to be told apart from what surrounds it, not
+  as the default wrapper for a section.
+- **The subject earns the top of the type scale.** `text-2xl` is the in-app ceiling (§4.2) and it is
+  reserved for the one figure or name the screen exists to show. A screen whose largest text is
+  `text-xl` — the `h1` size — has no subject, only a title.
+
+The muted twin of the accent edge (`line-strong`, §6) is how the subject looks when there is nothing
+in it. A rest day, an empty log, a goal not yet set: same block, same size, quieter edge. An empty
+state that is a different component from its full state makes the screen change shape for no reason.
+
 ---
 
 ## 6. Surface, border, radius, elevation
@@ -1013,6 +1044,13 @@ Motion is feedback. It confirms something happened; it never announces, decorate
 | Bottom sheet in/out | 250ms | `cubic-bezier(.4,0,.2,1)` |
 | Value change in a chart | 320ms | default |
 | Row removal (with undo) | 200ms | `ease-out` |
+| **A measurement arriving** | **460ms, once** | `cubic-bezier(.16,1,.3,1)` |
+| **A block replaced in place** | **200ms** | `cubic-bezier(.16,1,.3,1)` |
+| **A row of days that travelled** | **260ms** | `cubic-bezier(.16,1,.3,1)` |
+
+The last three share one exponential ease-out so a screen that moves in several places still moves
+like one thing. They live in `index.css` as `merit-sweep`, `merit-rise`, `merit-left` / `merit-right`
+and are applied by class, never re-declared per component.
 
 Rules:
 
@@ -1020,7 +1058,17 @@ Rules:
   and disabling smooth scrolling.
 - **The press state is never transitioned.** A 150ms fade-in on `:active` reads as lag on touch,
   where there is no hover to precede it.
-- **Nothing auto-plays.** Merit has no self-running animation at all.
+- **One authored moment per screen, and it is a measurement arriving.** A bar or a ring fills from
+  nothing to its value once, when it mounts, over 460ms — never again, never on scroll, never on a
+  loop. Watching a measurement stop somewhere says more about where the day stands than finding it
+  already stopped, and it is the only thing on a screen allowed to move on its own. Everything else
+  moves because the reader did something.
+
+  This replaces an earlier flat ban on self-running animation. The ban was aimed at the right target
+  — the looping shimmer, the scroll-triggered entrance on every section, the number that counts up
+  because counting up looks expensive — and it caught the one honest case along with them. The rule
+  is *once, on the measurement, on the element the screen is about*. A second sweep on the same
+  screen means the screen has two subjects, which is a composition problem (§5.5), not a motion one.
 - Transform and opacity only, **with one exception: a disclosure may animate its own height** at
   150ms, matching the chevron beside it. The motion table above has always listed disclosure, and
   every other way of animating one is unavailable — `interpolate-size` and `calc-size()` are
@@ -1028,6 +1076,8 @@ Rules:
   "height or nothing", and a section that snaps open gives no sense of where its content came from.
   Nothing else animates a size. No animated grid columns (§7).
 - **No celebratory motion.** Logging a meal is not an achievement to be confettied.
+- **Nothing loops, nothing repeats, nothing plays on scroll.** The one exception is the measurement
+  above, which plays once on mount.
 
 ---
 

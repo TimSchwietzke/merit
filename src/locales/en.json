@@ -253,8 +253,7 @@
         "swapConfirm": "Swap {{a}} ({{aDay}}) with {{b}} ({{bDay}})?",
         "confirm": "Swap them",
         "loadFailed": "Your week could not be loaded. Check your connection and try again.",
-        "putNew": "Make a new routine",
-        "resume": "Back to the session"
+        "putNew": "Make a new routine"
       },
       "session": {
         "label": "the session",
