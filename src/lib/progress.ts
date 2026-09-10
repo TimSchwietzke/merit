@@ -1,5 +1,6 @@
 import { addDays } from '@/lib/date'
-import { weekOf } from '@/lib/schedule'
+import { weekOf, type PlannedRoutine } from '@/lib/schedule'
+import type { PlannedWeek } from '@/lib/streak'
 import { performed, volume, type SessionSets } from '@/lib/training'
 
 /**
@@ -20,6 +21,21 @@ export interface WeekPoint {
   volumeKg: number
   /** Days in the week with at least one performed set. */
   sessions: number
+}
+
+/**
+ * Distinct days in a range with at least one performed set.
+ *
+ * A set: two routines on one day is one day of training, and counting it as two
+ * would let a double day pay for a missed one.
+ */
+function trainedDays(sessions: readonly SessionSets[], from: string, to: string): number {
+  const days = new Set<string>()
+  for (const session of sessions) {
+    if (session.date < from || session.date > to) continue
+    if (performed(session.sets).length > 0) days.add(session.date)
+  }
+  return days.size
 }
 
 /**
@@ -45,7 +61,7 @@ export function weeklyVolume(
     points.push({
       week,
       volumeKg: inWeek.reduce((sum, session) => sum + volume(session.sets), 0),
-      sessions: inWeek.filter((session) => performed(session.sets).length > 0).length,
+      sessions: trainedDays(sessions, week, end),
     })
   }
 
@@ -67,4 +83,38 @@ export function trend(points: readonly WeekPoint[]): number | null {
   const base = earlier.reduce((sum, point) => sum + point.volumeKg, 0) / earlier.length
   if (base === 0) return null
   return (points[points.length - 1].volumeKg - base) / base
+}
+
+
+/**
+ * Each of the last `weeks` weeks with what the plan asked for and what happened,
+ * oldest first — what `weeklyStreak` and `weekCells` read.
+ *
+ * The plan is the weekly pattern, so what it asks for is the same every week:
+ * one session per routine per weekday it names. Per-date exceptions move a
+ * session between days rather than adding or removing one, so they do not
+ * change the count and are deliberately not consulted here.
+ *
+ * `trained` counts *days* with performed sets, not sessions: two routines on
+ * one day is one day of training, and counting it as two would let a double day
+ * pay for a missed one.
+ */
+export function plannedWeeks(
+  sessions: readonly SessionSets[],
+  routines: readonly PlannedRoutine[],
+  today: string,
+  weeks = 12,
+): PlannedWeek[] {
+  const planned = routines.reduce((sum, routine) => sum + routine.weekdays.length, 0)
+  const thisMonday = weekOf(today)[0]
+
+  return Array.from({ length: weeks }, (_, index) => {
+    const week = addDays(thisMonday, -7 * (weeks - 1 - index))
+    const end = addDays(week, 6)
+    return {
+      week,
+      planned,
+      trained: trainedDays(sessions, week, end),
+    }
+  })
 }

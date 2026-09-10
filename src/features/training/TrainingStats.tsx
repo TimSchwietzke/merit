@@ -2,8 +2,11 @@ import { useTranslation } from 'react-i18next'
 import { Area, AreaChart, ResponsiveContainer } from 'recharts'
 
 import { Panel } from '@/components/Panel'
+import { Streak } from '@/components/Streak'
 import { formatNumber } from '@/lib/format'
-import { trend, weeklyVolume, type WeekPoint } from '@/lib/progress'
+import { plannedWeeks, trend, weeklyVolume, type WeekPoint } from '@/lib/progress'
+import type { PlannedRoutine } from '@/lib/schedule'
+import { weekCells, weeklyStreak } from '@/lib/streak'
 import type { SessionSets } from '@/lib/training'
 
 /**
@@ -22,22 +25,26 @@ import type { SessionSets } from '@/lib/training'
  */
 export function TrainingStats({
   history,
+  routines,
   today,
   locale,
 }: {
   history: SessionSets[]
+  routines: PlannedRoutine[]
   today: string
   locale: string
 }) {
   const { t } = useTranslation()
   const points = weeklyVolume(history, today, 8)
   const latest = points[points.length - 1]
+  const weeks = plannedWeeks(history, routines, today, 12)
 
   // Nothing logged in two months is not a chart, it is a fact about the
   // account. §10.8: say so in the space it would occupy.
   if (points.every((point) => point.volumeKg === 0)) return null
 
   const change = trend(points)
+  const streak = weeklyStreak(weeks, today)
 
   return (
     <section className="mt-6 grid grid-cols-2 gap-3">
@@ -66,6 +73,24 @@ export function TrainingStats({
         points={points}
         series="sessions"
       />
+
+      {/* Full width beneath the pair: a run of weeks is a long shape, and
+          squeezed into half the column the cells would be narrower than the
+          gaps between them.
+
+          Only once there is a run. A `0` under twelve empty cells is the app
+          opening with a reproach, which is the thing a streak here is not
+          allowed to be. */}
+      {streak > 0 ? (
+        <Panel className="col-span-2 p-4">
+          <Streak
+            label={t('common.streak.training')}
+            count={streak}
+            cells={weekCells(weeks, today, 12)}
+            caption={t('common.streak.weeks', { count: streak })}
+          />
+        </Panel>
+      ) : null}
     </section>
   )
 }

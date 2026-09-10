@@ -7,6 +7,9 @@ import { toast } from 'sonner'
 import { EmptyState } from '@/components/EmptyState'
 import { Progress } from '@/components/Progress'
 import { Panel } from '@/components/Panel'
+import { Streak } from '@/components/Streak'
+import { useLoggedDays } from '@/features/nutrition/useLoggedDays'
+import { dailyStreak, dayCells } from '@/lib/streak'
 import { RowBody, Rows } from '@/components/Rows'
 import { SwipeRow } from '@/components/SwipeRow'
 import { ScreenTitle } from '@/components/ScreenTitle'
@@ -42,6 +45,8 @@ export default function FoodPage() {
   const today = todayKey()
   const date = params.get('date') ?? today
   const { entries, status, remove, restore } = useFoodLog(date)
+  const loggedDays = useLoggedDays(today)
+  const streak = dailyStreak(loggedDays, today)
   const [openRow, setOpenRow] = useState<string | null>(null)
   const { goals } = useGoalHistory()
   const goal = goalOn(goals, date)
@@ -173,6 +178,22 @@ export default function FoodPage() {
           </ul>
         </Panel>
       </section>
+
+      {/* Only once there is a run worth calling one. A `0` under a strip of
+          fourteen empty cells on somebody's first day is the app opening with
+          a reproach. */}
+      {streak > 1 ? (
+        <section className="mt-6">
+          <Panel className="p-4">
+            <Streak
+              label={t('common.streak.nutrition')}
+              count={streak}
+              cells={dayCells(loggedDays, today, 14)}
+              caption={t('common.streak.days', { count: streak })}
+            />
+          </Panel>
+        </section>
+      ) : null}
 
       <section className="mt-8">
         <SectionHead label={t('pages.food.log.label')} />

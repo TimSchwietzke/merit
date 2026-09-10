@@ -25,7 +25,15 @@
     "clearFilters": "clear",
     "filters": "Filters",
     "filtersOpen": "Filters, {{count}} active",
-    "close": "Close"
+    "close": "Close",
+    "streak": {
+      "nutrition": "kept up",
+      "training": "weeks to plan",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "weeks_one": "{{count}} week",
+      "weeks_other": "{{count}} weeks"
+    }
   },
   "auth": {
     "signIn": {

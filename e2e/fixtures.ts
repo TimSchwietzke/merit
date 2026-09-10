@@ -149,17 +149,28 @@ export async function stubBackend(
     },
   ]
 
-  await page.route('**/rest/v1/food_logs*', (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify([
-        { id: 'l1', meal_type: 'breakfast', quantity_g: 180, foods: FOODS[0] },
-        { id: 'l2', meal_type: 'breakfast', quantity_g: 60, foods: FOODS[1] },
-        { id: 'l3', meal_type: 'snack', quantity_g: 120, foods: FOODS[2] },
-      ]),
-    }),
-  )
+  await page.route('**/rest/v1/food_logs*', (route) => {
+    const json = (body: unknown) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) })
+
+    // The consistency mark asks for dates alone over a window; the day view
+    // asks for the portions on one date. Same path, different questions.
+    if (route.request().url().includes('select=date')) {
+      const day = (back: number) => {
+        const d = new Date()
+        d.setDate(d.getDate() - back)
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      }
+      // Nine unbroken days, then a gap, so the strip has both states in it.
+      return json([...Array(9).keys(), 11, 12].map((back) => ({ date: day(back) })))
+    }
+
+    return json([
+      { id: 'l1', meal_type: 'breakfast', quantity_g: 180, foods: FOODS[0] },
+      { id: 'l2', meal_type: 'breakfast', quantity_g: 60, foods: FOODS[1] },
+      { id: 'l3', meal_type: 'snack', quantity_g: 120, foods: FOODS[2] },
+    ])
+  })
 
   // The catalogue answers three different questions on the same path, so the
   // stub reads the request rather than returning the same list to all of them:

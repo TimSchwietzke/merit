@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router-dom'
 
+import { LayoutDashboard } from 'lucide-react'
+
 import { NAV_ITEMS } from '@/components/shell/nav-items'
 import { Wordmark } from '@/components/Wordmark'
 import { cn } from '@/lib/utils'
@@ -42,7 +44,7 @@ export function Nav() {
         className="hidden lg:sticky lg:top-0 lg:flex lg:h-[100dvh] lg:w-60 lg:shrink-0 lg:flex-col lg:gap-1 lg:border-r lg:border-line lg:bg-surface lg:px-3 lg:py-5"
       >
         <Wordmark className="mb-4 px-2.5" />
-        {[{ to: '/', labelKey: 'nav.dashboard' as const, Icon: null }, ...NAV_ITEMS].map(
+        {[{ to: '/', labelKey: 'nav.dashboard' as const, Icon: LayoutDashboard }, ...NAV_ITEMS].map(
           ({ to, labelKey, Icon }) => (
             <NavLink
               key={to}
@@ -57,16 +59,7 @@ export function Nav() {
                 )
               }
             >
-              {Icon ? (
-                <Icon size={15} strokeWidth={1.75} className="shrink-0" aria-hidden />
-              ) : (
-                <span
-                  aria-hidden
-                  className="flex size-[15px] shrink-0 items-center justify-center font-mono text-2xs"
-                >
-                  m
-                </span>
-              )}
+              <Icon size={15} strokeWidth={1.75} className="shrink-0" aria-hidden />
               {t(labelKey)}
             </NavLink>
           ),
@@ -92,11 +85,15 @@ export function Nav() {
           ))}
 
           {/* The centre. It breaks the row's rhythm on purpose: a disc rather
-              than a cell, lifted above the bar's own edge, carrying the
-              wordmark instead of an icon. It is the only destination here that
-              is not one of the four, and it is the only one shaped like that.
-              Moss when it is where you are — the brand's own colour, which no
-              domain owns. */}
+              than a cell, lifted above the bar's own edge. It is the only
+              destination here that is not one of the four, and it is the only
+              one shaped like that. Moss when it is where you are — the brand's
+              own colour, which no domain owns.
+
+              A drawn icon, not the wordmark's `m`: §17 rules out a text
+              character standing in for an icon, and it was doing exactly that.
+              Four panes in one frame is also what the screen is — the four
+              essentials read together. */}
           <li className="shrink-0 px-1">
             <NavLink
               to="/"
@@ -108,15 +105,14 @@ export function Nav() {
                   // the bar rather than sitting on top of it, which is what
                   // makes it read as attached instead of dropped there.
                   '-mt-5 flex size-14 items-center justify-center rounded-full border-4 border-bg',
-                  'font-mono text-lg lowercase transition-colors [transition-duration:140ms]',
-                  'active:[transition-duration:0ms]',
+                  'transition-colors [transition-duration:140ms] active:[transition-duration:0ms]',
                   isActive
                     ? 'bg-[var(--merit-moss)] font-medium text-bg'
                     : 'bg-surface-2 text-ink ring-1 ring-line active:bg-surface',
                 )
               }
             >
-              <span aria-hidden>m</span>
+              <LayoutDashboard size={22} strokeWidth={1.75} aria-hidden />
             </NavLink>
           </li>
 

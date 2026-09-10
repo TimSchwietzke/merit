@@ -28,7 +28,11 @@ import { AVERAGE_WINDOW_DAYS, weightDomain, type WeightPoint } from '@/lib/weigh
  * of keeping the colours it was mounted with.
  */
 const RAW = 'var(--merit-chart-4)'
-const AVERAGE = 'var(--merit-chart-5)'
+// The series that matters wears the domain's colour, not a palette entry: this
+// chart is the whole point of the weight screen, and the screen is steel. The
+// raw daily line stays neutral so the two are still told apart by more than
+// hue — 1px with half-opacity dots against 2px solid (§11).
+const AVERAGE = 'var(--merit-accent)'
 const AXIS = 'var(--merit-line-strong)'
 const LABEL = 'var(--merit-ink-faint)'
 

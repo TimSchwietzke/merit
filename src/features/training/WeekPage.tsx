@@ -125,7 +125,7 @@ export default function WeekPage() {
         />
       )}
 
-      <TrainingStats history={history} today={today} locale={locale} />
+      <TrainingStats history={history} routines={planned} today={today} locale={locale} />
 
       <RoutineList
         routines={routines}

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { trend, weeklyVolume } from '@/lib/progress'
+import { plannedWeeks, trend, weeklyVolume } from '@/lib/progress'
 import type { LoggedSet, SessionSets } from '@/lib/training'
 
 const set = (reps: number, weightKg: number, done = true): LoggedSet => ({
@@ -76,5 +76,43 @@ describe('trend', () => {
     expect(trend(weeklyVolume([], TODAY, 1))).toBeNull()
     // Every earlier week empty: a change from nothing has no percentage.
     expect(trend(weeklyVolume([{ date: '2026-09-07', sets: [set(10, 100)] }], TODAY, 3))).toBeNull()
+  })
+})
+
+describe('plannedWeeks', () => {
+  const routines = [
+    { id: 'r1', name: 'Oberkörper', weekdays: [1, 4] },
+    { id: 'r2', name: 'Unterkörper', weekdays: [2] },
+    // Started on demand, so it asks for nothing.
+    { id: 'r3', name: 'Frei', weekdays: [] },
+  ]
+
+  it('asks for one session per routine per weekday it names', () => {
+    const weeks = plannedWeeks([], routines, TODAY, 2)
+    expect(weeks.every((week) => week.planned === 3)).toBe(true)
+  })
+
+  it('counts days trained, not sessions logged', () => {
+    const weeks = plannedWeeks(
+      [
+        { date: '2026-09-07', sets: [set(5, 100)] },
+        { date: '2026-09-07', sets: [set(5, 100)] },
+        { date: '2026-09-09', sets: [set(5, 100)] },
+      ],
+      routines,
+      TODAY,
+      1,
+    )
+    expect(weeks[0].trained).toBe(2)
+  })
+
+  it('does not count a day that only holds planned sets', () => {
+    const weeks = plannedWeeks(
+      [{ date: '2026-09-08', sets: [set(5, 100, false)] }],
+      routines,
+      TODAY,
+      1,
+    )
+    expect(weeks[0].trained).toBe(0)
   })
 })
