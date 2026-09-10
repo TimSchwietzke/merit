@@ -253,6 +253,11 @@ export async function stubBackend(
   // Today's sets and a session a few days back, so the comparison line under
   // each exercise — the reason §10.10 gives for opening this tab — has
   // something to compare against.
+  //
+  // Ending a session is a real write, so the stub remembers it: the sets query
+  // reads `ended_at` back, and the bar has to stay gone across a reload.
+  let endedAt: string | null = null
+
   await page.route('**/rest/v1/workout_sets*', (route) => {
     if (route.request().method() !== 'GET') {
       return route.fulfill({ status: 201, contentType: 'application/json', body: '{}' })
@@ -270,7 +275,7 @@ export async function stubBackend(
       rir,
       done,
       exercise_id: exercise.id,
-      workouts: { date },
+      workouts: { date, ended_at: date === day(0) ? endedAt : null },
       exercises: exercise,
     })
     return route.fulfill({
@@ -367,6 +372,12 @@ export async function stubBackend(
     const url = route.request().url()
     const json = (body: unknown) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) })
+
+    if (route.request().method() === 'PATCH') {
+      const sent = JSON.parse(route.request().postData() ?? '{}')
+      endedAt = sent.ended_at ?? null
+      return json([{ id: 'w1' }])
+    }
 
     // The week screen asks for a range with the sets embedded; everything else
     // wants the one row it just upserted.

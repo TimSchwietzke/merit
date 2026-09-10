@@ -265,3 +265,22 @@ test('a write from one screen refetches for every reader, with no reload', async
   await expect.poll(() => reads - before, { timeout: 5000 }).toBeGreaterThanOrEqual(2)
   await expect(page.locator('[data-session-bar]')).toBeVisible()
 })
+
+test('finishing a session survives a reload', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+  await page.goto('/training')
+  await waitForScreen(page)
+
+  // The fixture leaves sets outstanding, so a session is running.
+  await expect(page.locator('[data-session-bar]')).toBeVisible()
+
+  await page.getByRole('button', { name: 'Einheit anzeigen' }).click()
+  await page.getByRole('button', { name: 'Einheit beenden' }).click()
+  await expect(page.locator('[data-session-bar]')).toBeHidden()
+
+  // It used to be React state, so this brought it straight back.
+  await page.reload()
+  await waitForScreen(page)
+  await expect(page.locator('[data-session-bar]')).toBeHidden()
+})

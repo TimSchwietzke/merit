@@ -169,7 +169,22 @@ export function ExerciseCatalogue({
     <Rows>
       {items.map((exercise) => (
         <Row key={exercise.id} onClick={() => onPick(exercise)}>
-          <span className="min-w-0 flex-1 truncate">{name(exercise)}</span>
+          <span className="min-w-0 flex-1">
+            <span className="block truncate">{name(exercise)}</span>
+            {/* What it works, as words rather than as a drawing. A body per row
+                is ninety paths per row, and this list runs to nine hundred of
+                them — the silhouette belongs where one exercise is being looked
+                at, not where they are being scanned. */}
+            {exercise.primaryMuscles.length > 0 ? (
+              <span className="block truncate font-mono text-2xs text-ink-faint">
+                {exercise.primaryMuscles
+                  .map((muscle) =>
+                    t(`pages.training.muscles.${muscle}` as 'pages.training.muscles.chest'),
+                  )
+                  .join(' · ')}
+              </span>
+            ) : null}
+          </span>
           <span className="shrink-0 font-mono text-2xs text-ink-faint">
             {t(`pages.training.add.equipment.${exercise.equipment}` as 'pages.training.add.equipment.barbell')}
           </span>

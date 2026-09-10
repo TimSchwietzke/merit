@@ -328,6 +328,25 @@
         "against": "{{change}}% gegenüber den Wochen davor",
         "weeks_one": "über {{count}} Woche",
         "weeks_other": "über {{count}} Wochen"
+      },
+      "muscles": {
+        "abdominals": "bauch",
+        "abductors": "abduktoren",
+        "adductors": "adduktoren",
+        "biceps": "bizeps",
+        "calves": "waden",
+        "chest": "brust",
+        "forearms": "unterarme",
+        "glutes": "gesäß",
+        "hamstrings": "beinbeuger",
+        "lats": "latissimus",
+        "lower back": "unterer rücken",
+        "middle back": "mittlerer rücken",
+        "neck": "nacken",
+        "quadriceps": "quadrizeps",
+        "shoulders": "schultern",
+        "traps": "trapez",
+        "triceps": "trizeps"
       }
     },
     "notFound": {

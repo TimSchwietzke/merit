@@ -57,6 +57,10 @@ export interface WorkoutState {
   exercises: Map<string, ExerciseRef>
   /** Earlier days, for the comparison line. */
   history: SessionSets[]
+  /** When this day's session was finished, or null while it is still running. */
+  endedAt: string | null
+  /** Finish the day's session, or take it back up again. */
+  setEnded: (ended: boolean) => Promise<boolean>
   status: 'loading' | 'ready' | 'error'
   addSet: (set: {
     exerciseId: string
@@ -111,7 +115,7 @@ function subscribe(listener: () => void) {
 }
 
 const SELECT = `id, set_number, reps, weight_kg, rir, done, exercise_id,
-  workouts!inner (date),
+  workouts!inner (date, ended_at),
   exercises!inner (id, name_en, name_de, muscle_group, equipment,
                    primary_muscles, secondary_muscles)`
 
@@ -123,7 +127,7 @@ type Row = {
   rir: number | null
   done: boolean
   exercise_id: string
-  workouts: { date: string }
+  workouts: { date: string; ended_at: string | null }
   exercises: {
     id: string
     name_en: string
@@ -186,7 +190,10 @@ export function useWorkout(date: string): WorkoutState {
   const current = rows?.date === date ? rows.rows : null
   const status: WorkoutState['status'] = failed ? 'error' : current === null ? 'loading' : 'ready'
 
-  const sets = (current ?? []).filter((row) => row.workouts.date === date).map(toSet)
+  const today = (current ?? []).filter((row) => row.workouts.date === date)
+  const sets = today.map(toSet)
+  // Every set of a day hangs off one workout, so the first row answers for it.
+  const endedAt = today[0]?.workouts.ended_at ?? null
 
   const exercises = new Map<string, ExerciseRef>()
   for (const row of current ?? []) {
@@ -282,6 +289,28 @@ export function useWorkout(date: string): WorkoutState {
    * afterwards. An exercise never done before starts at zero, which is a real
    * weight and the right one for a bodyweight movement.
    */
+  /**
+   * Finish the day's session, or take it back up.
+   *
+   * A write, not a flag: the button used to set React state, so a reload
+   * recomputed "running" from the still-unlogged sets and the bar came back —
+   * which read as the button doing nothing.
+   */
+  const setEnded = useCallback(
+    async (ended: boolean) => {
+      if (!userId) return false
+      const { error } = await supabase
+        .from('workouts')
+        .update({ ended_at: ended ? new Date().toISOString() : null })
+        .eq('user_id', userId)
+        .eq('date', date)
+      if (error) return false
+      published()
+      return true
+    },
+    [userId, date],
+  )
+
   const startRoutine = useCallback(
     async (plan: {
       routineId: string
@@ -371,5 +400,16 @@ export function useWorkout(date: string): WorkoutState {
     [userId],
   )
 
-  return { sets, exercises, history, status, addSet, updateSet, removeSet, startRoutine }
+  return {
+    sets,
+    exercises,
+    history,
+    status,
+    endedAt,
+    setEnded,
+    addSet,
+    updateSet,
+    removeSet,
+    startRoutine,
+  }
 }

@@ -7,6 +7,7 @@ import { toast } from 'sonner'
 import { EmptyState } from '@/components/EmptyState'
 import { ScreenTitle } from '@/components/ScreenTitle'
 import { SwipeRow } from '@/components/SwipeRow'
+import { ExerciseFigure } from '@/features/training/ExerciseFigure'
 import { Button } from '@/components/ui/button'
 import { useExercise } from '@/features/training/useExercise'
 import { useActiveSession } from '@/features/training/useActiveSession'
@@ -231,13 +232,21 @@ function Exercise({
           const first = firstOutstandingOf(sets, exercise!.id)
           if (first) onChoose(first.id)
         }}
-        className="flex w-full items-baseline justify-between gap-4 border-b border-line
+        className="flex w-full items-center justify-between gap-4 border-b border-line
                    bg-surface-2 px-4 py-3 text-left"
       >
-        <h2 className="min-w-0 truncate text-base font-medium text-ink">{name}</h2>
-        <span className="shrink-0 font-mono text-2xs text-ink-faint">
-          {t('pages.training.volume', { volume: formatNumber(volume(sets), locale, 0) })}
+        <span className="min-w-0 flex-1">
+          <h2 className="truncate text-base font-medium text-ink">{name}</h2>
+          <span className="mt-0.5 block font-mono text-2xs text-ink-faint">
+            {t('pages.training.volume', { volume: formatNumber(volume(sets), locale, 0) })}
+          </span>
         </span>
+        {/* Here rather than in the catalogue: a session holds four or five
+            exercises, and this is where somebody is looking at one of them
+            rather than scanning nine hundred. */}
+        {exercise ? (
+          <ExerciseFigure exercise={exercise} label={name} className="h-14 shrink-0" />
+        ) : null}
       </button>
 
       {/* The columns are named once, above the rows, instead of a label beside
