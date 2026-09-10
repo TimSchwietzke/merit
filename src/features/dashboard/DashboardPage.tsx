@@ -8,10 +8,11 @@ import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
 import { Button } from '@/components/ui/button'
 import { CalorieRing } from '@/features/dashboard/CalorieRing'
+import { Cells } from '@/components/Cells'
 import { DomainCard } from '@/features/dashboard/DomainCard'
 import { useGoalHistory } from '@/features/goals/useGoalHistory'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
-import { useLoggedDays } from '@/features/nutrition/useLoggedDays'
+import { useFoodHistory } from '@/features/nutrition/useFoodHistory'
 import { plannable, useRoutines } from '@/features/routines/useRoutines'
 import { useWorkout } from '@/features/training/useWorkout'
 import { useWeightLogs } from '@/features/weight/useWeightLogs'
@@ -204,7 +205,7 @@ function WeightCard({ locale }: { locale: string }) {
 function StreakCards() {
   const { t } = useTranslation()
   const today = todayKey()
-  const loggedDays = useLoggedDays(today)
+  const { days: loggedDays } = useFoodHistory(today)
   const { routines } = useRoutines()
   const { history } = useWorkout(today)
 
@@ -239,17 +240,6 @@ function StreakCards() {
         </DomainCard>
       ) : null}
     </>
-  )
-}
-
-/** The mosaic, sized for a half-width card rather than a full-width panel. */
-function Cells({ cells }: { cells: boolean[] }) {
-  return (
-    <span aria-hidden className="flex items-end gap-[2px]">
-      {cells.map((met, index) => (
-        <span key={index} className={`h-3 flex-1 rounded-sm ${met ? 'bg-accent' : 'bg-line'}`} />
-      ))}
-    </span>
   )
 }
 

@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
-import { ArrowUpDown, ChevronLeft, ChevronRight, Plus } from 'lucide-react'
+import { ArrowUpDown, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/EmptyState'
 import { Progress } from '@/components/Progress'
 import { Row, RowBody, Rows } from '@/components/Rows'
 import { SwipeRow } from '@/components/SwipeRow'
+import { WeekStrip } from '@/components/WeekStrip'
 import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
 import { Button } from '@/components/ui/button'
@@ -19,7 +20,7 @@ import { TrainingStats } from '@/features/training/TrainingStats'
 import { useSchedule, type DaySession, type ScheduleDay } from '@/features/training/useSchedule'
 import { useWorkout } from '@/features/training/useWorkout'
 import { addDays, todayKey } from '@/lib/date'
-import { formatDayLong, formatDayRange, formatDayShort, weekdayLabel } from '@/lib/format'
+import { formatDayShort, weekdayLabel } from '@/lib/format'
 import { addTo, isPast, swap, weekOf } from '@/lib/schedule'
 import { isoWeekday } from '@/lib/training'
 
@@ -84,11 +85,18 @@ export default function WeekPage() {
       <ScreenTitle>{t('nav.training')}</ScreenTitle>
 
       <WeekStrip
-        days={days}
         week={week}
         today={today}
         selected={selected}
         locale={locale}
+        label={t('pages.training.week.label')}
+        // A day is `done` once anything on it has been logged, `partial` while
+        // it is only planned, and unmarked when it holds no session at all.
+        markOf={(date) => {
+          const day = days.find((entry) => entry.date === date)
+          if (!day || day.sessions.length === 0) return 'none'
+          return day.sessions.some((session) => session.loggedSets > 0) ? 'done' : 'partial'
+        }}
         onSelect={setSelected}
         direction={direction}
         onShift={(by) => {
@@ -175,122 +183,6 @@ interface Marked {
   routineId: string
   date: string
   name: string
-}
-
-/**
- * What a day's tile says about it, by fill density rather than by hue (§10.10).
- *
- * A rest day carries nothing rather than a `line` dash. The heatmap needs its
- * empty state drawn because a grid with holes in it stops being a grid; a week
- * of seven does not, and a row of faint grey marks with two green ones in it
- * reads as five things you have not done.
- */
-function markOf(day: ScheduleDay | undefined): string {
-  if (!day || day.sessions.length === 0) return 'bg-transparent'
-  return day.sessions.some((session) => session.loggedSets > 0) ? 'bg-accent' : 'bg-accent/55'
-}
-
-function WeekStrip({
-  days,
-  week,
-  today,
-  selected,
-  locale,
-  onSelect,
-  onShift,
-  direction,
-}: {
-  days: ScheduleDay[]
-  week: string[]
-  today: string
-  selected: string
-  locale: string
-  onSelect: (date: string) => void
-  onShift: (by: -1 | 1) => void
-  /** Which way the last week change went, so the row can arrive from there. */
-  direction: -1 | 0 | 1
-}) {
-  const { t } = useTranslation()
-
-  const range = formatDayRange(week[0], week[6], locale)
-
-  // A plane lifted off the ground by fill, with no border doing the work. On
-  // the dark ground the step is the structure; the week is reference and reads
-  // as one block you consult, rather than as seven controls loose on the page.
-  return (
-    <div className="rounded-lg bg-surface p-2">
-      <div className="flex items-center justify-between gap-2">
-        <Button variant="bare" size="icon" aria-label={t('pages.training.week.prev')} onClick={() => onShift(-1)}>
-          <ChevronLeft />
-        </Button>
-        <p className="font-mono text-2xs text-ink-faint">{range}</p>
-        <Button variant="bare" size="icon" aria-label={t('pages.training.week.next')} onClick={() => onShift(1)}>
-          <ChevronRight />
-        </Button>
-      </div>
-
-      {/* A radio group, not seven buttons: exactly one day is being looked at,
-          and arrow keys should walk the week (§10.7).
-
-          Keyed on the week so a change of week remounts the row and it arrives
-          from the side it came from — the chevron says which way, and the row
-          agrees with it. */}
-      <div
-        key={week[0]}
-        role="radiogroup"
-        aria-label={t('pages.training.week.label')}
-        className={`-mx-1 mt-1 flex gap-0.5 ${direction === 0 ? '' : direction > 0 ? 'merit-left' : 'merit-right'}`}
-      >
-        {week.map((date) => {
-          const day = days.find((entry) => entry.date === date)
-          const isSelected = date === selected
-          const isToday = date === today
-
-          return (
-            <button
-              key={date}
-              type="button"
-              role="radio"
-              aria-checked={isSelected}
-              // The visible text is `Mo` above `07`, which a screen reader
-              // reads as "Mo07". The date is said properly instead.
-              aria-label={formatDayLong(date, locale)}
-              onClick={() => onSelect(date)}
-              className={`flex min-h-11 flex-1 flex-col items-center gap-1 rounded-md border px-1 pb-2 pt-1.5
-                          transition-colors [transition-duration:140ms] active:[transition-duration:0ms]
-                          ${
-                            isSelected
-                              ? 'border-accent bg-accent-soft'
-                              : isToday
-                                ? 'border-line-strong active:bg-surface-2'
-                                : 'border-transparent active:bg-surface-2'
-                          }`}
-            >
-              <span
-                className={`font-mono text-2xs ${
-                  isToday ? 'text-accent' : isSelected ? 'text-ink-muted' : 'text-ink-faint'
-                }`}
-              >
-                {weekdayLabel(isoWeekday(date), locale)}
-              </span>
-              <span
-                className={`font-mono text-sm tabular-nums ${
-                  isSelected ? 'font-medium text-ink' : 'text-ink-muted'
-                }`}
-              >
-                {date.slice(8)}
-              </span>
-              {/* The mosaic cell from the house style, one per day. */}
-              {/* Fixed width, not the tile's: on a desktop column the tile is
-                  100px wide and a mark that fills it stops being a mark and
-                  becomes an underline. */}
-              <span aria-hidden className={`h-1 w-6 rounded-sm ${markOf(day)}`} />
-            </button>
-          )
-        })}
-      </div>
-    </div>
-  )
 }
 
 /**

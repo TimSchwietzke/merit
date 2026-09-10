@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import { Area, AreaChart, ResponsiveContainer } from 'recharts'
 
 import { Panel } from '@/components/Panel'
+import { StatCard } from '@/components/StatCard'
 import { Streak } from '@/components/Streak'
 import { formatNumber } from '@/lib/format'
-import { plannedWeeks, trend, weeklyVolume, type WeekPoint } from '@/lib/progress'
+import { plannedWeeks, trend, weeklyVolume } from '@/lib/progress'
 import type { PlannedRoutine } from '@/lib/schedule'
 import { weekCells, weeklyStreak } from '@/lib/streak'
 import type { SessionSets } from '@/lib/training'
@@ -48,7 +48,8 @@ export function TrainingStats({
 
   return (
     <section className="mt-6 grid grid-cols-2 gap-3">
-      <Stat
+      <StatCard
+        id="stat-volume"
         label={t('pages.training.stats.volume')}
         value={formatNumber(latest.volumeKg / 1000, locale, 1)}
         unit="t"
@@ -65,7 +66,8 @@ export function TrainingStats({
         points={points}
         series="volumeKg"
       />
-      <Stat
+      <StatCard
+        id="stat-sessions"
         label={t('pages.training.stats.sessions')}
         value={String(latest.sessions)}
         unit={t('pages.training.stats.perWeek')}
@@ -92,63 +94,5 @@ export function TrainingStats({
         </Panel>
       ) : null}
     </section>
-  )
-}
-
-function Stat({
-  label,
-  value,
-  unit,
-  note,
-  points,
-  series,
-}: {
-  label: string
-  value: string
-  unit: string
-  note?: string
-  points: WeekPoint[]
-  series: 'volumeKg' | 'sessions'
-}) {
-  // Unique per card: two gradients with one id means the second chart paints
-  // with the first one's fill.
-  const fill = `fill-${series}`
-
-  return (
-    <Panel className="flex flex-col gap-3 p-4">
-      <p className="font-mono text-2xs text-ink-faint">{label}</p>
-
-      <p className="font-mono tabular-nums leading-none">
-        <span className="text-3xl font-medium text-ink">{value}</span>
-        <span className="ml-1 text-2xs text-ink-faint">{unit}</span>
-      </p>
-
-      {/* `aria-hidden`: the figure above already says everything this shape
-          says, and a screen reader reading eight unlabelled numbers is worse
-          than silence. */}
-      <div aria-hidden className="-mx-1 h-12">
-        <ResponsiveContainer width="100%" height="100%">
-          <AreaChart data={points} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
-            <defs>
-              <linearGradient id={fill} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="var(--merit-accent)" stopOpacity={0.35} />
-                <stop offset="100%" stopColor="var(--merit-accent)" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <Area
-              type="monotone"
-              dataKey={series}
-              stroke="var(--merit-accent)"
-              strokeWidth={2}
-              fill={`url(#${fill})`}
-              isAnimationActive={false}
-              dot={false}
-            />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
-      {note ? <p className="font-mono text-2xs text-ink-faint">{note}</p> : null}
-    </Panel>
   )
 }

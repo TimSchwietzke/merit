@@ -33,6 +33,11 @@
       "days_other": "{{count}} Tage",
       "weeks_one": "{{count}} Woche",
       "weeks_other": "{{count}} Wochen"
+    },
+    "week": {
+      "previous": "Woche zurück",
+      "next": "Woche vor",
+      "label": "diese woche"
     }
   },
   "auth": {
@@ -181,6 +186,15 @@
         "save": "Änderungen speichern",
         "saving": "Wird gespeichert …",
         "delete": "Aus dem Tag entfernen"
+      },
+      "stats": {
+        "average": "schnitt",
+        "onTarget": "im ziel",
+        "overDays_one": "über {{count}} Tag",
+        "overDays_other": "über {{count}} Tage",
+        "ofLogged_one": "von {{count}} erfasst",
+        "ofLogged_other": "von {{count}} erfasst",
+        "band": "innerhalb von 20 % des Ziels"
       }
     },
     "training": {
@@ -248,8 +262,6 @@
       },
       "week": {
         "label": "diese woche",
-        "prev": "Woche zurück",
-        "next": "Woche vor",
         "today": "heute",
         "nothing": "nichts geplant",
         "put": "Routine auf diesen Tag legen",
@@ -369,6 +381,13 @@
         "empty": "noch nichts eingetragen",
         "editing": "wird bearbeitet",
         "emptyRange": "in diesem Zeitraum nichts eingetragen"
+      },
+      "stats": {
+        "mean": "schnitt",
+        "change": "veränderung",
+        "overDays_one": "über {{count}} Wiegung",
+        "overDays_other": "über {{count}} Wiegungen",
+        "acrossRange": "erste bis letzte im Zeitraum"
       }
     },
     "goals": {

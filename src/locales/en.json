@@ -33,6 +33,11 @@
       "days_other": "{{count}} days",
       "weeks_one": "{{count}} week",
       "weeks_other": "{{count}} weeks"
+    },
+    "week": {
+      "previous": "Previous week",
+      "next": "Next week",
+      "label": "this week"
     }
   },
   "auth": {
@@ -181,6 +186,15 @@
         "save": "Save changes",
         "saving": "Saving…",
         "delete": "Remove from the day"
+      },
+      "stats": {
+        "average": "average",
+        "onTarget": "on target",
+        "overDays_one": "over {{count}} day",
+        "overDays_other": "over {{count}} days",
+        "ofLogged_one": "of {{count}} logged",
+        "ofLogged_other": "of {{count}} logged",
+        "band": "within 20% of the target"
       }
     },
     "training": {
@@ -248,8 +262,6 @@
       },
       "week": {
         "label": "this week",
-        "prev": "Previous week",
-        "next": "Next week",
         "today": "today",
         "nothing": "nothing planned",
         "put": "Put a routine on this day",
@@ -369,6 +381,13 @@
         "empty": "nothing logged yet",
         "editing": "editing",
         "emptyRange": "nothing logged in this range"
+      },
+      "stats": {
+        "mean": "average",
+        "change": "change",
+        "overDays_one": "over {{count}} weigh-in",
+        "overDays_other": "over {{count}} weigh-ins",
+        "acrossRange": "first to last in this range"
       }
     },
     "goals": {

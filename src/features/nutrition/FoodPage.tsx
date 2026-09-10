@@ -1,14 +1,18 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/EmptyState'
-import { Progress } from '@/components/Progress'
 import { Panel } from '@/components/Panel'
 import { Streak } from '@/components/Streak'
-import { useLoggedDays } from '@/features/nutrition/useLoggedDays'
+import { Cells } from '@/components/Cells'
+import { StatCard } from '@/components/StatCard'
+import { WeekStrip } from '@/components/WeekStrip'
+import { CalorieRing } from '@/features/dashboard/CalorieRing'
+import { useFoodHistory } from '@/features/nutrition/useFoodHistory'
+import { averageKcal, daysOnTarget, kcalSeries } from '@/lib/nutrition-progress'
+import { weekOf } from '@/lib/schedule'
 import { dailyStreak, dayCells } from '@/lib/streak'
 import { RowBody, Rows } from '@/components/Rows'
 import { SwipeRow } from '@/components/SwipeRow'
@@ -18,9 +22,9 @@ import { Value } from '@/components/Value'
 import { Button } from '@/components/ui/button'
 import { useGoalHistory } from '@/features/goals/useGoalHistory'
 import { useFoodLog, type LoggedFood } from '@/features/nutrition/useFoodLog'
-import { goalOn, progress } from '@/lib/goals'
+import { goalOn } from '@/lib/goals'
 import { addDays, todayKey } from '@/lib/date'
-import { formatDayLong, formatNumber } from '@/lib/format'
+import { formatNumber } from '@/lib/format'
 import {
   isComplete,
   LABEL_ORDER,
@@ -45,11 +49,25 @@ export default function FoodPage() {
   const today = todayKey()
   const date = params.get('date') ?? today
   const { entries, status, remove, restore } = useFoodLog(date)
-  const loggedDays = useLoggedDays(today)
+  const { days: loggedDays, totals: history } = useFoodHistory(today)
   const streak = dailyStreak(loggedDays, today)
   const [openRow, setOpenRow] = useState<string | null>(null)
   const { goals } = useGoalHistory()
   const goal = goalOn(goals, date)
+
+  const average = averageKcal(history, today, 7)
+  const onTarget = daysOnTarget(history, goal?.kcal ?? 0, today, 14)
+  // Two weeks, not four: twenty-eight cells across half a column are four
+  // pixels each and read as a barcode. One cell per day, filled where the day
+  // landed inside the band and empty where it did not or was never logged —
+  // the same mosaic as the run below it, so the two are one vocabulary.
+  const bandCells = kcalSeries(history, today, 14).map(
+    (day) =>
+      day.kcal !== null &&
+      goal !== null &&
+      day.kcal >= goal.kcal * 0.8 &&
+      day.kcal <= goal.kcal * 1.2,
+  )
 
   const toPortion = (entry: LoggedFood): Portion => ({
     nutrients: entry.food.nutrients,
@@ -58,6 +76,8 @@ export default function FoodPage() {
   const totals = sumPortions(entries.map(toPortion))
 
   const goto = (next: string) => setParams(next === today ? {} : { date: next })
+  // Which way the last week change went, so the strip arrives from that side.
+  const [direction, setDirection] = useState<-1 | 0 | 1>(0)
 
   async function onRemove(entry: LoggedFood) {
     if (!(await remove(entry.id))) return
@@ -77,67 +97,56 @@ export default function FoodPage() {
     <>
       <ScreenTitle>{t('nav.food')}</ScreenTitle>
 
-      {/* The day is the screen's subject, so it is the first thing on it. Next
-          is disabled on today: there is nothing to log for tomorrow. */}
-      <div className="flex items-center justify-between gap-2">
-        <Button variant="bare" size="icon" aria-label={t('pages.food.day.previous')} onClick={() => goto(addDays(date, -1))}>
-          <ChevronLeft />
-        </Button>
-        <p className="min-w-0 truncate text-center font-mono text-2xs text-ink">
-          {date === today ? t('common.today') : formatDayLong(date, locale)}
-        </p>
-        <Button
-          variant="bare"
-          size="icon"
-          aria-label={t('pages.food.day.next')}
-          disabled={date >= today}
-          onClick={() => goto(addDays(date, 1))}
-        >
-          <ChevronRight />
-        </Button>
-      </div>
+      {/* The same strip training carries, in moss. A pair of chevrons around
+          a date said which day you were on and nothing else; seven tiles say
+          which days you logged as well, and they are the same control on both
+          screens rather than two things to learn. */}
+      <WeekStrip
+        week={weekOf(date)}
+        today={today}
+        selected={date}
+        locale={locale}
+        label={t('common.week.label')}
+        // Logged or not. There is no half state here: a day either has food on
+        // it or it does not.
+        markOf={(day) => (loggedDays.has(day) ? 'done' : 'none')}
+        onSelect={(day) => goto(day > today ? today : day)}
+        direction={direction}
+        onShift={(by) => {
+          setDirection(by)
+          const next = addDays(date, by * 7)
+          goto(next > today ? today : next)
+        }}
+      />
 
       <section className="mt-6">
         <SectionHead label={t('pages.food.totals.label')} />
-        <Panel className="px-4 py-3.5">
-          <Value n={formatNumber(totals.kcal.value, locale, 0)} unit="kcal" size="xl" />
+        <Panel className="px-4 py-5">
+          {/* The ring, not a figure with a bar under it. A sum against a target
+              is a ring (§10.10), it is nutrition's own motif, and it had ended
+              up only on the dashboard — so the screen the motif belongs to was
+              the one screen not using it. */}
+          {goal ? (
+            <CalorieRing total={totals.kcal.value} target={goal.kcal} locale={locale} />
+          ) : (
+            <Value n={formatNumber(totals.kcal.value, locale, 0)} unit="kcal" size="xl" />
+          )}
 
-          {/* A number with a comparison, never a bare figure (§14). Without a
-              target there is nothing to compare against, so the line says how
-              to get one rather than pretending the day is complete. */}
-          <div className="mt-3">
-            {goal ? (
-              <Progress
-                total={totals.kcal.value}
-                target={goal.kcal}
-                ariaLabel={t('pages.food.totals.ariaCalories')}
-                label={
-                  <>
-                    <span className="text-ink">{formatNumber(totals.kcal.value, locale, 0)}</span> /{' '}
-                    {formatNumber(goal.kcal, locale, 0)} kcal ·{' '}
-                    {progress(totals.kcal.value, goal.kcal).over > 0 ? (
-                      <span className="font-medium text-ink">
-                        {t('pages.food.totals.over', {
-                          over: formatNumber(totals.kcal.value - goal.kcal, locale, 0),
-                        })}
-                      </span>
-                    ) : (
-                      t('pages.food.totals.left', {
-                        left: formatNumber(goal.kcal - totals.kcal.value, locale, 0),
-                      })
-                    )}
-                  </>
-                }
-              />
-            ) : (
+          {/* Without a target there is nothing to compare against, so the line
+              says how to get one rather than pretending the day is complete.
+              With one, the ring above has already said the figure, the target
+              and what is left — repeating it as a bar underneath is the screen
+              saying the same number twice. */}
+          {goal ? null : (
+            <div className="mt-4">
               <Link
                 to="/goals"
                 className="inline-flex min-h-11 items-center font-mono text-2xs text-accent underline decoration-1 underline-offset-2"
               >
                 {t('pages.food.totals.noTarget')} →
               </Link>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* EU label order, so the screen reads like the packaging (§10.10).
               No bars yet — a bar needs a target, and targets are their own
@@ -178,6 +187,29 @@ export default function FoodPage() {
           </ul>
         </Panel>
       </section>
+
+      {goal ? (
+        <section className="mt-6 grid grid-cols-2 gap-3">
+          <StatCard
+            id="stat-kcal"
+            label={t('pages.food.stats.average')}
+            value={average === null ? '—' : formatNumber(average, locale, 0)}
+            unit="kcal"
+            note={t('pages.food.stats.overDays', { count: 7 })}
+            points={kcalSeries(history, today, 14)}
+            series="kcal"
+          />
+          <StatCard
+            id="stat-onTarget"
+            label={t('pages.food.stats.onTarget')}
+            value={String(onTarget.met)}
+            unit={t('pages.food.stats.ofLogged', { count: onTarget.logged })}
+            note={t('pages.food.stats.band')}
+          >
+            <Cells cells={bandCells} />
+          </StatCard>
+        </section>
+      ) : null}
 
       {/* Only once there is a run worth calling one. A `0` under a strip of
           fourteen empty cells on somebody's first day is the app opening with

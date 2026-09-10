@@ -153,16 +153,24 @@ export async function stubBackend(
     const json = (body: unknown) =>
       route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) })
 
-    // The consistency mark asks for dates alone over a window; the day view
-    // asks for the portions on one date. Same path, different questions.
-    if (route.request().url().includes('select=date')) {
+    // The history asks for a window of days; the day view asks for the
+    // portions on one date. Same path, different questions.
+    if (route.request().url().includes('date=gte')) {
       const day = (back: number) => {
         const d = new Date()
         d.setDate(d.getDate() - back)
         return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
       }
       // Nine unbroken days, then a gap, so the strip has both states in it.
-      return json([...Array(9).keys(), 11, 12].map((back) => ({ date: day(back) })))
+      // The kcal vary either side of the 2100 target so the band count is not
+      // all-or-nothing.
+      return json(
+        [...Array(9).keys(), 11, 12].map((back) => ({
+          date: day(back),
+          quantity_g: 1000,
+          foods: { kcal_100g: back % 3 === 0 ? 150 : 210 },
+        })),
+      )
     }
 
     return json([
