@@ -51,7 +51,7 @@ for (const theme of ['light', 'dark'] as const) {
 
   test(`${theme}: the account value is ink, not accent`, async ({ page }) => {
     await stubBackend(page, { theme, locale: 'de' })
-    await page.goto('/more')
+    await page.goto('/account')
     const colour = await page
       .getByText('harness@merit.test')
       .evaluate((el) => getComputedStyle(el).color)
@@ -85,7 +85,7 @@ test('no horizontal scroll at any width, in German', async ({ page }) => {
   // as well — and it leaves the time budget to actually wait for the screen to
   // finish rendering. Measuring straight after `goto` measures the skeleton,
   // which is how a 544px-wide table got past this probe.
-  for (const path of ['/', '/food', '/food/add', '/training', '/training/add', '/training/routines', '/more', '/weight', '/goals']) {
+  for (const path of ['/', '/food', '/food/add', '/training', '/training/add', '/training/routines', '/cardio', '/account', '/weight', '/goals']) {
     await page.setViewportSize({ width: 375, height: 800 })
     await page.goto(path)
     await waitForScreen(page)
@@ -108,7 +108,7 @@ test('page gutters never exceed 24px, and the column caps at 860px', async ({ pa
   await stubBackend(page, { theme: 'light', locale: 'de' })
   for (const width of [1920, 1440, 1024, 768, 375]) {
     await page.setViewportSize({ width, height: 800 })
-    await page.goto('/more')
+    await page.goto('/account')
     const box = await page.locator('main').evaluate((el) => {
       const s = getComputedStyle(el)
       return { left: s.paddingLeft, right: s.paddingRight, w: el.getBoundingClientRect().width }
@@ -137,7 +137,13 @@ test('every touch target clears 44px at 375px, on every screen', async ({ page }
           .filter(({ r }) => r.width > 0 && (r.height < 44 || r.width < 44))
           .map(
             ({ el, r }) =>
-              `${el.tagName.toLowerCase()} "${(el.textContent ?? '').trim().slice(0, 24)}" ${Math.round(r.width)}x${Math.round(r.height)}`,
+              // The label and the classes as well as the text: an icon-only
+              // control reports as `button ""`, which names nothing and sends
+              // whoever reads this failure hunting for it by hand.
+              `${el.tagName.toLowerCase()} "${(el.textContent ?? '').trim().slice(0, 20)}"` +
+              `${el.getAttribute('aria-label') ? ` [${el.getAttribute('aria-label')}]` : ''}` +
+              ` .${(el.className.toString().trim().split(/\s+/)[0] ?? '')}` +
+              ` ${r.width.toFixed(1)}x${r.height.toFixed(1)}`,
           ),
       )
       offenders.push(...small.map((s) => `${locale} ${route.path}: ${s}`))

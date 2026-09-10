@@ -4,21 +4,21 @@ import { pathSegments, screenLabelKey } from '@/components/shell/route-path'
 
 describe('pathSegments', () => {
   it('starts every path at the app and links every segment but the last', () => {
-    const segments = pathSegments('/weight')
+    const segments = pathSegments('/goals')
     expect(segments.map((segment) => segment.labelKey)).toEqual([
       'app.name',
-      'nav.more',
-      'nav.weight',
+      'nav.account',
+      'nav.goals',
     ])
     expect(segments.slice(0, -1).every((segment) => segment.to)).toBe(true)
     expect(segments[segments.length - 1].to).toBeUndefined()
   })
 
   it('marks the day-scoped screens as day-scoped', () => {
-    for (const path of ['/', '/food', '/training']) {
+    for (const path of ['/', '/food', '/training', '/weight']) {
       expect(pathSegments(path).at(-1)?.labelKey).toBe('common.today')
     }
-    expect(pathSegments('/more').at(-1)?.labelKey).toBe('nav.more')
+    expect(pathSegments('/account').at(-1)?.labelKey).toBe('nav.account')
   })
 
   it('falls back to not-found for an address that does not exist', () => {
@@ -36,10 +36,10 @@ describe('screenLabelKey', () => {
   })
 
   it('names a nested screen after itself, not after the section above it', () => {
-    // `/weight` hangs under `more`; below `lg` the header has room for one
+    // `/goals` hangs under the account; below `lg` the header has room for one
     // label and it has to be the screen the visitor is looking at.
-    expect(screenLabelKey('/weight')).toBe('nav.weight')
-    expect(screenLabelKey('/more')).toBe('nav.more')
+    expect(screenLabelKey('/goals')).toBe('nav.goals')
+    expect(screenLabelKey('/account')).toBe('nav.account')
   })
 
   it('falls back to the app name rather than to nothing', () => {

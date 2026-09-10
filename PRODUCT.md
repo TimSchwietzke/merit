@@ -39,11 +39,24 @@ what it is:
   no value for is reported as missing — `partial · 3 of 7 foods` — never summed
   as zero. Every competitor quietly rounds absence down to nought, because a
   complete-looking number is easier to sell than a true one.
-- **It never judges a body or a day.** No streak, no flame, no
-  streak-at-risk notification, no per-food score, no "healthy" badge, no
-  congratulation aimed at a body rather than an act. It shows the user their own
-  numbers against their own targets and says nothing about what they should be.
-  This is a fixed product rule, not a stylistic preference.
+- **It never judges a body or a day.** No flame, no streak-at-risk
+  notification, no per-food score, no "healthy" badge, no congratulation aimed
+  at a body rather than an act. It shows the user their own numbers against
+  their own targets and says nothing about what they should be. This is a fixed
+  product rule, not a stylistic preference.
+
+  **A streak is wanted and is not a violation of it.** The owner asked for one
+  for both nutrition and training, and the line is not the count — it is the
+  pressure. A number that says what happened is a fact; a flame, a countdown to
+  losing it, or a notification about it is the app leaning on somebody, and
+  those stay out. The streak is rendered in merit's own idiom — the mosaic strip
+  and a mono line — never as a badge.
+
+  Each domain counts its own behaviour. Nutrition counts days with food logged,
+  because logging *is* the behaviour there. Training counts weeks in which the
+  planned sessions happened, never days: a routine planned for Monday and
+  Thursday cannot have a daily streak, and a correctly-taken rest day must never
+  break anything.
 - **The catalogue is shared and grows itself.** One person adding a product
   gives it to everyone in the group. A ten-person catalogue reaches usable
   coverage in weeks because the people using it are the people filling it.

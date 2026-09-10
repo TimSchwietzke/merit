@@ -6,10 +6,11 @@
     "label": "Hauptnavigation",
     "path": "Pfad",
     "dashboard": "übersicht",
-    "food": "ernährung",
     "training": "training",
-    "more": "mehr",
+    "cardio": "cardio",
+    "food": "ernährung",
     "weight": "gewicht",
+    "account": "konto",
     "goals": "ziele",
     "routines": "routinen",
     "session": "einheit"
@@ -305,34 +306,6 @@
         "weeks_other": "über {{count}} Wochen"
       }
     },
-    "more": {
-      "planned": "Hier stehen Einstellungen, Datenexport und die rechtlichen Seiten.",
-      "preferences": {
-        "label": "einstellungen",
-        "language": "sprache",
-        "theme": "design",
-        "languages": {
-          "de": "deutsch",
-          "en": "english"
-        },
-        "themes": {
-          "light": "hell",
-          "dark": "dunkel",
-          "system": "system"
-        },
-        "saveFailed": "Die Einstellung wurde nicht gespeichert und ist zurückgesetzt. Prüfe dein Netz und versuche es noch einmal."
-      },
-      "account": {
-        "label": "konto",
-        "signedInAs": "angemeldet als",
-        "signOut": "Abmelden",
-        "signingOut": "Wird abgemeldet …"
-      },
-      "tracking": {
-        "label": "erfassung",
-        "goals": "ziele"
-      }
-    },
     "notFound": {
       "title": "Seite nicht gefunden",
       "body": "Diese Adresse gibt es nicht.",
@@ -494,6 +467,37 @@
       "swipe": "Wische eine Routine zur Seite, um sie zu löschen.",
       "deleted": "{{name}} gelöscht",
       "undoFailed": "Das konnte nicht wiederhergestellt werden. Prüfe dein Netz und versuche es noch einmal."
+    },
+    "account": {
+      "planned": "Hier stehen Einstellungen, Datenexport und die rechtlichen Seiten.",
+      "preferences": {
+        "label": "einstellungen",
+        "language": "sprache",
+        "theme": "design",
+        "languages": {
+          "de": "deutsch",
+          "en": "english"
+        },
+        "themes": {
+          "light": "hell",
+          "dark": "dunkel",
+          "system": "system"
+        },
+        "saveFailed": "Die Einstellung wurde nicht gespeichert und ist zurückgesetzt. Prüfe dein Netz und versuche es noch einmal."
+      },
+      "account": {
+        "label": "konto",
+        "signedInAs": "angemeldet als",
+        "signOut": "Abmelden",
+        "signingOut": "Wird abgemeldet …"
+      },
+      "tracking": {
+        "label": "erfassung",
+        "goals": "ziele"
+      }
+    },
+    "cardio": {
+      "planned": "Einheiten, Minuten und die Kalorien, die sie kosten — wenn die vier Grundlagen stehen."
     }
   }
 }

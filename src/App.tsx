@@ -6,8 +6,9 @@ import { RequireAuth } from '@/features/auth/RequireAuth'
 import { SessionProvider } from '@/features/auth/SessionProvider'
 import SignInPage from '@/features/auth/SignInPage'
 import DashboardPage from '@/features/dashboard/DashboardPage'
-import MorePage from '@/features/more/MorePage'
-import NotFoundPage from '@/features/more/NotFoundPage'
+import AccountPage from '@/features/account/AccountPage'
+import CardioPage from '@/features/cardio/CardioPage'
+import NotFoundPage from '@/features/account/NotFoundPage'
 import FoodPage from '@/features/nutrition/FoodPage'
 import AddFoodPage from '@/features/nutrition/AddFoodPage'
 import LoggedPortionPage from '@/features/nutrition/LoggedPortionPage'
@@ -42,7 +43,8 @@ const router = createBrowserRouter([
           { path: '/training/session', element: <SessionPage /> },
           { path: '/training/add', element: <AddExercisePage /> },
           { path: '/training/routines/:id', element: <RoutineEditorPage /> },
-          { path: '/more', element: <MorePage /> },
+          { path: '/account', element: <AccountPage /> },
+          { path: '/cardio', element: <CardioPage /> },
           { path: '/weight', element: <WeightPage /> },
           { path: '/goals', element: <GoalsPage /> },
           { path: '*', element: <NotFoundPage /> },

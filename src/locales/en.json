@@ -6,10 +6,11 @@
     "label": "Main navigation",
     "path": "Path",
     "dashboard": "dashboard",
-    "food": "food",
     "training": "training",
-    "more": "more",
+    "cardio": "cardio",
+    "food": "food",
     "weight": "weight",
+    "account": "account",
     "goals": "goals",
     "routines": "routines",
     "session": "session"
@@ -305,34 +306,6 @@
         "weeks_other": "over {{count}} weeks"
       }
     },
-    "more": {
-      "planned": "Settings, data export and the legal pages go here.",
-      "preferences": {
-        "label": "preferences",
-        "language": "language",
-        "theme": "theme",
-        "languages": {
-          "de": "deutsch",
-          "en": "english"
-        },
-        "themes": {
-          "light": "light",
-          "dark": "dark",
-          "system": "system"
-        },
-        "saveFailed": "That preference did not save and has been put back. Check your connection and try again."
-      },
-      "account": {
-        "label": "account",
-        "signedInAs": "signed in as",
-        "signOut": "Sign out",
-        "signingOut": "Signing out…"
-      },
-      "tracking": {
-        "label": "tracking",
-        "goals": "goals"
-      }
-    },
     "notFound": {
       "title": "Page not found",
       "body": "This address does not exist.",
@@ -494,6 +467,37 @@
       "swipe": "Swipe a routine sideways to delete it.",
       "deleted": "{{name}} deleted",
       "undoFailed": "That could not be put back. Check your connection and try again."
+    },
+    "account": {
+      "planned": "Settings, data export and the legal pages go here.",
+      "preferences": {
+        "label": "preferences",
+        "language": "language",
+        "theme": "theme",
+        "languages": {
+          "de": "deutsch",
+          "en": "english"
+        },
+        "themes": {
+          "light": "light",
+          "dark": "dark",
+          "system": "system"
+        },
+        "saveFailed": "That preference did not save and has been put back. Check your connection and try again."
+      },
+      "account": {
+        "label": "account",
+        "signedInAs": "signed in as",
+        "signOut": "Sign out",
+        "signingOut": "Signing out…"
+      },
+      "tracking": {
+        "label": "tracking",
+        "goals": "goals"
+      }
+    },
+    "cardio": {
+      "planned": "Sessions, minutes and the calories they cost — after the four essentials work."
     }
   }
 }

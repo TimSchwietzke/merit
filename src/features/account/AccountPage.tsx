@@ -16,7 +16,7 @@ import type { Locale } from '@/lib/i18n'
 import { supabase } from '@/lib/supabase'
 import type { ThemePref } from '@/lib/theme'
 
-export default function MorePage() {
+export default function AccountPage() {
   const { t } = useTranslation()
   const { session } = useSession()
   const { locale, theme, status, saveFailed, setLocale, setTheme } = usePreferences()
@@ -37,23 +37,14 @@ export default function MorePage() {
 
   return (
     <>
-      <ScreenTitle>{t('nav.more')}</ScreenTitle>
-      <NotBuiltYet label={t('common.notBuiltYet')}>{t('pages.more.planned')}</NotBuiltYet>
+      <ScreenTitle>{t('nav.account')}</ScreenTitle>
+      <NotBuiltYet label={t('common.notBuiltYet')}>{t('pages.account.planned')}</NotBuiltYet>
 
       <section className="mt-8">
-        <SectionHead label={t('pages.more.tracking.label')} />
+        <SectionHead label={t('pages.account.tracking.label')} />
         <Rows>
           <Row to="/goals">
             <span className="min-w-0 flex-1 truncate">{t('nav.goals')}</span>
-            <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
-              →
-            </span>
-          </Row>
-          <Row to="/weight">
-            {/* `nav.weight`, not a label of its own: the tab bar, the path bar
-                and this row are one vocabulary, and a second copy is how two
-                casings of the same word get into the app (§4.4). */}
-            <span className="min-w-0 flex-1 truncate">{t('nav.weight')}</span>
             <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
               →
             </span>
@@ -62,33 +53,33 @@ export default function MorePage() {
       </section>
 
       <section className="mt-8">
-        <SectionHead label={t('pages.more.preferences.label')} />
+        <SectionHead label={t('pages.account.preferences.label')} />
         {/* Field puts the label above the control, not beside it: `design` plus
             three segments does not sit on one line at 375px (DESIGN.md §9, §10.2). */}
         <Panel>
-          <Field label={t('pages.more.preferences.language')}>
+          <Field label={t('pages.account.preferences.language')}>
             <SegmentedControl<Locale>
-              label={t('pages.more.preferences.language')}
+              label={t('pages.account.preferences.language')}
               value={locale}
               disabled={status === 'loading'}
               onChange={setLocale}
               segments={[
-                { value: 'de', label: t('pages.more.preferences.languages.de') },
-                { value: 'en', label: t('pages.more.preferences.languages.en') },
+                { value: 'de', label: t('pages.account.preferences.languages.de') },
+                { value: 'en', label: t('pages.account.preferences.languages.en') },
               ]}
             />
           </Field>
 
-          <Field label={t('pages.more.preferences.theme')}>
+          <Field label={t('pages.account.preferences.theme')}>
             <SegmentedControl<ThemePref>
-              label={t('pages.more.preferences.theme')}
+              label={t('pages.account.preferences.theme')}
               value={theme}
               disabled={status === 'loading'}
               onChange={setTheme}
               segments={[
-                { value: 'light', label: t('pages.more.preferences.themes.light') },
-                { value: 'dark', label: t('pages.more.preferences.themes.dark') },
-                { value: 'system', label: t('pages.more.preferences.themes.system') },
+                { value: 'light', label: t('pages.account.preferences.themes.light') },
+                { value: 'dark', label: t('pages.account.preferences.themes.dark') },
+                { value: 'system', label: t('pages.account.preferences.themes.system') },
               ]}
             />
           </Field>
@@ -96,15 +87,15 @@ export default function MorePage() {
 
         {saveFailed ? (
           <p role="alert" className="mt-3 text-sm text-danger">
-            {t('pages.more.preferences.saveFailed')}
+            {t('pages.account.preferences.saveFailed')}
           </p>
         ) : null}
       </section>
 
       <section className="mt-8">
-        <SectionHead label={t('pages.more.account.label')} />
+        <SectionHead label={t('pages.account.account.label')} />
         <Panel>
-          <Field label={t('pages.more.account.signedInAs')}>
+          <Field label={t('pages.account.account.signedInAs')}>
             <p className="break-all">{session?.user.email}</p>
           </Field>
         </Panel>
@@ -116,7 +107,7 @@ export default function MorePage() {
         ) : null}
 
         <Button variant="quiet" pending={pending} onClick={signOut} className="mt-4">
-          {pending ? t('pages.more.account.signingOut') : t('pages.more.account.signOut')}
+          {pending ? t('pages.account.account.signingOut') : t('pages.account.account.signOut')}
         </Button>
       </section>
     </>

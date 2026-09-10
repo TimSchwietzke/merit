@@ -16,6 +16,7 @@
  *   moss   nutrition   what you eat, and merit's own green
  *   oxide  training    what you lift; the colour of a rusted plate
  *   steel  weight      what you measure
+ *   plum   cardio      what you spend; the one domain measured in minutes
  *
  * The dashboard has no hue of its own. It is where the three meet, and each
  * block there wears the colour of the domain it reports on.
@@ -42,6 +43,8 @@
   --merit-oxide-soft: #f8ece4;
   --merit-steel: #37648f;
   --merit-steel-soft: #e7eef6;
+  --merit-plum: #6d4fa3;
+  --merit-plum-soft: #efeaf7;
 
   --merit-accent: var(--merit-moss);
   --merit-accent-soft: var(--merit-moss-soft);
@@ -73,6 +76,8 @@
   --merit-oxide-soft: #241710;
   --merit-steel: #8fb4d8;
   --merit-steel-soft: #141d26;
+  --merit-plum: #b39ddb;
+  --merit-plum-soft: #1a1526;
 
   --merit-accent: var(--merit-moss);
   --merit-accent-soft: var(--merit-moss-soft);
@@ -105,6 +110,8 @@
     --merit-oxide-soft: #241710;
     --merit-steel: #8fb4d8;
     --merit-steel-soft: #141d26;
+    --merit-plum: #b39ddb;
+    --merit-plum-soft: #1a1526;
 
     --merit-accent: var(--merit-moss);
     --merit-accent-soft: var(--merit-moss-soft);
@@ -131,4 +138,9 @@
 [data-domain="weight"] {
   --merit-accent: var(--merit-steel);
   --merit-accent-soft: var(--merit-steel-soft);
+}
+
+[data-domain="cardio"] {
+  --merit-accent: var(--merit-plum);
+  --merit-accent-soft: var(--merit-plum-soft);
 }
