@@ -72,7 +72,11 @@
         "nothingPlanned": "No routine is planned in yet.",
         "open": "Training"
       },
-      "loadFailed": "Today could not be loaded. Check your connection and try again."
+      "loadFailed": "Today could not be loaded. Check your connection and try again.",
+      "weight": {
+        "noTrend": "no trend yet",
+        "week": "{{delta}} kg this week"
+      }
     },
     "food": {
       "loadFailed": "The day's foods could not be loaded. Check your connection and try again.",

@@ -72,7 +72,11 @@
         "nothingPlanned": "Noch keine Routine eingeplant.",
         "open": "Training"
       },
-      "loadFailed": "Der heutige Tag konnte nicht geladen werden. Prüfe dein Netz und versuche es noch einmal."
+      "loadFailed": "Der heutige Tag konnte nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
+      "weight": {
+        "noTrend": "noch kein Trend",
+        "week": "{{delta}} kg diese Woche"
+      }
     },
     "food": {
       "loadFailed": "Die Einträge des Tages konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
