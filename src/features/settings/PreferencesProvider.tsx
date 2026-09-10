@@ -51,7 +51,17 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
         if (isLocale(data.locale) && data.locale !== i18n.language) {
           void i18n.changeLanguage(data.locale)
         }
-        if (!hasStoredPref() && isThemePref(data.theme)) setStoredTheme(data.theme)
+        // Seeded onto a device that has never chosen — but only a real
+        // choice, never the default.
+        //
+        // The local copy exists so the pre-paint bootstrap can read it and not
+        // flash the wrong theme (§2.5). `system` needs no copy: it is what the
+        // bootstrap already does when it finds nothing. Writing it anyway would
+        // put something on the device that the user never asked for, which is
+        // the one thing this app does not do and the privacy notice says so.
+        if (!hasStoredPref() && isThemePref(data.theme) && data.theme !== 'system') {
+          setStoredTheme(data.theme)
+        }
         setStatus('ready')
       })
 

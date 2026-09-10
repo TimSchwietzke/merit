@@ -231,6 +231,8 @@ export type Database = {
         Row: {
           activity_level: string | null
           birth_date: string | null
+          consent_at: string | null
+          consent_version: string | null
           created_at: string
           display_name: string | null
           goal: string | null
@@ -244,6 +246,8 @@ export type Database = {
         Insert: {
           activity_level?: string | null
           birth_date?: string | null
+          consent_at?: string | null
+          consent_version?: string | null
           created_at?: string
           display_name?: string | null
           goal?: string | null
@@ -257,6 +261,8 @@ export type Database = {
         Update: {
           activity_level?: string | null
           birth_date?: string | null
+          consent_at?: string | null
+          consent_version?: string | null
           created_at?: string
           display_name?: string | null
           goal?: string | null
@@ -533,6 +539,7 @@ export type Database = {
         Args: { high: number; low: number; numbers: number[] }
         Returns: boolean
       }
+      delete_own_account: { Args: never; Returns: undefined }
       set_routine_exercises: {
         Args: { items: Json; routine: string }
         Returns: undefined

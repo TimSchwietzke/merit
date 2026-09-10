@@ -2,6 +2,8 @@ import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Navigate, useLocation } from 'react-router-dom'
 
+import { Link } from 'react-router-dom'
+
 import { Wordmark } from '@/components/Wordmark'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -106,6 +108,24 @@ export default function SignInPage() {
           {pending ? t('auth.signIn.pending') : t('auth.signIn.submit')}
         </Button>
       </form>
+
+      {/* Reachable without an account. § 5 DDG wants the imprint `ständig
+          verfügbar`, and somebody who cannot get in still has a right to read
+          who is running this and what happens to their data. */}
+      <nav aria-label={t('pages.account.data.legal')} className="mt-10 flex gap-4">
+        <Link
+          to="/legal/privacy"
+          className="inline-flex min-h-11 items-center font-mono text-2xs text-ink-faint underline decoration-1 underline-offset-2 hover:text-ink"
+        >
+          {t('pages.account.data.privacy')}
+        </Link>
+        <Link
+          to="/legal/imprint"
+          className="inline-flex min-h-11 items-center font-mono text-2xs text-ink-faint underline decoration-1 underline-offset-2 hover:text-ink"
+        >
+          {t('pages.account.data.imprint')}
+        </Link>
+      </nav>
     </main>
   )
 }

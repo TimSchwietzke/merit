@@ -9,6 +9,8 @@ import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
 import { SegmentedControl } from '@/components/SegmentedControl'
 import { Button } from '@/components/ui/button'
+import { Confirm } from '@/components/ui/confirm'
+import { buildExport, download } from '@/features/account/export'
 import { authErrorKey, type AuthErrorKey } from '@/features/auth/auth-errors'
 import { useSession } from '@/features/auth/useSession'
 import { usePreferences } from '@/features/settings/usePreferences'
@@ -110,6 +112,117 @@ export default function AccountPage() {
           {pending ? t('pages.account.account.signingOut') : t('pages.account.account.signOut')}
         </Button>
       </section>
+
+      <YourData />
+
+      <section className="mt-8">
+        <SectionHead label={t('pages.account.data.legal')} />
+        <Rows>
+          <Row to="/legal/privacy">
+            <span className="min-w-0 flex-1 truncate">{t('pages.account.data.privacy')}</span>
+            <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
+              →
+            </span>
+          </Row>
+          <Row to="/legal/imprint">
+            <span className="min-w-0 flex-1 truncate">{t('pages.account.data.imprint')}</span>
+            <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
+              →
+            </span>
+          </Row>
+        </Rows>
+      </section>
     </>
+  )
+}
+
+/**
+ * Articles 15, 17 and 20, as two buttons.
+ *
+ * They are on the account screen rather than behind a support address because
+ * the rights are the user's and a right somebody has to ask for is a right with
+ * a gatekeeper. Both act immediately and neither needs anybody to be watching.
+ */
+function YourData() {
+  const { t } = useTranslation()
+  const [busy, setBusy] = useState<'export' | 'delete' | null>(null)
+  const [failed, setFailed] = useState<'export' | 'delete' | null>(null)
+  const [confirming, setConfirming] = useState(false)
+
+  async function exportData() {
+    setBusy('export')
+    setFailed(null)
+    const file = await buildExport()
+    setBusy(null)
+    if (!file) {
+      setFailed('export')
+      return
+    }
+    download(file, `merit-${file.exportedAt.slice(0, 10)}.json`)
+  }
+
+  async function deleteAccount() {
+    setBusy('delete')
+    setFailed(null)
+    const { error } = await supabase.rpc('delete_own_account')
+    if (error) {
+      setBusy(null)
+      setFailed('delete')
+      return
+    }
+    // The row is gone; the session in this tab is not. Signing out clears it
+    // and RequireAuth sends them to the sign-in screen.
+    await supabase.auth.signOut()
+  }
+
+  return (
+    <section className="mt-8">
+      <SectionHead label={t('pages.account.data.label')} />
+      <p className="mb-4 max-w-[62ch] text-sm text-ink-muted">{t('pages.account.data.lead')}</p>
+
+      <div className="flex flex-col gap-6">
+        <div>
+          <Button variant="quiet" pending={busy === 'export'} onClick={() => void exportData()}>
+            {busy === 'export' ? t('pages.account.data.exporting') : t('pages.account.data.export')}
+          </Button>
+          <p className="mt-2 max-w-[62ch] font-mono text-2xs text-ink-faint">
+            {t('pages.account.data.exportHint')}
+          </p>
+          {failed === 'export' ? (
+            <p role="alert" className="mt-2 text-sm text-danger">
+              {t('pages.account.data.exportFailed')}
+            </p>
+          ) : null}
+        </div>
+
+        <div>
+          <Button
+            variant="quiet"
+            className="text-danger hover:border-danger"
+            pending={busy === 'delete'}
+            onClick={() => setConfirming(true)}
+          >
+            {busy === 'delete' ? t('pages.account.data.deleting') : t('pages.account.data.delete')}
+          </Button>
+          <p className="mt-2 max-w-[62ch] font-mono text-2xs text-ink-faint">
+            {t('pages.account.data.deleteHint')}
+          </p>
+          {failed === 'delete' ? (
+            <p role="alert" className="mt-2 text-sm text-danger">
+              {t('pages.account.data.deleteFailed')}
+            </p>
+          ) : null}
+        </div>
+      </div>
+
+      <Confirm
+        open={confirming}
+        onOpenChange={(open) => !open && setConfirming(false)}
+        question={t('pages.account.data.deleteConfirm')}
+        confirmLabel={t('pages.account.data.deleteConfirmLabel')}
+        cancelLabel={t('common.cancel')}
+        onConfirm={() => void deleteAccount()}
+      />
+    </section>
   )
 }

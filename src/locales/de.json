@@ -39,7 +39,8 @@
       "previous": "Woche zurück",
       "next": "Woche vor",
       "label": "diese woche"
-    }
+    },
+    "cancel": "Abbrechen"
   },
   "auth": {
     "signIn": {
@@ -572,6 +573,23 @@
       "tracking": {
         "label": "erfassung",
         "goals": "ziele"
+      },
+      "data": {
+        "label": "deine daten",
+        "lead": "Alles, was dieses Konto enthält, und der Weg hinaus.",
+        "export": "Meine Daten herunterladen",
+        "exporting": "Wird vorbereitet …",
+        "exportHint": "Eine JSON-Datei: dein Profil, Wiegungen, Ernährungstagebuch, Ziele, Routinen und jeder Satz. Artikel 15 und 20.",
+        "exportFailed": "Der Download hat nicht geklappt. Prüfe dein Netz und versuche es noch einmal.",
+        "delete": "Mein Konto löschen",
+        "deleting": "Wird gelöscht …",
+        "deleteHint": "Löscht das Konto und alles, was daran hängt — Wiegungen, Ernährungstagebuch, Routinen, Sätze. Lebensmittel und Übungen, die du hinzugefügt hast, bleiben ohne deinen Namen im gemeinsamen Katalog. Das lässt sich nicht rückgängig machen.",
+        "deleteConfirm": "Dieses Konto und alles darin löschen? Das lässt sich nicht rückgängig machen.",
+        "deleteConfirmLabel": "Alles löschen",
+        "deleteFailed": "Das Konto wurde nicht gelöscht. Prüfe dein Netz und versuche es noch einmal.",
+        "legal": "rechtliches",
+        "privacy": "Datenschutz",
+        "imprint": "Impressum"
       }
     },
     "cardio": {
@@ -586,6 +604,33 @@
         "title": "merit wurde aktualisiert",
         "lead": "Dieser Tab läuft noch auf einer älteren Version, und der Bildschirm ist umgezogen. Neu laden holt die neue Version; an deinen Einträgen ändert sich nichts."
       }
+    },
+    "legal": {
+      "updated": "Stand {{date}}",
+      "privacy": {
+        "title": "Datenschutz"
+      },
+      "imprint": {
+        "title": "Impressum"
+      },
+      "missing": "Diese Seite ist nicht fertig. Der Text fehlt noch und muss stehen, bevor jemand eingeladen wird — siehe docs/LEGAL-INPUTS.md."
+    },
+    "consent": {
+      "title": "Bevor es losgeht",
+      "lead": "merit hält Gesundheitsdaten über dich fest. Das deutsche und europäische Recht behandelt sie als besondere Kategorie, und sie dürfen nur verarbeitet werden, wenn du ausdrücklich zustimmst. Deshalb wird hier einmal gefragt, für sich allein, und es ist eine echte Frage.",
+      "what": "Worin du einwilligst",
+      "whatBody": "Dass merit dein Körpergewicht, optional deinen Körperfettanteil, was du isst und wie du trainierst — Übungen, Sätze, Wiederholungen und Gewichte — speichern und verarbeiten darf. Wenn du dir ein Kalorienziel berechnen lässt, kommen Größe, Geburtsdatum, Geschlecht, Aktivitätsniveau und Ziel dazu.",
+      "why": "Wofür das benutzt wird",
+      "whyBody": "Um dir deine eigenen Zahlen zu zeigen, und für sonst nichts. Es gibt keine Werbung, kein Tracking, kein Profiling, keine automatisierte Entscheidungsfindung, und nichts wird weitergegeben oder verkauft. Niemand sonst sieht deine Einträge — weder andere Nutzer dieser App noch die Person, die sie betreibt.",
+      "control": "Was du behältst",
+      "controlBody": "Du kannst jederzeit alles als eine Datei herunterladen, und du kannst das Konto samt Inhalt jederzeit löschen — beides unter „konto“, sofort und ohne jemanden zu fragen. Das Löschen ist zugleich der Widerruf dieser Einwilligung, denn sie ist die einzige Grundlage, auf der irgendetwas davon aufbewahrt wird.",
+      "statement": "Ich willige ausdrücklich ein, dass merit meine Gesundheitsdaten wie oben beschrieben verarbeitet.",
+      "agree": "Ich willige ein",
+      "saving": "Wird gespeichert …",
+      "read": "Vollständige Datenschutzerklärung lesen",
+      "failed": "Das wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+      "decline": "Wenn du lieber nicht möchtest, melde dich einfach ab. Bis zur Einwilligung wird nichts aufgezeichnet, und ein Konto ohne sie wird nie benutzt.",
+      "notReady": "merit kann noch nicht benutzt werden: die Datenschutzerklärung fehlt, also gibt es nichts, worin eingewilligt werden könnte. Siehe docs/LEGAL-INPUTS.md."
     }
   }
 }
