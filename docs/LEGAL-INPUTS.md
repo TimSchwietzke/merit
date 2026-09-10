@@ -15,27 +15,76 @@ the app refuses to ask anybody for consent.
 
 ---
 
-## 1. Who is responsible
+## 1. Who is responsible — and the address question
 
-The generator will ask for the controller. It must be a real name and a real
-postal address — § 5 DDG does not accept a PO box or an email address alone.
+The generator will ask for the controller. Before answering, decide whether an
+imprint is required at all, because **that is the only thing here demanding a
+postal address** and publishing a home address is a real cost.
+
+### Does merit need an imprint?
+
+§ 5 DDG applies to *geschäftsmäßige* digital services. Purely private ones are
+exempt. `Geschäftsmäßig` is read broadly — sustained activity, with or without
+profit — and courts have treated a single advertising banner as enough to lose
+the exemption. So the question is not "do I earn anything" but "is this offered
+to the public".
+
+What points at **private**, and is true of merit:
+
+- invite-only; no open sign-up, no public registration form
+- nothing sold, no advertising, no affiliate links, no payments
+- roughly ten to thirty users, all known personally
+- `noindex, nofollow` and a `Disallow: /` robots.txt, so it is not in search
+  results and not discoverable
+
+What points the other way is the **portfolio framing**: presenting the deployed
+app publicly as a demonstration of professional capability is a professional
+purpose. That framing lives in the GitHub repository, which is a different
+service from the app. Keeping it there — not linking the live app from a CV, a
+portfolio site or a public profile — keeps the deployed service private.
+
+**If it stays genuinely private, no imprint is required and no postal address
+has to be published.** That is the position to take deliberately rather than by
+accident, and it is worth one paid hour with a lawyer to confirm.
+
+### If an imprint is needed anyway
+
+A *ladungsfähige Anschrift* is required: street, number, postcode, town.
+Established points:
+
+- A **Postfach is not sufficient** — the BGH has decided this.
+- A **c/o address is valid** if you are genuinely reachable there.
+- An **Impressumsservice** provides exactly this — a summonable address that is
+  not your home, with mail forwarded — from a few euros a month. This is the
+  normal answer to this problem in Germany and there is nothing irregular about
+  it.
+
+So the options, in the order worth considering them:
+
+1. Establish and keep the private character; publish no imprint.
+2. An Impressumsservice address (a few € / month).
+3. A c/o address of somebody who agrees, where post genuinely reaches you.
+4. Your own address — only if you are comfortable with it, and you have said
+   you are not.
+
+### The privacy notice is separate and less demanding
+
+Art. 13(1)(a) GDPR requires the **identity and contact details of the
+controller** for anyone whose data is processed. That is a name and a contact
+that reliably works — an email address answered promptly is workable. It does
+not carry § 5 DDG's summonable-address requirement.
+
+So even with no imprint, the notice still names you and gives an email. Tell the
+generator this explicitly; several of them assume an imprint exists and will
+otherwise fill the notice with a postal address you do not want to give.
 
 | Field | Value |
 |---|---|
-| Name | *fill in* |
-| Street and number | *fill in* |
-| Postcode and town | *fill in* |
-| Country | Germany |
-| Email | *fill in* |
-| Phone | not required if email is answered promptly |
+| Controller name | *fill in* |
+| Contact email | *fill in* |
+| Postal address | **decide first** — see above |
 | Data protection officer | none — the thresholds in § 38 BDSG are not met |
 | VAT ID / register entry | none — no commercial activity |
-
-**On whether an imprint is needed at all.** A *purely* private site is exempt,
-but the exemption is read narrowly: `geschäftsmäßig` covers sustained activity
-with or without profit, and courts have treated a single advertising banner as
-enough to lose it. merit is also a portfolio project, which is a professional
-purpose. Having an imprint that turns out not to be required costs nothing.
 
 ---
 
@@ -182,7 +231,8 @@ All of these are implemented in the app rather than by request:
 
 ## 8. Still to check, and not by me
 
-- [ ] Fill in the controller's real name and postal address.
+- [ ] Decide the imprint question above, and if an address is needed, pick a
+      route that is not your home.
 - [ ] Sign the **Supabase** DPA and the **Vercel** DPA; keep copies.
 - [ ] Write the **Verzeichnis von Verarbeitungstätigkeiten** (Art. 30). The
       small-organisation exemption in Art. 30(5) does **not** apply here,
