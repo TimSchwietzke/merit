@@ -8,7 +8,7 @@
  * Segments before the last are links; the last is where you are. The three
  * day-scoped screens carry a `today` segment because they are day-scoped by
  * definition (GOAL.md §2.1: nutrition is logged per day, training has a session
- * for today). `/more` is not, so it stops at two.
+ * for today). The account is not, so it stops at two.
  */
 export interface PathSegment {
   labelKey:
@@ -16,10 +16,13 @@ export interface PathSegment {
     | 'nav.dashboard'
     | 'nav.food'
     | 'nav.training'
-    | 'nav.more'
+    | 'nav.cardio'
+    | 'nav.account'
     | 'nav.weight'
     | 'nav.goals'
     | 'nav.routines'
+    | 'nav.session'
+    | 'common.today'
     | 'common.add'
     | 'common.today'
     | 'common.notFound'
@@ -36,17 +39,33 @@ const PATHS: Record<string, PathSegment[]> = {
   '/food/add': [ROOT, { labelKey: 'nav.food', to: '/food' }, { labelKey: 'common.add' }],
   '/training/add': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'common.add' }],
   '/training/routines': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'nav.routines' }],
-  '/more': [ROOT, { labelKey: 'nav.more' }],
-  // Weight is reached through `more` rather than from a tab of its own (there
-  // are four and four is the ceiling, §7), and the path says so.
-  '/weight': [ROOT, { labelKey: 'nav.more', to: '/more' }, { labelKey: 'nav.weight' }],
-  '/goals': [ROOT, { labelKey: 'nav.more', to: '/more' }, { labelKey: 'nav.goals' }],
+  '/training/day': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'common.today' }],
+  '/training/session': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'nav.session' }],
+  '/account': [ROOT, { labelKey: 'nav.account' }],
+  '/cardio': [ROOT, { labelKey: 'nav.cardio' }],
+  // Weight is a tab of its own now, so its path is two segments like the other
+  // three. Goals stay under the account, which is where they are set from.
+  '/weight': [ROOT, { labelKey: 'nav.weight', to: '/weight' }, { labelKey: 'common.today' }],
+  '/goals': [ROOT, { labelKey: 'nav.account', to: '/account' }, { labelKey: 'nav.goals' }],
 }
 
 const NOT_FOUND: PathSegment[] = [ROOT, { labelKey: 'common.notFound' }]
 
+/**
+ * Paths with an id in them — a routine, a logged portion — are not keys in the
+ * table above, so the longest listed path they sit under answers for them. A
+ * routine's editor is `merit / training / routines`, which is where it is,
+ * rather than "not found", which is what an exact-match lookup called it.
+ */
 export function pathSegments(pathname: string): PathSegment[] {
-  return PATHS[pathname] ?? NOT_FOUND
+  const exact = PATHS[pathname]
+  if (exact) return exact
+
+  const parent = Object.keys(PATHS)
+    .filter((path) => path !== '/' && pathname.startsWith(`${path}/`))
+    .sort((a, b) => b.length - a.length)[0]
+
+  return parent ? PATHS[parent] : NOT_FOUND
 }
 
 /**

@@ -1,10 +1,12 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  activeSet,
+  firstOutstandingOf,
   groupSets,
+  nextActive,
   isoWeekday,
   nextSession,
-  planPaused,
   lastSessionFor,
   nextSetNumber,
   repeatOf,
@@ -20,6 +22,7 @@ const set = (setNumber: number, reps: number, weightKg: number, exerciseId = 'be
   reps,
   weightKg,
   rir: null,
+  done: true,
 })
 
 describe('groupSets', () => {
@@ -158,19 +161,91 @@ describe('isoWeekday', () => {
   })
 })
 
-describe('planPaused', () => {
-  it('is paused up to and including the last day', () => {
-    expect(planPaused('2026-09-20', '2026-09-09')).toBe(true)
-    expect(planPaused('2026-09-20', '2026-09-20')).toBe(true)
-    expect(planPaused('2026-09-20', '2026-09-21')).toBe(false)
+describe('the active set', () => {
+  const bench = (n: number, done = false) => ({ ...set(n, 8, 60, 'bench'), done })
+  const row = (n: number, done = false) => ({ ...set(n, 10, 55, 'row'), done })
+
+  it('is the first outstanding one when nothing has been chosen', () => {
+    expect(activeSet([bench(1), bench(2), row(1)], null)?.id).toBe('bench-1')
   })
 
-  it('is not paused when nothing was set, however the nothing arrives', () => {
-    // A profile row read before the column existed comes back with the field
-    // missing, and `undefined !== null` is true — which is how an undefined
-    // reached a date parser and took the dashboard down.
-    expect(planPaused(null, '2026-09-09')).toBe(false)
-    expect(planPaused(undefined, '2026-09-09')).toBe(false)
-    expect(planPaused('', '2026-09-09')).toBe(false)
+  it('walks down the exercise it is in before going anywhere else', () => {
+    const sets = [bench(1, true), bench(2), row(1)]
+    expect(nextActive(sets, sets[0])).toBe('bench-2')
+  })
+
+  it('goes back to the top of the session once an exercise runs out', () => {
+    // Row 1 comes after bench on screen but is outstanding, and bench is done.
+    const sets = [bench(1, true), bench(2, true), row(1)]
+    expect(nextActive(sets, sets[1])).toBe('row-1')
+  })
+
+  it('takes the first outstanding one from anywhere when nothing precedes it', () => {
+    const sets = [bench(1, true), bench(2), row(1)]
+    expect(nextActive(sets)).toBe('bench-2')
+  })
+
+  it('is null when the session is finished, which is what ends it', () => {
+    expect(nextActive([bench(1, true), row(1, true)])).toBeNull()
+    expect(activeSet([bench(1, true)], null)).toBeNull()
+  })
+
+  it('keeps a set the user chose, until it is logged', () => {
+    // Without this a tap on set three is undone by the next render.
+    const sets = [bench(1), bench(2), bench(3)]
+    expect(activeSet(sets, 'bench-3')?.id).toBe('bench-3')
+
+    const logged = [bench(1), bench(2), bench(3, true)]
+    expect(activeSet(logged, 'bench-3')?.id).toBe('bench-1')
+  })
+
+  it('selects an exercise by its first outstanding set', () => {
+    const sets = [bench(1, true), bench(2), row(1)]
+    expect(firstOutstandingOf(sets, 'bench')?.id).toBe('bench-2')
+    expect(firstOutstandingOf(sets, 'nothing')).toBeNull()
+  })
+})
+
+describe('a planned set counts for nothing until it is logged', () => {
+  const planned = (n: number) => ({ ...set(n, 8, 60, 'bench'), done: false })
+
+  it('stays out of the volume', () => {
+    // Otherwise starting a session reports it as trained.
+    expect(volume([set(1, 8, 60), planned(2)])).toBe(480)
+  })
+
+  it('stays out of the comparison line', () => {
+    const sessions: SessionSets[] = [
+      { date: '2026-09-01', sets: [set(1, 8, 55)] },
+      { date: '2026-09-05', sets: [planned(1), planned(2)] },
+    ]
+    expect(lastSessionFor(sessions, 'bench', '2026-09-09')?.date).toBe('2026-09-01')
+  })
+
+  it('is not what the next set repeats', () => {
+    expect(repeatOf([set(1, 8, 60), planned(2)], 'bench')).toMatchObject({ reps: 8, weightKg: 60 })
+    expect(repeatOf([planned(1)], 'bench')).toBeNull()
+  })
+
+  it('still shows in the list, which is how it gets done', () => {
+    expect(groupSets([set(1, 8, 60), planned(2)])).toEqual([{ sets: 2, reps: 8, weightKg: 60 }])
+  })
+})
+
+describe('the active set, when sets were done out of order', () => {
+  const bench = (n: number, done = false) => ({ ...set(n, 8, 60, 'bench'), done })
+  const row = (n: number, done = false) => ({ ...set(n, 10, 55, 'row'), done })
+
+  it('finishes the exercise it is in before moving to another one', () => {
+    // Tapping set 3 and logging it used to jump to another exercise while sets
+    // one and two of this one were still outstanding — you log a set, look
+    // down, and the highlight is somewhere else entirely.
+    const sets = [bench(1), bench(2), bench(3, true), row(1)]
+    expect(nextActive(sets, sets[2])).toBe('bench-1')
+  })
+
+  it('still leaves once the exercise really is finished', () => {
+    const sets = [bench(1, true), bench(2, true), row(1)]
+    expect(nextActive(sets, sets[1])).toBe('row-1')
   })
 })

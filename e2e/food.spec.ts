@@ -120,6 +120,10 @@ test('a logged row opens on tap and only gives up its delete to a swipe', async 
   // Nothing destructive is on screen until it is asked for (§10.1).
   await expect(page.getByRole('button', { name: 'Entfernen' })).toHaveCount(0)
 
+  // Centre it in the viewport first: the session bar is fixed to the bottom of
+  // the screen, so a row that happens to sit under it receives none of the
+  // drag.
+  await row.evaluate((el) => el.scrollIntoView({ block: 'center' }))
   const box = (await row.boundingBox())!
   const y = box.y + box.height / 2
   await page.mouse.move(box.x + 20, y)

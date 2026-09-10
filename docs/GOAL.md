@@ -27,7 +27,7 @@ for at least three months.
 | **Weight** | Log body weight. Optional: body fat %, body measurements. |
 | **Nutrition** | Log food per day and meal. Calories + macros (protein / fat / carbs). |
 | **Barcode** | Scan a barcode with the phone camera, resolve to a food, log it. |
-| **Strength training** | Plan training days, schedule them, log sets (exercise, reps, weight, optional RIR). |
+| **Strength training** | Build routines, schedule them into the week, log sets (exercise, reps, weight, optional RIR). |
 | **Visualisation** | Charts for weight, calories/macros, and strength progression. |
 | **Settings** | Language (DE/EN), theme (light/dark), goal configuration, data export, account deletion. |
 
@@ -113,7 +113,7 @@ and minerals is too patchy to show meaningful daily targets.
 - **Weight chart:** shows raw daily values *and* a 7-day rolling average as two
   separate series in different colours. Either series can be hidden in settings.
   Daily weight is too noisy to read a trend from raw values alone.
-- **Training plan:** users define training days as reusable templates
+- **Training plan:** users define routines as reusable templates
   ("Upper A", "Lower B"), then schedule them (e.g. Monday = Upper A). Individual
   sessions can be moved or edited without breaking the plan; the plan itself can
   also be edited as a whole.

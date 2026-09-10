@@ -8,16 +8,23 @@ import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
 import { Button } from '@/components/ui/button'
 import { CalorieRing } from '@/features/dashboard/CalorieRing'
+import { Cells } from '@/components/Cells'
+import { DomainCard } from '@/features/dashboard/DomainCard'
 import { useGoalHistory } from '@/features/goals/useGoalHistory'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
-import { usePlanPause } from '@/features/routines/usePlanPause'
-import { useRoutines } from '@/features/routines/useRoutines'
+import { useFoodHistory } from '@/features/nutrition/useFoodHistory'
+import { plannable, useRoutines } from '@/features/routines/useRoutines'
 import { useWorkout } from '@/features/training/useWorkout'
+import { useWeightLogs } from '@/features/weight/useWeightLogs'
 import { addDays, todayKey } from '@/lib/date'
-import { formatDayLong, formatNumber, weekdayLabel } from '@/lib/format'
+import { formatDelta, formatNumber, weekdayLabel } from '@/lib/format'
 import { goalOn } from '@/lib/goals'
 import { sumPortions } from '@/lib/nutrition'
-import { isoWeekday, nextSession, planPaused } from '@/lib/training'
+import { plannedWeeks } from '@/lib/progress'
+import { scheduledOn } from '@/lib/schedule'
+import { dailyStreak, dayCells, weekCells, weeklyStreak } from '@/lib/streak'
+import { isoWeekday, nextSession } from '@/lib/training'
+import { latestEntry, weeklyDelta } from '@/lib/weight'
 
 /**
  * What the day looks like, top to bottom (GOAL.md §6): a calm summary, then
@@ -45,7 +52,13 @@ export default function DashboardPage() {
     <>
       <ScreenTitle>{t('nav.dashboard')}</ScreenTitle>
 
-      <section>
+      {/* The day in one sentence, first, in the one serif line per screen §4.1
+          allows and on the accent edge §6 calls the signature. It used to sit
+          at the bottom under a heading with a button beneath it; the card below
+          is the way into training now, so the sentence only has to be true. */}
+      <TrainingLine locale={locale} />
+
+      <section className="mt-6">
         <SectionHead label={t('pages.dashboard.summary')} />
         <Panel className="px-4 py-6">
           {status === 'error' ? (
@@ -110,10 +123,122 @@ export default function DashboardPage() {
         </Panel>
       </section>
 
-      <section className="mt-8">
-        <SectionHead label={t('pages.dashboard.training.label')} />
-        <TrainingLine locale={locale} />
+      {/* The other three domains, each in its own colour, each the way into
+          itself. This is the only screen where all four are on one page, and
+          it is the only reason it exists — everything on it is a pointer at a
+          tab that says it better. */}
+      <section className="mt-6 grid grid-cols-2 gap-3">
+        <TrainingCard locale={locale} />
+        <WeightCard locale={locale} />
+        <StreakCards />
       </section>
+
+    </>
+  )
+}
+
+/** Today's session, or the next one. */
+function TrainingCard({ locale }: { locale: string }) {
+  const { t } = useTranslation()
+  const today = todayKey()
+  const { routines } = useRoutines()
+  const { sets } = useWorkout(today)
+
+  const plan = plannable(routines)
+  const due = scheduledOn(plan, [], today)[0]
+  const logged = sets.filter((set) => set.done).length
+
+  const note = due
+    ? sets.length > 0
+      ? t('pages.training.week.progress', { logged, total: sets.length })
+      : t('pages.training.week.open')
+    : (() => {
+        const next = nextSession(plan, today)
+        return next
+          ? weekdayLabel(isoWeekday(addDays(today, next.inDays)), locale)
+          : t('pages.training.week.nothing')
+      })()
+
+  return (
+    <DomainCard
+      domain="training"
+      to="/training"
+      label={t('nav.training')}
+      note={note}
+      value={due ? undefined : '—'}
+    >
+      {due ? (
+        <p className="truncate text-lg font-semibold tracking-tight text-ink">{due.name}</p>
+      ) : null}
+    </DomainCard>
+  )
+}
+
+/** The last weigh-in and where the week put it. */
+function WeightCard({ locale }: { locale: string }) {
+  const { t } = useTranslation()
+  const { entries } = useWeightLogs()
+  const latest = latestEntry(entries)
+  const delta = weeklyDelta(entries, todayKey())
+
+  return (
+    <DomainCard
+      domain="weight"
+      to="/weight"
+      label={t('nav.weight')}
+      value={latest ? formatNumber(latest.weightKg, locale, 1) : '—'}
+      unit={latest ? 'kg' : undefined}
+      // A change with its sign kept, and no colour on it: §17 rules out a
+      // traffic light on a number, and neither direction is a verdict.
+      note={
+        delta === null
+          ? t('pages.dashboard.weight.noTrend')
+          : t('pages.dashboard.weight.week', {
+              delta: formatDelta(delta, locale, 1),
+            })
+      }
+    />
+  )
+}
+
+/** Both runs, side by side, each in the colour of what it counts. */
+function StreakCards() {
+  const { t } = useTranslation()
+  const today = todayKey()
+  const { days: loggedDays } = useFoodHistory(today)
+  const { routines } = useRoutines()
+  const { history } = useWorkout(today)
+
+  const days = dailyStreak(loggedDays, today)
+  const weeks = weeklyStreak(plannedWeeks(history, plannable(routines), today, 12), today)
+
+  // Neither appears before there is a run to report (PRODUCT.md).
+  if (days === 0 && weeks === 0) return null
+
+  return (
+    <>
+      {days > 1 ? (
+        <DomainCard
+          to="/food"
+          label={t('common.streak.nutrition')}
+          value={String(days)}
+          unit={t('common.streak.days', { count: days })}
+        >
+          <Cells cells={dayCells(loggedDays, today, 14)} />
+        </DomainCard>
+      ) : null}
+
+      {weeks > 0 ? (
+        <DomainCard
+          domain="training"
+          to="/training"
+          label={t('common.streak.training')}
+          value={String(weeks)}
+          unit={t('common.streak.weeks', { count: weeks })}
+        >
+          <Cells cells={weekCells(plannedWeeks(history, plannable(routines), today, 12), today, 12)} />
+        </DomainCard>
+      ) : null}
     </>
   )
 }
@@ -127,14 +252,14 @@ export default function DashboardPage() {
  * written to make anybody feel anything.
  *
  * The accent edge is the one piece of pure voice on the screen (§6), and there
- * is one per screen — this is it.
+ * is one per screen — this is it. It carries no button: every card below is a
+ * way in, and a second one here would be the screen asking twice.
  */
 function TrainingLine({ locale }: { locale: string }) {
   const { t } = useTranslation()
   const today = todayKey()
   const { routines, status } = useRoutines()
   const { sets } = useWorkout(today)
-  const { pausedUntil } = usePlanPause()
 
   if (status === 'loading') {
     return <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
@@ -150,13 +275,6 @@ function TrainingLine({ locale }: { locale: string }) {
   const trained = sets.length > 0
 
   const sentence = () => {
-    // A paused plan reports nothing as due, and says so rather than going
-    // quiet — otherwise it looks like the plan was forgotten.
-    if (planPaused(pausedUntil, today)) {
-      return t('pages.dashboard.training.paused', {
-        date: formatDayLong(pausedUntil as string, locale),
-      })
-    }
     if (due && trained) return t('pages.dashboard.training.doneToday', { name: due.name })
     if (due) return t('pages.dashboard.training.due', { name: due.name })
 
@@ -171,12 +289,5 @@ function TrainingLine({ locale }: { locale: string }) {
     })}`
   }
 
-  return (
-    <>
-      <Statement>{sentence()}</Statement>
-      <Button asChild variant="quiet" className="mt-4">
-        <Link to="/training">{t('pages.dashboard.training.open')}</Link>
-      </Button>
-    </>
-  )
+  return <Statement>{sentence()}</Statement>
 }

@@ -1,4 +1,4 @@
-import { addDays, daysBetween, parseDateKey } from '@/lib/date'
+import { addDays, parseDateKey } from '@/lib/date'
 /**
  * The training maths (CLAUDE.md, Code).
  *
@@ -14,6 +14,8 @@ export interface LoggedSet {
   reps: number
   weightKg: number
   rir: number | null
+  /** False while a set is planned and has not been performed. */
+  done: boolean
 }
 
 export interface SessionSets {
@@ -21,6 +23,9 @@ export interface SessionSets {
   date: string
   sets: LoggedSet[]
 }
+
+/** Only what actually happened. A plan is not an achievement. */
+export const performed = (sets: readonly LoggedSet[]) => sets.filter((set) => set.done)
 
 /** One line of a summary: three sets of eight at sixty kilos. */
 export interface SetGroup {
@@ -64,7 +69,7 @@ export function lastSessionFor(
 
   for (const session of sessions) {
     if (session.date >= date) continue
-    const sets = session.sets.filter((set) => set.exerciseId === exerciseId)
+    const sets = session.sets.filter((set) => set.exerciseId === exerciseId && set.done)
     if (sets.length === 0) continue
     if (!best || session.date > best.date) best = { date: session.date, sets }
   }
@@ -77,7 +82,7 @@ export function lastSessionFor(
  * was, and the only one that needs no assumptions about anybody's maximum.
  */
 export function volume(sets: readonly LoggedSet[]): number {
-  return sets.reduce((total, set) => total + set.reps * set.weightKg, 0)
+  return performed(sets).reduce((total, set) => total + set.reps * set.weightKg, 0)
 }
 
 /** The next set number for an exercise: one past the highest already logged. */
@@ -93,7 +98,7 @@ export function nextSetNumber(sets: readonly LoggedSet[], exerciseId: string): n
  * form opens on it and typing is only needed when something changed.
  */
 export function repeatOf(sets: readonly LoggedSet[], exerciseId: string): LoggedSet | null {
-  const mine = sets.filter((set) => set.exerciseId === exerciseId)
+  const mine = performed(sets).filter((set) => set.exerciseId === exerciseId)
   if (mine.length === 0) return null
   return mine.reduce((latest, set) => (set.setNumber > latest.setNumber ? set : latest))
 }
@@ -129,15 +134,57 @@ export function nextSession(
   return null
 }
 
+
 /**
- * Whether the plan is paused on a given day. The date is the last day of the
- * pause, so a fortnight away is not a fortnight of missed sessions.
+ * Which set is the one being done.
+ *
+ * The rule people follow without thinking about it: keep going down this
+ * exercise, and when it runs out go back to the top and take the first thing
+ * still outstanding. `sets` arrives in the order the session is laid out, so
+ * "top to bottom" is simply its order.
+ *
+ * Returns null when everything is logged, which is what ends a session.
  */
-export function planPaused(pausedUntil: string | null | undefined, date: string): boolean {
-  // Any absent value, not just `null`. A profile row read before this column
-  // existed comes back with the field missing, and `undefined !== null` is
-  // true — which sent an undefined into a date parser and took the dashboard
-  // down with it.
-  if (!pausedUntil) return false
-  return daysBetween(date, pausedUntil) >= 0
+export function nextActive(sets: readonly LoggedSet[], after?: LoggedSet | null): string | null {
+  const outstanding = sets.filter((set) => !set.done)
+  if (outstanding.length === 0) return null
+
+  if (after) {
+    // The next one down this exercise…
+    const below = outstanding.find(
+      (set) => set.exerciseId === after.exerciseId && set.setNumber > after.setNumber,
+    )
+    if (below) return below.id
+
+    // …and if there is none, anything still outstanding *in this exercise*
+    // before moving on. Skipping to another exercise while sets three and four
+    // are done but one and two are not is how somebody logs a set, looks down,
+    // and finds the highlight somewhere else entirely.
+    const remaining = outstanding.find((set) => set.exerciseId === after.exerciseId)
+    if (remaining) return remaining.id
+  }
+
+  return outstanding[0].id
+}
+
+/**
+ * The active set, honouring a choice the user made.
+ *
+ * A set tapped by hand stays active until it is logged; once it is, or if it
+ * was never valid, the rule above takes over. Without this a tap on set three
+ * would be undone by the next render.
+ */
+export function activeSet(sets: readonly LoggedSet[], chosen: string | null): LoggedSet | null {
+  const picked = chosen ? sets.find((set) => set.id === chosen && !set.done) : undefined
+  if (picked) return picked
+  const id = nextActive(sets)
+  return id ? (sets.find((set) => set.id === id) ?? null) : null
+}
+
+/** The first outstanding set of one exercise — what tapping its card selects. */
+export function firstOutstandingOf(
+  sets: readonly LoggedSet[],
+  exerciseId: string,
+): LoggedSet | null {
+  return sets.find((set) => set.exerciseId === exerciseId && !set.done) ?? null
 }

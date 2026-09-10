@@ -14,6 +14,11 @@ import { progress } from '@/lib/goals'
  * Undershooting is the same mechanism and deliberately quieter — the bar simply
  * is not full. A day in progress is not a failed day, and this screen is looked
  * at mid-afternoon more often than at midnight.
+ *
+ * The fill sweeps in once when the bar mounts. It is the only self-running
+ * motion Merit has and it is deliberately on this component: a bar is a
+ * measurement, and watching it stop somewhere says more about where the day
+ * stands than finding it already stopped.
  */
 export function Progress({
   total,
@@ -45,7 +50,13 @@ export function Progress({
         aria-label={ariaLabel}
         className="relative h-[3px] w-full overflow-hidden rounded-full bg-line"
       >
-        <div className="absolute inset-y-0 left-0 bg-accent" style={{ width: `${fill}%` }} />
+        {/* The one authored moment on a screen (§13): the bar arrives at its
+            value rather than being found already there. Scale, not width, so it
+            is a compositor job; once, on mount, never again. */}
+        <div
+          className="merit-sweep absolute inset-y-0 left-0 bg-accent"
+          style={{ width: `${fill}%` }}
+        />
         {over > 0 ? (
           <>
             <div

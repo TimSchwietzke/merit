@@ -6,9 +6,19 @@ import { ROUTES, expect, stubBackend, test, waitForScreen } from './fixtures'
  * browser actually resolved.
  */
 
+// `accent` is the moss the sign-in screen wears: outside a domain, the default
+// stands. The training and weight routes rebind it (tokens.css), which is what
+// the domain probe below checks.
 const TOKENS = {
   light: { ink: 'rgb(38, 37, 33)', inkFaint: 'rgb(115, 108, 92)', accent: 'rgb(79, 107, 44)' },
-  dark: { ink: 'rgb(219, 215, 202)', inkFaint: 'rgb(151, 144, 131)', accent: 'rgb(168, 194, 122)' },
+  dark: { ink: 'rgb(230, 227, 220)', inkFaint: 'rgb(148, 143, 136)', accent: 'rgb(168, 194, 122)' },
+} as const
+
+/** The domain hues, dark theme. See `tokens.css`. */
+const DOMAIN = {
+  '/food': 'rgb(168, 194, 122)',
+  '/training': 'rgb(212, 136, 92)',
+  '/weight': 'rgb(143, 180, 216)',
 } as const
 
 for (const theme of ['light', 'dark'] as const) {
@@ -41,7 +51,7 @@ for (const theme of ['light', 'dark'] as const) {
 
   test(`${theme}: the account value is ink, not accent`, async ({ page }) => {
     await stubBackend(page, { theme, locale: 'de' })
-    await page.goto('/more')
+    await page.goto('/account')
     const colour = await page
       .getByText('harness@merit.test')
       .evaluate((el) => getComputedStyle(el).color)
@@ -75,7 +85,7 @@ test('no horizontal scroll at any width, in German', async ({ page }) => {
   // as well — and it leaves the time budget to actually wait for the screen to
   // finish rendering. Measuring straight after `goto` measures the skeleton,
   // which is how a 544px-wide table got past this probe.
-  for (const path of ['/', '/food', '/food/add', '/training', '/training/add', '/training/routines', '/more', '/weight', '/goals']) {
+  for (const path of ['/', '/food', '/food/add', '/training', '/training/add', '/training/routines', '/cardio', '/account', '/weight', '/goals']) {
     await page.setViewportSize({ width: 375, height: 800 })
     await page.goto(path)
     await waitForScreen(page)
@@ -98,7 +108,7 @@ test('page gutters never exceed 24px, and the column caps at 860px', async ({ pa
   await stubBackend(page, { theme: 'light', locale: 'de' })
   for (const width of [1920, 1440, 1024, 768, 375]) {
     await page.setViewportSize({ width, height: 800 })
-    await page.goto('/more')
+    await page.goto('/account')
     const box = await page.locator('main').evaluate((el) => {
       const s = getComputedStyle(el)
       return { left: s.paddingLeft, right: s.paddingRight, w: el.getBoundingClientRect().width }
@@ -127,7 +137,13 @@ test('every touch target clears 44px at 375px, on every screen', async ({ page }
           .filter(({ r }) => r.width > 0 && (r.height < 44 || r.width < 44))
           .map(
             ({ el, r }) =>
-              `${el.tagName.toLowerCase()} "${(el.textContent ?? '').trim().slice(0, 24)}" ${Math.round(r.width)}x${Math.round(r.height)}`,
+              // The label and the classes as well as the text: an icon-only
+              // control reports as `button ""`, which names nothing and sends
+              // whoever reads this failure hunting for it by hand.
+              `${el.tagName.toLowerCase()} "${(el.textContent ?? '').trim().slice(0, 20)}"` +
+              `${el.getAttribute('aria-label') ? ` [${el.getAttribute('aria-label')}]` : ''}` +
+              ` .${(el.className.toString().trim().split(/\s+/)[0] ?? '')}` +
+              ` ${r.width.toFixed(1)}x${r.height.toFixed(1)}`,
           ),
       )
       offenders.push(...small.map((s) => `${locale} ${route.path}: ${s}`))
@@ -159,4 +175,52 @@ test('the undo toast clears the tab bar', async ({ page }) => {
     .evaluate((el) => el.getBoundingClientRect().top)
 
   expect(toast, 'toast overlaps the tab bar').toBeLessThanOrEqual(bar)
+})
+
+test('each domain retints the interface, and the wordmark keeps the brand', async ({ page }) => {
+  await stubBackend(page, { theme: 'dark', locale: 'de' })
+
+  for (const [route, hue] of Object.entries(DOMAIN)) {
+    await page.goto(route)
+    await waitForScreen(page)
+    const accent = await page.evaluate(() =>
+      getComputedStyle(document.querySelector('[data-domain], main')!).getPropertyValue(
+        '--merit-accent',
+      ),
+    )
+    // The variable resolves through `var()`, so compare what it paints with.
+    const painted = await page.evaluate((value) => {
+      const probe = document.createElement('span')
+      probe.style.color = value.trim()
+      document.body.append(probe)
+      const colour = getComputedStyle(probe).color
+      probe.remove()
+      return colour
+    }, accent)
+    expect(painted, route).toBe(hue)
+  }
+
+  // Whatever the section, the wordmark is merit's own green.
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/training')
+  await waitForScreen(page)
+  await expect(page.getByLabel('Pfad')).toBeVisible()
+})
+
+test('a route that throws shows merit, not the framework', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'dark', locale: 'de' })
+
+  // What a tab left open across a deploy hits: the chunk it asks for is gone.
+  await page.route('**/WeightPage*.js', (route) => route.fulfill({ status: 404, body: '' }))
+  await page.route('**/WeightPage*.tsx', (route) => route.fulfill({ status: 404, body: '' }))
+
+  await page.goto('/weight')
+  await expect(page.getByText('merit wurde aktualisiert')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Neu laden' })).toBeVisible()
+
+  // None of the framework's developer screen, and no stack anywhere on it.
+  await expect(page.getByText(/Unexpected Application Error/i)).toBeHidden()
+  await expect(page.getByText(/Hey developer/i)).toBeHidden()
+  await expect(page.getByText(/\.tsx/)).toBeHidden()
 })

@@ -59,6 +59,25 @@ export function formatDayShort(key: string, locale: string): string {
   )
 }
 
+/**
+ * Two day keys as one range. `formatRange` collapses whatever the locale
+ * repeats — `Sep 7 – 13`, `07.–13. Sept.` — which hand-assembling the two ends
+ * and stripping the month off one of them cannot do, because which end carries
+ * the month is itself a property of the locale.
+ */
+export function formatDayRange(from: string, to: string, locale: string): string {
+  const at = (key: string) => {
+    const [year, month, day] = key.split('-').map(Number)
+    return new Date(year, month - 1, day)
+  }
+  // `numeric`, not `2-digit`: the padding is dropped by `formatRange` anyway,
+  // and it is the tiles below that need their numerals to line up in a column.
+  return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'short' }).formatRange(
+    at(from),
+    at(to),
+  )
+}
+
 export function formatDayLong(key: string, locale: string): string {
   const [year, month, day] = key.split('-').map(Number)
   return new Intl.DateTimeFormat(locale, {

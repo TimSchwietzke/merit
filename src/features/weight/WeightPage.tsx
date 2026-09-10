@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
+import { Cells } from '@/components/Cells'
 import { Panel } from '@/components/Panel'
+import { StatCard } from '@/components/StatCard'
 import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
 import { SegmentedControl } from '@/components/SegmentedControl'
-import { Value } from '@/components/Value'
 import { WeightChart } from '@/features/weight/WeightChart'
+import { dayCells } from '@/lib/streak'
 import { WeightForm } from '@/features/weight/WeightForm'
 import { WeightList } from '@/features/weight/WeightList'
 import { useWeightLogs } from '@/features/weight/useWeightLogs'
@@ -56,6 +58,19 @@ export default function WeightPage() {
   // its control appears at both ends of the screen: reading the log and having
   // to scroll back to the chart to change what the log shows is the annoyance.
   const visible = entries.filter((entry) => daysBetween(from, entry.date) >= 0)
+
+  // The range's own numbers. Only weigh-ins that happened — a day nobody stood
+  // on the scale is not a weight, and averaging it in as one would be the same
+  // mistake as summing a missing nutrient as zero.
+  const logged = visible.filter((entry) => entry.weightKg !== null)
+  const mean = logged.reduce((sum, entry) => sum + entry.weightKg, 0) / (logged.length || 1)
+  const change =
+    logged.length > 1 ? logged[logged.length - 1].weightKg - logged[0].weightKg : 0
+  const weighed = dayCells(
+    entries.map((entry) => entry.date),
+    today,
+    14,
+  )
 
   const rangeControl = (
     <SegmentedControl<WeightRange>
@@ -107,7 +122,15 @@ export default function WeightPage() {
         <Panel className="px-4 py-3.5">
           {latest ? (
             <>
-              <Value n={formatNumber(latest.weightKg, locale)} unit="kg" size="xl" />
+              {/* `text-3xl` mono, the size training's volume and nutrition's
+                  ring already stand at. This screen's one figure was two steps
+                  below theirs. */}
+              <p className="font-mono tabular-nums leading-none">
+                <span className="text-3xl font-medium text-ink">
+                  {formatNumber(latest.weightKg, locale)}
+                </span>
+                <span className="ml-1 text-2xs text-ink-faint">kg</span>
+              </p>
               {/* A number with a comparison, not a bare figure (§14). The
                   comparison is between two seven-day averages: a single day
                   swings by a kilo on water alone. */}
@@ -130,12 +153,40 @@ export default function WeightPage() {
         </Panel>
       </section>
 
+      {/* Two readings over the range, in the same cards training and nutrition
+          use — the screen had a chart and no numbers off it, so the range
+          control changed a picture and nothing you could quote. */}
+      {logged.length > 1 ? (
+        <section className="mt-6 grid grid-cols-2 gap-3">
+          <StatCard
+            id="stat-weight-mean"
+            label={t('pages.weight.stats.mean')}
+            value={formatNumber(mean, locale)}
+            unit="kg"
+            note={t('pages.weight.stats.overDays', { count: logged.length })}
+          />
+          <StatCard
+            id="stat-weight-change"
+            label={t('pages.weight.stats.change')}
+            value={formatDelta(change, locale)}
+            unit="kg"
+            note={t('pages.weight.stats.acrossRange')}
+          >
+            <Cells cells={weighed} />
+          </StatCard>
+        </section>
+      ) : null}
+
       <section className="mt-8">
         <SectionHead label={t('pages.weight.chart.label')} hint={rangeControl} />
         {status === 'loading' ? (
           <p className="font-mono text-2xs text-ink-faint">{t('common.loading')}</p>
         ) : (
-          <WeightChart points={points} locale={locale} />
+          // In a panel like every other chart in the app. It sat bare on the
+          // page, which was the old hairline language showing through.
+          <Panel className="px-2 py-4">
+            <WeightChart points={points} locale={locale} />
+          </Panel>
         )}
       </section>
 

@@ -417,6 +417,37 @@ a step or two of their mobile values. Interfaces that scale their own padding wi
 the single most reliable tell of a generated layout: everything breathes uniformly and nothing has a
 hierarchy. Density is the signature; keep it at every width.
 
+### 5.5 Composition — one thing wins
+
+Every screen has exactly one element that is the subject, and it must be obvious which one within a
+second of the screen appearing. This is the rule the rest of this file assumed and never wrote down,
+and its absence is a real failure mode with a signature: three `Panel`s down a screen, each with the
+same border, the same radius and the same fill, none of them louder than the others. Every component
+is correct and the screen is dead. The fix is never a shadow.
+
+The ladder, loudest first. **A screen uses one rung from the top two and nothing else does:**
+
+| Rung | Device | Where |
+|---|---|---|
+| Subject | The accent edge (§6) or the ring (§10.10), with its figure at `text-2xl` | Once. Never twice. |
+| Support | A `Panel`, a `Rows` list under a §10.3 head | As often as needed |
+| Reference | Bare on the page — no border, no fill, mono labels in `ink-faint` | As often as needed |
+
+Two consequences worth stating, because both were got wrong before this was written:
+
+- **A frame is not free.** Wrapping something in a `Panel` promotes it, and a screen where everything
+  is promoted has no subject. The week strip on `/training` is reference — it is what you consult to
+  change the subject, not the subject itself — so it sits bare on the page and the day it selects
+  takes the edge. Reach for `Panel` when a group needs to be told apart from what surrounds it, not
+  as the default wrapper for a section.
+- **The subject earns the top of the type scale.** `text-2xl` is the in-app ceiling (§4.2) and it is
+  reserved for the one figure or name the screen exists to show. A screen whose largest text is
+  `text-xl` — the `h1` size — has no subject, only a title.
+
+The muted twin of the accent edge (`line-strong`, §6) is how the subject looks when there is nothing
+in it. A rest day, an empty log, a goal not yet set: same block, same size, quieter edge. An empty
+state that is a different component from its full state makes the screen change shape for no reason.
+
 ---
 
 ## 6. Surface, border, radius, elevation
@@ -810,6 +841,60 @@ mid-afternoon more often than at midnight.
   centred reticle drawn in `line-strong`, and one mono line of instruction beneath. No overlay
   animation, no scanning laser. On failure it falls through to manual entry in the same sheet, not on
   a different screen.
+- **Week strip** — the training screen's top block: seven tiles, Monday to Sunday, above the detail
+  for whichever one is selected. A tile is a weekday in mono `text-2xs`, the day of the month in mono
+  below it, and a 4px mosaic mark beneath that. The mark is the consistency heatmap's vocabulary
+  applied to one week and told apart by fill density rather than hue: half-strength `accent` for a
+  session that is planned, full `accent` for one that has been started, **nothing at all** for a rest
+  day. The heatmap draws its empty state because a grid with holes stops being a grid; a row of seven
+  does not, and a week of faint marks with two solid ones in it reads as five things you failed to
+  do.
+
+  Selection is `accent` border on `accent-soft`; today, unselected, is `line-strong` with its weekday
+  label in `accent`. It is a `radiogroup` — exactly one day is being looked at, and the arrow keys
+  should walk the week. **Choosing a day changes the block below it and nothing else**: no route, no
+  push, no back button. That is the whole reason the strip exists rather than a list of seven rows,
+  which cost a screen of height to say the same thing and made the day you cared about scroll.
+
+  Seven tiles inside 375px do not clear the 44px floor at the panel's own padding, so the strip is
+  pulled 4px past it and its gap drops to the mosaic's 2px. The mark is a fixed 24px, not the tile's
+  width: on a desktop column the tile is 100px and a mark that fills it stops being a mark.
+
+- **Multi-step form** — a screen that asks for several things of different sizes splits into steps
+  named by a §10.7 segmented control at the top, `1 · name & days` / `2 · exercises`. The control is
+  the way back as well as the progress: a stepper you cannot walk backwards through is a wizard, and
+  wizards are how people get stuck.
+
+  **Order the steps the way somebody thinks, not the way the schema is shaped.** Naming a thing and
+  saying when it happens is one small decision; filling it with content is a long one. Asking for the
+  long one first, and gating the short one behind it, is the arrangement that made the routine editor
+  feel wrong even though every field on it was correct.
+
+  Each step ends in a pair of buttons, the way out on the left and the way on on the right — `Cancel`
+  / `Next`, then `Back` / `Save`. A step's `Next` is disabled until that step is answered; `Save` is
+  disabled while the thing would be invalid, with the reason in mono `text-2xs` beneath it rather
+  than in a toast after the tap.
+
+  **A form with a Save button holds a draft and writes nothing before it.** This is the condition, not
+  a preference: a screen that saves each field as it is touched has nothing for Cancel to undo, which
+  is how one ends up offering Delete and a back link instead — the two things you are left with when
+  arriving somewhere has already changed the data. Where the draft is a list, it goes over in one
+  call so a save cannot half-apply.
+
+- **Floating add** — the one place Merit floats a control over the page instead of putting it in the
+  flow: adding to the list a screen is *about*, on a screen you scroll. 56px, `accent` on `bg`, a
+  lucide `+` at 22px, `radius-md` and square — a circle is a pill and §6 allows exactly two of those.
+  It takes the shadow the session bar takes, on the same licence: it genuinely floats.
+
+  It sits 12px above the tab bar, right-aligned, and **the list beneath it carries the padding to
+  clear it** — a fixed element takes no space in the flow and will otherwise sit on the last row.
+  **Only one floating thing at a time**: where the session bar can appear, the button hides. Two
+  targets fighting for the corner a thumb rests on is how the wrong one gets hit between sets.
+
+  It is not a general licence for a FAB. A screen with a single obvious action puts it in the flow
+  under the thing it acts on; this is for a list that grows, where the action outlives the scroll
+  position.
+
 - **Rest-day / next-session line** — one sentence, sans, `ink-muted`, on the dashboard, naming when
   the next session is due.
 - **Streak / consistency mark** — a mono `text-2xs` line with the significant number promoted to
@@ -959,6 +1044,13 @@ Motion is feedback. It confirms something happened; it never announces, decorate
 | Bottom sheet in/out | 250ms | `cubic-bezier(.4,0,.2,1)` |
 | Value change in a chart | 320ms | default |
 | Row removal (with undo) | 200ms | `ease-out` |
+| **A measurement arriving** | **460ms, once** | `cubic-bezier(.16,1,.3,1)` |
+| **A block replaced in place** | **200ms** | `cubic-bezier(.16,1,.3,1)` |
+| **A row of days that travelled** | **260ms** | `cubic-bezier(.16,1,.3,1)` |
+
+The last three share one exponential ease-out so a screen that moves in several places still moves
+like one thing. They live in `index.css` as `merit-sweep`, `merit-rise`, `merit-left` / `merit-right`
+and are applied by class, never re-declared per component.
 
 Rules:
 
@@ -966,7 +1058,17 @@ Rules:
   and disabling smooth scrolling.
 - **The press state is never transitioned.** A 150ms fade-in on `:active` reads as lag on touch,
   where there is no hover to precede it.
-- **Nothing auto-plays.** Merit has no self-running animation at all.
+- **One authored moment per screen, and it is a measurement arriving.** A bar or a ring fills from
+  nothing to its value once, when it mounts, over 460ms — never again, never on scroll, never on a
+  loop. Watching a measurement stop somewhere says more about where the day stands than finding it
+  already stopped, and it is the only thing on a screen allowed to move on its own. Everything else
+  moves because the reader did something.
+
+  This replaces an earlier flat ban on self-running animation. The ban was aimed at the right target
+  — the looping shimmer, the scroll-triggered entrance on every section, the number that counts up
+  because counting up looks expensive — and it caught the one honest case along with them. The rule
+  is *once, on the measurement, on the element the screen is about*. A second sweep on the same
+  screen means the screen has two subjects, which is a composition problem (§5.5), not a motion one.
 - Transform and opacity only, **with one exception: a disclosure may animate its own height** at
   150ms, matching the chevron beside it. The motion table above has always listed disclosure, and
   every other way of animating one is unavailable — `interpolate-size` and `calc-size()` are
@@ -974,6 +1076,8 @@ Rules:
   "height or nothing", and a section that snaps open gives no sense of where its content came from.
   Nothing else animates a size. No animated grid columns (§7).
 - **No celebratory motion.** Logging a meal is not an achievement to be confettied.
+- **Nothing loops, nothing repeats, nothing plays on scroll.** The one exception is the measurement
+  above, which plays once on mount.
 
 ---
 

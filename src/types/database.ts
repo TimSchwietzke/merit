@@ -230,7 +230,6 @@ export type Database = {
           goal: string | null
           height_cm: number | null
           locale: string
-          plan_paused_until: string | null
           sex: string | null
           theme: string
           updated_at: string
@@ -244,7 +243,6 @@ export type Database = {
           goal?: string | null
           height_cm?: number | null
           locale?: string
-          plan_paused_until?: string | null
           sex?: string | null
           theme?: string
           updated_at?: string
@@ -258,7 +256,6 @@ export type Database = {
           goal?: string | null
           height_cm?: number | null
           locale?: string
-          plan_paused_until?: string | null
           sex?: string | null
           theme?: string
           updated_at?: string
@@ -296,8 +293,7 @@ export type Database = {
           id: string
           position: number
           routine_id: string
-          target_reps: number
-          target_sets: number
+          set_reps: number[]
         }
         Insert: {
           created_at?: string
@@ -305,8 +301,7 @@ export type Database = {
           id?: string
           position: number
           routine_id: string
-          target_reps: number
-          target_sets: number
+          set_reps: number[]
         }
         Update: {
           created_at?: string
@@ -314,8 +309,7 @@ export type Database = {
           id?: string
           position?: number
           routine_id?: string
-          target_reps?: number
-          target_sets?: number
+          set_reps?: number[]
         }
         Relationships: [
           {
@@ -361,6 +355,41 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_sessions: {
+        Row: {
+          created_at: string
+          id: string
+          routine_id: string
+          scheduled_date: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          routine_id: string
+          scheduled_date: string
+          status: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          routine_id?: string
+          scheduled_date?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scheduled_sessions_routine_id_fkey"
+            columns: ["routine_id"]
+            isOneToOne: false
+            referencedRelation: "routines"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       weight_logs: {
         Row: {
           body_fat_pct: number | null
@@ -394,6 +423,7 @@ export type Database = {
       workout_sets: {
         Row: {
           created_at: string
+          done: boolean
           exercise_id: string
           id: string
           reps: number
@@ -406,6 +436,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          done?: boolean
           exercise_id: string
           id?: string
           reps: number
@@ -418,6 +449,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          done?: boolean
           exercise_id?: string
           id?: string
           reps?: number
@@ -488,7 +520,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      all_between: {
+        Args: { high: number; low: number; numbers: number[] }
+        Returns: boolean
+      }
+      set_routine_exercises: {
+        Args: { items: Json; routine: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

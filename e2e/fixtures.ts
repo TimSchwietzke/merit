@@ -56,13 +56,17 @@ export const ROUTES: Route[] = [
   { name: 'dashboard', path: '/' },
   { name: 'food', path: '/food' },
   { name: 'training', path: '/training' },
-  { name: 'more', path: '/more' },
+  { name: 'account', path: '/account' },
+  { name: 'cardio', path: '/cardio' },
   { name: 'weight', path: '/weight' },
   { name: 'food-add', path: '/food/add' },
   { name: 'food-scan', path: '/food/add?scan=1' },
   { name: 'goals', path: '/goals' },
   { name: 'training-add', path: '/training/add' },
-  { name: 'training-routines', path: '/training/routines' },
+  { name: 'training-routine', path: '/training/routines/r1' },
+  { name: 'training-routine-empty', path: '/training/routines/r3' },
+  { name: 'training-session', path: '/training/session?routine=r1' },
+  { name: 'training-day', path: '/training/day' },
   { name: 'not-found', path: '/nowhere' },
   { name: 'sign-in', path: '/sign-in', signedOut: true },
 ]
@@ -145,17 +149,36 @@ export async function stubBackend(
     },
   ]
 
-  await page.route('**/rest/v1/food_logs*', (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify([
-        { id: 'l1', meal_type: 'breakfast', quantity_g: 180, foods: FOODS[0] },
-        { id: 'l2', meal_type: 'breakfast', quantity_g: 60, foods: FOODS[1] },
-        { id: 'l3', meal_type: 'snack', quantity_g: 120, foods: FOODS[2] },
-      ]),
-    }),
-  )
+  await page.route('**/rest/v1/food_logs*', (route) => {
+    const json = (body: unknown) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) })
+
+    // The history asks for a window of days; the day view asks for the
+    // portions on one date. Same path, different questions.
+    if (route.request().url().includes('date=gte')) {
+      const day = (back: number) => {
+        const d = new Date()
+        d.setDate(d.getDate() - back)
+        return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      }
+      // Nine unbroken days, then a gap, so the strip has both states in it.
+      // The kcal vary either side of the 2100 target so the band count is not
+      // all-or-nothing.
+      return json(
+        [...Array(9).keys(), 11, 12].map((back) => ({
+          date: day(back),
+          quantity_g: 1000,
+          foods: { kcal_100g: back % 3 === 0 ? 150 : 210 },
+        })),
+      )
+    }
+
+    return json([
+      { id: 'l1', meal_type: 'breakfast', quantity_g: 180, foods: FOODS[0] },
+      { id: 'l2', meal_type: 'breakfast', quantity_g: 60, foods: FOODS[1] },
+      { id: 'l3', meal_type: 'snack', quantity_g: 120, foods: FOODS[2] },
+    ])
+  })
 
   // The catalogue answers three different questions on the same path, so the
   // stub reads the request rather than returning the same list to all of them:
@@ -239,12 +262,13 @@ export async function stubBackend(
       d.setDate(d.getDate() - back)
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
     }
-    const set = (id: string, exercise: (typeof EXERCISES)[number], n: number, reps: number, kg: number, date: string, rir: number | null = null) => ({
+    const set = (id: string, exercise: (typeof EXERCISES)[number], n: number, reps: number, kg: number, date: string, rir: number | null = null, done = true) => ({
       id,
       set_number: n,
       reps,
       weight_kg: kg,
       rir,
+      done,
       exercise_id: exercise.id,
       workouts: { date },
       exercises: exercise,
@@ -259,13 +283,17 @@ export async function stubBackend(
         set('s4', EXERCISES[0], 1, 8, 62.5, day(0), 2),
         set('s5', EXERCISES[0], 2, 8, 62.5, day(0), 1),
         set('s6', EXERCISES[2], 1, 10, 55, day(0)),
-        set('s7', EXERCISES[2], 2, 10, 55, day(0)),
+        // Waiting: the bar has a set to be on, and the rows have all three
+        // states between them.
+        set('s7', EXERCISES[2], 2, 10, 55, day(0), null, false),
+        set('s8', EXERCISES[2], 3, 10, 55, day(0), null, false),
       ]),
     })
   })
 
-  // One routine, planned for Monday and Thursday, so the start screen and the
-  // routine list both have something to show.
+  // Three routines: two with exercises on opposite halves of the week, and one
+  // with none at all — which is the case the list marks `unfinished` and the
+  // week is not allowed to plan.
   await page.route('**/rest/v1/routines*', (route) => {
     if (route.request().method() !== 'GET') {
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'r1' }) })
@@ -284,19 +312,39 @@ export async function stubBackend(
               id: 're1',
               exercise_id: 'x1',
               position: 0,
-              target_sets: 3,
-              target_reps: 8,
+              set_reps: [8, 8, 6],
               exercises: EXERCISES[0],
             },
             {
               id: 're2',
               exercise_id: 'x3',
               position: 1,
-              target_sets: 3,
-              target_reps: 10,
+              set_reps: [10, 10, 10],
               exercises: EXERCISES[2],
             },
           ],
+        },
+        {
+          id: 'r2',
+          name: 'Unterkörper',
+          position: 1,
+          routine_days: [{ weekday: 2 }, { weekday: 5 }],
+          routine_exercises: [
+            {
+              id: 're3',
+              exercise_id: 'x3',
+              position: 0,
+              set_reps: [12, 10, 8],
+              exercises: EXERCISES[2],
+            },
+          ],
+        },
+        {
+          id: 'r3',
+          name: 'Nacken & Schultern',
+          position: 2,
+          routine_days: [],
+          routine_exercises: [],
         },
       ]),
     })
@@ -306,9 +354,31 @@ export async function stubBackend(
     route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
   )
 
-  await page.route('**/rest/v1/workouts*', (route) =>
-    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'w1' }) }),
+  // Saving a routine's exercises is one call, so the stub is one too.
+  await page.route('**/rest/v1/rpc/**', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: 'null' }),
   )
+
+  await page.route('**/rest/v1/scheduled_sessions*', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
+  )
+
+  await page.route('**/rest/v1/workouts*', (route) => {
+    const url = route.request().url()
+    const json = (body: unknown) =>
+      route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(body) })
+
+    // The week screen asks for a range with the sets embedded; everything else
+    // wants the one row it just upserted.
+    if (url.includes('workout_sets')) {
+      const d = new Date()
+      const today = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+      return json([
+        { id: 'w1', date: today, routine_id: 'r1', workout_sets: [{ done: true }, { done: false }, { done: false }] },
+      ])
+    }
+    return json({ id: 'w1' })
+  })
 
   await page.route('**/rest/v1/nutrition_goals*', (route) =>
     route.fulfill({

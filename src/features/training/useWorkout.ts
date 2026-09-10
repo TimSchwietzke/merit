@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { useSession } from '@/features/auth/useSession'
 import { addDays } from '@/lib/date'
@@ -35,23 +35,54 @@ export interface WorkoutState {
     reps: number
     weightKg: number
     rir: number | null
+    done?: boolean
   }) => Promise<boolean>
   updateSet: (
     id: string,
-    values: { reps: number; weightKg: number; rir: number | null },
+    values: { reps: number; weightKg: number; rir: number | null; done?: boolean },
   ) => Promise<boolean>
   removeSet: (id: string) => Promise<boolean>
-  /** Write a routine's planned sets onto the day. Resolves false if any failed. */
+  /** Write a routine's planned sets onto a day — this one unless told another. */
   startRoutine: (plan: {
     routineId: string
-    exercises: { exerciseId: string; targetSets: number; targetReps: number }[]
+    /** Reps per set, in order — the plan says what each set is, not how many. */
+    exercises: { exerciseId: string; setReps: number[] }[]
+    forDate?: string
   }) => Promise<boolean>
 }
 
 /** How far back the comparison line is allowed to reach. */
 const WINDOW_DAYS = 180
 
-const SELECT = `id, set_number, reps, weight_kg, rir, exercise_id,
+/**
+ * One version number for every caller of this hook.
+ *
+ * There are three — the session bar's provider, the day screen and the session
+ * preview — and each used to hold its own private counter, so a write made
+ * through one was invisible to the others until something remounted them.
+ * Starting a routine from the preview wrote the sets and told nobody: the bar
+ * sat hidden until the page was reloaded, because the provider's query had no
+ * reason to run again.
+ *
+ * A write is a write. Whoever makes it, everyone reading the same table hears
+ * about it.
+ */
+let version = 0
+const listeners = new Set<() => void>()
+
+function published() {
+  version += 1
+  for (const listener of listeners) listener()
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener)
+  return () => {
+    listeners.delete(listener)
+  }
+}
+
+const SELECT = `id, set_number, reps, weight_kg, rir, done, exercise_id,
   workouts!inner (date),
   exercises!inner (id, name_en, name_de, muscle_group, equipment)`
 
@@ -61,6 +92,7 @@ type Row = {
   reps: number
   weight_kg: number
   rir: number | null
+  done: boolean
   exercise_id: string
   workouts: { date: string }
   exercises: {
@@ -79,6 +111,7 @@ const toSet = (row: Row): LoggedSet => ({
   reps: row.reps,
   weightKg: row.weight_kg,
   rir: row.rir,
+  done: row.done,
 })
 
 export function useWorkout(date: string): WorkoutState {
@@ -87,10 +120,10 @@ export function useWorkout(date: string): WorkoutState {
 
   const [rows, setRows] = useState<{ date: string; rows: Row[] } | null>(null)
   const [failed, setFailed] = useState(false)
-  // Bumped after a write, which is what re-runs the query. A reload function
-  // called from the effect would be a state write the effect owns; a token is
-  // the same reload expressed as a dependency.
-  const [reloads, setReloads] = useState(0)
+  // Bumped by any write from any caller, which is what re-runs the query. A
+  // reload function called from the effect would be a state write the effect
+  // owns; a token is the same reload expressed as a dependency.
+  const shared = useSyncExternalStore(subscribe, () => version)
   const rowsRef = useRef<Row[]>([])
 
   useEffect(() => {
@@ -117,7 +150,7 @@ export function useWorkout(date: string): WorkoutState {
     return () => {
       active = false
     }
-  }, [userId, date, reloads])
+  }, [userId, date, shared])
 
   const current = rows?.date === date ? rows.rows : null
   const status: WorkoutState['status'] = failed ? 'error' : current === null ? 'loading' : 'ready'
@@ -144,7 +177,13 @@ export function useWorkout(date: string): WorkoutState {
   const history: SessionSets[] = [...byDate].map(([day, daySets]) => ({ date: day, sets: daySets }))
 
   const addSet = useCallback(
-    async (set: { exerciseId: string; reps: number; weightKg: number; rir: number | null }) => {
+    async (set: {
+      exerciseId: string
+      reps: number
+      weightKg: number
+      rir: number | null
+      done?: boolean
+    }) => {
       if (!userId) return false
 
       // The day's workout is created on the first set rather than when the
@@ -172,17 +211,22 @@ export function useWorkout(date: string): WorkoutState {
         reps: set.reps,
         weight_kg: set.weightKg,
         rir: set.rir,
+        // A set added by hand is one being done now, not one being planned.
+        done: set.done ?? true,
       })
 
       if (error) return false
-      setReloads((n) => n + 1)
+      published()
       return true
     },
     [userId, date],
   )
 
   const updateSet = useCallback(
-    async (id: string, values: { reps: number; weightKg: number; rir: number | null }) => {
+    async (
+      id: string,
+      values: { reps: number; weightKg: number; rir: number | null; done?: boolean },
+    ) => {
       if (!userId) return false
       const { data, error } = await supabase
         .from('workout_sets')
@@ -190,6 +234,7 @@ export function useWorkout(date: string): WorkoutState {
           reps: values.reps,
           weight_kg: values.weightKg,
           rir: values.rir,
+          ...(values.done === undefined ? {} : { done: values.done }),
         })
         .eq('id', id)
         .eq('user_id', userId)
@@ -197,7 +242,7 @@ export function useWorkout(date: string): WorkoutState {
         .single()
 
       if (!data || error) return false
-      setReloads((n) => n + 1)
+      published()
       return true
     },
     [userId],
@@ -215,33 +260,60 @@ export function useWorkout(date: string): WorkoutState {
   const startRoutine = useCallback(
     async (plan: {
       routineId: string
-      exercises: { exerciseId: string; targetSets: number; targetReps: number }[]
+      exercises: { exerciseId: string; setReps: number[] }[]
+      forDate?: string
     }) => {
       if (!userId) return false
+      const on = plan.forDate ?? date
 
-      const workout = await supabase
+      // A day can hold several workouts now, so this is an insert rather than
+      // an upsert — but not a second one from the same routine, which would be
+      // the same session written twice by a double tap.
+      const existing = await supabase
         .from('workouts')
-        .upsert({ user_id: userId, date, routine_id: plan.routineId }, { onConflict: 'user_id,date' })
         .select('id')
-        .single()
+        .eq('user_id', userId)
+        .eq('date', on)
+        .eq('routine_id', plan.routineId)
+        .maybeSingle()
+
+      const workout = existing.data
+        ? existing
+        : await supabase
+            .from('workouts')
+            .insert({ user_id: userId, date: on, routine_id: plan.routineId })
+            .select('id')
+            .single()
+
       if (!workout.data || workout.error) return false
+      // Started already: its sets are what they are, and rewriting them would
+      // throw away everything logged so far. It still publishes — the caller is
+      // about to navigate to those sets, and a reader that was mounted before
+      // they existed has no other way to learn about them.
+      if (existing.data) {
+        published()
+        return true
+      }
+      const workoutId = workout.data.id
 
       const lastWeight = (exerciseId: string): number => {
         const earlier = rowsRef.current
-          .filter((row) => row.exercise_id === exerciseId && row.workouts.date < date)
+          .filter((row) => row.exercise_id === exerciseId && row.done && row.workouts.date < on)
           .sort((a, b) => b.workouts.date.localeCompare(a.workouts.date))
         return earlier[0]?.weight_kg ?? 0
       }
 
       const rows = plan.exercises.flatMap((entry) =>
-        Array.from({ length: entry.targetSets }, (_, index) => ({
-          workout_id: workout.data.id,
+        entry.setReps.map((reps, index) => ({
+          workout_id: workoutId,
           user_id: userId,
           exercise_id: entry.exerciseId,
           set_number: index + 1,
-          reps: entry.targetReps,
+          reps,
           weight_kg: lastWeight(entry.exerciseId),
           rir: null,
+          // Planned, not performed. It becomes true when it is logged.
+          done: false,
         })),
       )
 
@@ -250,7 +322,7 @@ export function useWorkout(date: string): WorkoutState {
         if (error) return false
       }
 
-      setReloads((n) => n + 1)
+      published()
       return true
     },
     [userId, date],
@@ -268,7 +340,7 @@ export function useWorkout(date: string): WorkoutState {
         .single()
 
       if (!data || error) return false
-      setReloads((n) => n + 1)
+      published()
       return true
     },
     [userId],

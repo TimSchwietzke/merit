@@ -6,12 +6,14 @@
     "label": "Main navigation",
     "path": "Path",
     "dashboard": "dashboard",
-    "food": "food",
     "training": "training",
-    "more": "more",
+    "cardio": "cardio",
+    "food": "food",
     "weight": "weight",
+    "account": "account",
     "goals": "goals",
-    "routines": "routines"
+    "routines": "routines",
+    "session": "session"
   },
   "common": {
     "notBuiltYet": "not built yet",
@@ -23,7 +25,20 @@
     "clearFilters": "clear",
     "filters": "Filters",
     "filtersOpen": "Filters, {{count}} active",
-    "close": "Close"
+    "close": "Close",
+    "streak": {
+      "nutrition": "kept up",
+      "training": "weeks to plan",
+      "days_one": "{{count}} day",
+      "days_other": "{{count}} days",
+      "weeks_one": "{{count}} week",
+      "weeks_other": "{{count}} weeks"
+    },
+    "week": {
+      "previous": "Previous week",
+      "next": "Next week",
+      "label": "this week"
+    }
   },
   "auth": {
     "signIn": {
@@ -59,11 +74,14 @@
         "rest": "Rest day.",
         "next": "Next is {{name}} on {{day}}.",
         "nextTomorrow": "Next is {{name}} tomorrow.",
-        "nothingPlanned": "No training day is planned in yet.",
-        "paused": "Plan paused until {{date}}.",
+        "nothingPlanned": "No routine is planned in yet.",
         "open": "Training"
       },
-      "loadFailed": "Today could not be loaded. Check your connection and try again."
+      "loadFailed": "Today could not be loaded. Check your connection and try again.",
+      "weight": {
+        "noTrend": "no trend yet",
+        "week": "{{delta}} kg this week"
+      }
     },
     "food": {
       "loadFailed": "The day's foods could not be loaded. Check your connection and try again.",
@@ -168,6 +186,15 @@
         "save": "Save changes",
         "saving": "Saving…",
         "delete": "Remove from the day"
+      },
+      "stats": {
+        "average": "average",
+        "onTarget": "on target",
+        "overDays_one": "over {{count}} day",
+        "overDays_other": "over {{count}} days",
+        "ofLogged_one": "of {{count}} logged",
+        "ofLogged_other": "of {{count}} logged",
+        "band": "within 20% of the target"
       }
     },
     "training": {
@@ -225,17 +252,6 @@
         "core": "core",
         "full_body": "full body"
       },
-      "start": {
-        "label": "start a session",
-        "due": "due today",
-        "other": "your other days",
-        "free": "Free session",
-        "freeHint": "pick exercises as you go",
-        "manage": "Training days",
-        "starting": "Starting…",
-        "startFailed": "That session did not start. Check your connection and try again.",
-        "paused": "plan paused until {{date}}"
-      },
       "setRow": {
         "add": "Add a set",
         "done": "Mark done",
@@ -243,34 +259,75 @@
         "planned": "planned",
         "save": "Save",
         "editing": "Editing set {{n}}"
-      }
-    },
-    "more": {
-      "planned": "Settings, data export and the legal pages go here.",
-      "preferences": {
-        "label": "preferences",
-        "language": "language",
-        "theme": "theme",
-        "languages": {
-          "de": "deutsch",
-          "en": "english"
-        },
-        "themes": {
-          "light": "light",
-          "dark": "dark",
-          "system": "system"
-        },
-        "saveFailed": "That preference did not save and has been put back. Check your connection and try again."
       },
-      "account": {
-        "label": "account",
-        "signedInAs": "signed in as",
-        "signOut": "Sign out",
-        "signingOut": "Signing out…"
+      "week": {
+        "label": "this week",
+        "today": "today",
+        "nothing": "nothing planned",
+        "put": "Put a routine on this day",
+        "putTitle": "which routine?",
+        "putFailed": "That did not save. Check your connection and try again.",
+        "open": "not started",
+        "progress": "{{logged}} of {{total}} sets done",
+        "setCount_one": "{{count}} set",
+        "setCount_other": "{{count}} sets",
+        "marks": "rest day · planned · done",
+        "move": "Move this session",
+        "moving": "Pick the day to swap {{name}} with.",
+        "moveCancel": "Cancel",
+        "swapConfirm": "Swap {{a}} ({{aDay}}) with {{b}} ({{bDay}})?",
+        "confirm": "Swap them",
+        "loadFailed": "Your week could not be loaded. Check your connection and try again.",
+        "putNew": "Make a new routine"
       },
-      "tracking": {
-        "label": "tracking",
-        "goals": "goals"
+      "session": {
+        "label": "the session",
+        "changeRoutine": "Do a different routine",
+        "changeRoutineTitle": "which routine?",
+        "replaced": "{{wanted}} instead of {{displaced}} on this day. {{displaced}} is back next week.",
+        "start": "Start the session",
+        "starting": "Starting…",
+        "startFailed": "That did not start. Check your connection and try again.",
+        "resume": "Open the session",
+        "removeSet": "One set fewer",
+        "addSet": "One set more",
+        "removeExercise": "Not today",
+        "sets": "{{sets}} × {{reps}}",
+        "empty": "nothing left in this session",
+        "unsaved": "changed for today",
+        "save": "Save the change",
+        "scopeTitle": "keep this change for…",
+        "scopeToday": "Today only",
+        "scopeTodayHint": "The routine itself is untouched.",
+        "scopeAlways": "Every future session",
+        "scopeAlwaysHint": "Changes the routine for good.",
+        "scopePick": "Pick the days",
+        "scopePickHint": "For a stretch where you have less time.",
+        "pickTitle": "which days?",
+        "pickDone": "Apply to {{count}} days",
+        "saveFailed": "That change did not save. Check your connection and try again.",
+        "moveHere": "Train today instead?",
+        "moveHereBody": "{{name}} is planned for {{day}}. Starting it now moves it to today.",
+        "moveConfirm": "Move it to today"
+      },
+      "bar": {
+        "title": "Session running",
+        "setOf": "Set {{n}} of {{total}}",
+        "log": "Log set",
+        "logging": "Logging…",
+        "expand": "Show the session",
+        "collapse": "Hide the session",
+        "finish": "End the session",
+        "finished": "Everything logged.",
+        "invalid": "Enter reps and a weight."
+      },
+      "stats": {
+        "volume": "volume",
+        "sessions": "sessions",
+        "perWeek": "/ week",
+        "against": "{{change}}% against the weeks before",
+        "weeks_one": "over {{count}} week",
+        "weeks_other": "over {{count}} weeks"
       }
     },
     "notFound": {
@@ -324,6 +381,13 @@
         "empty": "nothing logged yet",
         "editing": "editing",
         "emptyRange": "nothing logged in this range"
+      },
+      "stats": {
+        "mean": "average",
+        "change": "change",
+        "overDays_one": "over {{count}} weigh-in",
+        "overDays_other": "over {{count}} weigh-ins",
+        "acrossRange": "first to last in this range"
       }
     },
     "goals": {
@@ -391,40 +455,90 @@
       }
     },
     "routines": {
-      "title": "Training days",
-      "lead": "A training day you can start again: the exercises, in order, with the sets and reps they plan for.",
-      "label": "your days",
-      "empty": "no training day yet",
-      "newName": "name",
-      "newPlaceholder": "Upper body 1",
-      "create": "Add a training day",
-      "creating": "Adding…",
+      "label": "routines",
+      "empty": "no routine yet",
+      "defaultName": "New routine",
+      "create": "Add a routine",
       "createFailed": "That did not save. Check your connection and try again.",
-      "nameInvalid": "Give the day a name.",
-      "exerciseCount": "{{count}} exercises",
+      "exerciseCount_one": "{{count}} exercise",
+      "exerciseCount_other": "{{count}} exercises",
+      "unfinished": "no exercises yet",
       "noWeekday": "not planned in",
-      "loadFailed": "Your training days could not be loaded. Check your connection and try again.",
-      "back": "Back to training",
+      "loadFailed": "Your routines could not be loaded. Check your connection and try again.",
+      "back": "training",
       "editor": {
+        "unnamed": "a new routine",
+        "steps": "the two steps of a routine",
+        "stepPlan": "1 · name & days",
+        "stepExercises": "2 · exercises",
         "name": "name",
+        "namePlaceholder": "Upper body 1",
         "weekdays": "planned for",
         "weekdaysHint": " · leave empty to start it whenever",
         "exercises": "exercises",
         "addExercise": "Add an exercise",
+        "pickTitle": "which exercise?",
         "empty": "no exercises yet",
-        "sets": "sets",
+        "needsExercise": "a routine needs at least one",
         "reps": "reps",
         "up": "Move up",
         "down": "Move down",
         "remove": "Remove",
-        "deleteRoutine": "Delete this training day",
-        "deleted": "{{name}} deleted",
-        "saveFailed": "That change did not save. Check your connection and try again."
+        "cancel": "Cancel",
+        "next": "Next",
+        "back": "Back",
+        "save": "Save",
+        "saving": "Saving…",
+        "saveFailed": "That did not save. Check your connection and try again.",
+        "setN": "set {{n}}",
+        "addSet": "One set more",
+        "removeSet": "Remove set {{n}}"
       },
-      "pauseLabel": "pause the plan",
-      "pauseUntil": "until",
-      "pauseHint": " · nothing is due while paused",
-      "pauseClear": "Resume the plan"
+      "delete": "Delete",
+      "swipe": "Swipe a routine sideways to delete it.",
+      "deleted": "{{name}} deleted",
+      "undoFailed": "That could not be put back. Check your connection and try again."
+    },
+    "account": {
+      "planned": "Settings, data export and the legal pages go here.",
+      "preferences": {
+        "label": "preferences",
+        "language": "language",
+        "theme": "theme",
+        "languages": {
+          "de": "deutsch",
+          "en": "english"
+        },
+        "themes": {
+          "light": "light",
+          "dark": "dark",
+          "system": "system"
+        },
+        "saveFailed": "That preference did not save and has been put back. Check your connection and try again."
+      },
+      "account": {
+        "label": "account",
+        "signedInAs": "signed in as",
+        "signOut": "Sign out",
+        "signingOut": "Signing out…"
+      },
+      "tracking": {
+        "label": "tracking",
+        "goals": "goals"
+      }
+    },
+    "cardio": {
+      "planned": "Sessions, minutes and the calories they cost — after the four essentials work."
+    },
+    "error": {
+      "title": "That did not load",
+      "lead": "Something went wrong on the way to this screen. It has been logged. Going back to the start usually clears it.",
+      "reload": "Reload",
+      "home": "Back to the start",
+      "stale": {
+        "title": "merit was updated",
+        "lead": "This tab is running an older version and the screen you asked for has moved. Reloading picks up the new one; nothing you logged is affected."
+      }
     }
   }
 }
