@@ -18,6 +18,8 @@ export interface PathSegment {
     | 'nav.training'
     | 'nav.cardio'
     | 'nav.account'
+    | 'pages.legal.privacy.title'
+    | 'pages.legal.imprint.title'
     | 'nav.weight'
     | 'nav.goals'
     | 'nav.routines'
@@ -42,6 +44,8 @@ const PATHS: Record<string, PathSegment[]> = {
   '/training/day': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'common.today' }],
   '/training/session': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'nav.session' }],
   '/account': [ROOT, { labelKey: 'nav.account' }],
+  '/legal/privacy': [ROOT, { labelKey: 'pages.legal.privacy.title' }],
+  '/legal/imprint': [ROOT, { labelKey: 'pages.legal.imprint.title' }],
   '/cardio': [ROOT, { labelKey: 'nav.cardio' }],
   // Weight is a tab of its own now, so its path is two segments like the other
   // three. Goals stay under the account, which is where they are set from.

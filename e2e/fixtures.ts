@@ -1,5 +1,9 @@
 import { test as base, type Page } from '@playwright/test'
 
+import { PRIVACY_VERSION } from '../src/features/legal/version'
+
+
+
 /**
  * The visual harness (DESIGN.md §16.2: "opened at 375px, in German, in both
  * themes"). It renders every screen across the width sweep without touching the
@@ -57,6 +61,8 @@ export const ROUTES: Route[] = [
   { name: 'food', path: '/food' },
   { name: 'training', path: '/training' },
   { name: 'account', path: '/account' },
+  { name: 'legal-privacy', path: '/legal/privacy' },
+  { name: 'legal-imprint', path: '/legal/imprint' },
   { name: 'cardio', path: '/cardio' },
   { name: 'weight', path: '/weight' },
   { name: 'food-add', path: '/food/add' },
@@ -74,10 +80,16 @@ export const ROUTES: Route[] = [
 /** Signs the browser in and answers the profile query, offline. */
 export async function stubBackend(
   page: Page,
-  { theme, locale, signedOut = false }: { theme: Theme; locale: Locale; signedOut?: boolean },
+  {
+    theme,
+    locale,
+    signedOut = false,
+    /** Seed a chosen theme. Off for the probe that asserts the app writes none. */
+    seedTheme = true,
+  }: { theme: Theme; locale: Locale; signedOut?: boolean; seedTheme?: boolean },
 ) {
   await page.addInitScript(
-    ({ ref, user, expiresAt, theme, locale, signedOut }) => {
+    ({ ref, user, expiresAt, theme, locale, signedOut, seedTheme }) => {
       const session = {
         access_token: 'harness-access-token',
         refresh_token: 'harness-refresh-token',
@@ -96,13 +108,13 @@ export async function stubBackend(
       }
       if (!signedOut) window.localStorage.setItem(`sb-${ref}-auth-token`, JSON.stringify(session))
       // The theme is read synchronously by the bootstrap script before paint.
-      window.localStorage.setItem('merit.theme', theme)
+      if (seedTheme) window.localStorage.setItem('merit.theme', theme)
       // i18n falls back to navigator before the profile arrives; pin it so the
       // first frame is already in the language under test.
       Object.defineProperty(navigator, 'languages', { get: () => [locale] })
       Object.defineProperty(navigator, 'language', { get: () => locale })
     },
-    { ref: PROJECT_REF, user: USER, expiresAt: EXPIRES_AT, theme, locale, signedOut },
+    { ref: PROJECT_REF, user: USER, expiresAt: EXPIRES_AT, theme, locale, signedOut, seedTheme },
   )
 
   // A month of weigh-ins, so the chart renders with both series and a gap in it
@@ -428,7 +440,14 @@ export async function stubBackend(
         sex: 'male',
         activity_level: 'moderate',
         goal: 'lose',
-        plan_paused_until: null,
+        // Consent already given, at the current version of the notice: every
+        // screen test is about a signed-in account that is past the gate. The
+        // gate itself has its own test.
+        consent_at: '2026-09-01T09:00:00.000Z',
+        // Whatever the current notice is. While there is none the gate lets a
+        // development build through anyway, and once there is one this matches
+        // it — so the screen tests never sit behind the consent question.
+        consent_version: PRIVACY_VERSION,
       }),
     }),
   )

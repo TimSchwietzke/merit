@@ -233,3 +233,66 @@ test('a route that throws shows merit, not the framework', async ({ page }) => {
   await expect(page.getByText(/Hey developer/i)).toBeHidden()
   await expect(page.getByText(/\.tsx/)).toBeHidden()
 })
+
+test('nothing is stored on the device before the user acts', async ({ page }) => {
+  await stubBackend(page, { theme: 'light', locale: 'de', seedTheme: false })
+
+  // An account that has never chosen a theme. The default fixture simulates one
+  // that has, and a theme chosen on another device is a choice — this test is
+  // about the device that has made none.
+  await page.route('**/rest/v1/profiles*', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ locale: 'de', theme: 'system' }),
+    }),
+  )
+
+  await page.goto('/')
+  await waitForScreen(page)
+  await page.waitForTimeout(400)
+
+  const stored = await page.evaluate(() => ({
+    keys: Object.keys(localStorage).sort(),
+    session: Object.keys(sessionStorage),
+    cookie: document.cookie,
+  }))
+
+  // § 25 TDDDG: nothing may be written to the device without consent unless it
+  // is strictly necessary for the service the user asked for. Merit's answer is
+  // to write nothing at all until somebody acts.
+  //
+  // The sign-in token is the one exception the law names — it keeps the login
+  // the user explicitly requested — and the harness seeds it, so it is the only
+  // key allowed here. `merit.theme` must be *absent*: it is written when a
+  // theme is chosen, and a profile that says `system` is not a choice. That is
+  // the whole reason this app needs no consent banner, so it is asserted rather
+  // than believed.
+  expect(stored.keys.filter((key) => !key.startsWith('sb-'))).toEqual([])
+  expect(stored.session).toEqual([])
+  expect(stored.cookie).toBe('')
+})
+
+test('the app makes no third-party requests it was not asked to make', async ({ page }) => {
+  // Another sweep of every route; same budget as the other two.
+  test.setTimeout(180_000)
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+
+  const external: string[] = []
+  page.on('request', (request) => {
+    const host = new URL(request.url()).host
+    // The dev server and our own Supabase project are first party. Anything
+    // else reaching the network without the user starting a barcode scan is a
+    // recipient the privacy notice does not name.
+    if (!host.includes('127.0.0.1') && !host.includes('localhost') && !host.includes('supabase')) {
+      external.push(host)
+    }
+  })
+
+  for (const route of ROUTES) {
+    await page.goto(route.path)
+    await waitForScreen(page)
+  }
+
+  expect([...new Set(external)]).toEqual([])
+})

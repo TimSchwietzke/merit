@@ -1,0 +1,5 @@
+# merit is invite-only. There is nothing here for a crawler to index, and
+# staying out of search results is part of how it stays a private service
+# rather than one offered to the public.
+User-agent: *
+Disallow: /

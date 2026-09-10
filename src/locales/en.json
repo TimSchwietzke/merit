@@ -39,7 +39,8 @@
       "previous": "Previous week",
       "next": "Next week",
       "label": "this week"
-    }
+    },
+    "cancel": "Cancel"
   },
   "auth": {
     "signIn": {
@@ -572,6 +573,23 @@
       "tracking": {
         "label": "tracking",
         "goals": "goals"
+      },
+      "data": {
+        "label": "your data",
+        "lead": "Everything this account holds, and the way out of it.",
+        "export": "Download my data",
+        "exporting": "Preparing…",
+        "exportHint": "One JSON file: your profile, weigh-ins, food log, targets, routines and every set. Article 15 and 20.",
+        "exportFailed": "That did not download. Check your connection and try again.",
+        "delete": "Delete my account",
+        "deleting": "Deleting…",
+        "deleteHint": "Removes the account and everything scoped to it — weigh-ins, food log, routines, sets. Foods and exercises you added stay in the shared catalogue without your name on them. This cannot be undone.",
+        "deleteConfirm": "Delete this account and everything in it? This cannot be undone.",
+        "deleteConfirmLabel": "Delete everything",
+        "deleteFailed": "The account was not deleted. Check your connection and try again.",
+        "legal": "legal",
+        "privacy": "Privacy",
+        "imprint": "Imprint"
       }
     },
     "cardio": {
@@ -586,6 +604,33 @@
         "title": "merit was updated",
         "lead": "This tab is running an older version and the screen you asked for has moved. Reloading picks up the new one; nothing you logged is affected."
       }
+    },
+    "legal": {
+      "updated": "Last updated {{date}}",
+      "privacy": {
+        "title": "Privacy"
+      },
+      "imprint": {
+        "title": "Imprint"
+      },
+      "missing": "This page is not finished. Its text has not been supplied yet and must be in place before anybody is invited — see docs/LEGAL-INPUTS.md."
+    },
+    "consent": {
+      "title": "Before you start",
+      "lead": "merit records health data about you. German and EU law treats that as a special category, and it may only be processed if you explicitly agree to it. So this is asked once, on its own, and it is a real question.",
+      "what": "What you would be agreeing to",
+      "whatBody": "That merit may store and process your body weight, optionally your body fat percentage, what you eat, and how you train — exercises, sets, reps and weights. If you ask it to calculate a calorie target it also stores your height, date of birth, sex, activity level and goal.",
+      "why": "What it is used for",
+      "whyBody": "Showing you your own numbers, and nothing else. There is no advertising, no tracking, no profiling, no automated decision-making, and nothing is shared with anyone or sold. Nobody else can see your entries — not other people using this app, and not the person who runs it.",
+      "control": "What you keep",
+      "controlBody": "You can download everything as one file at any time, and you can delete the account and everything in it at any time — both under “account”, immediately, without asking anyone. Deleting is also how you withdraw this consent, because it is the only basis on which any of this is kept.",
+      "statement": "I explicitly consent to merit processing my health data as described above.",
+      "agree": "I agree",
+      "saving": "Saving…",
+      "read": "Read the full privacy notice",
+      "failed": "That did not save. Check your connection and try again.",
+      "decline": "If you would rather not, simply sign out. Nothing is recorded until you agree, and an account without this consent is never used.",
+      "notReady": "merit is not ready to be used yet: its privacy notice has not been published, so there is nothing to consent to. See docs/LEGAL-INPUTS.md."
     }
   }
 }
