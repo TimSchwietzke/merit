@@ -1,46 +1,48 @@
 import { BACK, FRONT, OUTLINE, SILHOUETTE, VIEW_BOX } from '@/components/muscle-paths'
 
 /**
- * A body with the muscles an exercise works filled in.
+ * A body with regions lit to whatever degree the caller asks for.
  *
- * This is the exercise illustration. Not a photograph of somebody in a gym —
- * 876 of those would be a different app bolted onto this one, and the catalogue
- * would be fixed while the design was broken. A silhouette drawn from our own
- * tokens is always present, always consistent, needs no licence to comply with,
- * and answers the question somebody actually scans a catalogue for: what does
- * this work.
+ * Two screens want this and they want different things from it. An exercise
+ * wants two states — what it works and what it helps with. The dashboard wants
+ * a continuous one — how long ago each part was trained, brightest today and
+ * dark after a week. So the component takes an intensity per region rather than
+ * a category, and both callers describe themselves in the same vocabulary.
  *
- * Three fills, told apart by density rather than by hue, the same rule the
- * mosaic and the week strip follow: `accent` for a primary muscle, the accent
- * at 45% for a secondary, `surface-2` for everything else. The body's own
- * contour is a stroke in `line-strong`, and the parts that are not muscles at
- * all — head, hands, feet — stay silhouette. The colour arrives through
- * `accent`, so the map is oxide inside training and steel inside weight without
- * being told which.
+ * The light is one hue at varying strength, never a second colour: the accent
+ * mixed into `surface-2` by however much the caller asked for. That is the same
+ * fill-density rule the mosaic and the week strip follow, and it is why the map
+ * still reads in greyscale and to a red-green deficiency. Colour arrives
+ * through `accent`, so the body is oxide inside training and moss on the
+ * dashboard without being told which.
  *
- * `role="img"` with the muscles named: a screen reader gets the sentence the
- * picture is making, because an SVG of ninety paths is otherwise silence.
+ * Regions that are not muscles at all — head, hands, feet — stay silhouette
+ * whatever is passed for them.
+ *
+ * `role="img"` with a written label: an SVG of ninety paths is otherwise
+ * silence, and the sentence is the part worth hearing.
  */
 export function MuscleMap({
-  primary,
-  secondary = [],
+  regions,
   label,
   className = '',
+  reveal = false,
 }: {
-  /** Slugs from `muscle-paths` — `chest`, `triceps`, `upper-back`. */
-  primary: readonly string[]
-  secondary?: readonly string[]
+  /** Slug → 0..1. Anything absent is unlit. */
+  regions: Readonly<Record<string, number>>
   label: string
   className?: string
+  /** Light the regions on mount instead of finding them already lit (§13). */
+  reveal?: boolean
 }) {
-  const first = new Set(primary)
-  const second = new Set(secondary)
-
+  // Unlit is `line`, not `surface-2`: on the near-black ground a plane-coloured
+  // body reads as a shadow of one. `line` is the structural neutral and it is
+  // the point at which a shape becomes a body you can see before anything on it
+  // has lit up.
   const fill = (slug: string) => {
-    if (SILHOUETTE.has(slug)) return 'var(--merit-surface-2)'
-    if (first.has(slug)) return 'var(--merit-accent)'
-    if (second.has(slug)) return 'color-mix(in oklab, var(--merit-accent) 45%, transparent)'
-    return 'var(--merit-surface-2)'
+    const lit = SILHOUETTE.has(slug) ? 0 : Math.max(0, Math.min(1, regions[slug] ?? 0))
+    if (lit === 0) return 'var(--merit-line)'
+    return `color-mix(in oklab, var(--merit-accent) ${Math.round(lit * 100)}%, var(--merit-line))`
   }
 
   return (
@@ -62,7 +64,18 @@ export function MuscleMap({
             vectorEffect="non-scaling-stroke"
           />
           {Object.entries(side === 'front' ? FRONT : BACK).map(([slug, paths]) =>
-            paths.map((d, index) => <path key={`${slug}-${index}`} d={d} fill={fill(slug)} />),
+            paths.map((d, index) => (
+              <path
+                key={`${slug}-${index}`}
+                d={d}
+                fill={fill(slug)}
+                // A reading arriving rather than one already there — the same
+                // authored moment a bar makes, on a shape instead of a length.
+                // Once, on mount; `prefers-reduced-motion` lands it on the end
+                // state in the first frame.
+                className={reveal ? 'merit-light' : undefined}
+              />
+            )),
           )}
         </svg>
       ))}

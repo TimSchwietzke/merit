@@ -236,6 +236,10 @@ export async function stubBackend(
     { id: 'x1', name_en: 'Bench press', name_de: 'Bankdrücken', muscle_group: 'chest', equipment: 'barbell', primary_muscles: ['chest'], secondary_muscles: ['triceps', 'shoulders'] },
     { id: 'x2', name_en: 'Barbell back squat', name_de: 'Kniebeuge mit Langhantel', muscle_group: 'legs', equipment: 'barbell', primary_muscles: ['quadriceps'], secondary_muscles: ['glutes', 'hamstrings', 'lower back'] },
     { id: 'x3', name_en: 'Lat pulldown', name_de: 'Latzug', muscle_group: 'back', equipment: 'cable', primary_muscles: ['lats'], secondary_muscles: ['biceps', 'middle back'] },
+    // Trained a few days back, so the recency map has legs at half strength.
+    // Squats stay untrained: a catalogue with nothing ever done in it is a case
+    // the day screen has to handle and one exercise has to keep covering.
+    { id: 'x4', name_en: 'Leg press', name_de: 'Beinpresse', muscle_group: 'legs', equipment: 'machine', primary_muscles: ['quadriceps'], secondary_muscles: ['glutes', 'hamstrings'] },
   ]
 
   await page.route('**/rest/v1/exercises*', (route) =>
@@ -282,6 +286,10 @@ export async function stubBackend(
       status: 200,
       contentType: 'application/json',
       body: JSON.stringify([
+        // A leg day five days back, so the recency map has a gradient rather
+        // than one bright week and darkness behind it.
+        set('s9', EXERCISES[3], 1, 10, 120, day(5)),
+        set('s10', EXERCISES[3], 2, 10, 120, day(5)),
         set('s1', EXERCISES[0], 1, 8, 60, day(3)),
         set('s2', EXERCISES[0], 2, 8, 60, day(3)),
         set('s3', EXERCISES[0], 3, 7, 60, day(3)),

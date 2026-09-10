@@ -1,5 +1,5 @@
 import { MuscleMap } from '@/components/MuscleMap'
-import { onBody } from '@/lib/muscles'
+import { onBody, worksRegions } from '@/lib/muscles'
 import type { ExerciseRef } from '@/features/training/useWorkout'
 
 /**
@@ -43,8 +43,7 @@ export function ExerciseFigure({
 
   return (
     <MuscleMap
-      primary={onBody(exercise.primaryMuscles)}
-      secondary={onBody(exercise.secondaryMuscles)}
+      regions={worksRegions(onBody(exercise.primaryMuscles), onBody(exercise.secondaryMuscles))}
       label={label}
       className={className}
     />

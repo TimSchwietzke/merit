@@ -32,7 +32,8 @@
       "days_one": "{{count}} day",
       "days_other": "{{count}} days",
       "weeks_one": "{{count}} week",
-      "weeks_other": "{{count}} weeks"
+      "weeks_other": "{{count}} weeks",
+      "none": "nothing to report yet"
     },
     "week": {
       "previous": "Previous week",
@@ -81,6 +82,33 @@
       "weight": {
         "noTrend": "no trend yet",
         "week": "{{delta}} kg this week"
+      },
+      "regions": {
+        "abs": "abs",
+        "adductors": "adductors",
+        "biceps": "biceps",
+        "calves": "calves",
+        "chest": "chest",
+        "deltoids": "shoulders",
+        "forearm": "forearms",
+        "gluteal": "glutes",
+        "hamstring": "hamstrings",
+        "lower-back": "lower back",
+        "neck": "neck",
+        "obliques": "obliques",
+        "quadriceps": "quads",
+        "tibialis": "shins",
+        "trapezius": "traps",
+        "triceps": "triceps",
+        "upper-back": "back"
+      },
+      "recency": {
+        "label": "what you have trained lately",
+        "never": "{{region}} has had nothing at all",
+        "cold": "{{region}} last, over a week ago",
+        "longest_one": "{{region}} last, {{count}} day ago",
+        "longest_other": "{{region}} last, {{count}} days ago",
+        "fresh": "every part inside the last two days"
       }
     },
     "food": {

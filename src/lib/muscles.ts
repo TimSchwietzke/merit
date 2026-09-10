@@ -94,3 +94,21 @@ export function groupOf(primary: readonly string[]): string {
   // The first primary decides; a lift is filed under what it is mainly for.
   return GROUP[primary[0] as Muscle] ?? 'full_body'
 }
+
+/**
+ * An exercise's muscles as the body map's intensities: full for what it works,
+ * a little under half for what it helps with.
+ *
+ * Two states expressed in the continuous vocabulary the map takes, so the
+ * dashboard's recency shading and an exercise's two categories are the same
+ * kind of thing to the component drawing them.
+ */
+export function worksRegions(
+  primary: readonly string[],
+  secondary: readonly string[] = [],
+): Record<string, number> {
+  const regions: Record<string, number> = {}
+  for (const slug of secondary) regions[slug] = 0.45
+  for (const slug of primary) regions[slug] = 1
+  return regions
+}
