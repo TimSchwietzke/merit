@@ -206,3 +206,21 @@ test('each domain retints the interface, and the wordmark keeps the brand', asyn
   await waitForScreen(page)
   await expect(page.getByLabel('Pfad')).toBeVisible()
 })
+
+test('a route that throws shows merit, not the framework', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'dark', locale: 'de' })
+
+  // What a tab left open across a deploy hits: the chunk it asks for is gone.
+  await page.route('**/WeightPage*.js', (route) => route.fulfill({ status: 404, body: '' }))
+  await page.route('**/WeightPage*.tsx', (route) => route.fulfill({ status: 404, body: '' }))
+
+  await page.goto('/weight')
+  await expect(page.getByText('merit wurde aktualisiert')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Neu laden' })).toBeVisible()
+
+  // None of the framework's developer screen, and no stack anywhere on it.
+  await expect(page.getByText(/Unexpected Application Error/i)).toBeHidden()
+  await expect(page.getByText(/Hey developer/i)).toBeHidden()
+  await expect(page.getByText(/\.tsx/)).toBeHidden()
+})

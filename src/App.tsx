@@ -2,6 +2,7 @@ import { lazy } from 'react'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 
 import { AppShell } from '@/components/shell/AppShell'
+import RouteError from '@/components/shell/RouteError'
 import { RequireAuth } from '@/features/auth/RequireAuth'
 import { SessionProvider } from '@/features/auth/SessionProvider'
 import SignInPage from '@/features/auth/SignInPage'
@@ -27,9 +28,13 @@ const WeightPage = lazy(() => import('@/features/weight/WeightPage'))
 // One route, one file (DESIGN.md §7). Everything except /sign-in sits behind
 // RequireAuth — there is no public page in Merit and no open sign-up.
 const router = createBrowserRouter([
-  { path: '/sign-in', element: <SignInPage /> },
+  { path: '/sign-in', element: <SignInPage />, errorElement: <RouteError /> },
   {
     element: <RequireAuth />,
+    // On the auth boundary rather than deeper, so it catches a route that
+    // throws *and* a lazy chunk that never arrives — the second is what a tab
+    // left open across a deploy hits, and it happens before any screen mounts.
+    errorElement: <RouteError />,
     children: [
       {
         element: <AppShell />,
