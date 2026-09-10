@@ -15,7 +15,9 @@ import { Confirm } from '@/components/ui/confirm'
 import { Sheet } from '@/components/ui/sheet'
 import { plannable, useRoutines, type Routine } from '@/features/routines/useRoutines'
 import { useActiveSession } from '@/features/training/useActiveSession'
+import { TrainingStats } from '@/features/training/TrainingStats'
 import { useSchedule, type DaySession, type ScheduleDay } from '@/features/training/useSchedule'
+import { useWorkout } from '@/features/training/useWorkout'
 import { addDays, todayKey } from '@/lib/date'
 import { formatDayLong, formatDayRange, formatDayShort, weekdayLabel } from '@/lib/format'
 import { addTo, isPast, swap, weekOf } from '@/lib/schedule'
@@ -46,6 +48,7 @@ export default function WeekPage() {
   const [selected, setSelected] = useState(today)
   const week = useMemo(() => weekOf(selected), [selected])
 
+  const { history } = useWorkout(today)
   const { routines, status: routinesStatus, create, remove, restore } = useRoutines()
   const planned = useMemo(() => plannable(routines), [routines])
   const { days, overrides, status, apply } = useSchedule(week[0], week[6], planned)
@@ -121,6 +124,8 @@ export default function WeekPage() {
           onNew={() => void addRoutine()}
         />
       )}
+
+      <TrainingStats history={history} today={today} locale={locale} />
 
       <RoutineList
         routines={routines}
@@ -209,11 +214,11 @@ function WeekStrip({
 
   const range = formatDayRange(week[0], week[6], locale)
 
-  // Bare on the page, not inside a Panel. Three bordered boxes down a screen
-  // is three things claiming to be the subject; the week is reference, and
-  // reference does not need a frame.
+  // A plane lifted off the ground by fill, with no border doing the work. On
+  // the dark ground the step is the structure; the week is reference and reads
+  // as one block you consult, rather than as seven controls loose on the page.
   return (
-    <div>
+    <div className="rounded-lg bg-surface p-2">
       <div className="flex items-center justify-between gap-2">
         <Button variant="bare" size="icon" aria-label={t('pages.training.week.prev')} onClick={() => onShift(-1)}>
           <ChevronLeft />

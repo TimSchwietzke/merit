@@ -6,9 +6,19 @@ import { ROUTES, expect, stubBackend, test, waitForScreen } from './fixtures'
  * browser actually resolved.
  */
 
+// `accent` is the moss the sign-in screen wears: outside a domain, the default
+// stands. The training and weight routes rebind it (tokens.css), which is what
+// the domain probe below checks.
 const TOKENS = {
   light: { ink: 'rgb(38, 37, 33)', inkFaint: 'rgb(115, 108, 92)', accent: 'rgb(79, 107, 44)' },
-  dark: { ink: 'rgb(219, 215, 202)', inkFaint: 'rgb(151, 144, 131)', accent: 'rgb(168, 194, 122)' },
+  dark: { ink: 'rgb(230, 227, 220)', inkFaint: 'rgb(148, 143, 136)', accent: 'rgb(168, 194, 122)' },
+} as const
+
+/** The domain hues, dark theme. See `tokens.css`. */
+const DOMAIN = {
+  '/food': 'rgb(168, 194, 122)',
+  '/training': 'rgb(212, 136, 92)',
+  '/weight': 'rgb(143, 180, 216)',
 } as const
 
 for (const theme of ['light', 'dark'] as const) {
@@ -159,4 +169,34 @@ test('the undo toast clears the tab bar', async ({ page }) => {
     .evaluate((el) => el.getBoundingClientRect().top)
 
   expect(toast, 'toast overlaps the tab bar').toBeLessThanOrEqual(bar)
+})
+
+test('each domain retints the interface, and the wordmark keeps the brand', async ({ page }) => {
+  await stubBackend(page, { theme: 'dark', locale: 'de' })
+
+  for (const [route, hue] of Object.entries(DOMAIN)) {
+    await page.goto(route)
+    await waitForScreen(page)
+    const accent = await page.evaluate(() =>
+      getComputedStyle(document.querySelector('[data-domain], main')!).getPropertyValue(
+        '--merit-accent',
+      ),
+    )
+    // The variable resolves through `var()`, so compare what it paints with.
+    const painted = await page.evaluate((value) => {
+      const probe = document.createElement('span')
+      probe.style.color = value.trim()
+      document.body.append(probe)
+      const colour = getComputedStyle(probe).color
+      probe.remove()
+      return colour
+    }, accent)
+    expect(painted, route).toBe(hue)
+  }
+
+  // Whatever the section, the wordmark is merit's own green.
+  await page.setViewportSize({ width: 1440, height: 900 })
+  await page.goto('/training')
+  await waitForScreen(page)
+  await expect(page.getByLabel('Pfad')).toBeVisible()
 })

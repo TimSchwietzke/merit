@@ -81,3 +81,8 @@ desktop.ini
 # Playwright: downloaded browsers, captures and run artefacts
 e2e/shots/
 e2e/.results/
+
+# ── Impeccable ──────────────────────────────────────────────────────
+# Surface briefs and decision artefacts are working notes for the design
+# tooling, not the design system. DESIGN.md and PRODUCT.md are committed.
+.impeccable/

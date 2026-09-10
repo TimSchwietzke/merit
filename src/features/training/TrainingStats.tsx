@@ -1,0 +1,129 @@
+import { useTranslation } from 'react-i18next'
+import { Area, AreaChart, ResponsiveContainer } from 'recharts'
+
+import { Panel } from '@/components/Panel'
+import { formatNumber } from '@/lib/format'
+import { trend, weeklyVolume, type WeekPoint } from '@/lib/progress'
+import type { SessionSets } from '@/lib/training'
+
+/**
+ * What the last eight weeks of training look like, as two readings side by
+ * side (GOAL.md §2.1).
+ *
+ * The training screen had no answer to "is anything moving" — the reason
+ * anybody opens this tab on a rest day. Two cards answer it: how much was
+ * lifted, and how often. A number at full size with its shape underneath, which
+ * is the arrangement an instrument uses when the value matters more than the
+ * curve but the curve is why you believe the value.
+ *
+ * The charts have no axes, no gridlines and no tooltip. At 165px wide those are
+ * illegible ornament; the figure above carries the value and the shape carries
+ * the direction. The full series with its axes belongs on a screen of its own.
+ */
+export function TrainingStats({
+  history,
+  today,
+  locale,
+}: {
+  history: SessionSets[]
+  today: string
+  locale: string
+}) {
+  const { t } = useTranslation()
+  const points = weeklyVolume(history, today, 8)
+  const latest = points[points.length - 1]
+
+  // Nothing logged in two months is not a chart, it is a fact about the
+  // account. §10.8: say so in the space it would occupy.
+  if (points.every((point) => point.volumeKg === 0)) return null
+
+  const change = trend(points)
+
+  return (
+    <section className="mt-6 grid grid-cols-2 gap-3">
+      <Stat
+        label={t('pages.training.stats.volume')}
+        value={formatNumber(latest.volumeKg / 1000, locale, 1)}
+        unit="t"
+        // A change against the weeks before it, said as a number rather than
+        // coloured green or red: §17 forbids a traffic-light scale on a figure,
+        // and a light week is not a failure.
+        note={
+          change === null
+            ? undefined
+            : t('pages.training.stats.against', {
+                change: `${change > 0 ? '+' : ''}${formatNumber(change * 100, locale, 0)}`,
+              })
+        }
+        points={points}
+        series="volumeKg"
+      />
+      <Stat
+        label={t('pages.training.stats.sessions')}
+        value={String(latest.sessions)}
+        unit={t('pages.training.stats.perWeek')}
+        note={t('pages.training.stats.weeks', { count: points.length })}
+        points={points}
+        series="sessions"
+      />
+    </section>
+  )
+}
+
+function Stat({
+  label,
+  value,
+  unit,
+  note,
+  points,
+  series,
+}: {
+  label: string
+  value: string
+  unit: string
+  note?: string
+  points: WeekPoint[]
+  series: 'volumeKg' | 'sessions'
+}) {
+  // Unique per card: two gradients with one id means the second chart paints
+  // with the first one's fill.
+  const fill = `fill-${series}`
+
+  return (
+    <Panel className="flex flex-col gap-3 p-4">
+      <p className="font-mono text-2xs text-ink-faint">{label}</p>
+
+      <p className="font-mono tabular-nums leading-none">
+        <span className="text-3xl font-medium text-ink">{value}</span>
+        <span className="ml-1 text-2xs text-ink-faint">{unit}</span>
+      </p>
+
+      {/* `aria-hidden`: the figure above already says everything this shape
+          says, and a screen reader reading eight unlabelled numbers is worse
+          than silence. */}
+      <div aria-hidden className="-mx-1 h-12">
+        <ResponsiveContainer width="100%" height="100%">
+          <AreaChart data={points} margin={{ top: 2, right: 0, bottom: 0, left: 0 }}>
+            <defs>
+              <linearGradient id={fill} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="var(--merit-accent)" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="var(--merit-accent)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <Area
+              type="monotone"
+              dataKey={series}
+              stroke="var(--merit-accent)"
+              strokeWidth={2}
+              fill={`url(#${fill})`}
+              isAnimationActive={false}
+              dot={false}
+            />
+          </AreaChart>
+        </ResponsiveContainer>
+      </div>
+
+      {note ? <p className="font-mono text-2xs text-ink-faint">{note}</p> : null}
+    </Panel>
+  )
+}

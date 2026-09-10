@@ -295,6 +295,14 @@
         "finish": "Einheit beenden",
         "finished": "Alles eingetragen.",
         "invalid": "Trage Wiederholungen und ein Gewicht ein."
+      },
+      "stats": {
+        "volume": "volumen",
+        "sessions": "einheiten",
+        "perWeek": "/ woche",
+        "against": "{{change}}% gegenüber den Wochen davor",
+        "weeks_one": "über {{count}} Woche",
+        "weeks_other": "über {{count}} Wochen"
       }
     },
     "more": {

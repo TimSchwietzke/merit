@@ -1,9 +1,27 @@
 /*
- * Merit design tokens. Two complete themes, resolved to a `data-theme` attribute
- * on <html> by the bootstrap script in index.html before the first paint.
+ * Merit design tokens.
  *
- * Neutrals follow the Vitesse editor themes, shared with NCLA.
- * Accent: Moss. Worst contrast ratio 5.31:1 — see DESIGN.md §16.3.
+ * **Dark is the design; light is its translation.** Every elevation and every
+ * hue was chosen against the near-black ground and then carried across, because
+ * a plane that lifts by fill rather than by a hairline only works when the
+ * ground is dark enough for the step to read.
+ *
+ * **Three domain hues, one at a time.** `--merit-accent` is not a constant: it
+ * is whatever the domain the reader is inside says it is, rebound by the
+ * `data-domain` attribute below. Everything already written against `accent` —
+ * the focus ring, the active tab, a filled bar, a selected day, a primary
+ * button — retints with it and needed no change to do so. The hue lives on what
+ * you touch and on what you measure, never scattered as decoration.
+ *
+ *   moss   nutrition   what you eat, and merit's own green
+ *   oxide  training    what you lift; the colour of a rusted plate
+ *   steel  weight      what you measure
+ *
+ * The dashboard has no hue of its own. It is where the three meet, and each
+ * block there wears the colour of the domain it reports on.
+ *
+ * Contrast: every hue clears WCAG AA (4.5:1) against all three dark planes.
+ * Worst case is oxide on `surface-2` at 5.73:1 — see DESIGN.md §16.3.
  */
 
 :root {
@@ -11,14 +29,22 @@
 
   --merit-bg: #fdfcf9;
   --merit-surface: #ffffff;
-  --merit-surface-2: #f4f1ea;
+  --merit-surface-2: #f2efe8;
   --merit-line: #e5e0d5;
   --merit-line-strong: #d5cdbd;
   --merit-ink: #262521;
   --merit-ink-muted: #6b6555;
   --merit-ink-faint: #736c5c;
-  --merit-accent: #4f6b2c;
-  --merit-accent-soft: #eef2e2;
+
+  --merit-moss: #4f6b2c;
+  --merit-moss-soft: #eef2e2;
+  --merit-oxide: #a35a30;
+  --merit-oxide-soft: #f8ece4;
+  --merit-steel: #37648f;
+  --merit-steel-soft: #e7eef6;
+
+  --merit-accent: var(--merit-moss);
+  --merit-accent-soft: var(--merit-moss-soft);
   --merit-danger: #a33a2b;
 
   /* Charts only. Never referenced outside a chart component. */
@@ -32,17 +58,25 @@
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --merit-bg: #121212;
-  --merit-surface: #1a1a1a;
-  --merit-surface-2: #222220;
-  --merit-line: #2c2c29;
-  --merit-line-strong: #3a3a36;
-  --merit-ink: #dbd7ca;
-  --merit-ink-muted: #a29c8b;
-  --merit-ink-faint: #979083;
-  --merit-accent: #a8c27a;
-  --merit-accent-soft: #1b2113;
-  --merit-danger: #cb7676;
+  --merit-bg: #0e0e0f;
+  --merit-surface: #17181a;
+  --merit-surface-2: #202124;
+  --merit-line: #2a2b2e;
+  --merit-line-strong: #3b3d41;
+  --merit-ink: #e6e3dc;
+  --merit-ink-muted: #a5a099;
+  --merit-ink-faint: #948f88;
+
+  --merit-moss: #a8c27a;
+  --merit-moss-soft: #1a2113;
+  --merit-oxide: #d4885c;
+  --merit-oxide-soft: #241710;
+  --merit-steel: #8fb4d8;
+  --merit-steel-soft: #141d26;
+
+  --merit-accent: var(--merit-moss);
+  --merit-accent-soft: var(--merit-moss-soft);
+  --merit-danger: #e08a7a;
 
   --merit-chart-1: #a8c27a;
   --merit-chart-2: #d0a874;
@@ -56,17 +90,25 @@
   :root:not([data-theme="light"]) {
     color-scheme: dark;
 
-    --merit-bg: #121212;
-    --merit-surface: #1a1a1a;
-    --merit-surface-2: #222220;
-    --merit-line: #2c2c29;
-    --merit-line-strong: #3a3a36;
-    --merit-ink: #dbd7ca;
-    --merit-ink-muted: #a29c8b;
-    --merit-ink-faint: #979083;
-    --merit-accent: #a8c27a;
-    --merit-accent-soft: #1b2113;
-    --merit-danger: #cb7676;
+    --merit-bg: #0e0e0f;
+    --merit-surface: #17181a;
+    --merit-surface-2: #202124;
+    --merit-line: #2a2b2e;
+    --merit-line-strong: #3b3d41;
+    --merit-ink: #e6e3dc;
+    --merit-ink-muted: #a5a099;
+    --merit-ink-faint: #948f88;
+
+    --merit-moss: #a8c27a;
+    --merit-moss-soft: #1a2113;
+    --merit-oxide: #d4885c;
+    --merit-oxide-soft: #241710;
+    --merit-steel: #8fb4d8;
+    --merit-steel-soft: #141d26;
+
+    --merit-accent: var(--merit-moss);
+    --merit-accent-soft: var(--merit-moss-soft);
+    --merit-danger: #e08a7a;
 
     --merit-chart-1: #a8c27a;
     --merit-chart-2: #d0a874;
@@ -74,4 +116,19 @@
     --merit-chart-4: #6f6a5e;
     --merit-chart-5: #a8c27a;
   }
+}
+
+/* ── The domain hue ──────────────────────────────────────────────────
+   One attribute on the app frame retints the whole interface, because every
+   component was already written against `accent` rather than against a colour.
+   `nutrition` is moss and so needs no rule: moss is the default and the
+   wordmark keeps it wherever it renders. */
+[data-domain="training"] {
+  --merit-accent: var(--merit-oxide);
+  --merit-accent-soft: var(--merit-oxide-soft);
+}
+
+[data-domain="weight"] {
+  --merit-accent: var(--merit-steel);
+  --merit-accent-soft: var(--merit-steel-soft);
 }

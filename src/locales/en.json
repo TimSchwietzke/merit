@@ -295,6 +295,14 @@
         "finish": "End the session",
         "finished": "Everything logged.",
         "invalid": "Enter reps and a weight."
+      },
+      "stats": {
+        "volume": "volume",
+        "sessions": "sessions",
+        "perWeek": "/ week",
+        "against": "{{change}}% against the weeks before",
+        "weeks_one": "over {{count}} week",
+        "weeks_other": "over {{count}} weeks"
       }
     },
     "more": {
