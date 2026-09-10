@@ -7,8 +7,6 @@ export interface ActiveSessionState {
   sets: LoggedSet[]
   exercises: Map<string, ExerciseRef>
   active: LoggedSet | null
-  /** Bumped by every write, so anything reading today's sets refetches. */
-  revision: number
   running: boolean
   ended: boolean
   choose: (setId: string) => void

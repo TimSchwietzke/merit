@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
 import { useSession } from '@/features/auth/useSession'
 import { addDays } from '@/lib/date'
@@ -54,6 +54,34 @@ export interface WorkoutState {
 /** How far back the comparison line is allowed to reach. */
 const WINDOW_DAYS = 180
 
+/**
+ * One version number for every caller of this hook.
+ *
+ * There are three — the session bar's provider, the day screen and the session
+ * preview — and each used to hold its own private counter, so a write made
+ * through one was invisible to the others until something remounted them.
+ * Starting a routine from the preview wrote the sets and told nobody: the bar
+ * sat hidden until the page was reloaded, because the provider's query had no
+ * reason to run again.
+ *
+ * A write is a write. Whoever makes it, everyone reading the same table hears
+ * about it.
+ */
+let version = 0
+const listeners = new Set<() => void>()
+
+function published() {
+  version += 1
+  for (const listener of listeners) listener()
+}
+
+function subscribe(listener: () => void) {
+  listeners.add(listener)
+  return () => {
+    listeners.delete(listener)
+  }
+}
+
 const SELECT = `id, set_number, reps, weight_kg, rir, done, exercise_id,
   workouts!inner (date),
   exercises!inner (id, name_en, name_de, muscle_group, equipment)`
@@ -86,16 +114,16 @@ const toSet = (row: Row): LoggedSet => ({
   done: row.done,
 })
 
-export function useWorkout(date: string, revision = 0): WorkoutState {
+export function useWorkout(date: string): WorkoutState {
   const { session } = useSession()
   const userId = session?.user.id
 
   const [rows, setRows] = useState<{ date: string; rows: Row[] } | null>(null)
   const [failed, setFailed] = useState(false)
-  // Bumped after a write, which is what re-runs the query. A reload function
-  // called from the effect would be a state write the effect owns; a token is
-  // the same reload expressed as a dependency.
-  const [reloads, setReloads] = useState(0)
+  // Bumped by any write from any caller, which is what re-runs the query. A
+  // reload function called from the effect would be a state write the effect
+  // owns; a token is the same reload expressed as a dependency.
+  const shared = useSyncExternalStore(subscribe, () => version)
   const rowsRef = useRef<Row[]>([])
 
   useEffect(() => {
@@ -122,7 +150,7 @@ export function useWorkout(date: string, revision = 0): WorkoutState {
     return () => {
       active = false
     }
-  }, [userId, date, reloads, revision])
+  }, [userId, date, shared])
 
   const current = rows?.date === date ? rows.rows : null
   const status: WorkoutState['status'] = failed ? 'error' : current === null ? 'loading' : 'ready'
@@ -188,7 +216,7 @@ export function useWorkout(date: string, revision = 0): WorkoutState {
       })
 
       if (error) return false
-      setReloads((n) => n + 1)
+      published()
       return true
     },
     [userId, date],
@@ -214,7 +242,7 @@ export function useWorkout(date: string, revision = 0): WorkoutState {
         .single()
 
       if (!data || error) return false
-      setReloads((n) => n + 1)
+      published()
       return true
     },
     [userId],
@@ -259,8 +287,13 @@ export function useWorkout(date: string, revision = 0): WorkoutState {
 
       if (!workout.data || workout.error) return false
       // Started already: its sets are what they are, and rewriting them would
-      // throw away everything logged so far.
-      if (existing.data) return true
+      // throw away everything logged so far. It still publishes — the caller is
+      // about to navigate to those sets, and a reader that was mounted before
+      // they existed has no other way to learn about them.
+      if (existing.data) {
+        published()
+        return true
+      }
       const workoutId = workout.data.id
 
       const lastWeight = (exerciseId: string): number => {
@@ -289,7 +322,7 @@ export function useWorkout(date: string, revision = 0): WorkoutState {
         if (error) return false
       }
 
-      setReloads((n) => n + 1)
+      published()
       return true
     },
     [userId, date],
@@ -307,7 +340,7 @@ export function useWorkout(date: string, revision = 0): WorkoutState {
         .single()
 
       if (!data || error) return false
-      setReloads((n) => n + 1)
+      published()
       return true
     },
     [userId],

@@ -237,3 +237,31 @@ test('adding a routine is one target, and it yields the corner while a session r
   await expect(page.getByLabel('name')).toBeFocused()
   await expect(page.getByLabel('name')).toHaveValue('')
 })
+
+test('a write from one screen refetches for every reader, with no reload', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+
+  // Two components read today's sets: the session-bar provider above the
+  // router, and whichever screen is mounted. They used to hold separate
+  // refetch counters, so a write made through one was invisible to the other
+  // until a reload remounted it — the bar stayed hidden after starting a
+  // routine.
+  let reads = 0
+  await page.route('**/rest/v1/workout_sets*', (route) => {
+    if (route.request().method() === 'GET') reads += 1
+    return route.fallback()
+  })
+
+  const now = new Date()
+  const key = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+  await page.goto(`/training/session?date=${key}&routine=r1`)
+  await waitForScreen(page)
+
+  const before = reads
+  await page.getByRole('button', { name: /starten/i }).first().click()
+
+  // Both readers, not just the one that made the write.
+  await expect.poll(() => reads - before, { timeout: 5000 }).toBeGreaterThanOrEqual(2)
+  await expect(page.locator('[data-session-bar]')).toBeVisible()
+})

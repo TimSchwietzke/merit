@@ -54,14 +54,11 @@ export default function TrainingPage() {
 
   const today = todayKey()
   const date = params.get('date') ?? today
-  // The bar and this list read the same query through the same revision, so
-  // logging a set from the bar cannot leave the list behind it showing older
-  // figures.
-  const { revision, active, choose } = useActiveSession()
-  const { sets, exercises, history, status, addSet, updateSet, removeSet } = useWorkout(
-    date,
-    revision,
-  )
+  // The bar and this list read the same query, and `useWorkout` publishes every
+  // write to all of its readers — so logging a set from the bar cannot leave
+  // the list behind it showing older figures.
+  const { active, choose } = useActiveSession()
+  const { sets, exercises, history, status, addSet, updateSet, removeSet } = useWorkout(date)
   const [openRow, setOpenRow] = useState<string | null>(null)
 
   const pickedId = params.get('exercise')
