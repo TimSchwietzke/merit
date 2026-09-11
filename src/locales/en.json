@@ -49,7 +49,7 @@
   "auth": {
     "signIn": {
       "title": "Sign in",
-      "lead": "Merit is invite-only. Accounts are created by hand — there is no sign-up.",
+      "lead": "Merit is invite-only. Accounts are created by hand, there is no sign-up.",
       "email": "e-mail",
       "password": "password",
       "submit": "Sign in",
@@ -181,7 +181,7 @@
       },
       "new": {
         "title": "Add a food",
-        "shared": "Anything you add goes into the catalogue everyone using Merit shares. Values are per 100 g or 100 ml, as they appear on the packaging.",
+        "shared": "Anything you add is visible to everyone using Merit. Values per 100 g or 100 ml, as on the packaging.",
         "name": "name",
         "brand": "brand",
         "optional": " · optional",
@@ -203,7 +203,7 @@
         "barcode": "barcode",
         "look": "Look up",
         "barcodeInvalid": "That is not a barcode. Check the digits and try again.",
-        "denied": "Merit has no access to the camera. Allow it in the browser, then try again — or type the number below.",
+        "denied": "Merit has no access to the camera. Allow it in the browser and try again, or type the number below.",
         "missing": "no product for this barcode",
         "offline": "Open Food Facts could not be reached. Check your connection, or add the food yourself.",
         "addYourself": "Add it yourself",
@@ -389,7 +389,6 @@
     },
     "weight": {
       "loadFailed": "Your weigh-ins could not be loaded. Check your connection and try again.",
-      "averageNote": "The average is the mean of every weigh-in in the {{days}} days ending on that day. Days without one are left out, not filled in.",
       "deleted": "{{date}} deleted",
       "undoFailed": "That entry could not be put back. Log the day again.",
       "range": "Time range",
@@ -614,7 +613,7 @@
         "exportFailed": "That did not download. Check your connection and try again.",
         "delete": "Delete my account",
         "deleting": "Deleting…",
-        "deleteHint": "Removes the account and everything scoped to it — weigh-ins, food log, routines, sets. Foods and exercises you added stay in the shared catalogue without your name on them. This cannot be undone.",
+        "deleteHint": "Removes the account and everything scoped to it: weigh-ins, food log, routines, sets. Foods and exercises you added stay in the shared catalogue without your name on them. This cannot be undone.",
         "deleteConfirm": "Delete this account and everything in it? This cannot be undone.",
         "deleteConfirmLabel": "Delete everything",
         "deleteFailed": "The account was not deleted. Check your connection and try again.",
@@ -624,7 +623,7 @@
       }
     },
     "cardio": {
-      "planned": "Sessions, minutes and the calories they cost — after the four essentials work."
+      "planned": "Sessions, minutes and the calories they cost, once the four essentials work."
     },
     "error": {
       "title": "That did not load",
@@ -644,17 +643,17 @@
       "imprint": {
         "title": "Imprint"
       },
-      "missing": "This page is not finished. Its text has not been supplied yet and must be in place before anybody is invited — see docs/LEGAL-INPUTS.md."
+      "missing": "This page is not finished. Its text has not been supplied yet and must be in place before anybody is invited. See docs/LEGAL-INPUTS.md."
     },
     "consent": {
       "title": "Before you start",
       "lead": "merit records health data about you. German and EU law treats that as a special category, and it may only be processed if you explicitly agree to it. So this is asked once, on its own, and it is a real question.",
       "what": "What you would be agreeing to",
-      "whatBody": "That merit may store and process your body weight, optionally your body fat percentage, what you eat, and how you train — exercises, sets, reps and weights. If you ask it to calculate a calorie target it also stores your height, date of birth, sex, activity level and goal.",
+      "whatBody": "That merit may store and process your body weight, optionally your body fat percentage, what you eat, and how you train: exercises, sets, reps and weights. If you ask it to calculate a calorie target it also stores your height, date of birth, sex, activity level and goal.",
       "why": "What it is used for",
-      "whyBody": "Showing you your own numbers, and nothing else. There is no advertising, no tracking, no profiling, no automated decision-making, and nothing is shared with anyone or sold. Nobody else can see your entries — not other people using this app, and not the person who runs it.",
+      "whyBody": "Showing you your own numbers, and nothing else. There is no advertising, no tracking, no profiling, no automated decision-making, and nothing is shared with anyone or sold. Nobody else can see your entries: not other people using this app, and not the person who runs it.",
       "control": "What you keep",
-      "controlBody": "You can download everything as one file at any time, and you can delete the account and everything in it at any time — both under “account”, immediately, without asking anyone. Deleting is also how you withdraw this consent, because it is the only basis on which any of this is kept.",
+      "controlBody": "You can download everything as one file at any time, and you can delete the account and everything in it at any time. Both under “account”, immediately, without asking anyone. Deleting is also how you withdraw this consent, because it is the only basis on which any of this is kept.",
       "statement": "I explicitly consent to merit processing my health data as described above.",
       "agree": "I agree",
       "saving": "Saving…",

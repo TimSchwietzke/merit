@@ -49,7 +49,7 @@
   "auth": {
     "signIn": {
       "title": "Anmelden",
-      "lead": "Merit ist nur auf Einladung nutzbar. Konten werden von Hand angelegt — eine Registrierung gibt es nicht.",
+      "lead": "Merit ist nur auf Einladung nutzbar. Konten werden von Hand angelegt, eine Registrierung gibt es nicht.",
       "email": "e-mail",
       "password": "passwort",
       "submit": "Anmelden",
@@ -181,7 +181,7 @@
       },
       "new": {
         "title": "Lebensmittel anlegen",
-        "shared": "Was du anlegst, landet im gemeinsamen Katalog aller Merit-Nutzer. Die Werte gelten je 100 g oder 100 ml, so wie sie auf der Packung stehen.",
+        "shared": "Was du anlegst, sehen alle Merit-Nutzer. Werte je 100 g oder 100 ml, wie auf der Packung.",
         "name": "name",
         "brand": "marke",
         "optional": " · optional",
@@ -203,7 +203,7 @@
         "barcode": "barcode",
         "look": "Nachschlagen",
         "barcodeInvalid": "Das ist kein Barcode. Prüfe die Ziffern und versuche es noch einmal.",
-        "denied": "Merit hat keinen Zugriff auf die Kamera. Erlaube ihn im Browser und versuche es noch einmal — oder tippe die Nummer unten ein.",
+        "denied": "Merit hat keinen Zugriff auf die Kamera. Erlaube ihn im Browser und versuche es noch einmal, oder tippe die Nummer unten ein.",
         "missing": "kein Produkt zu diesem Barcode",
         "offline": "Open Food Facts war nicht erreichbar. Prüfe dein Netz oder trage das Lebensmittel selbst ein.",
         "addYourself": "Selbst eintragen",
@@ -389,7 +389,6 @@
     },
     "weight": {
       "loadFailed": "Deine Wiegungen konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
-      "averageNote": "Der Durchschnitt ist das Mittel aller Wiegungen in den {{days}} Tagen bis zu diesem Tag. Tage ohne Wiegung bleiben leer und werden nicht aufgefüllt.",
       "deleted": "{{date}} gelöscht",
       "undoFailed": "Der Eintrag konnte nicht wiederhergestellt werden. Trage den Tag noch einmal ein.",
       "range": "Zeitraum",
@@ -614,7 +613,7 @@
         "exportFailed": "Der Download hat nicht geklappt. Prüfe dein Netz und versuche es noch einmal.",
         "delete": "Mein Konto löschen",
         "deleting": "Wird gelöscht …",
-        "deleteHint": "Löscht das Konto und alles, was daran hängt — Wiegungen, Ernährungstagebuch, Routinen, Sätze. Lebensmittel und Übungen, die du hinzugefügt hast, bleiben ohne deinen Namen im gemeinsamen Katalog. Das lässt sich nicht rückgängig machen.",
+        "deleteHint": "Löscht das Konto und alles, was daran hängt: Wiegungen, Ernährungstagebuch, Routinen, Sätze. Lebensmittel und Übungen, die du hinzugefügt hast, bleiben ohne deinen Namen im gemeinsamen Katalog. Das lässt sich nicht rückgängig machen.",
         "deleteConfirm": "Dieses Konto und alles darin löschen? Das lässt sich nicht rückgängig machen.",
         "deleteConfirmLabel": "Alles löschen",
         "deleteFailed": "Das Konto wurde nicht gelöscht. Prüfe dein Netz und versuche es noch einmal.",
@@ -624,7 +623,7 @@
       }
     },
     "cardio": {
-      "planned": "Einheiten, Minuten und die Kalorien, die sie kosten — wenn die vier Grundlagen stehen."
+      "planned": "Einheiten, Minuten und die Kalorien, die sie kosten. Sobald die vier Grundlagen stehen."
     },
     "error": {
       "title": "Das hat nicht geladen",
@@ -644,17 +643,17 @@
       "imprint": {
         "title": "Impressum"
       },
-      "missing": "Diese Seite ist nicht fertig. Der Text fehlt noch und muss stehen, bevor jemand eingeladen wird — siehe docs/LEGAL-INPUTS.md."
+      "missing": "Diese Seite ist nicht fertig. Der Text fehlt noch und muss stehen, bevor jemand eingeladen wird. Siehe docs/LEGAL-INPUTS.md."
     },
     "consent": {
       "title": "Bevor es losgeht",
       "lead": "merit hält Gesundheitsdaten über dich fest. Das deutsche und europäische Recht behandelt sie als besondere Kategorie, und sie dürfen nur verarbeitet werden, wenn du ausdrücklich zustimmst. Deshalb wird hier einmal gefragt, für sich allein, und es ist eine echte Frage.",
       "what": "Worin du einwilligst",
-      "whatBody": "Dass merit dein Körpergewicht, optional deinen Körperfettanteil, was du isst und wie du trainierst — Übungen, Sätze, Wiederholungen und Gewichte — speichern und verarbeiten darf. Wenn du dir ein Kalorienziel berechnen lässt, kommen Größe, Geburtsdatum, Geschlecht, Aktivitätsniveau und Ziel dazu.",
+      "whatBody": "Dass merit dein Körpergewicht, optional deinen Körperfettanteil, was du isst und wie du trainierst (Übungen, Sätze, Wiederholungen und Gewichte) speichern und verarbeiten darf. Wenn du dir ein Kalorienziel berechnen lässt, kommen Größe, Geburtsdatum, Geschlecht, Aktivitätsniveau und Ziel dazu.",
       "why": "Wofür das benutzt wird",
-      "whyBody": "Um dir deine eigenen Zahlen zu zeigen, und für sonst nichts. Es gibt keine Werbung, kein Tracking, kein Profiling, keine automatisierte Entscheidungsfindung, und nichts wird weitergegeben oder verkauft. Niemand sonst sieht deine Einträge — weder andere Nutzer dieser App noch die Person, die sie betreibt.",
+      "whyBody": "Um dir deine eigenen Zahlen zu zeigen, und für sonst nichts. Es gibt keine Werbung, kein Tracking, kein Profiling, keine automatisierte Entscheidungsfindung, und nichts wird weitergegeben oder verkauft. Niemand sonst sieht deine Einträge: weder andere Nutzer dieser App noch die Person, die sie betreibt.",
       "control": "Was du behältst",
-      "controlBody": "Du kannst jederzeit alles als eine Datei herunterladen, und du kannst das Konto samt Inhalt jederzeit löschen — beides unter „konto“, sofort und ohne jemanden zu fragen. Das Löschen ist zugleich der Widerruf dieser Einwilligung, denn sie ist die einzige Grundlage, auf der irgendetwas davon aufbewahrt wird.",
+      "controlBody": "Du kannst jederzeit alles als eine Datei herunterladen, und du kannst das Konto samt Inhalt jederzeit löschen. Beides unter „konto“, sofort und ohne jemanden zu fragen. Das Löschen ist zugleich der Widerruf dieser Einwilligung, denn sie ist die einzige Grundlage, auf der irgendetwas davon aufbewahrt wird.",
       "statement": "Ich willige ausdrücklich ein, dass merit meine Gesundheitsdaten wie oben beschrieben verarbeitet.",
       "agree": "Ich willige ein",
       "saving": "Wird gespeichert …",
