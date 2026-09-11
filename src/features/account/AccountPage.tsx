@@ -6,6 +6,7 @@ import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
 import { Button } from '@/components/ui/button'
 import { authErrorKey, type AuthErrorKey } from '@/features/auth/auth-errors'
+import { forgetDevice } from '@/lib/offline/db'
 import { supabase } from '@/lib/supabase'
 
 /**
@@ -29,6 +30,10 @@ export default function AccountPage() {
   async function signOut() {
     setPending(true)
     setErrorKey(null)
+
+    // The training mirror goes with the session. It is health data, and a
+    // signed-out phone has no business still holding it.
+    await forgetDevice()
 
     const { error } = await supabase.auth.signOut()
     if (error) {

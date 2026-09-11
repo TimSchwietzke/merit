@@ -5,6 +5,7 @@ import { ScreenTitle } from '@/components/ScreenTitle'
 import { Button } from '@/components/ui/button'
 import { Confirm } from '@/components/ui/confirm'
 import { buildExport, download } from '@/features/account/export'
+import { forgetDevice } from '@/lib/offline/db'
 import { supabase } from '@/lib/supabase'
 
 /**
@@ -47,6 +48,7 @@ export default function DataPage() {
     }
     // The row is gone; the session in this tab is not. Signing out clears it
     // and RequireAuth sends them to the sign-in screen.
+    await forgetDevice()
     await supabase.auth.signOut()
   }
 

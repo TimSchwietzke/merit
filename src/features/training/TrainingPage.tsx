@@ -59,7 +59,8 @@ export default function TrainingPage() {
   // write to all of its readers — so logging a set from the bar cannot leave
   // the list behind it showing older figures.
   const { active, choose } = useActiveSession()
-  const { sets, exercises, history, status, addSet, updateSet, removeSet } = useWorkout(date)
+  const { sets, exercises, history, status, offline, unsent, rejected, addSet, updateSet, removeSet } =
+    useWorkout(date)
   const [openRow, setOpenRow] = useState<string | null>(null)
 
   const pickedId = params.get('exercise')
@@ -116,6 +117,21 @@ export default function TrainingPage() {
           <ChevronRight />
         </Button>
       </div>
+
+      {/* Not an error and not a dialog: the sets are on the phone and they are
+          going nowhere. §14 asks for the position stated plainly and nothing
+          more made of it. */}
+      {offline ? (
+        <p className="mt-4 font-mono text-2xs text-ink-faint">
+          {t('pages.training.offline', { count: unsent.size })}
+        </p>
+      ) : null}
+
+      {rejected ? (
+        <p role="alert" className="mt-4 text-sm text-danger">
+          {t('pages.training.syncRejected')}
+        </p>
+      ) : null}
 
       <div className="mt-6">
         {status === 'error' ? (
