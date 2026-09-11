@@ -11,24 +11,6 @@ somebody something.
 
 ## MVP: blocks friends using this daily
 
-### First-run onboarding
-See `GOAL.md` §2.1.1.
-
-- A new account currently lands on an empty dashboard with no hint what to do
-  first. Everything works and nothing has been entered, which reads as broken.
-- Collect, in order: display name, current weight, height, birth date, sex,
-  activity level, goal. All of these already exist as fields elsewhere, so
-  onboarding is a path through them, not a new data model.
-- **Ask how often they train per week**, then offer a matching example routine
-  (2× full body, 3× upper/lower/full, 4× upper/lower split). Generated from the
-  existing exercise catalogue into real `routines` rows, editable afterwards
-  like anything else. A plan somebody can change beats an empty plan screen.
-- Skippable and resumable: quitting halfway asks for the rest next time rather
-  than starting over.
-- **Repeatable.** A way to run it again from the account screen, for somebody
-  who skipped it, whose circumstances changed, or who wants a fresh example
-  plan. This also makes it testable without creating a new account.
-
 ### Food search by name (USDA + Open Food Facts)
 - `supabase/functions/` does not exist yet; the USDA proxy was never built.
 - Today you can only find something that carries a barcode or that somebody

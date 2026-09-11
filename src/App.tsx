@@ -9,6 +9,7 @@ import SignInPage from '@/features/auth/SignInPage'
 import DashboardPage from '@/features/dashboard/DashboardPage'
 import AccountPage from '@/features/account/AccountPage'
 import { ConsentGate } from '@/features/legal/ConsentGate'
+import { OnboardingGate } from '@/features/onboarding/OnboardingGate'
 import ImprintPage from '@/features/legal/ImprintPage'
 import { LegalShell } from '@/features/legal/LegalShell'
 import PrivacyPage from '@/features/legal/PrivacyPage'
@@ -31,6 +32,8 @@ const WeightPage = lazy(() => import('@/features/weight/WeightPage'))
 const ProfilePage = lazy(() => import('@/features/account/ProfilePage'))
 const AppearancePage = lazy(() => import('@/features/account/AppearancePage'))
 const DataPage = lazy(() => import('@/features/account/DataPage'))
+// Seen once per account, and not again by anybody who has been past it.
+const WelcomePage = lazy(() => import('@/features/onboarding/WelcomePage'))
 
 // One route, one file (DESIGN.md §7). Everything except /sign-in sits behind
 // RequireAuth — there is no public page in Merit and no open sign-up.
@@ -64,26 +67,38 @@ const router = createBrowserRouter([
         // question asked before there is one.
         element: <ConsentGate />,
         children: [
+          // Not inside AppShell: a walkthrough with a tab bar under it is an
+          // invitation out through the side door, and the screens those tabs
+          // lead to are the empty ones it exists to fill.
+          { path: '/welcome', element: <WelcomePage /> },
+
           {
-            element: <AppShell />,
+            // The first sign-in goes to the walkthrough rather than to an
+            // empty dashboard. Everything below is the app itself.
+            element: <OnboardingGate />,
             children: [
-              { path: '/', element: <DashboardPage /> },
-              { path: '/food', element: <FoodPage /> },
-              { path: '/food/add', element: <AddFoodPage /> },
-              { path: '/food/entry/:id', element: <LoggedPortionPage /> },
-              { path: '/training', element: <WeekPage /> },
-              { path: '/training/day', element: <TrainingPage /> },
-              { path: '/training/session', element: <SessionPage /> },
-              { path: '/training/add', element: <AddExercisePage /> },
-              { path: '/training/routines/:id', element: <RoutineEditorPage /> },
-              { path: '/account', element: <AccountPage /> },
-              { path: '/account/profile', element: <ProfilePage /> },
-              { path: '/account/appearance', element: <AppearancePage /> },
-              { path: '/account/data', element: <DataPage /> },
-              { path: '/cardio', element: <CardioPage /> },
-              { path: '/weight', element: <WeightPage /> },
-              { path: '/goals', element: <GoalsPage /> },
-              { path: '*', element: <NotFoundPage /> },
+              {
+                element: <AppShell />,
+                children: [
+                  { path: '/', element: <DashboardPage /> },
+                  { path: '/food', element: <FoodPage /> },
+                  { path: '/food/add', element: <AddFoodPage /> },
+                  { path: '/food/entry/:id', element: <LoggedPortionPage /> },
+                  { path: '/training', element: <WeekPage /> },
+                  { path: '/training/day', element: <TrainingPage /> },
+                  { path: '/training/session', element: <SessionPage /> },
+                  { path: '/training/add', element: <AddExercisePage /> },
+                  { path: '/training/routines/:id', element: <RoutineEditorPage /> },
+                  { path: '/account', element: <AccountPage /> },
+                  { path: '/account/profile', element: <ProfilePage /> },
+                  { path: '/account/appearance', element: <AppearancePage /> },
+                  { path: '/account/data', element: <DataPage /> },
+                  { path: '/cardio', element: <CardioPage /> },
+                  { path: '/weight', element: <WeightPage /> },
+                  { path: '/goals', element: <GoalsPage /> },
+                  { path: '*', element: <NotFoundPage /> },
+                ],
+              },
             ],
           },
         ],
@@ -91,7 +106,6 @@ const router = createBrowserRouter([
     ],
   },
 ])
-
 export default function App() {
   return (
     <SessionProvider>

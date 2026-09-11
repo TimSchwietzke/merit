@@ -16,7 +16,8 @@
     "session": "session",
     "profile": "profile",
     "appearance": "appearance",
-    "data": "your data"
+    "data": "your data",
+    "welcome": "setup"
   },
   "common": {
     "notBuiltYet": "not built yet",
@@ -661,6 +662,65 @@
       "failed": "That did not save. Check your connection and try again.",
       "decline": "If you would rather not, simply sign out. Nothing is recorded until you agree, and an account without this consent is never used.",
       "notReady": "merit is not ready to be used yet: its privacy notice has not been published, so there is nothing to consent to. See docs/LEGAL-INPUTS.md."
+    },
+    "welcome": {
+      "loadFailed": "Your details could not be loaded. Check your connection and try again.",
+      "saveFailed": "That was not saved. Check your connection and try again.",
+      "next": "Continue",
+      "later": "later",
+      "back": "back",
+      "finish": "Done",
+      "intro": {
+        "panel": "Introduction, panel {{n}} of {{total}}",
+        "next": "Next",
+        "start": "Get started",
+        "skip": "skip",
+        "merit": {
+          "label": "what this is",
+          "line": "Your numbers, in one place.",
+          "body": "merit keeps what you eat, what you lift and what you weigh. None of it is graded."
+        },
+        "food": {
+          "label": "nutrition",
+          "line": "What you eat.",
+          "body": "Scan a barcode or type it in. The day adds itself up."
+        },
+        "training": {
+          "label": "training",
+          "line": "What you lift.",
+          "body": "Sets, reps, weight. The week is a plan, and you can change it whenever you like."
+        },
+        "weight": {
+          "label": "weight",
+          "line": "What you measure.",
+          "body": "Weigh in when you like. The seven-day average shows the direction."
+        }
+      },
+      "steps": {
+        "name": {
+          "title": "What should we call you?",
+          "lead": "It goes at the top of the dashboard, and you can change it at any time."
+        },
+        "body": {
+          "title": "What do you weigh, and how tall are you?",
+          "lead": "The weight is logged as today's weigh-in.",
+          "weightInvalid": "Enter a weight between 20 and 400 kg."
+        },
+        "about": {
+          "title": "Date of birth and sex",
+          "lead": "Both are used for one thing: working out your calorie target."
+        },
+        "goal": {
+          "title": "How much do you move, and where is this going?",
+          "lead": "This sets how far your target sits from what holds your weight steady."
+        },
+        "target": {
+          "title": "Your daily target",
+          "lead": "Worked out from what you entered, in force from today.",
+          "save": "Save target",
+          "note": "protein and fat are starting points: 1.8 g per kg and 30 % of the energy. change them under targets."
+        }
+      }
     }
   }
 }

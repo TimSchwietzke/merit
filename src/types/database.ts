@@ -238,6 +238,7 @@ export type Database = {
           goal: string | null
           height_cm: number | null
           locale: string
+          onboarded_at: string | null
           sex: string | null
           theme: string
           updated_at: string
@@ -253,6 +254,7 @@ export type Database = {
           goal?: string | null
           height_cm?: number | null
           locale?: string
+          onboarded_at?: string | null
           sex?: string | null
           theme?: string
           updated_at?: string
@@ -268,6 +270,7 @@ export type Database = {
           goal?: string | null
           height_cm?: number | null
           locale?: string
+          onboarded_at?: string | null
           sex?: string | null
           theme?: string
           updated_at?: string

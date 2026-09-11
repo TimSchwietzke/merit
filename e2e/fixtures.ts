@@ -74,6 +74,7 @@ export const ROUTES: Route[] = [
   { name: 'training-session', path: '/training/session?routine=r1' },
   { name: 'training-day', path: '/training/day' },
   { name: 'not-found', path: '/nowhere' },
+  { name: 'welcome', path: '/welcome' },
   { name: 'sign-in', path: '/sign-in', signedOut: true },
 ]
 
@@ -448,6 +449,10 @@ export async function stubBackend(
         // development build through anyway, and once there is one this matches
         // it — so the screen tests never sit behind the consent question.
         consent_version: PRIVACY_VERSION,
+        // Past the first-run walkthrough as well: every screen test is about
+        // an account that is set up. The walkthrough is captured on its own
+        // route below.
+        onboarded_at: '2026-09-01T09:00:00.000Z',
       }),
     }),
   )

@@ -48,6 +48,10 @@ export default function AccountPage() {
           <LinkRow to="/goals" label={t('nav.goals')} />
           <LinkRow to="/account/appearance" label={t('nav.appearance')} />
           <LinkRow to="/account/data" label={t('nav.data')} />
+          {/* The first-run walkthrough, on purpose reachable again: somebody
+              who skipped it, whose circumstances changed, or who wants to see
+              it a second time (GOAL.md §2.1.1). */}
+          <LinkRow to="/welcome" label={t('nav.welcome')} />
         </Rows>
       </section>
 
