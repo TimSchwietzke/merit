@@ -13,7 +13,7 @@
     "test:watch": "vitest",
     "db:types": "npx --yes supabase gen types typescript --linked > src/types/database.ts",
     "shots": "playwright test e2e/visual.spec.ts",
-    "test:e2e": "playwright test e2e/probe.spec.ts e2e/welcome.spec.ts e2e/weight.spec.ts e2e/food.spec.ts e2e/goals.spec.ts e2e/training.spec.ts"
+    "test:e2e": "playwright test e2e/probe.spec.ts e2e/welcome.spec.ts e2e/offline.spec.ts e2e/weight.spec.ts e2e/food.spec.ts e2e/goals.spec.ts e2e/training.spec.ts"
   },
   "dependencies": {
     "@fontsource-variable/ibm-plex-sans": "^5.3.0",
@@ -23,6 +23,7 @@
     "@zxing/browser": "^0.2.1",
     "class-variance-authority": "^0.7.1",
     "cn": "^0.2.6",
+    "dexie": "^4.4.6",
     "i18next": "^26.4.2",
     "lucide-react": "^1.42.0",
     "radix-ui": "^1.6.7",

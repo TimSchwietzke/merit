@@ -385,7 +385,10 @@
         "shoulders": "shoulders",
         "traps": "traps",
         "triceps": "triceps"
-      }
+      },
+      "offline_one": "offline · 1 set is waiting on this device",
+      "offline_other": "offline · {{count}} sets are waiting on this device",
+      "syncRejected": "The server refused one change and it was dropped. Check today's sets."
     },
     "notFound": {
       "title": "Page not found",

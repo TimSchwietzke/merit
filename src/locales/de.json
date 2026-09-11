@@ -385,7 +385,10 @@
         "shoulders": "schultern",
         "traps": "trapez",
         "triceps": "trizeps"
-      }
+      },
+      "offline_one": "offline · 1 Satz wartet auf diesem Gerät",
+      "offline_other": "offline · {{count}} Sätze warten auf diesem Gerät",
+      "syncRejected": "Eine Änderung hat der Server abgelehnt und sie ist verworfen. Prüfe die Sätze von heute."
     },
     "notFound": {
       "title": "Seite nicht gefunden",

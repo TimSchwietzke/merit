@@ -292,7 +292,15 @@ export async function stubBackend(
       rir,
       done,
       exercise_id: exercise.id,
-      workouts: { date, ended_at: date === day(0) ? endedAt : null },
+      // `id` and `routine_id` as well: the day screen reads the workout a set
+      // hangs off, because a set logged on this device has to know which
+      // session it belongs to before there is a server to ask.
+      workouts: {
+        id: `w-${date}`,
+        date,
+        ended_at: date === day(0) ? endedAt : null,
+        routine_id: date === day(0) ? 'r1' : null,
+      },
       exercises: exercise,
     })
     return route.fulfill({

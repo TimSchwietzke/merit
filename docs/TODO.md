@@ -21,13 +21,16 @@ somebody something.
 - If it is added, it goes in the same list as a third group, deduplicated
   against the other two by barcode.
 
-### Offline workout logging
-- Required by `GOAL.md` §5 and `CLAUDE.md`, and not started: Dexie is not even
-  installed.
-- Gym basements have no signal. Sets logged there must land locally and sync
-  when the connection returns, without the user thinking about it.
-- Nutrition and barcode scanning stay online-only on purpose, since scanning
-  needs the network anyway.
+### Offline training, the rest of it
+- Logging works offline: every training write lands in IndexedDB and is sent
+  from a queue, so a set logged in a basement survives the app being closed and
+  goes out by itself when there is a signal.
+- **Starting a routine still needs the network.** The routine list is not
+  mirrored, so arriving at the gym with no signal and pressing start does
+  nothing. Mirroring `routines` and `routine_exercises` the same way the sets
+  are mirrored is the fix, and it is a small one.
+- The rest of the app stays online: nutrition needs the network to scan
+  anyway, and the weight chart is not something anybody opens underground.
 
 ---
 
