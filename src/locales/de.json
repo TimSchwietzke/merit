@@ -16,7 +16,8 @@
     "session": "einheit",
     "profile": "profil",
     "appearance": "darstellung",
-    "data": "deine daten"
+    "data": "deine daten",
+    "welcome": "einrichtung"
   },
   "common": {
     "notBuiltYet": "noch nicht gebaut",
@@ -661,6 +662,65 @@
       "failed": "Das wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
       "decline": "Wenn du lieber nicht möchtest, melde dich einfach ab. Bis zur Einwilligung wird nichts aufgezeichnet, und ein Konto ohne sie wird nie benutzt.",
       "notReady": "merit kann noch nicht benutzt werden: die Datenschutzerklärung fehlt, also gibt es nichts, worin eingewilligt werden könnte. Siehe docs/LEGAL-INPUTS.md."
+    },
+    "welcome": {
+      "loadFailed": "Deine Angaben konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
+      "saveFailed": "Das wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+      "next": "Weiter",
+      "later": "später",
+      "back": "zurück",
+      "finish": "Fertig",
+      "intro": {
+        "panel": "Einführung, Bild {{n}} von {{total}}",
+        "next": "Weiter",
+        "start": "Los geht's",
+        "skip": "überspringen",
+        "merit": {
+          "label": "was das hier ist",
+          "line": "Deine Zahlen, an einem Ort.",
+          "body": "merit hält fest, was du isst, was du hebst und was du wiegst. Bewertet wird nichts davon."
+        },
+        "food": {
+          "label": "ernährung",
+          "line": "Was du isst.",
+          "body": "Barcode scannen oder eintippen. Der Tag zählt sich selbst zusammen."
+        },
+        "training": {
+          "label": "training",
+          "line": "Was du hebst.",
+          "body": "Sätze, Wiederholungen, Gewicht. Die Woche ist ein Plan, den du jederzeit änderst."
+        },
+        "weight": {
+          "label": "gewicht",
+          "line": "Was du misst.",
+          "body": "Wiegen, wann du willst. Der Schnitt über sieben Tage zeigt die Richtung."
+        }
+      },
+      "steps": {
+        "name": {
+          "title": "Wie heißt du?",
+          "lead": "Steht oben auf der Übersicht. Lässt sich jederzeit ändern."
+        },
+        "body": {
+          "title": "Was wiegst du, und wie groß bist du?",
+          "lead": "Das Gewicht wird als Wiegung von heute eingetragen.",
+          "weightInvalid": "Trage ein Gewicht zwischen 20 und 400 kg ein."
+        },
+        "about": {
+          "title": "Geburtsdatum und Geschlecht",
+          "lead": "Beides geht nur in die Berechnung deines Kalorienziels ein."
+        },
+        "goal": {
+          "title": "Wie viel bewegst du dich, und wohin soll es gehen?",
+          "lead": "Das bestimmt, wie weit dein Ziel von deinem Erhaltungsbedarf abweicht."
+        },
+        "target": {
+          "title": "Dein Tagesziel",
+          "lead": "Aus deinen Angaben gerechnet, gültig ab heute.",
+          "save": "Ziel speichern",
+          "note": "eiweiß und fett sind startwerte: 1,8 g je kg und 30 % der energie. unter zielen änderbar."
+        }
+      }
     }
   }
 }

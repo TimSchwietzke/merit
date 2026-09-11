@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Choice } from '@/components/Choice'
 import { NumberField } from '@/components/NumberField'
 import { Panel } from '@/components/Panel'
 import { ScreenTitle } from '@/components/ScreenTitle'
@@ -233,33 +234,6 @@ function BodySection({
         </Panel>
       </form>
     </section>
-  )
-}
-
-function Choice<T extends string>({
-  label,
-  value,
-  options,
-  onChange,
-}: {
-  label: string
-  value: T | null
-  options: { value: T; label: string }[]
-  onChange: (value: T) => void
-}) {
-  return (
-    <div className="flex flex-col items-start gap-2">
-      <p className="font-mono text-2xs text-ink-faint">{label}</p>
-      <SegmentedControl<T>
-        label={label}
-        // The control has no empty state, so an unset profile field shows the
-        // first option unselected rather than inventing a value: `value` stays
-        // outside the option set until the user picks one.
-        value={value ?? ('' as T)}
-        onChange={onChange}
-        segments={options}
-      />
-    </div>
   )
 }
 
