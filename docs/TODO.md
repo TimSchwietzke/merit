@@ -11,18 +11,15 @@ somebody something.
 
 ## MVP: blocks friends using this daily
 
-### Food search by name (USDA + Open Food Facts)
-- `supabase/functions/` does not exist yet; the USDA proxy was never built.
-- Today you can only find something that carries a barcode or that somebody
-  already typed in by hand. No banana, no oats, no chicken breast.
-- USDA FoodData Central covers whole foods and is CC0. The api.data.gov key
-  must stay in an Edge Function secret and never reach the client
-  (`CLAUDE.md`, hard rule 1).
-- Open Food Facts also has a text search; it covers packaged goods well and
-  whole foods poorly. Both results in one list, deduplicated, with the source
-  visible.
-- Every resolved result gets cached into `foods` so the same search never hits
-  an external API twice.
+### Food search by name, the Open Food Facts half
+- USDA text search is built: an Edge Function proxy holds the api.data.gov key,
+  the results are mapped to Merit's eight values before they cross the wire, and
+  picking one caches it into `foods` with its `fdc_id`.
+- Open Food Facts has a text search too and it is not wired up. It covers
+  packaged goods, which already arrive by barcode, so it is worth less than it
+  looks: the case it would add is a packet whose barcode will not scan.
+- If it is added, it goes in the same list as a third group, deduplicated
+  against the other two by barcode.
 
 ### Offline workout logging
 - Required by `GOAL.md` §5 and `CLAUDE.md`, and not started: Dexie is not even

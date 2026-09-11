@@ -1,40 +1,56 @@
 import { useEffect, useState } from 'react'
 
 import { supabase } from '@/lib/supabase'
-import type { FoodNutrients } from '@/lib/nutrition'
+import {
+  FOOD_SELECT,
+  toCatalogueFood,
+  type CatalogueFood,
+  type FoodRow,
+} from '@/features/nutrition/catalogue'
+import type { UsdaFood } from '@/lib/usda'
 
 /**
- * Search the shared catalogue by name.
+ * Search by name: the shared catalogue first, USDA behind it.
  *
- * Own database first (GOAL.md §4). Open Food Facts and the USDA proxy are the
- * next two steps in that lookup order and are not built yet; the empty state
- * here already offers the fourth, which is adding the food by hand.
+ * This is the lookup order in GOAL.md §4 with the steps that exist so far.
+ * Merit's own catalogue answers instantly and holds everything anybody has
+ * scanned or typed in; FoodData Central covers the whole foods nobody scans,
+ * which is the gap that made the search useless for a banana. Open Food Facts
+ * has a text search too, and it is not here: it covers packaged goods, which
+ * arrive by barcode already.
+ *
+ * Both searches hang off one debounce. The USDA call goes through an Edge
+ * Function because the api.data.gov key must never reach the browser
+ * (CLAUDE.md, hard rule 1); nothing about the user goes with it.
  */
-export interface CatalogueFood {
-  id: string
-  name: string
-  brand: string | null
-  source: string
-  servingSizeG: number | null
-  servingLabel: string | null
-  nutrients: FoodNutrients
-}
+export type SearchStatus = 'idle' | 'searching' | 'ready' | 'error'
 
-const SELECT = `id, name, brand, source, serving_size_g, serving_label,
-  kcal_100g, fat_100g, carbs_100g, protein_100g,
-  saturated_fat_100g, sugars_100g, fibre_100g, salt_100g`
+/**
+ * `off` is a deployment without the USDA secret: there is nothing the reader
+ * could do about it and nothing to say, so the group simply is not there.
+ */
+export type RemoteStatus = SearchStatus | 'off' | 'rateLimited'
 
 /** Below this a search matches most of the catalogue and helps nobody. */
 const MIN_QUERY = 2
 const LIMIT = 25
+const DEBOUNCE = 250
 
 export function useFoodSearch(query: string) {
   // The query the results belong to is held with them, so "too short" and
   // "still searching" are read off the current query during render rather than
   // written into state at the top of an effect.
-  const [answered, setAnswered] = useState<{ query: string; results: CatalogueFood[]; error: boolean }>(
-    { query: '', results: [], error: false },
-  )
+  const [answered, setAnswered] = useState<{
+    query: string
+    results: CatalogueFood[]
+    error: boolean
+  }>({ query: '', results: [], error: false })
+
+  const [remote, setRemote] = useState<{
+    query: string
+    foods: UsdaFood[]
+    status: Exclude<RemoteStatus, 'idle' | 'searching'>
+  }>({ query: '', foods: [], status: 'ready' })
 
   const trimmed = query.trim()
   const tooShort = trimmed.length < MIN_QUERY
@@ -48,7 +64,7 @@ export function useFoodSearch(query: string) {
     const timer = setTimeout(() => {
       void supabase
         .from('foods')
-        .select(SELECT)
+        .select(FOOD_SELECT)
         .ilike('name', `%${trimmed}%`)
         .order('name')
         .limit(LIMIT)
@@ -61,27 +77,52 @@ export function useFoodSearch(query: string) {
           setAnswered({
             query: trimmed,
             error: false,
-            results: data.map((row) => ({
-              id: row.id,
-              name: row.name,
-              brand: row.brand,
-              source: row.source,
-              servingSizeG: row.serving_size_g,
-              servingLabel: row.serving_label,
-              nutrients: {
-                kcal: row.kcal_100g,
-                fat: row.fat_100g,
-                carbs: row.carbs_100g,
-                protein: row.protein_100g,
-                saturatedFat: row.saturated_fat_100g,
-                sugars: row.sugars_100g,
-                fibre: row.fibre_100g,
-                salt: row.salt_100g,
-              },
-            })),
+            results: (data as FoodRow[]).map(toCatalogueFood),
           })
         })
-    }, 250)
+    }, DEBOUNCE)
+
+    return () => {
+      active = false
+      clearTimeout(timer)
+    }
+  }, [trimmed, tooShort])
+
+  // A second effect rather than one: the catalogue is a few milliseconds away
+  // and USDA is a proxied round trip, and the near answer should not wait for
+  // the far one.
+  useEffect(() => {
+    if (tooShort) return
+    let active = true
+
+    const timer = setTimeout(() => {
+      void supabase.functions
+        .invoke<{ foods?: UsdaFood[]; error?: string }>('usda', { body: { query: trimmed } })
+        .then(async ({ data, error }) => {
+          if (!active) return
+          if (!error) {
+            setRemote({ query: trimmed, foods: data?.foods ?? [], status: 'ready' })
+            return
+          }
+          // The function answers a refusal with a status and a reason, and
+          // supabase-js reports both as one error with the body attached.
+          const reason =
+            error instanceof Error && 'context' in error
+              ? await (error.context as Response)
+                  .clone()
+                  .json()
+                  .then((body: { error?: string }) => body.error)
+                  .catch(() => undefined)
+              : undefined
+          if (!active) return
+          setRemote({
+            query: trimmed,
+            foods: [],
+            status:
+              reason === 'not_configured' ? 'off' : reason === 'rate_limited' ? 'rateLimited' : 'error',
+          })
+        })
+    }, DEBOUNCE)
 
     return () => {
       active = false
@@ -90,7 +131,7 @@ export function useFoodSearch(query: string) {
   }, [trimmed, tooShort])
 
   const answersThis = answered.query === trimmed
-  const status: 'idle' | 'searching' | 'ready' | 'error' = tooShort
+  const status: SearchStatus = tooShort
     ? 'idle'
     : !answersThis
       ? 'searching'
@@ -98,5 +139,27 @@ export function useFoodSearch(query: string) {
         ? 'error'
         : 'ready'
 
-  return { results: status === 'ready' ? answered.results : [], status }
+  const results = status === 'ready' ? answered.results : []
+
+  const remoteAnswersThis = remote.query === trimmed
+  const remoteStatus: RemoteStatus = tooShort
+    ? 'idle'
+    : !remoteAnswersThis
+      ? 'searching'
+      : remote.status
+
+  // What the catalogue already holds is not offered a second time from USDA:
+  // the cached row is the one to log, because it carries the id the day's
+  // entries point at. Matched on the FoodData Central id, and on the name for
+  // rows cached before that id was kept.
+  const known = new Set(results.map((food) => food.fdcId))
+  const knownNames = new Set(results.map((food) => food.name.toLowerCase()))
+  const usda =
+    remoteStatus === 'ready'
+      ? remote.foods.filter(
+          (food) => !known.has(food.fdcId) && !knownNames.has(food.name.toLowerCase()),
+        )
+      : []
+
+  return { results, status, usda, remoteStatus }
 }

@@ -1,7 +1,12 @@
 import { normaliseBarcode } from '@/lib/barcode'
 import { lookupOffProduct } from '@/lib/off'
 import { supabase } from '@/lib/supabase'
-import type { CatalogueFood } from '@/features/nutrition/useFoodSearch'
+import {
+  FOOD_SELECT,
+  toCatalogueFood,
+  type CatalogueFood,
+  type FoodRow,
+} from '@/features/nutrition/catalogue'
 
 /**
  * A barcode to a food, in the order GOAL.md §4 sets out.
@@ -17,51 +22,11 @@ export type Resolution =
   | { kind: 'missing'; barcode: string }
   | { kind: 'offline' }
 
-const SELECT = `id, name, brand, source, serving_size_g, serving_label,
-  kcal_100g, fat_100g, carbs_100g, protein_100g,
-  saturated_fat_100g, sugars_100g, fibre_100g, salt_100g`
-
-type Row = {
-  id: string
-  name: string
-  brand: string | null
-  source: string
-  serving_size_g: number | null
-  serving_label: string | null
-  kcal_100g: number
-  fat_100g: number
-  carbs_100g: number
-  protein_100g: number
-  saturated_fat_100g: number | null
-  sugars_100g: number | null
-  fibre_100g: number | null
-  salt_100g: number | null
-}
-
-const toFood = (row: Row): CatalogueFood => ({
-  id: row.id,
-  name: row.name,
-  brand: row.brand,
-  source: row.source,
-  servingSizeG: row.serving_size_g,
-  servingLabel: row.serving_label,
-  nutrients: {
-    kcal: row.kcal_100g,
-    fat: row.fat_100g,
-    carbs: row.carbs_100g,
-    protein: row.protein_100g,
-    saturatedFat: row.saturated_fat_100g,
-    sugars: row.sugars_100g,
-    fibre: row.fibre_100g,
-    salt: row.salt_100g,
-  },
-})
-
 export async function resolveBarcode(code: string, userId: string): Promise<Resolution> {
   const barcode = normaliseBarcode(code)
 
-  const cached = await supabase.from('foods').select(SELECT).eq('barcode', barcode).maybeSingle()
-  if (cached.data) return { kind: 'found', food: toFood(cached.data as Row) }
+  const cached = await supabase.from('foods').select(FOOD_SELECT).eq('barcode', barcode).maybeSingle()
+  if (cached.data) return { kind: 'found', food: toCatalogueFood(cached.data as FoodRow) }
 
   const looked = await lookupOffProduct(barcode)
   if (looked.kind === 'offline') return { kind: 'offline' }
@@ -87,17 +52,17 @@ export async function resolveBarcode(code: string, userId: string): Promise<Reso
       source: 'off',
       created_by: userId,
     })
-    .select(SELECT)
+    .select(FOOD_SELECT)
     .single()
 
   // A unique violation here means somebody else cached the same product between
   // the read above and this write — which is a hit, not a failure. Read it back
   // rather than reporting a barcode that plainly resolved as broken.
   if (error?.code === '23505') {
-    const raced = await supabase.from('foods').select(SELECT).eq('barcode', barcode).maybeSingle()
-    if (raced.data) return { kind: 'found', food: toFood(raced.data as Row) }
+    const raced = await supabase.from('foods').select(FOOD_SELECT).eq('barcode', barcode).maybeSingle()
+    if (raced.data) return { kind: 'found', food: toCatalogueFood(raced.data as FoodRow) }
   }
 
   if (!data || error) return { kind: 'offline' }
-  return { kind: 'found', food: toFood(data as Row) }
+  return { kind: 'found', food: toCatalogueFood(data as FoodRow) }
 }

@@ -29,5 +29,8 @@
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"]
+  /* The USDA mapper runs inside an Edge Function but is plain TypeScript with
+     no imports, so it is typechecked here with everything else. Its neighbour
+     index.ts is Deno and is not. */
+  "include": ["src", "supabase/functions/**/map.ts"]
 }
