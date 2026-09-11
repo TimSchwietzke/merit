@@ -9,7 +9,7 @@ give the ready-made `tokens.css`, the shadcn bridge, the Tailwind v4 mapping, an
 primitives.
 
 **What is fixed and what is not.** The neutrals, the font families, the border-over-shadow rule, the
-6px radius ceiling and the voice are fixed, those carry the signature across projects. The accent
+tight-radius ladder and the voice are fixed, those carry the signature across projects. The accent
 hue, the layout and the component inventory are Merit's own.
 
 **What changed relative to the desktop house style, and why.** Four things, each with a reason:
@@ -32,7 +32,8 @@ Everything else is carried over unchanged and deliberately so.
 ## 1. The signature in one paragraph
 
 Warm paper in light, warm black in dark. Structure comes from 1px hairlines, never from shadows.
-Nothing is rounder than 6px. One muted accent, moss green, spent only on the active thing, links,
+Corners are tight and scale with the thing: 6px on a control, 10px on a container, 14px on a bottom
+sheet, and nothing is ever a pill. One muted accent, moss green, spent only on the active thing, links,
 the focus ring and a single left edge; everything else is greyscale, and importance is carried by
 weight and emphasis instead of hue. Three typefaces with three jobs: sans for the interface, mono for
 anything machine-shaped and for every small label, serif for the one sentence per screen worth
@@ -461,7 +462,7 @@ and it is exactly what shadcn ships by default, so §3.2 is not optional.
 
 ```css
 --radius-sm: 3px;   /* inline code, chart cells, tiny marks */
---radius-md: 5px;   /* buttons, inputs, chips, nav items */
+--radius-md: 6px;   /* buttons, inputs, chips, nav items */
 --radius-lg: 10px;  /* panels, row lists, cards */
 --radius-xl: 14px;  /* bottom sheets and dialogs */
 ```
@@ -470,8 +471,14 @@ The old ceiling was 6px on everything, inherited from a desktop editor where eve
 panel a few pixels from its neighbour. It does not survive the move to a phone: a full-width bottom
 sheet with 6px corners reads as a web page that failed to load its styling, not as a tight interface,
 because every sheet the reader has ever pulled up on that device is rounder. A control stays tight:
-a 5px button is right and a 12px one is a pill in disguise, but a large surface takes a larger
+a 6px button is right and a 12px one is a pill in disguise, but a large surface takes a larger
 radius, which is the same rule the ceiling was reaching for, applied proportionally.
+
+**The ladder ran 4/8/16/22 for a while and that was too far.** It was reaching for the softness a
+phone wants and arrived at the shape every generated interface ships: a 16px row, a 22px filled
+rectangle with nothing drawn on it, and no radius left over for whatever sits inside a 16px pad. The
+grouped list of rows this app is mostly made of is the pattern iOS draws its own settings with, and
+iOS draws it at 10. Structure comes from the hairline here, so the corner never had to carry it.
 
 Still no pills. `border-radius: 9999px` is allowed for exactly two things: a thin progress track, and
 the drag handle of a bottom sheet. A fully rounded button is toy UI at any size.

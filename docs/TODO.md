@@ -27,21 +27,16 @@ somebody something.
 ## Wording: small, and the cheapest wins here
 
 ### What is left of the anti-slop pass
-The wording pass and the em dash sweep are done (see `chore/anti-slop`). Three
-judgement calls are not, because each one changes how the app looks or what a
-legal text says:
+The wording pass, the em dash sweep and the radius ladder are done. Two things
+were looked at and deliberately left alone:
 
-- **The radius ladder.** `index.css` runs 4/8/16/22; `DESIGN.md` §1 says nothing
-  is rounder than 6px and §6 lists 3/5/10/14. The code won that argument in #16
-  for a stated reason, and the doc was never updated. A 16px row and a 22px
-  filled card with no border is also the most-cited signature of a generated
-  interface. Decide one ladder and make both say it.
-- **Mono density.** 143 `font-mono` and 131 `text-2xs` against three uses of the
-  serif statement. Mono labels are the signature (§4.1); decorative mono is a
-  tell. The counterweight the signature depends on is on three screens.
-- **Em dashes in the legal texts.** 17 of them in `documents.ts`, in prose that
-  came from a German legal generator. Re-punctuating a privacy notice is a
-  change to a legal text, not a formatting pass, so it was left alone.
+- **Mono density.** 143 `font-mono` against three uses of the serif statement
+  looked lopsided until it was checked against what each face is for: the mono
+  is on numbers, units, counts and dates, which is measurement and exactly its
+  job (`PRODUCT.md`, Brand Commitments), and the serif carries one sentence on
+  the two screens that have one. Nothing to change.
+- **Em dashes in the legal texts.** 17 in `documents.ts`, in prose a German
+  legal generator produced. Left as they are, on the owner's call.
 
 ---
 

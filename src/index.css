@@ -37,14 +37,23 @@
   /* The one number or name a screen exists to show. Reserved, mobile-first. */
   --text-4xl: 2.75rem;
 
-  /* Radius scales with the surface. The old 3/5/10/14 ladder was inherited
-     from a desktop editor and read as sharp on a phone, where every card the
-     reader has ever seen is rounder. Still no pills: a progress track and a
-     sheet's drag handle are the only things that go fully round. */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
-  --radius-xl: 22px;
+  /* Radius scales with the surface, and stops well short of a pill.
+     A control is a control at 6px and starts pretending to be a tag at 10.
+     A grouped list of rows is the pattern iOS Settings uses, and 10px is the
+     radius iOS draws it at, which is the number a thumb on this phone reads as
+     "a group" without reading as "a card from a component library". Only a
+     bottom sheet goes further, because it is pulled up over the screen and the
+     top edge is doing the physical metaphor.
+
+     The 4/8/16/22 ladder this replaces was reaching for softness on a phone
+     and landed on the default look instead: a 16px row with a 16px pad has no
+     radius left for what sits inside it, and a 22px filled card with no border
+     is the shape every generated interface ships. Structure comes from the
+     hairline here (§1), so the corner does not have to carry it. */
+  --radius-sm: 3px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
 }
 
 /* ── shadcn bridge ───────────────────────────────────────────────────
@@ -90,7 +99,7 @@
   --chart-4: var(--merit-chart-4);
   --chart-5: var(--merit-chart-5);
 
-  --radius: 5px;                            /* shadcn ships 0.5rem */
+  --radius: 6px;                            /* shadcn ships 0.5rem */
 }
 
 @layer base {

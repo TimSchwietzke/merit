@@ -36,10 +36,12 @@ export function DomainCard({
       data-domain={domain}
       // `h-full`: inside the carousel every card is as tall as the tallest, and
       // a short one that does not fill its slot makes the peek look broken.
-      // `rounded-xl` and no border: the fill alone is enough separation on this
-      // ground, and a hairline around each of four cards is what turns a strip
-      // into a row of boxes.
-      className="flex h-full flex-col gap-3 rounded-xl bg-surface p-5 transition-colors
+      // No border: the fill alone is enough separation on this ground, and a
+      // hairline around each of four cards is what turns a strip into a row of
+      // boxes. The corner is the container radius the whole app uses, though,
+      // because a 22px filled rectangle with nothing drawn on it is the shape
+      // every generated interface ships.
+      className="flex h-full flex-col gap-3 rounded-lg bg-surface p-5 transition-colors
                  [transition-duration:140ms] hover:bg-surface-2 active:bg-surface-2
                  active:[transition-duration:0ms]"
     >

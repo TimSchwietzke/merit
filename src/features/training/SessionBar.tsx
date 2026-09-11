@@ -72,7 +72,7 @@ export function SessionBar() {
                  z-30 px-3 lg:bottom-3"
     >
       <div
-        className="pointer-events-auto mx-auto w-full max-w-[520px] rounded-[14px] border border-line
+        className="pointer-events-auto mx-auto w-full max-w-[520px] rounded-xl border border-line
                    bg-surface/95 px-4 py-3 shadow-lg backdrop-blur"
       >
         <div className="flex items-center justify-between gap-3">

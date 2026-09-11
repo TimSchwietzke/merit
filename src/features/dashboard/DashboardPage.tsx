@@ -186,7 +186,7 @@ function NutritionCard({
   return (
     <Link
       to="/food"
-      className="flex h-full flex-col gap-4 rounded-xl bg-surface p-4 transition-colors
+      className="flex h-full flex-col gap-4 rounded-lg bg-surface p-4 transition-colors
                  [transition-duration:140ms] hover:bg-surface-2 active:bg-surface-2
                  active:[transition-duration:0ms]"
     >

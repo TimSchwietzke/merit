@@ -33,10 +33,10 @@ export function Sheet({
         <Dialog.Overlay className="fixed inset-0 z-40 bg-ink/20 backdrop-blur-[2px]" />
 
         <Dialog.Content
-          className="fixed inset-x-0 bottom-0 z-50 max-h-[85dvh] overflow-y-auto rounded-t-[14px]
+          className="fixed inset-x-0 bottom-0 z-50 max-h-[85dvh] overflow-y-auto rounded-t-xl
                      border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] shadow-lg
                      md:inset-x-auto md:bottom-auto md:left-1/2 md:top-1/2 md:w-[420px]
-                     md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-[14px] md:border"
+                     md:-translate-x-1/2 md:-translate-y-1/2 md:rounded-xl md:border"
         >
           {/* The drag handle is one of exactly two things §6 lets go fully
               round. It is decoration for the eye, not a control. */}
