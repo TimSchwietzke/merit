@@ -17,7 +17,6 @@ import { useWeightLogs } from '@/features/weight/useWeightLogs'
 import { daysBetween, todayKey } from '@/lib/date'
 import { formatDayShort, formatDelta, formatNumber } from '@/lib/format'
 import {
-  AVERAGE_WINDOW_DAYS,
   buildSeries,
   latestEntry,
   rangeStart,
@@ -246,10 +245,6 @@ export default function WeightPage() {
           />
         )}
       </section>
-
-      <p className="mt-8 font-mono text-2xs text-ink-faint">
-        {t('pages.weight.averageNote', { days: AVERAGE_WINDOW_DAYS })}
-      </p>
     </>
   )
 }
