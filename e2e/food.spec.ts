@@ -190,7 +190,7 @@ test('a name search reaches Open Food Facts, once asked, and logs what it finds'
   // Typing alone asks nobody.
   expect(searches, 'typing does not spend the quota').toBe(0)
 
-  await page.getByRole('button', { name: 'Bei Open Food Facts suchen' }).click()
+  await page.getByRole('button', { name: 'Open Food Facts durchsuchen' }).click()
   await expect(page.getByText('Skyr Vanille')).toBeVisible()
   expect(searches).toBe(1)
 

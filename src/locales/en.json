@@ -160,12 +160,11 @@
       },
       "add": {
         "title": "Add food",
-        "lead": "Search the catalogue, and USDA as well for fruit, vegetables and meat. If something is missing, type it in.",
         "search": "search",
         "searchHint": " · at least two letters",
         "searching": "searching",
-        "noResults": "no food matches",
-        "addYourself": "Add it yourself",
+        "noResults": "nothing found",
+        "addYourself": "Type it in yourself",
         "searchFailed": "The search did not go through. Check your connection and try again.",
         "back": "Back to the day",
         "recent": "recently used",
@@ -176,10 +175,12 @@
         "usdaBusy": "usda is busy just now. Try again in a few minutes.",
         "off": "open food facts",
         "searchOff": "Search Open Food Facts",
-        "offSearching": "searching open food facts …",
-        "offNone": "nothing on open food facts",
-        "offBusy": "too many searches just now. Wait a minute and it works again.",
-        "offFailed": "Open Food Facts could not be reached. Scan the barcode, or type the food in yourself."
+        "offSearching": "searching …",
+        "offNone": "nothing found",
+        "offBusy": "too many searches",
+        "offFailed": "not reachable",
+        "scan": "Scan",
+        "elsewhere": "if nothing fits"
       },
       "portion": {
         "quantity": "quantity",

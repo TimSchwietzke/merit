@@ -12,6 +12,12 @@ import { expect, stubBackend, test, waitForScreen } from './fixtures'
 const offlineNote = /offline ·/
 
 test('a set logged with no connection survives a reload and goes out later', async ({ page }) => {
+  // Three loads, and two of them wait for the network to fail rather than to
+  // answer. That is sixteen seconds on an idle machine and more against three
+  // other workers, so the budget is stated rather than left to a default sized
+  // for a screenshot.
+  test.setTimeout(60_000)
+
   await stubBackend(page, { theme: 'light', locale: 'de' })
   await page.goto('/training/day')
   await waitForScreen(page)

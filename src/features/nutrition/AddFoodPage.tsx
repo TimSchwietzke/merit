@@ -1,9 +1,11 @@
+import { ScanBarcode } from 'lucide-react'
 import { lazy, Suspense, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { PageHeader } from '@/components/PageHeader'
 import { Row, Rows } from '@/components/Rows'
+import { SectionHead } from '@/components/SectionHead'
 import { Collapsible } from '@/components/ui/collapsible'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -103,6 +105,11 @@ export default function AddFoodPage() {
   // A packet the catalogue already holds is offered from the catalogue, where
   // the row has the id a day's entries point at.
   const known = new Set(results.map((food) => food.barcode))
+  const term = query.trim().toLowerCase()
+  const shownRecent =
+    term.length === 0
+      ? recent
+      : recent.filter(({ food }) => `${food.name} ${food.brand ?? ''}`.toLowerCase().includes(term))
   const offFoods = offAnswers?.status === 'ready'
     ? offAnswers.foods.filter((food) => !known.has(food.barcode))
     : []
@@ -277,45 +284,64 @@ export default function AddFoodPage() {
     )
   }
 
+  const searchable = query.trim().length >= 3
+  const nothingYet = status === 'ready' && results.length === 0 && usda.length === 0
+
   return (
     <>
-      <PageHeader title={t('pages.food.add.title')} lead={t('pages.food.add.lead')} />
+      {/* No lead. The screen is a search field with its own label, and a
+          paragraph explaining which databases sit behind it is a paragraph
+          nobody reads twice (§14, and the wording pass on docs/TODO.md). */}
+      <PageHeader title={t('pages.food.add.title')} />
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="food-search">
           {t('pages.food.add.search')}
           <span className="text-ink-faint">{t('pages.food.add.searchHint')}</span>
         </Label>
-        <Input
-          id="food-search"
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          autoComplete="off"
-          autoCapitalize="none"
-          spellCheck={false}
-        />
+
+        {/* Scanning sits *beside* the field rather than in a full-width block
+            under it: they are two ways of asking the same question, and the
+            block was a third competing rectangle on a screen that already had
+            two (§5.5 — one thing wins). It keeps its word as well as its icon,
+            because it is the fastest path to a packaged product and not a
+            place to be clever (§12). */}
+        <div className="flex items-start gap-2">
+          <Input
+            id="food-search"
+            type="search"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            className="min-w-0 flex-1"
+          />
+          <Button variant="tinted" className="shrink-0" onClick={() => setScanning(true)}>
+            <ScanBarcode aria-hidden />
+            {t('pages.food.add.scan')}
+          </Button>
+        </div>
       </div>
 
-      {/* The fastest path to a packaged product, so it is not buried under the
-          search results (GOAL.md §5: repeating a log must be one tap). */}
-      <Button variant="tinted" className="mt-4 w-full md:w-auto" onClick={() => setScanning(true)}>
-        {t('pages.food.scan.open')}
-      </Button>
+      <section className="mt-8">
+        {/* Recently used first: GOAL.md §5 calls repeating a previous meal the
+            feature that decides whether the app gets used daily.
 
-      <section className="mt-6">
-        {/* First among the results and narrowed by nothing (§10.11). GOAL.md §5
-            calls repeating a previous meal the feature that decides whether the
-            app gets used daily. */}
-        {recent.length > 0 ? (
+            Narrowed by the query, which §10.11 does not ask for — it says
+            recents are narrowed by nothing. That rule is about the screen at
+            rest. Once somebody has typed `nudel`, a row for yesterday's energy
+            drink is not a shortcut, it is the first thing in the way of the
+            answer. */}
+        {shownRecent.length > 0 ? (
           <Collapsible
             label={t('pages.food.add.recent')}
-            count={recent.length}
+            count={shownRecent.length}
             open={!folded.has('recent')}
             onOpenChange={(open) => fold('recent', open)}
           >
             <FoodRows
-              foods={recent.map(({ food }) => ({
+              foods={shownRecent.map(({ food }) => ({
                 key: food.id,
                 name: food.name,
                 brand: food.brand,
@@ -410,59 +436,66 @@ export default function AddFoodPage() {
           </div>
         ) : null}
 
-        {/* One tap, one search. The button says which service it is about to
-            ask, because asking it is a choice the quota makes worth naming. */}
-        {status === 'ready' && query.trim().length >= 3 ? (
-          <div className="mt-4">
-            {offAnswers && (offAnswers.status !== 'ready' || offFoods.length === 0) ? (
-              <p className="font-mono text-2xs text-ink-faint">
-                {t(
-                  offAnswers.status === 'searching'
-                    ? 'pages.food.add.offSearching'
-                    : offAnswers.status === 'busy'
-                      ? 'pages.food.add.offBusy'
-                      : offAnswers.status === 'failed'
-                        ? 'pages.food.add.offFailed'
-                        : 'pages.food.add.offNone',
-                )}
-              </p>
-            ) : (
-              <Button variant="quiet" className="w-full md:w-auto" onClick={() => void searchOff()}>
-                {t('pages.food.add.searchOff')}
-              </Button>
-            )}
-          </div>
+        {/* Said once, and only once everything that answers on its own has
+            answered. It used to say `kein treffer` while Open Food Facts had
+            not been asked yet, which was the screen giving up in front of the
+            reader and then offering to try. */}
+        {nothingYet ? (
+          <p className="mt-4 font-mono text-2xs text-ink-faint">
+            {t('pages.food.add.noResults')}
+          </p>
         ) : null}
 
-        {/* Silent when the proxy has no key: that is a deployment that has not
-            been finished, and there is nothing the reader could do about it. */}
         {remoteStatus === 'error' || remoteStatus === 'rateLimited' ? (
           <p className="mt-4 font-mono text-2xs text-ink-faint">
             {t(`pages.food.add.usda${remoteStatus === 'rateLimited' ? 'Busy' : 'Failed'}`)}
           </p>
         ) : null}
+      </section>
 
-        {/* The most important empty state in the app: it is the path by which
-            the shared catalogue grows (§10.8). The next step is offered in
-            place, not on another screen. */}
-        {(status === 'ready' &&
-          results.length === 0 &&
-          usda.length === 0 &&
-          remoteStatus !== 'searching') ||
-        status === 'idle' ? (
-          <div className="rounded-lg border border-line bg-surface px-4 py-6 text-center">
-            {status === 'ready' ? (
-              <p className="text-sm text-ink-muted">{t('pages.food.add.noResults')}</p>
-            ) : null}
-            <Button
-              variant="tinted"
-              className={status === 'ready' ? 'mt-4' : ''}
-              onClick={() => setCreating(true)}
-            >
-              {t('pages.food.add.addYourself')}
-            </Button>
-          </div>
-        ) : null}
+      {/* The two ways on, as one list rather than as two more full-width
+          rectangles under the results (§10.1: lists are rows). They are always
+          in the same place, whether the search found everything or nothing,
+          and each says what it is about to do rather than what it is. */}
+      <section className="mt-8">
+        <SectionHead label={t('pages.food.add.elsewhere')} />
+        <Rows>
+          {searchable && offFoods.length === 0 ? (
+            offAnswers && offAnswers.status !== 'ready' ? (
+              <ActionNote
+                label={t('pages.food.add.searchOff')}
+                note={t(
+                  offAnswers.status === 'searching'
+                    ? 'pages.food.add.offSearching'
+                    : offAnswers.status === 'busy'
+                      ? 'pages.food.add.offBusy'
+                      : 'pages.food.add.offFailed',
+                )}
+              />
+            ) : offAnswers ? (
+              <ActionNote
+                label={t('pages.food.add.searchOff')}
+                note={t('pages.food.add.offNone')}
+              />
+            ) : (
+              <Row onClick={() => void searchOff()}>
+                <span className="min-w-0 flex-1">{t('pages.food.add.searchOff')}</span>
+                <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
+                  →
+                </span>
+              </Row>
+            )
+          ) : null}
+
+          {/* The path by which the shared catalogue grows (§10.8), and the last
+              one that always works. */}
+          <Row onClick={() => setCreating(true)}>
+            <span className="min-w-0 flex-1">{t('pages.food.add.addYourself')}</span>
+            <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
+              →
+            </span>
+          </Row>
+        </Rows>
       </section>
 
       <Attribution />
@@ -497,6 +530,16 @@ function Attribution() {
         {ATTRIBUTION_URL.replace('https://', '')}
       </a>
     </p>
+  )
+}
+
+/** The same row, once it has been pressed and has something to report. */
+function ActionNote({ label, note }: { label: string; note: string }) {
+  return (
+    <li className="flex min-h-[52px] items-center gap-3 px-4 py-3">
+      <span className="min-w-0 flex-1 text-ink-muted">{label}</span>
+      <span className="shrink-0 text-right font-mono text-2xs text-ink-faint">{note}</span>
+    </li>
   )
 }
 
