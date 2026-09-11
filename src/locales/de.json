@@ -555,7 +555,6 @@
         "name": {
           "label": "name",
           "field": "anzeigename",
-          "hint": "Wie merit dich anspricht. Nur du siehst ihn.",
           "placeholder": "Dein Name",
           "save": "Namen speichern",
           "saving": "Wird gespeichert …",
@@ -568,7 +567,6 @@
           "field": "neue adresse",
           "save": "Adresse ändern",
           "saving": "Wird geändert …",
-          "hint": "Die Änderung wird erst wirksam, wenn du den Link in der Bestätigungsmail öffnest. Bis dahin gilt die alte Adresse.",
           "sent": "Bestätigungsmail unterwegs. Öffne den Link darin — prüfe auch den Spam-Ordner.",
           "unchanged": "Das ist die Adresse, mit der du angemeldet bist.",
           "failed": "Die Adresse wurde nicht geändert. Prüfe dein Netz und versuche es noch einmal."
@@ -581,7 +579,6 @@
           "save": "Passwort ändern",
           "saving": "Wird geändert …",
           "saved": "Passwort geändert.",
-          "hint": "Mindestens acht Zeichen. Das aktuelle Passwort wird abgefragt, damit eine offene Sitzung allein nicht reicht.",
           "tooShort": "Mindestens acht Zeichen.",
           "mismatch": "Die beiden Eingaben sind nicht gleich.",
           "wrongCurrent": "Das aktuelle Passwort stimmt nicht.",
@@ -611,10 +608,8 @@
       },
       "data": {
         "label": "deine daten",
-        "lead": "Alles, was dieses Konto enthält, und der Weg hinaus.",
         "export": "Meine Daten herunterladen",
         "exporting": "Wird vorbereitet …",
-        "exportHint": "Eine JSON-Datei: dein Profil, Wiegungen, Ernährungstagebuch, Ziele, Routinen und jeder Satz. Artikel 15 und 20.",
         "exportFailed": "Der Download hat nicht geklappt. Prüfe dein Netz und versuche es noch einmal.",
         "delete": "Mein Konto löschen",
         "deleting": "Wird gelöscht …",

@@ -1,6 +1,8 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 
+import { Field } from '@/components/Field'
+import { Panel } from '@/components/Panel'
 import { ScreenTitle } from '@/components/ScreenTitle'
 import { SectionHead } from '@/components/SectionHead'
 import { Button } from '@/components/ui/button'
@@ -110,9 +112,6 @@ function DisplayName() {
           autoComplete="name"
           maxLength={80}
         />
-        <p className="max-w-[62ch] font-mono text-2xs text-ink-faint">
-          {t('pages.account.profile.name.hint')}
-        </p>
         <Button type="submit" variant="quiet" pending={pending} className="mt-2 self-start">
           {pending ? t('pages.account.profile.name.saving') : t('pages.account.profile.name.save')}
         </Button>
@@ -166,10 +165,11 @@ function EmailAddress() {
   return (
     <section className="mt-8">
       <SectionHead label={t('pages.account.profile.email.label')} />
-      <p className="mb-4 font-mono text-2xs text-ink-faint">
-        {t('pages.account.profile.email.current')}
-      </p>
-      <p className="-mt-3 mb-4 break-all text-sm">{current}</p>
+      <Panel className="mb-5">
+        <Field label={t('pages.account.profile.email.current')}>
+          <p className="break-all">{current}</p>
+        </Field>
+      </Panel>
 
       <form onSubmit={onSubmit} className="flex flex-col gap-2" noValidate>
         <Label htmlFor="new-email">{t('pages.account.profile.email.field')}</Label>
@@ -184,9 +184,6 @@ function EmailAddress() {
           autoCorrect="off"
           spellCheck={false}
         />
-        <p className="max-w-[62ch] font-mono text-2xs text-ink-faint">
-          {t('pages.account.profile.email.hint')}
-        </p>
         <Button type="submit" variant="quiet" pending={pending} className="mt-2 self-start">
           {pending
             ? t('pages.account.profile.email.saving')
@@ -285,9 +282,6 @@ function Password() {
             onChange={(e) => setRepeat(e.target.value)}
             autoComplete="new-password"
           />
-          <p className="max-w-[62ch] font-mono text-2xs text-ink-faint">
-            {t('pages.account.profile.password.hint')}
-          </p>
         </div>
 
         <Button type="submit" variant="quiet" pending={pending} className="self-start">

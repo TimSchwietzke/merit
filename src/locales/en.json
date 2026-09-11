@@ -555,7 +555,6 @@
         "name": {
           "label": "name",
           "field": "display name",
-          "hint": "What merit calls you. Only you see it.",
           "placeholder": "Your name",
           "save": "Save name",
           "saving": "Saving …",
@@ -568,7 +567,6 @@
           "field": "new address",
           "save": "Change address",
           "saving": "Changing …",
-          "hint": "The change takes effect only once you open the link in the confirmation email. Until then the old address stands.",
           "sent": "Confirmation email on its way. Open the link in it — check the spam folder too.",
           "unchanged": "That is the address you are already signed in with.",
           "failed": "The address was not changed. Check your connection and try again."
@@ -581,7 +579,6 @@
           "save": "Change password",
           "saving": "Changing …",
           "saved": "Password changed.",
-          "hint": "At least eight characters. The current password is asked for so that an open session alone is not enough.",
           "tooShort": "At least eight characters.",
           "mismatch": "The two entries do not match.",
           "wrongCurrent": "That is not the current password.",
@@ -611,10 +608,8 @@
       },
       "data": {
         "label": "your data",
-        "lead": "Everything this account holds, and the way out of it.",
         "export": "Download my data",
         "exporting": "Preparing…",
-        "exportHint": "One JSON file: your profile, weigh-ins, food log, targets, routines and every set. Article 15 and 20.",
         "exportFailed": "That did not download. Check your connection and try again.",
         "delete": "Delete my account",
         "deleting": "Deleting…",

@@ -53,16 +53,11 @@ export default function DataPage() {
   return (
     <>
       <ScreenTitle>{t('nav.data')}</ScreenTitle>
-      <p className="mt-8 mb-4 max-w-[62ch] text-sm text-ink-muted">{t('pages.account.data.lead')}</p>
-
-      <div className="flex flex-col gap-6">
+      <div className="mt-8 flex flex-col gap-6">
         <div>
           <Button variant="quiet" pending={busy === 'export'} onClick={() => void exportData()}>
             {busy === 'export' ? t('pages.account.data.exporting') : t('pages.account.data.export')}
           </Button>
-          <p className="mt-2 max-w-[62ch] font-mono text-2xs text-ink-faint">
-            {t('pages.account.data.exportHint')}
-          </p>
           {failed === 'export' ? (
             <p role="alert" className="mt-2 text-sm text-danger">
               {t('pages.account.data.exportFailed')}
