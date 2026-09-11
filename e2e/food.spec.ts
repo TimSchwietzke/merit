@@ -167,15 +167,14 @@ test('tapping a logged row opens it for editing, not for deleting', async ({ pag
   await expect(page.getByRole('button', { name: 'Aus dem Tag entfernen' })).toBeVisible()
 })
 
-test('a name search reaches Open Food Facts, once asked, and logs what it finds', async ({
-  page,
-}) => {
+test('one search asks every source, and typing asks none', async ({ page }) => {
   await page.setViewportSize({ width: 375, height: 900 })
   await stubBackend(page, { theme: 'light', locale: 'de' })
 
-  // Every call the proxy gets is counted: ten searches a minute for the whole
-  // project is the reason it is a button and not another debounce, and a
-  // regression there would be invisible on screen.
+  // Every call to the proxy is counted. Open Food Facts allows ten searches a
+  // minute for the whole project, so "a search happens because somebody asked
+  // for one" is a promise with a number behind it, and a regression into
+  // searching per keystroke would be invisible on screen.
   let searches = 0
   await page.route('**/functions/v1/off-search', async (route) => {
     searches += 1
@@ -186,22 +185,21 @@ test('a name search reaches Open Food Facts, once asked, and logs what it finds'
   await waitForScreen(page)
   await page.locator('#food-search').fill('skyr')
   await page.waitForTimeout(700)
-
-  // Typing alone asks nobody.
   expect(searches, 'typing does not spend the quota').toBe(0)
 
-  await page.getByRole('button', { name: 'Open Food Facts durchsuchen' }).click()
+  await page.getByRole('button', { name: 'Suchen' }).click()
+
+  // One press, and all three answer into one list.
+  await expect(page.getByRole('button', { name: /katalog/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: /open food facts/ })).toBeVisible()
   await expect(page.getByText('Skyr Vanille')).toBeVisible()
   expect(searches).toBe(1)
 
-  // The stub answers with two, and one of them is already in the catalogue:
-  // that one is not offered again here, because the row above it is the one
-  // carrying the id a day's entries point at.
-  const group = page.getByRole('button', { name: /open food facts/ })
-  await expect(group).toContainText('1')
+  // The packet the catalogue already holds is not offered twice: the group
+  // carries one of the stub's two products.
+  await expect(page.getByRole('button', { name: /open food facts/ })).toContainText('1')
 
   // Picking one writes it into the shared catalogue and goes to the quantity.
   await page.getByRole('button', { name: /Skyr Vanille/ }).click()
-  await expect(page.getByRole('heading', { name: 'Lebensmittel hinzufügen' })).toBeVisible()
   await expect(page.getByLabel('menge')).toBeVisible()
 })

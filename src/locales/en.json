@@ -161,8 +161,8 @@
       "add": {
         "title": "Add food",
         "search": "search",
-        "searchHint": " · at least two letters",
-        "searching": "searching",
+        "searchHint": " · type a name, then search",
+        "searching": "searching …",
         "noResults": "nothing found",
         "addYourself": "Type it in yourself",
         "searchFailed": "The search did not go through. Check your connection and try again.",
@@ -180,7 +180,8 @@
         "offBusy": "too many searches",
         "offFailed": "not reachable",
         "scan": "Scan",
-        "elsewhere": "if nothing fits"
+        "elsewhere": "if nothing fits",
+        "go": "Search"
       },
       "portion": {
         "quantity": "quantity",

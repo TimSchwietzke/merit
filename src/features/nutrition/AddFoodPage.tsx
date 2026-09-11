@@ -1,5 +1,5 @@
 import { ScanBarcode } from 'lucide-react'
-import { lazy, Suspense, useState } from 'react'
+import { lazy, Suspense, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
@@ -27,7 +27,7 @@ import { useRecentFoods } from '@/features/nutrition/useRecentFoods'
 import { useSession } from '@/features/auth/useSession'
 import { todayKey } from '@/lib/date'
 import { formatNumber } from '@/lib/format'
-import { ATTRIBUTION_URL, searchOffProducts, type OffFood } from '@/lib/off'
+import { ATTRIBUTION_URL, type OffFood } from '@/lib/off'
 import { supabase } from '@/lib/supabase'
 import type { MealType } from '@/lib/nutrition'
 import type { UsdaFood } from '@/lib/usda'
@@ -67,7 +67,13 @@ export default function AddFoodPage() {
   const meal = (params.get('meal') as MealType | null) ?? undefined
 
   const [query, setQuery] = useState('')
-  const { results, status, usda, remoteStatus } = useFoodSearch(query)
+  // What was typed, and what was asked. A search happens because somebody
+  // asked for one: it is one press rather than one per keystroke, which is
+  // what makes it affordable to ask Open Food Facts every time (ten searches a
+  // minute for the whole project) and what makes the screen quiet until there
+  // is something to say.
+  const [term, setTerm] = useState('')
+  const { results, status, usda, usdaStatus, off, offStatus } = useFoodSearch(term)
   const recent = useRecentFoods()
   const [folded, setFolded] = useState<Set<string>>(new Set())
 
@@ -87,32 +93,7 @@ export default function AddFoodPage() {
   const [failed, setFailed] = useState(false)
   const [scanResult, setScanResult] = useState<'missing' | 'offline' | null>(null)
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null)
-  // Open Food Facts is asked on request rather than on every pause in typing:
-  // ten searches a minute for the whole project (see the proxy), against a
-  // thousand an hour for USDA. A packaged product is normally scanned anyway,
-  // and this is the fallback for the packet whose barcode will not read.
-  const [off, setOff] = useState<{
-    query: string
-    status: 'searching' | 'ready' | 'busy' | 'failed'
-    foods: OffFood[]
-  } | null>(null)
-
   const { add } = useFoodLog(date)
-
-  // Answers belong to the query that asked for them. Typing on invalidates
-  // them rather than leaving a list under a search it does not answer.
-  const offAnswers = off !== null && off.query === query.trim() ? off : null
-  // A packet the catalogue already holds is offered from the catalogue, where
-  // the row has the id a day's entries point at.
-  const known = new Set(results.map((food) => food.barcode))
-  const term = query.trim().toLowerCase()
-  const shownRecent =
-    term.length === 0
-      ? recent
-      : recent.filter(({ food }) => `${food.name} ${food.brand ?? ''}`.toLowerCase().includes(term))
-  const offFoods = offAnswers?.status === 'ready'
-    ? offAnswers.foods.filter((food) => !known.has(food.barcode))
-    : []
 
   async function logPortion({ quantityG, mealType }: { quantityG: number; mealType: MealType }) {
     if (!picked) return
@@ -152,17 +133,6 @@ export default function AddFoodPage() {
     setPending(false)
     if (cached) setPicked(cached)
     else setFailed(true)
-  }
-
-  async function searchOff() {
-    const term = query.trim()
-    setOff({ query: term, status: 'searching', foods: [] })
-    const found = await searchOffProducts(term)
-    setOff({
-      query: term,
-      status: found.kind === 'found' ? 'ready' : found.kind === 'busy' ? 'busy' : 'failed',
-      foods: found.kind === 'found' ? found.foods : [],
-    })
   }
 
   async function pickOff(food: OffFood) {
@@ -284,64 +254,79 @@ export default function AddFoodPage() {
     )
   }
 
-  const searchable = query.trim().length >= 3
-  const nothingYet = status === 'ready' && results.length === 0 && usda.length === 0
+  const asked = term.length > 0
+  const searching =
+    status === 'searching' || usdaStatus === 'searching' || offStatus === 'searching'
+  const nothing =
+    asked && !searching && results.length === 0 && usda.length === 0 && off.length === 0
+
+  function search(event: FormEvent) {
+    event.preventDefault()
+    setTerm(query.trim())
+  }
 
   return (
     <>
       {/* No lead. The screen is a search field with its own label, and a
-          paragraph explaining which databases sit behind it is a paragraph
-          nobody reads twice (§14, and the wording pass on docs/TODO.md). */}
+          paragraph naming the databases behind it is a paragraph nobody reads
+          twice (§14, and the wording pass on docs/TODO.md). */}
       <PageHeader title={t('pages.food.add.title')} />
 
-      <div className="flex flex-col gap-2">
+      {/* A form, so the keyboard's own go key does what the button does. */}
+      <form onSubmit={search} className="flex flex-col gap-2">
         <Label htmlFor="food-search">
           {t('pages.food.add.search')}
           <span className="text-ink-faint">{t('pages.food.add.searchHint')}</span>
         </Label>
 
-        {/* Scanning sits *beside* the field rather than in a full-width block
-            under it: they are two ways of asking the same question, and the
-            block was a third competing rectangle on a screen that already had
-            two (§5.5 — one thing wins). It keeps its word as well as its icon,
-            because it is the fastest path to a packaged product and not a
-            place to be clever (§12). */}
         <div className="flex items-start gap-2">
           <Input
             id="food-search"
             type="search"
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => {
+              setQuery(event.target.value)
+              // Emptying the field puts the screen back where it started,
+              // rather than leaving results under a search that is no longer
+              // written anywhere.
+              if (event.target.value.trim() === '') setTerm('')
+            }}
             autoComplete="off"
             autoCapitalize="none"
             spellCheck={false}
             className="min-w-0 flex-1"
           />
-          <Button variant="tinted" className="shrink-0" onClick={() => setScanning(true)}>
-            <ScanBarcode aria-hidden />
-            {t('pages.food.add.scan')}
+          <Button type="submit" variant="primary" className="shrink-0" disabled={searching}>
+            {t(searching ? 'pages.food.add.searching' : 'pages.food.add.go')}
           </Button>
         </div>
-      </div>
+      </form>
+
+      {/* The other way of asking the same question, and the fastest one for a
+          packet. Under the field rather than beside it: three controls on one
+          row at 375px is a row nobody can hit (§5.2). */}
+      <Button variant="tinted" className="mt-3 w-full" onClick={() => setScanning(true)}>
+        <ScanBarcode aria-hidden />
+        {t('pages.food.scan.open')}
+      </Button>
 
       <section className="mt-8">
-        {/* Recently used first: GOAL.md §5 calls repeating a previous meal the
-            feature that decides whether the app gets used daily.
+        {/* Before a search, the screen is the list of things logged lately.
+            GOAL.md §5 calls repeating a previous meal the feature that decides
+            whether the app gets used daily, and §10.11 puts it first.
 
-            Narrowed by the query, which §10.11 does not ask for — it says
-            recents are narrowed by nothing. That rule is about the screen at
-            rest. Once somebody has typed `nudel`, a row for yesterday's energy
-            drink is not a shortcut, it is the first thing in the way of the
-            answer. */}
-        {shownRecent.length > 0 ? (
+            After a search it goes: what was asked for is what the screen is
+            about, and every one of these rows is in the catalogue anyway, so
+            the results hold whichever of them matched. */}
+        {!asked && recent.length > 0 ? (
           <Collapsible
             label={t('pages.food.add.recent')}
-            count={shownRecent.length}
+            count={recent.length}
             open={!folded.has('recent')}
             onOpenChange={(open) => fold('recent', open)}
           >
             <FoodRows
-              foods={shownRecent.map(({ food }) => ({
+              foods={recent.map(({ food }) => ({
                 key: food.id,
                 name: food.name,
                 brand: food.brand,
@@ -353,7 +338,7 @@ export default function AddFoodPage() {
           </Collapsible>
         ) : null}
 
-        {status === 'searching' ? (
+        {searching ? (
           <p className="font-mono text-2xs text-ink-faint">{t('pages.food.add.searching')}</p>
         ) : null}
 
@@ -363,7 +348,7 @@ export default function AddFoodPage() {
           </p>
         ) : null}
 
-        {status === 'ready' && results.length > 0 ? (
+        {results.length > 0 ? (
           <Collapsible
             label={t('pages.food.add.catalogue')}
             count={results.length}
@@ -383,15 +368,9 @@ export default function AddFoodPage() {
           </Collapsible>
         ) : null}
 
-        {/* USDA under the catalogue, because the catalogue answers instantly
-            and this is a round trip. A result here is not a row yet: picking
-            one writes it into the shared catalogue first (GOAL.md §4). */}
-        {remoteStatus === 'searching' && status === 'ready' ? (
-          <p className="mt-4 font-mono text-2xs text-ink-faint">
-            {t('pages.food.add.searchingUsda')}
-          </p>
-        ) : null}
-
+        {/* The outside services under the catalogue, which answers instantly
+            while they are round trips. A row here is not in the catalogue yet:
+            picking one writes it there first (GOAL.md §4). */}
         {usda.length > 0 ? (
           <div className="mt-4">
             <Collapsible
@@ -414,16 +393,16 @@ export default function AddFoodPage() {
           </div>
         ) : null}
 
-        {offFoods.length > 0 ? (
+        {off.length > 0 ? (
           <div className="mt-4">
             <Collapsible
               label={t('pages.food.add.off')}
-              count={offFoods.length}
+              count={off.length}
               open={!folded.has('off')}
               onOpenChange={(open) => fold('off', open)}
             >
               <FoodRows
-                foods={offFoods.map((food) => ({
+                foods={off.map((food) => ({
                   key: food.barcode,
                   name: food.name,
                   brand: food.brand,
@@ -436,67 +415,45 @@ export default function AddFoodPage() {
           </div>
         ) : null}
 
-        {/* Said once, and only once everything that answers on its own has
-            answered. It used to say `kein treffer` while Open Food Facts had
-            not been asked yet, which was the screen giving up in front of the
-            reader and then offering to try. */}
-        {nothingYet ? (
-          <p className="mt-4 font-mono text-2xs text-ink-faint">
-            {t('pages.food.add.noResults')}
+        {nothing ? (
+          <p className="font-mono text-2xs text-ink-faint">{t('pages.food.add.noResults')}</p>
+        ) : null}
+
+        {/* One line, and only when a service actually failed. A search that
+            found nothing has already said so above; a service that was not
+            reachable is a different fact and the reason a result might be
+            missing. Nothing is said about a proxy without its key: that is a
+            deployment nobody reading this screen can finish. */}
+        {asked && !searching && (usdaStatus === 'error' || usdaStatus === 'rateLimited') ? (
+          <p className="mt-3 font-mono text-2xs text-ink-faint">
+            {t(`pages.food.add.usda${usdaStatus === 'rateLimited' ? 'Busy' : 'Failed'}`)}
           </p>
         ) : null}
 
-        {remoteStatus === 'error' || remoteStatus === 'rateLimited' ? (
-          <p className="mt-4 font-mono text-2xs text-ink-faint">
-            {t(`pages.food.add.usda${remoteStatus === 'rateLimited' ? 'Busy' : 'Failed'}`)}
+        {asked && !searching && (offStatus === 'error' || offStatus === 'rateLimited') ? (
+          <p className="mt-3 font-mono text-2xs text-ink-faint">
+            {t(offStatus === 'rateLimited' ? 'pages.food.add.offBusy' : 'pages.food.add.offFailed')}
           </p>
         ) : null}
       </section>
 
-      {/* The two ways on, as one list rather than as two more full-width
-          rectangles under the results (§10.1: lists are rows). They are always
-          in the same place, whether the search found everything or nothing,
-          and each says what it is about to do rather than what it is. */}
-      <section className="mt-8">
-        <SectionHead label={t('pages.food.add.elsewhere')} />
-        <Rows>
-          {searchable && offFoods.length === 0 ? (
-            offAnswers && offAnswers.status !== 'ready' ? (
-              <ActionNote
-                label={t('pages.food.add.searchOff')}
-                note={t(
-                  offAnswers.status === 'searching'
-                    ? 'pages.food.add.offSearching'
-                    : offAnswers.status === 'busy'
-                      ? 'pages.food.add.offBusy'
-                      : 'pages.food.add.offFailed',
-                )}
-              />
-            ) : offAnswers ? (
-              <ActionNote
-                label={t('pages.food.add.searchOff')}
-                note={t('pages.food.add.offNone')}
-              />
-            ) : (
-              <Row onClick={() => void searchOff()}>
-                <span className="min-w-0 flex-1">{t('pages.food.add.searchOff')}</span>
-                <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
-                  →
-                </span>
-              </Row>
-            )
-          ) : null}
-
-          {/* The path by which the shared catalogue grows (§10.8), and the last
-              one that always works. */}
-          <Row onClick={() => setCreating(true)}>
-            <span className="min-w-0 flex-1">{t('pages.food.add.addYourself')}</span>
-            <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
-              →
-            </span>
-          </Row>
-        </Rows>
-      </section>
+      {/* Only once a search has been run. Before that there is nothing it could
+          not fit, and a screen that opens by offering to give up is a screen
+          that has already given up. It stays for a search that found things
+          too: finding four pastas is not the same as finding yours. */}
+      {asked && !searching ? (
+        <section className="mt-8">
+          <SectionHead label={t('pages.food.add.elsewhere')} />
+          <Rows>
+            <Row onClick={() => setCreating(true)}>
+              <span className="min-w-0 flex-1">{t('pages.food.add.addYourself')}</span>
+              <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
+                →
+              </span>
+            </Row>
+          </Rows>
+        </section>
+      ) : null}
 
       <Attribution />
 
@@ -530,16 +487,6 @@ function Attribution() {
         {ATTRIBUTION_URL.replace('https://', '')}
       </a>
     </p>
-  )
-}
-
-/** The same row, once it has been pressed and has something to report. */
-function ActionNote({ label, note }: { label: string; note: string }) {
-  return (
-    <li className="flex min-h-[52px] items-center gap-3 px-4 py-3">
-      <span className="min-w-0 flex-1 text-ink-muted">{label}</span>
-      <span className="shrink-0 text-right font-mono text-2xs text-ink-faint">{note}</span>
-    </li>
   )
 }
 

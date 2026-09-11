@@ -161,8 +161,8 @@
       "add": {
         "title": "Lebensmittel hinzufügen",
         "search": "suche",
-        "searchHint": " · mindestens zwei buchstaben",
-        "searching": "wird gesucht",
+        "searchHint": " · name eintippen, dann suchen",
+        "searching": "sucht …",
         "noResults": "kein treffer",
         "addYourself": "Selbst eintragen",
         "searchFailed": "Die Suche ist nicht durchgekommen. Prüfe dein Netz und versuche es noch einmal.",
@@ -180,7 +180,8 @@
         "offBusy": "gerade zu viele suchen",
         "offFailed": "nicht erreichbar",
         "scan": "Scannen",
-        "elsewhere": "wenn nichts passt"
+        "elsewhere": "wenn nichts passt",
+        "go": "Suchen"
       },
       "portion": {
         "quantity": "menge",
