@@ -2,7 +2,12 @@ import { useEffect, useState } from 'react'
 
 import { useSession } from '@/features/auth/useSession'
 import { supabase } from '@/lib/supabase'
-import type { CatalogueFood } from '@/features/nutrition/useFoodSearch'
+import {
+  FOOD_SELECT,
+  toCatalogueFood,
+  type CatalogueFood,
+  type FoodRow,
+} from '@/features/nutrition/catalogue'
 
 /**
  * The foods this user logged most recently, each once.
@@ -17,11 +22,7 @@ import type { CatalogueFood } from '@/features/nutrition/useFoodSearch'
  * maintain.
  */
 const SELECT = `food_id, quantity_g, meal_type,
-  foods!inner (
-    id, name, brand, source, serving_size_g, serving_label,
-    kcal_100g, fat_100g, carbs_100g, protein_100g,
-    saturated_fat_100g, sugars_100g, fibre_100g, salt_100g
-  )`
+  foods!inner ( ${FOOD_SELECT} )`
 
 const SCAN = 100
 
@@ -36,22 +37,7 @@ type Row = {
   food_id: string
   quantity_g: number
   meal_type: string
-  foods: {
-    id: string
-    name: string
-    brand: string | null
-    source: string
-    serving_size_g: number | null
-    serving_label: string | null
-    kcal_100g: number
-    fat_100g: number
-    carbs_100g: number
-    protein_100g: number
-    saturated_fat_100g: number | null
-    sugars_100g: number | null
-    fibre_100g: number | null
-    salt_100g: number | null
-  }
+  foods: FoodRow
 }
 
 export function useRecentFoods(limit = 8): RecentFood[] {
@@ -79,24 +65,7 @@ export function useRecentFoods(limit = 8): RecentFood[] {
           out.push({
             quantityG: row.quantity_g,
             mealType: row.meal_type,
-            food: {
-              id: row.foods.id,
-              name: row.foods.name,
-              brand: row.foods.brand,
-              source: row.foods.source,
-              servingSizeG: row.foods.serving_size_g,
-              servingLabel: row.foods.serving_label,
-              nutrients: {
-                kcal: row.foods.kcal_100g,
-                fat: row.foods.fat_100g,
-                carbs: row.foods.carbs_100g,
-                protein: row.foods.protein_100g,
-                saturatedFat: row.foods.saturated_fat_100g,
-                sugars: row.foods.sugars_100g,
-                fibre: row.foods.fibre_100g,
-                salt: row.foods.salt_100g,
-              },
-            },
+            food: toCatalogueFood(row.foods),
           })
           if (out.length === limit) break
         }

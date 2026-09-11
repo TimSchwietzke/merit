@@ -18,6 +18,6 @@ export default defineConfig({
     // in each feature. A DOM environment gets added with the first component
     // test that needs one, not in advance.
     environment: 'node',
-    include: ['src/**/*.test.ts', 'src/**/*.test.tsx'],
+    include: ['src/**/*.test.ts', 'src/**/*.test.tsx', 'supabase/functions/**/*.test.ts'],
   },
 })

@@ -10,9 +10,11 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { NewFoodForm, type NewFood } from '@/features/nutrition/NewFoodForm'
 import { resolveBarcode } from '@/features/nutrition/resolve-barcode'
+import { resolveUsdaFood } from '@/features/nutrition/resolve-usda'
 import { PortionForm } from '@/features/nutrition/PortionForm'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
-import { useFoodSearch, type CatalogueFood } from '@/features/nutrition/useFoodSearch'
+import { useFoodSearch } from '@/features/nutrition/useFoodSearch'
+import { type CatalogueFood } from '@/features/nutrition/catalogue'
 import { useRecentFoods } from '@/features/nutrition/useRecentFoods'
 import { useSession } from '@/features/auth/useSession'
 import { todayKey } from '@/lib/date'
@@ -20,6 +22,7 @@ import { formatNumber } from '@/lib/format'
 import { ATTRIBUTION_URL } from '@/lib/off'
 import { supabase } from '@/lib/supabase'
 import type { MealType } from '@/lib/nutrition'
+import type { UsdaFood } from '@/lib/usda'
 
 /**
  * Adding a food, as one screen with three states: search the catalogue, add a
@@ -30,10 +33,10 @@ import type { MealType } from '@/lib/nutrition'
  * it looks like it does, and the day underneath is not holding scroll position
  * behind a scrim.
  *
- * The lookup order this implements is steps one and four of GOAL.md §4 — our
- * own database, then manual entry. Open Food Facts and the USDA proxy are steps
- * two and three and slot in between, at the point where the search comes back
- * with nothing.
+ * The lookup order is GOAL.md §4: Merit's own catalogue, then Open Food Facts
+ * by barcode, then USDA by name for the whole foods nobody scans, then typing
+ * it in. Each step is a group on this screen rather than a screen of its own,
+ * so a search that only USDA can answer still ends in the same tap.
  */
 /**
  * The decoder is a third of the bundle gzipped and only this one state needs
@@ -56,7 +59,7 @@ export default function AddFoodPage() {
   const meal = (params.get('meal') as MealType | null) ?? undefined
 
   const [query, setQuery] = useState('')
-  const { results, status } = useFoodSearch(query)
+  const { results, status, usda, remoteStatus } = useFoodSearch(query)
   const recent = useRecentFoods()
   const [folded, setFolded] = useState<Set<string>>(new Set())
 
@@ -108,6 +111,17 @@ export default function AddFoodPage() {
     if (resolved.kind === 'missing') setScannedBarcode(resolved.barcode)
   }
 
+  async function pickUsda(food: UsdaFood) {
+    if (!session || pending) return
+    setPending(true)
+    setFailed(false)
+
+    const cached = await resolveUsdaFood(food, session.user.id)
+    setPending(false)
+    if (cached) setPicked(cached)
+    else setFailed(true)
+  }
+
   async function createFood(food: NewFood) {
     if (!session) return
     setPending(true)
@@ -149,6 +163,7 @@ export default function AddFoodPage() {
       name: data.name,
       brand: data.brand,
       source: data.source,
+      fdcId: null,
       servingSizeG: data.serving_size_g,
       servingLabel: data.serving_label,
       nutrients: {
@@ -271,9 +286,14 @@ export default function AddFoodPage() {
             onOpenChange={(open) => fold('recent', open)}
           >
             <FoodRows
-              foods={recent.map((entry) => entry.food)}
+              foods={recent.map(({ food }) => ({
+                key: food.id,
+                name: food.name,
+                brand: food.brand,
+                kcal: food.nutrients.kcal,
+                pick: () => setPicked(food),
+              }))}
               locale={locale}
-              onPick={setPicked}
             />
           </Collapsible>
         ) : null}
@@ -295,14 +315,66 @@ export default function AddFoodPage() {
             open={!folded.has('catalogue')}
             onOpenChange={(open) => fold('catalogue', open)}
           >
-            <FoodRows foods={results} locale={locale} onPick={setPicked} />
+            <FoodRows
+              foods={results.map((food) => ({
+                key: food.id,
+                name: food.name,
+                brand: food.brand,
+                kcal: food.nutrients.kcal,
+                pick: () => setPicked(food),
+              }))}
+              locale={locale}
+            />
           </Collapsible>
+        ) : null}
+
+        {/* USDA under the catalogue, because the catalogue answers instantly
+            and this is a round trip. A result here is not a row yet: picking
+            one writes it into the shared catalogue first (GOAL.md §4). */}
+        {remoteStatus === 'searching' && status === 'ready' ? (
+          <p className="mt-4 font-mono text-2xs text-ink-faint">
+            {t('pages.food.add.searchingUsda')}
+          </p>
+        ) : null}
+
+        {usda.length > 0 ? (
+          <div className="mt-4">
+            <Collapsible
+              label={t('pages.food.add.usda')}
+              count={usda.length}
+              open={!folded.has('usda')}
+              onOpenChange={(open) => fold('usda', open)}
+            >
+              <FoodRows
+                foods={usda.map((food) => ({
+                  key: String(food.fdcId),
+                  name: food.name,
+                  brand: null,
+                  kcal: food.nutrients.kcal,
+                  pick: () => void pickUsda(food),
+                }))}
+                locale={locale}
+              />
+            </Collapsible>
+          </div>
+        ) : null}
+
+        {/* Silent when the proxy has no key: that is a deployment that has not
+            been finished, and there is nothing the reader could do about it. */}
+        {remoteStatus === 'error' || remoteStatus === 'rateLimited' ? (
+          <p className="mt-4 font-mono text-2xs text-ink-faint">
+            {t(`pages.food.add.usda${remoteStatus === 'rateLimited' ? 'Busy' : 'Failed'}`)}
+          </p>
         ) : null}
 
         {/* The most important empty state in the app: it is the path by which
             the shared catalogue grows (§10.8). The next step is offered in
             place, not on another screen. */}
-        {(status === 'ready' && results.length === 0) || status === 'idle' ? (
+        {(status === 'ready' &&
+          results.length === 0 &&
+          usda.length === 0 &&
+          remoteStatus !== 'searching') ||
+        status === 'idle' ? (
           <div className="rounded-lg border border-line bg-surface px-4 py-6 text-center">
             {status === 'ready' ? (
               <p className="text-sm text-ink-muted">{t('pages.food.add.noResults')}</p>
@@ -354,22 +426,23 @@ function Attribution() {
 }
 
 /**
- * The row a food gets in either group. Two call sites in one file, so it stays
- * here rather than becoming a component nobody else imports.
+ * The row a food gets in any of the three groups. The catalogue has rows with
+ * ids and USDA has results that are not rows yet, so what they have in common
+ * is passed in rather than the shape they do not share.
  */
-function FoodRows({
-  foods,
-  locale,
-  onPick,
-}: {
-  foods: CatalogueFood[]
-  locale: string
-  onPick: (food: CatalogueFood) => void
-}) {
+interface Pickable {
+  key: string
+  name: string
+  brand: string | null
+  kcal: number
+  pick: () => void
+}
+
+function FoodRows({ foods, locale }: { foods: Pickable[]; locale: string }) {
   return (
     <Rows>
       {foods.map((food) => (
-        <Row key={food.id} onClick={() => onPick(food)}>
+        <Row key={food.key} onClick={food.pick}>
           <span className="min-w-0 flex-1">
             <span className="block truncate">{food.name}</span>
             {food.brand ? (
@@ -377,7 +450,7 @@ function FoodRows({
             ) : null}
           </span>
           <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
-            {formatNumber(food.nutrients.kcal, locale, 0)} kcal / 100 g
+            {formatNumber(food.kcal, locale, 0)} kcal / 100 g
           </span>
         </Row>
       ))}

@@ -133,6 +133,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           fat_100g: number
+          fdc_id: number | null
           fibre_100g: number | null
           id: string
           kcal_100g: number
@@ -154,6 +155,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           fat_100g: number
+          fdc_id?: number | null
           fibre_100g?: number | null
           id?: string
           kcal_100g: number
@@ -175,6 +177,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           fat_100g?: number
+          fdc_id?: number | null
           fibre_100g?: number | null
           id?: string
           kcal_100g?: number

@@ -160,7 +160,7 @@
       },
       "add": {
         "title": "Add food",
-        "lead": "Search what Merit already knows. If it is not there yet, add it.",
+        "lead": "Search the catalogue, and USDA as well for fruit, vegetables and meat. If something is missing, type it in.",
         "search": "search",
         "searchHint": " · at least two letters",
         "searching": "searching",
@@ -169,7 +169,11 @@
         "searchFailed": "The search did not go through. Check your connection and try again.",
         "back": "Back to the day",
         "recent": "recently used",
-        "catalogue": "catalogue"
+        "catalogue": "catalogue",
+        "usda": "usda",
+        "searchingUsda": "searching usda …",
+        "usdaFailed": "usda could not be reached. What is above is the whole catalogue.",
+        "usdaBusy": "usda is busy just now. Try again in a few minutes."
       },
       "portion": {
         "quantity": "quantity",

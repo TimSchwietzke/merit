@@ -457,6 +457,36 @@ export async function stubBackend(
     }),
   )
 
+  // The USDA proxy. Answered locally like everything else: the harness must
+  // not reach api.data.gov, and a screen test of the search wants the group
+  // to be in the capture.
+  await page.route('**/functions/v1/usda', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        foods: [
+          {
+            fdcId: 173944,
+            name: 'Bananas, raw',
+            nutrients: {
+              kcal: 89, fat: 0.33, carbs: 22.84, protein: 1.09,
+              saturatedFat: 0.112, sugars: 12.23, fibre: 2.6, salt: 0.0025,
+            },
+          },
+          {
+            fdcId: 171477,
+            name: 'Chicken, broilers or fryers, breast, meat only, raw',
+            nutrients: {
+              kcal: 120, fat: 2.62, carbs: 0, protein: 22.5,
+              saturatedFat: 0.56, sugars: null, fibre: null, salt: 0.114,
+            },
+          },
+        ],
+      }),
+    }),
+  )
+
   // Nothing else should reach the network. Fail loudly rather than hanging.
   await page.route('**/auth/v1/**', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }),

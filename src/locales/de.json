@@ -160,7 +160,7 @@
       },
       "add": {
         "title": "Lebensmittel hinzufügen",
-        "lead": "Durchsuche, was Merit schon kennt. Fehlt etwas, trage es ein.",
+        "lead": "Durchsuche den Katalog, für Obst, Gemüse und Fleisch auch die USDA-Datenbank. Fehlt etwas, trage es ein.",
         "search": "suche",
         "searchHint": " · mindestens zwei buchstaben",
         "searching": "wird gesucht",
@@ -169,7 +169,11 @@
         "searchFailed": "Die Suche ist nicht durchgekommen. Prüfe dein Netz und versuche es noch einmal.",
         "back": "Zurück zum Tag",
         "recent": "zuletzt benutzt",
-        "catalogue": "katalog"
+        "catalogue": "katalog",
+        "usda": "usda",
+        "searchingUsda": "usda wird durchsucht …",
+        "usdaFailed": "usda war nicht erreichbar. Der Katalog oben ist vollständig.",
+        "usdaBusy": "usda ist gerade ausgelastet. Versuch es in ein paar Minuten noch einmal."
       },
       "portion": {
         "quantity": "menge",
