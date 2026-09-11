@@ -22,6 +22,9 @@ export interface PathSegment {
     | 'pages.legal.imprint.title'
     | 'nav.weight'
     | 'nav.goals'
+    | 'nav.profile'
+    | 'nav.appearance'
+    | 'nav.data'
     | 'nav.routines'
     | 'nav.session'
     | 'common.today'
@@ -44,6 +47,9 @@ const PATHS: Record<string, PathSegment[]> = {
   '/training/day': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'common.today' }],
   '/training/session': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'nav.session' }],
   '/account': [ROOT, { labelKey: 'nav.account' }],
+  '/account/profile': [ROOT, { labelKey: 'nav.account', to: '/account' }, { labelKey: 'nav.profile' }],
+  '/account/appearance': [ROOT, { labelKey: 'nav.account', to: '/account' }, { labelKey: 'nav.appearance' }],
+  '/account/data': [ROOT, { labelKey: 'nav.account', to: '/account' }, { labelKey: 'nav.data' }],
   '/legal/privacy': [ROOT, { labelKey: 'pages.legal.privacy.title' }],
   '/legal/imprint': [ROOT, { labelKey: 'pages.legal.imprint.title' }],
   '/cardio': [ROOT, { labelKey: 'nav.cardio' }],

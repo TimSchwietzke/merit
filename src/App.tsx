@@ -28,6 +28,9 @@ import RoutineEditorPage from '@/features/routines/RoutineEditorPage'
 // bundle. Split out, it is fetched by the people who open it rather than by
 // everyone on a gym connection.
 const WeightPage = lazy(() => import('@/features/weight/WeightPage'))
+const ProfilePage = lazy(() => import('@/features/account/ProfilePage'))
+const AppearancePage = lazy(() => import('@/features/account/AppearancePage'))
+const DataPage = lazy(() => import('@/features/account/DataPage'))
 
 // One route, one file (DESIGN.md §7). Everything except /sign-in sits behind
 // RequireAuth — there is no public page in Merit and no open sign-up.
@@ -74,6 +77,9 @@ const router = createBrowserRouter([
               { path: '/training/add', element: <AddExercisePage /> },
               { path: '/training/routines/:id', element: <RoutineEditorPage /> },
               { path: '/account', element: <AccountPage /> },
+              { path: '/account/profile', element: <ProfilePage /> },
+              { path: '/account/appearance', element: <AppearancePage /> },
+              { path: '/account/data', element: <DataPage /> },
               { path: '/cardio', element: <CardioPage /> },
               { path: '/weight', element: <WeightPage /> },
               { path: '/goals', element: <GoalsPage /> },

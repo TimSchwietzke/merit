@@ -13,7 +13,10 @@
     "account": "konto",
     "goals": "ziele",
     "routines": "routinen",
-    "session": "einheit"
+    "session": "einheit",
+    "profile": "profil",
+    "appearance": "darstellung",
+    "data": "deine daten"
   },
   "common": {
     "notBuiltYet": "noch nicht gebaut",
@@ -548,7 +551,43 @@
       "undoFailed": "Das konnte nicht wiederhergestellt werden. Prüfe dein Netz und versuche es noch einmal."
     },
     "account": {
-      "planned": "Hier stehen Einstellungen, Datenexport und die rechtlichen Seiten.",
+      "profile": {
+        "name": {
+          "label": "name",
+          "field": "anzeigename",
+          "hint": "Wie merit dich anspricht. Nur du siehst ihn.",
+          "placeholder": "Dein Name",
+          "save": "Namen speichern",
+          "saving": "Wird gespeichert …",
+          "saved": "Gespeichert.",
+          "failed": "Der Name wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal."
+        },
+        "email": {
+          "label": "e-mail",
+          "current": "angemeldet als",
+          "field": "neue adresse",
+          "save": "Adresse ändern",
+          "saving": "Wird geändert …",
+          "hint": "Die Änderung wird erst wirksam, wenn du den Link in der Bestätigungsmail öffnest. Bis dahin gilt die alte Adresse.",
+          "sent": "Bestätigungsmail unterwegs. Öffne den Link darin — prüfe auch den Spam-Ordner.",
+          "unchanged": "Das ist die Adresse, mit der du angemeldet bist.",
+          "failed": "Die Adresse wurde nicht geändert. Prüfe dein Netz und versuche es noch einmal."
+        },
+        "password": {
+          "label": "passwort",
+          "current": "aktuelles passwort",
+          "field": "neues passwort",
+          "repeat": "neues passwort wiederholen",
+          "save": "Passwort ändern",
+          "saving": "Wird geändert …",
+          "saved": "Passwort geändert.",
+          "hint": "Mindestens acht Zeichen. Das aktuelle Passwort wird abgefragt, damit eine offene Sitzung allein nicht reicht.",
+          "tooShort": "Mindestens acht Zeichen.",
+          "mismatch": "Die beiden Eingaben sind nicht gleich.",
+          "wrongCurrent": "Das aktuelle Passwort stimmt nicht.",
+          "failed": "Das Passwort wurde nicht geändert. Prüfe dein Netz und versuche es noch einmal."
+        }
+      },
       "preferences": {
         "label": "einstellungen",
         "language": "sprache",
@@ -569,10 +608,6 @@
         "signedInAs": "angemeldet als",
         "signOut": "Abmelden",
         "signingOut": "Wird abgemeldet …"
-      },
-      "tracking": {
-        "label": "erfassung",
-        "goals": "ziele"
       },
       "data": {
         "label": "deine daten",

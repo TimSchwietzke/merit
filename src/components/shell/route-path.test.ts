@@ -21,6 +21,18 @@ describe('pathSegments', () => {
     expect(pathSegments('/account').at(-1)?.labelKey).toBe('nav.account')
   })
 
+  it('hangs the account sub-screens under the account, not under the app', () => {
+    // The prefix fallback would answer `/account/profile` with the account's
+    // own two segments and call the screen `konto`, which is the screen it
+    // just left.
+    expect(pathSegments('/account/profile').map((segment) => segment.labelKey)).toEqual([
+      'app.name',
+      'nav.account',
+      'nav.profile',
+    ])
+    expect(screenLabelKey('/account/data')).toBe('nav.data')
+  })
+
   it('falls back to not-found for an address that does not exist', () => {
     expect(pathSegments('/nowhere').map((segment) => segment.labelKey)).toEqual([
       'app.name',
