@@ -11,16 +11,6 @@ somebody something.
 
 ## MVP: blocks friends using this daily
 
-### Food search by name, the Open Food Facts half
-- USDA text search is built: an Edge Function proxy holds the api.data.gov key,
-  the results are mapped to Merit's eight values before they cross the wire, and
-  picking one caches it into `foods` with its `fdc_id`.
-- Open Food Facts has a text search too and it is not wired up. It covers
-  packaged goods, which already arrive by barcode, so it is worth less than it
-  looks: the case it would add is a packet whose barcode will not scan.
-- If it is added, it goes in the same list as a third group, deduplicated
-  against the other two by barcode.
-
 ### Offline training, the rest of it
 - Logging works offline: every training write lands in IndexedDB and is sent
   from a queue, so a set logged in a basement survives the app being closed and

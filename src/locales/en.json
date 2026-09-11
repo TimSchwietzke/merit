@@ -173,7 +173,13 @@
         "usda": "usda",
         "searchingUsda": "searching usda …",
         "usdaFailed": "usda could not be reached. What is above is the whole catalogue.",
-        "usdaBusy": "usda is busy just now. Try again in a few minutes."
+        "usdaBusy": "usda is busy just now. Try again in a few minutes.",
+        "off": "open food facts",
+        "searchOff": "Search Open Food Facts",
+        "offSearching": "searching open food facts …",
+        "offNone": "nothing on open food facts",
+        "offBusy": "too many searches just now. Wait a minute and it works again.",
+        "offFailed": "Open Food Facts could not be reached. Scan the barcode, or type the food in yourself."
       },
       "portion": {
         "quantity": "quantity",

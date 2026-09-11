@@ -173,7 +173,13 @@
         "usda": "usda",
         "searchingUsda": "usda wird durchsucht …",
         "usdaFailed": "usda war nicht erreichbar. Der Katalog oben ist vollständig.",
-        "usdaBusy": "usda ist gerade ausgelastet. Versuch es in ein paar Minuten noch einmal."
+        "usdaBusy": "usda ist gerade ausgelastet. Versuch es in ein paar Minuten noch einmal.",
+        "off": "open food facts",
+        "searchOff": "Bei Open Food Facts suchen",
+        "offSearching": "open food facts wird durchsucht …",
+        "offNone": "kein treffer bei open food facts",
+        "offBusy": "gerade zu viele Suchen. Warte eine Minute, dann geht es wieder.",
+        "offFailed": "Open Food Facts war nicht erreichbar. Scanne den Barcode oder trage das Lebensmittel selbst ein."
       },
       "portion": {
         "quantity": "menge",

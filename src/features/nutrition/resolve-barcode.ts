@@ -1,5 +1,5 @@
 import { normaliseBarcode } from '@/lib/barcode'
-import { lookupOffProduct } from '@/lib/off'
+import { lookupOffProduct, type OffFood } from '@/lib/off'
 import { supabase } from '@/lib/supabase'
 import {
   FOOD_SELECT,
@@ -22,17 +22,14 @@ export type Resolution =
   | { kind: 'missing'; barcode: string }
   | { kind: 'offline' }
 
-export async function resolveBarcode(code: string, userId: string): Promise<Resolution> {
-  const barcode = normaliseBarcode(code)
-
-  const cached = await supabase.from('foods').select(FOOD_SELECT).eq('barcode', barcode).maybeSingle()
-  if (cached.data) return { kind: 'found', food: toCatalogueFood(cached.data as FoodRow) }
-
-  const looked = await lookupOffProduct(barcode)
-  if (looked.kind === 'offline') return { kind: 'offline' }
-  if (looked.kind === 'missing') return { kind: 'missing', barcode }
-
-  const { food } = looked
+/**
+ * An Open Food Facts product, written into the shared catalogue.
+ *
+ * Both ways in end here: a barcode that resolved, and a name search somebody
+ * picked from. The catalogue is shared, so the next person to scan or search
+ * for it gets the row rather than another round trip (CLAUDE.md).
+ */
+export async function cacheOffFood(food: OffFood, userId: string): Promise<CatalogueFood | null> {
   const { data, error } = await supabase
     .from('foods')
     .insert({
@@ -55,14 +52,32 @@ export async function resolveBarcode(code: string, userId: string): Promise<Reso
     .select(FOOD_SELECT)
     .single()
 
-  // A unique violation here means somebody else cached the same product between
-  // the read above and this write — which is a hit, not a failure. Read it back
-  // rather than reporting a barcode that plainly resolved as broken.
+  // A unique violation means somebody else cached the same product between the
+  // lookup and this write, which is a hit and not a failure. Read it back
+  // rather than reporting a product that plainly resolved as broken.
   if (error?.code === '23505') {
-    const raced = await supabase.from('foods').select(FOOD_SELECT).eq('barcode', barcode).maybeSingle()
-    if (raced.data) return { kind: 'found', food: toCatalogueFood(raced.data as FoodRow) }
+    const raced = await supabase
+      .from('foods')
+      .select(FOOD_SELECT)
+      .eq('barcode', food.barcode)
+      .maybeSingle()
+    if (raced.data) return toCatalogueFood(raced.data as FoodRow)
   }
 
-  if (!data || error) return { kind: 'offline' }
-  return { kind: 'found', food: toCatalogueFood(data as FoodRow) }
+  if (!data || error) return null
+  return toCatalogueFood(data as FoodRow)
+}
+
+export async function resolveBarcode(code: string, userId: string): Promise<Resolution> {
+  const barcode = normaliseBarcode(code)
+
+  const cached = await supabase.from('foods').select(FOOD_SELECT).eq('barcode', barcode).maybeSingle()
+  if (cached.data) return { kind: 'found', food: toCatalogueFood(cached.data as FoodRow) }
+
+  const looked = await lookupOffProduct(barcode)
+  if (looked.kind === 'offline') return { kind: 'offline' }
+  if (looked.kind === 'missing') return { kind: 'missing', barcode }
+
+  const food = await cacheOffFood(looked.food, userId)
+  return food ? { kind: 'found', food } : { kind: 'offline' }
 }

@@ -147,3 +147,18 @@ describe('lookupOffProduct', () => {
     expect((await lookupOffProduct('3017620422003')).kind).toBe('offline')
   })
 })
+
+describe('brands, in either shape', () => {
+  it('takes the first of the comma-separated string the product API sends', () => {
+    expect(mapOffProduct(nutella)?.brand).toBe('Nutella')
+  })
+
+  it('takes the first of the array the search API sends', () => {
+    expect(mapOffProduct({ ...nutella, brands: ['Ferrero', 'Nutella'] })?.brand).toBe('Ferrero')
+  })
+
+  it('is null when there is no brand at all', () => {
+    expect(mapOffProduct({ ...nutella, brands: [] })?.brand).toBeNull()
+    expect(mapOffProduct({ ...nutella, brands: '' })?.brand).toBeNull()
+  })
+})

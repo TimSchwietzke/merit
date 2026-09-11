@@ -1,4 +1,5 @@
 import { KCAL_LIMITS, NUTRIENT_LIMITS, type FoodNutrients } from '@/lib/nutrition'
+import { supabase } from '@/lib/supabase'
 
 /**
  * Open Food Facts, mapped onto Merit's shape.
@@ -41,7 +42,8 @@ interface OffProduct {
   product_name?: string
   product_name_de?: string
   product_name_en?: string
-  brands?: string
+  /** A string from the product API, an array from the search one. */
+  brands?: string | string[]
   serving_size?: string
   serving_quantity?: number | string
   nutriments?: Record<string, number | string | undefined>
@@ -129,11 +131,23 @@ export function mapOffProduct(product: OffProduct): OffFood | null {
   return {
     barcode,
     name: name.slice(0, 200),
-    brand: (product.brands ?? '').split(',')[0]?.trim().slice(0, 120) || null,
+    brand: firstBrand(product.brands),
     nutrients,
     servingSizeG: servingLabel ? servingSizeG : null,
     servingLabel: servingSizeG ? servingLabel : null,
   }
+}
+
+/**
+ * The first brand, from either shape.
+ *
+ * The product API answers with `"Nutella, Ferrero, Yum yum"` and the search API
+ * with `["Nutella", "Ferrero"]`, and the field is a pile of synonyms either
+ * way: the first one is the one on the packet.
+ */
+const firstBrand = (brands: string | string[] | undefined): string | null => {
+  const list = Array.isArray(brands) ? brands : (brands ?? '').split(',')
+  return list[0]?.trim().slice(0, 120) || null
 }
 
 export type LookupResult =
@@ -166,4 +180,53 @@ export async function lookupOffProduct(barcode: string, signal?: AbortSignal): P
     // tunnel is the wrong sentence.
     return { kind: 'offline' }
   }
+}
+
+/** What a text search can come back with. An empty list is a real answer. */
+export type SearchResult =
+  | { kind: 'found'; foods: OffFood[] }
+  /** Ten searches a minute for the whole project, and they are spent. */
+  | { kind: 'busy' }
+  | { kind: 'offline' }
+
+/**
+ * Search Open Food Facts by name, through the proxy (`supabase/functions/
+ * off-search`), which is where the reason for the proxy is written down.
+ *
+ * Answers are kept for the life of the page. Somebody who searches "skyr",
+ * looks at the list, goes back and searches it again has asked one question,
+ * and the quota is small enough that asking it twice matters.
+ */
+const answered = new Map<string, OffFood[]>()
+
+export async function searchOffProducts(query: string): Promise<SearchResult> {
+  const term = query.trim().toLowerCase()
+  const remembered = answered.get(term)
+  if (remembered) return { kind: 'found', foods: remembered }
+
+  const { data, error } = await supabase.functions.invoke<{ products?: unknown[]; error?: string }>(
+    'off-search',
+    { body: { query: term } },
+  )
+
+  if (error) {
+    const reason =
+      error instanceof Error && 'context' in error
+        ? await (error.context as Response)
+            .clone()
+            .json()
+            .then((body: { error?: string }) => body.error)
+            .catch(() => undefined)
+        : undefined
+    return { kind: reason === 'rate_limited' ? 'busy' : 'offline' }
+  }
+
+  // A product with no energy value cannot be logged against a calorie budget,
+  // and `mapOffProduct` says so by answering null. Those drop out here.
+  const foods = (data?.products ?? [])
+    .map((product) => mapOffProduct(product as OffProduct))
+    .filter((food) => food !== null)
+
+  answered.set(term, foods)
+  return { kind: 'found', foods }
 }

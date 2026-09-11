@@ -79,11 +79,18 @@ Lookup order when a user adds a food:
 
 1. **Own database** (`foods` table) — already known products and anything users
    have added by hand.
-2. **Open Food Facts API** — barcode lookup for packaged products.
+2. **Open Food Facts API** — barcode lookup for packaged products, and a text
+   search for the packet whose barcode will not scan.
    Read requests need no API key, only a custom `User-Agent`
    (`Merit/1.0 (contact@example.com)`).
    Rate limit: 15 req/min/IP for product reads, 10 req/min/IP for search.
-   Call this **client-side** so the limit applies per user, not per server.
+   The **barcode lookup is client-side**, so that limit applies per user rather
+   than per server. The **text search cannot be**: `search.openfoodfacts.org`
+   answers without an `Access-Control-Allow-Origin` header, so a browser will
+   not hand the response to the page, and the older `/cgi/search.pl` answers
+   503. It goes through an Edge Function, which means ten searches a minute for
+   everybody together — which is why that one is a button rather than something
+   that fires while you type.
    Licence: ODbL — requires attribution in the app.
 3. **USDA FoodData Central** — text search for unpackaged whole foods
    (banana, chicken breast, rice), which Open Food Facts covers poorly.

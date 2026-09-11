@@ -166,3 +166,42 @@ test('tapping a logged row opens it for editing, not for deleting', async ({ pag
   // The keyboard route to the same thing the swipe reveals.
   await expect(page.getByRole('button', { name: 'Aus dem Tag entfernen' })).toBeVisible()
 })
+
+test('a name search reaches Open Food Facts, once asked, and logs what it finds', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 375, height: 900 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+
+  // Every call the proxy gets is counted: ten searches a minute for the whole
+  // project is the reason it is a button and not another debounce, and a
+  // regression there would be invisible on screen.
+  let searches = 0
+  await page.route('**/functions/v1/off-search', async (route) => {
+    searches += 1
+    await route.fallback()
+  })
+
+  await page.goto('/food/add')
+  await waitForScreen(page)
+  await page.locator('#food-search').fill('skyr')
+  await page.waitForTimeout(700)
+
+  // Typing alone asks nobody.
+  expect(searches, 'typing does not spend the quota').toBe(0)
+
+  await page.getByRole('button', { name: 'Bei Open Food Facts suchen' }).click()
+  await expect(page.getByText('Skyr Vanille')).toBeVisible()
+  expect(searches).toBe(1)
+
+  // The stub answers with two, and one of them is already in the catalogue:
+  // that one is not offered again here, because the row above it is the one
+  // carrying the id a day's entries point at.
+  const group = page.getByRole('button', { name: /open food facts/ })
+  await expect(group).toContainText('1')
+
+  // Picking one writes it into the shared catalogue and goes to the quantity.
+  await page.getByRole('button', { name: /Skyr Vanille/ }).click()
+  await expect(page.getByRole('heading', { name: 'Lebensmittel hinzufügen' })).toBeVisible()
+  await expect(page.getByLabel('menge')).toBeVisible()
+})

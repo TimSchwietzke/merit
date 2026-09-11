@@ -10,16 +10,22 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { NewFoodForm, type NewFood } from '@/features/nutrition/NewFoodForm'
 import { resolveBarcode } from '@/features/nutrition/resolve-barcode'
+import { cacheOffFood } from '@/features/nutrition/resolve-barcode'
 import { resolveUsdaFood } from '@/features/nutrition/resolve-usda'
 import { PortionForm } from '@/features/nutrition/PortionForm'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
 import { useFoodSearch } from '@/features/nutrition/useFoodSearch'
-import { type CatalogueFood } from '@/features/nutrition/catalogue'
+import {
+  FOOD_SELECT,
+  toCatalogueFood,
+  type CatalogueFood,
+  type FoodRow,
+} from '@/features/nutrition/catalogue'
 import { useRecentFoods } from '@/features/nutrition/useRecentFoods'
 import { useSession } from '@/features/auth/useSession'
 import { todayKey } from '@/lib/date'
 import { formatNumber } from '@/lib/format'
-import { ATTRIBUTION_URL } from '@/lib/off'
+import { ATTRIBUTION_URL, searchOffProducts, type OffFood } from '@/lib/off'
 import { supabase } from '@/lib/supabase'
 import type { MealType } from '@/lib/nutrition'
 import type { UsdaFood } from '@/lib/usda'
@@ -79,8 +85,27 @@ export default function AddFoodPage() {
   const [failed, setFailed] = useState(false)
   const [scanResult, setScanResult] = useState<'missing' | 'offline' | null>(null)
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null)
+  // Open Food Facts is asked on request rather than on every pause in typing:
+  // ten searches a minute for the whole project (see the proxy), against a
+  // thousand an hour for USDA. A packaged product is normally scanned anyway,
+  // and this is the fallback for the packet whose barcode will not read.
+  const [off, setOff] = useState<{
+    query: string
+    status: 'searching' | 'ready' | 'busy' | 'failed'
+    foods: OffFood[]
+  } | null>(null)
 
   const { add } = useFoodLog(date)
+
+  // Answers belong to the query that asked for them. Typing on invalidates
+  // them rather than leaving a list under a search it does not answer.
+  const offAnswers = off !== null && off.query === query.trim() ? off : null
+  // A packet the catalogue already holds is offered from the catalogue, where
+  // the row has the id a day's entries point at.
+  const known = new Set(results.map((food) => food.barcode))
+  const offFoods = offAnswers?.status === 'ready'
+    ? offAnswers.foods.filter((food) => !known.has(food.barcode))
+    : []
 
   async function logPortion({ quantityG, mealType }: { quantityG: number; mealType: MealType }) {
     if (!picked) return
@@ -122,6 +147,28 @@ export default function AddFoodPage() {
     else setFailed(true)
   }
 
+  async function searchOff() {
+    const term = query.trim()
+    setOff({ query: term, status: 'searching', foods: [] })
+    const found = await searchOffProducts(term)
+    setOff({
+      query: term,
+      status: found.kind === 'found' ? 'ready' : found.kind === 'busy' ? 'busy' : 'failed',
+      foods: found.kind === 'found' ? found.foods : [],
+    })
+  }
+
+  async function pickOff(food: OffFood) {
+    if (!session || pending) return
+    setPending(true)
+    setFailed(false)
+
+    const cached = await cacheOffFood(food, session.user.id)
+    setPending(false)
+    if (cached) setPicked(cached)
+    else setFailed(true)
+  }
+
   async function createFood(food: NewFood) {
     if (!session) return
     setPending(true)
@@ -148,7 +195,7 @@ export default function AddFoodPage() {
         source: 'community',
         created_by: session.user.id,
       })
-      .select('id, name, brand, source, serving_size_g, serving_label')
+      .select(FOOD_SELECT)
       .single()
 
     setPending(false)
@@ -158,25 +205,7 @@ export default function AddFoodPage() {
     }
 
     // Straight on to the quantity: the food was added in order to log it.
-    setPicked({
-      id: data.id,
-      name: data.name,
-      brand: data.brand,
-      source: data.source,
-      fdcId: null,
-      servingSizeG: data.serving_size_g,
-      servingLabel: data.serving_label,
-      nutrients: {
-        kcal: food.values.kcal ?? 0,
-        fat: food.values.fat ?? 0,
-        carbs: food.values.carbs ?? 0,
-        protein: food.values.protein ?? 0,
-        saturatedFat: food.values.saturatedFat,
-        sugars: food.values.sugars,
-        fibre: food.values.fibre,
-        salt: food.values.salt,
-      },
-    })
+    setPicked(toCatalogueFood(data as FoodRow))
     setCreating(false)
   }
 
@@ -356,6 +385,52 @@ export default function AddFoodPage() {
                 locale={locale}
               />
             </Collapsible>
+          </div>
+        ) : null}
+
+        {offFoods.length > 0 ? (
+          <div className="mt-4">
+            <Collapsible
+              label={t('pages.food.add.off')}
+              count={offFoods.length}
+              open={!folded.has('off')}
+              onOpenChange={(open) => fold('off', open)}
+            >
+              <FoodRows
+                foods={offFoods.map((food) => ({
+                  key: food.barcode,
+                  name: food.name,
+                  brand: food.brand,
+                  kcal: food.nutrients.kcal,
+                  pick: () => void pickOff(food),
+                }))}
+                locale={locale}
+              />
+            </Collapsible>
+          </div>
+        ) : null}
+
+        {/* One tap, one search. The button says which service it is about to
+            ask, because asking it is a choice the quota makes worth naming. */}
+        {status === 'ready' && query.trim().length >= 3 ? (
+          <div className="mt-4">
+            {offAnswers && (offAnswers.status !== 'ready' || offFoods.length === 0) ? (
+              <p className="font-mono text-2xs text-ink-faint">
+                {t(
+                  offAnswers.status === 'searching'
+                    ? 'pages.food.add.offSearching'
+                    : offAnswers.status === 'busy'
+                      ? 'pages.food.add.offBusy'
+                      : offAnswers.status === 'failed'
+                        ? 'pages.food.add.offFailed'
+                        : 'pages.food.add.offNone',
+                )}
+              </p>
+            ) : (
+              <Button variant="quiet" className="w-full md:w-auto" onClick={() => void searchOff()}>
+                {t('pages.food.add.searchOff')}
+              </Button>
+            )}
           </div>
         ) : null}
 
