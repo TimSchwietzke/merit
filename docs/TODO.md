@@ -40,6 +40,66 @@ were looked at and deliberately left alone:
 
 ---
 
+## Design questions, noticed on the phone
+
+Both of these are decisions rather than tasks. Each one has a rule behind the
+current state, and in both cases the rule may be producing something that reads
+as an oversight.
+
+### One domain has a `+` and two do not
+
+`/training` has a floating `+` in the bottom right that creates a routine.
+`/food` puts *add a food* and *scan a barcode* at the foot of the day's log,
+and `/weight` has the form itself on the page, in the lower half. So the three
+domains you add things to offer it three different ways.
+
+`DESIGN.md` §10.10 is why: the floating button is allowed there and explicitly
+"not a general licence for a FAB", because a screen with a single obvious
+action puts it in the flow. That reasoning holds for `/weight`, where the form
+is already on screen and a `+` would open something that is not hidden. It
+holds less well for `/food`, where the add links sit under the log and a day
+with fifteen entries puts them off the bottom of the screen.
+
+Three ways to settle it:
+
+1. **Give `/food` the same floating `+`** and leave `/weight` alone, since its
+   action is never off screen. Two of three then match, and the odd one out is
+   the one whose action is always visible.
+2. **Take the floating button off `/training` too** and put *new routine* in
+   the flow at the end of the week, which is where the eye ends up anyway.
+   Consistent, and it removes the one component that fights the session bar for
+   the corner a thumb rests on.
+3. **Keep all three and say why in `DESIGN.md`**, so the next person reading
+   the screens sees a rule rather than a drift.
+
+Whichever wins, §10.10 gets the sentence that makes it a decision.
+
+### The dashboard and nutrition are the same green
+
+They are, and the code says so on purpose: `tokens.css` binds nutrition to
+moss, moss is merit's own accent, and the dashboard is given no hue of its own
+because "it is where the three meet". The consequence is that on the dashboard
+the chrome, the focus ring and the nutrition block are one colour with two
+different meanings, and a reader cannot tell whether the green means *merit* or
+means *food*.
+
+It looks like a leftover, and the fix is not obviously "give nutrition a new
+hue": moss was chosen for a health tool and nutrition is the most-used domain
+in the app, so moving it costs the brand its own colour on the screen it is
+used most.
+
+1. **Make the dashboard greyscale.** Nothing on it carries accent except the
+   blocks themselves, each already wearing its own domain hue. The green there
+   then means nutrition and only nutrition. Cheapest, and it makes the rule
+   true rather than nearly true.
+2. **Give nutrition its own hue** and keep moss for merit alone. The most
+   honest, and the most work: a fourth domain colour has to clear AA on three
+   planes in both themes (§16.3), and the app's most-used screen changes colour.
+3. **Write it down as intended** and stop calling it a question: merit's colour
+   is the colour of the domain it grew out of.
+
+---
+
 ## After the MVP
 
 ### Water tracker
