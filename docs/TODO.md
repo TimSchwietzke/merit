@@ -11,21 +11,6 @@ somebody something.
 
 ## MVP: blocks friends using this daily
 
-### Profile settings, and a rebuilt account screen
-*In progress.*
-
-- There is currently **no way to change a password**, which is the gap that
-  started this list. Also no way to set a display name or change the email.
-- The account screen mixes six unrelated things on one scroll: goals,
-  language, theme, the signed-in address, export, deletion, legal. The panels
-  separate them visually but the screen tells no story.
-- Fix: the account screen becomes a plain list, and each area gets its own
-  screen: profile, appearance, your data, legal. The pattern already exists
-  in the code (`Rows` + `Row to="/goals"`), it is just not carried through.
-- Email changes send a confirmation to both the old and the new address, and
-  Supabase's default SMTP is rate-limited and lands in spam. The UI has to say
-  "check your inbox, the old address stays valid until you do".
-
 ### First-run onboarding
 See `GOAL.md` §2.1.1.
 
@@ -56,13 +41,6 @@ See `GOAL.md` §2.1.1.
   visible.
 - Every resolved result gets cached into `foods` so the same search never hits
   an external API twice.
-
-### PWA manifest
-- No manifest, no icons, no theme colour. merit cannot be added to a
-  homescreen and always opens with browser chrome around it.
-- For an app opened between two sets in a gym this is not cosmetic.
-- Small: a manifest, a maskable icon set, `apple-mobile-web-app-*` meta tags.
-  No service worker yet, that belongs with offline logging below.
 
 ### Offline workout logging
 - Required by `GOAL.md` §5 and `CLAUDE.md`, and not started: Dexie is not even
@@ -179,13 +157,6 @@ See `GOAL.md` §2.1.1.
 - Point: `docker compose up` gives a local Supabase and the dev server, so the
   app can be worked on without touching the production project, and so the
   repo is reproducible for anybody reading it as a portfolio piece.
-
----
-
-## Not code
-
-- **One legal review** of the privacy notice and the consent screen before
-  anybody outside the household is invited. `LEGAL-INPUTS.md` §8.
 
 ---
 

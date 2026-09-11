@@ -3,6 +3,11 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <!-- Recent iOS reads the manifest, older versions only honour these two.
+         Two lines, and they cover the phones that do not. -->
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
     <!-- viewport-fit=cover is what makes env(safe-area-inset-*) non-zero.
          No user-scalable=no: it breaks pinch-zoom for everyone who needs it. -->
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
