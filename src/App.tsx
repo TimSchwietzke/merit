@@ -36,7 +36,7 @@ const DataPage = lazy(() => import('@/features/account/DataPage'))
 const WelcomePage = lazy(() => import('@/features/onboarding/WelcomePage'))
 
 // One route, one file (DESIGN.md §7). Everything except /sign-in sits behind
-// RequireAuth — there is no public page in Merit and no open sign-up.
+// RequireAuth. There is no public page in Merit and no open sign-up.
 const router = createBrowserRouter([
   { path: '/sign-in', element: <SignInPage />, errorElement: <RouteError /> },
 
@@ -56,7 +56,7 @@ const router = createBrowserRouter([
   {
     element: <RequireAuth />,
     // On the auth boundary rather than deeper, so it catches a route that
-    // throws *and* a lazy chunk that never arrives — the second is what a tab
+    // throws *and* a lazy chunk that never arrives, the second is what a tab
     // left open across a deploy hits, and it happens before any screen mounts.
     errorElement: <RouteError />,
     children: [

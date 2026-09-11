@@ -28,7 +28,7 @@ import { latestEntry, weeklyDelta, type WeightEntry } from '@/lib/weight'
 /**
  * The way in.
  *
- * Not a report — a report is what every other screen already is, and stacking
+ * Not a report. A report is what every other screen already is, and stacking
  * four of them in identical bordered rectangles is what made this one feel like
  * a settings page. Almost nothing here is in a container: the ground is one
  * continuous surface, and what separates a block from the one under it is space
@@ -37,8 +37,8 @@ import { latestEntry, weeklyDelta, type WeightEntry } from '@/lib/weight'
  *
  * The rhythm is deliberately uneven. A date at display size, a body at the top
  * with nothing around it, then four readings packed into four different shapes
- * — a tall one holding a ring, two short ones beside it, a wide one under them
- * — each arriving from the edge it sits against. Four blocks of one width in
+ *. A tall one holding a ring, two short ones beside it, a wide one under them
+ *, each arriving from the edge it sits against. Four blocks of one width in
  * one column is something somebody scrolls past.
  */
 export default function DashboardPage() {
@@ -49,7 +49,7 @@ export default function DashboardPage() {
   // Every query this screen needs, fetched once here and handed down.
   //
   // Each of these used to be called inside the card that wanted it, which meant
-  // `useWorkout` ran five times and `useRoutines` three — eight round trips for
+  // `useWorkout` ran five times and `useRoutines` three, eight round trips for
   // six answers, five of them the same 180-day query. Worse than the waste, each
   // copy held its own state and resolved at its own moment, so the screen
   // assembled in stages: the cards landed, then the body arrived underneath the
@@ -109,7 +109,7 @@ export default function DashboardPage() {
           across two rows; training and weight are one line each and sit beside
           it; the run underneath is wide and short and takes the full width.
           Nothing is the same size as anything else and nothing is centred, so
-          the block is uneven without being mostly air — the version before this
+          the block is uneven without being mostly air, the version before this
           alternated sides and spent half the screen on the gaps.
 
           Each still arrives from the edge it sits against, the first time it is
@@ -342,7 +342,7 @@ function StreakCard({
  * written to make anybody feel anything.
  *
  * The accent edge is the one piece of pure voice on the screen (§6), and there
- * is one per screen — this is it. It carries no button: every card below is a
+ * is one per screen, this is it. It carries no button: every card below is a
  * way in, and a second one here would be the screen asking twice.
  */
 function TrainingLine({

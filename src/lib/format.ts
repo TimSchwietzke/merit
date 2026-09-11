@@ -15,7 +15,7 @@ export function formatNumber(value: number, locale: string, digits = 1): string 
 }
 
 /**
- * A change, always carrying its sign — `+0,4`, `−0,3`.
+ * A change, always carrying its sign, `+0,4`, `−0,3`.
  *
  * The hyphen CLDR hands back for English is normalised to a real minus (U+2212).
  * German already gets one, and a delta that is a minus sign in one language and
@@ -61,7 +61,7 @@ export function formatDayShort(key: string, locale: string): string {
 
 /**
  * Two day keys as one range. `formatRange` collapses whatever the locale
- * repeats — `Sep 7 – 13`, `07.–13. Sept.` — which hand-assembling the two ends
+ * repeats, `Sep 7 – 13`, `07.–13. Sept.`: which hand-assembling the two ends
  * and stripping the month off one of them cannot do, because which end carries
  * the month is itself a property of the locale.
  */
@@ -93,7 +93,7 @@ export function formatDayLong(key: string, locale: string): string {
  *
  * Half of Europe writes a comma and `type="number"` rejects it (DESIGN.md §8),
  * so the field is `inputMode="decimal"` text and the parsing is ours. Returns
- * null for anything that is not a plain positive decimal in range — no
+ * null for anything that is not a plain positive decimal in range, no
  * exponents, no signs, no thousands separators. Refusing beats guessing here:
  * `1,234` means one point two three four to a German and one thousand to
  * everyone else.
@@ -104,7 +104,7 @@ export function parseDecimalInput(
 ): number | null {
   const normalised = raw.trim().replace(',', '.')
 
-  // Shape first, then precision, then range — rather than one regex built from
+  // Shape first, then precision, then range, rather than one regex built from
   // the arguments. The built one had two faults: `decimals: 0` produced the
   // quantifier `{1,0}`, which throws rather than failing to match, and the
   // integer part was fixed at four digits, so no caller could ever accept a

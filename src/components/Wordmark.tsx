@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 
 /**
  * `merit`, lowercase, everywhere it renders (DESIGN.md §4.4). Sans, text-lg,
- * weight 600 (§4.2, §4.3) — one component so the sidebar and the sign-in screen
+ * weight 600 (§4.2, §4.3). One component so the sidebar and the sign-in screen
  * cannot drift into two different treatments of the same name.
  *
  * The only places the name is capitalised are the manifest, the <title> and

@@ -1,5 +1,5 @@
 /**
- * Day keys — `YYYY-MM-DD` in the *user's* timezone.
+ * Day keys, `YYYY-MM-DD` in the *user's* timezone.
  *
  * Postgres stores these columns as `date`, and a date has no timezone. The whole
  * risk lives on this side: `toISOString()` returns UTC, so a weigh-in at 23:30

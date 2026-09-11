@@ -14,7 +14,7 @@ import type { LoggedSet, SessionSets } from '@/lib/training'
  *
  * One query covers both. The comparison line needs the previous session for
  * every exercise on screen, and fetching that per exercise would be a request
- * per block on a gym connection — so a window of recent sets comes back at once
+ * per block on a gym connection, so a window of recent sets comes back at once
  * and the maths slices it (`lastSessionFor`).
  *
  * **Every write lands on the device first** (GOAL.md §5). A set is written to
@@ -94,10 +94,10 @@ export interface WorkoutState {
     values: { reps: number; weightKg: number; rir: number | null; done?: boolean },
   ) => Promise<boolean>
   removeSet: (id: string) => Promise<boolean>
-  /** Write a routine's planned sets onto a day — this one unless told another. */
+  /** Write a routine's planned sets onto a day, this one unless told another. */
   startRoutine: (plan: {
     routineId: string
-    /** Reps per set, in order — the plan says what each set is, not how many. */
+    /** Reps per set, in order. The plan says what each set is, not how many. */
     exercises: { exerciseId: string; setReps: number[] }[]
     forDate?: string
   }) => Promise<boolean>
@@ -109,8 +109,8 @@ const WINDOW_DAYS = 180
 /**
  * One version number for every caller of this hook.
  *
- * There are three — the session bar's provider, the day screen and the session
- * preview — and each used to hold its own private counter, so a write made
+ * There are three. The session bar's provider, the day screen and the session
+ * preview, and each used to hold its own private counter, so a write made
  * through one was invisible to the others until something remounted them.
  *
  * A write is a write. Whoever makes it, everyone reading the same table hears
@@ -143,7 +143,7 @@ const SELECT = `id, set_number, reps, weight_kg, rir, done, exercise_id,
  * One request per window in flight, however many callers want it.
  *
  * The session bar's provider sits above the router and reads today's sets, and
- * so does whichever screen is mounted — so every screen was fetching a hundred
+ * so does whichever screen is mounted, so every screen was fetching a hundred
  * and eighty days of sets twice. This is the heaviest query in the app and
  * PRODUCT.md's third principle is that the connection is bad.
  */
@@ -423,7 +423,7 @@ export function useWorkout(date: string): WorkoutState {
    * Finish the day's session, or take it back up.
    *
    * A write, not a flag: the button used to set React state, so a reload
-   * recomputed "running" from the still-unlogged sets and the bar came back —
+   * recomputed "running" from the still-unlogged sets and the bar came back,
    * which read as the button doing nothing.
    */
   const setEnded = useCallback(
@@ -447,7 +447,7 @@ export function useWorkout(date: string): WorkoutState {
    *
    * Weight comes from the last time each exercise was actually performed, so
    * the session opens as something to confirm rather than something to fill in
-   * — and so progress is visible at the moment of lifting rather than looked up
+   *, and so progress is visible at the moment of lifting rather than looked up
    * afterwards. An exercise never done before starts at zero, which is a real
    * weight and the right one for a bodyweight movement.
    */
@@ -461,7 +461,7 @@ export function useWorkout(date: string): WorkoutState {
       const on = plan.forDate ?? date
 
       // Started already: its sets are what they are, and rewriting them would
-      // throw away everything logged so far. It still publishes — the caller is
+      // throw away everything logged so far. It still publishes, the caller is
       // about to navigate to those sets, and a reader that was mounted before
       // they existed has no other way to learn about them.
       const started = rowsRef.current.some(

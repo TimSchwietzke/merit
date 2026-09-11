@@ -10,7 +10,7 @@ import { scheduledOn } from '@/lib/schedule'
  *
  * Two reads: the exceptions to the weekly pattern in range, and the workouts in
  * range. The pattern itself comes from the caller, which already has the
- * routines loaded for its own list — one query, not two of the same. Everything
+ * routines loaded for its own list, one query, not two of the same. Everything
  * the week screen shows is derived from those three; nothing about a day's
  * status is stored.
  */

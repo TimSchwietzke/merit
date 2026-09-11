@@ -12,7 +12,7 @@ import { progress } from '@/lib/goals'
  * measurable rather than just red.
  *
  * The centre carries the remaining figure, and the ring is `role="img"` with
- * the same numbers in its label — a ring is unreadable to a screen reader
+ * the same numbers in its label, a ring is unreadable to a screen reader
  * otherwise.
  */
 const SIZE = 168

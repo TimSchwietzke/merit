@@ -17,7 +17,7 @@ const FIELD = `min-h-11 w-full min-w-0 rounded-md bg-surface-2 px-2 text-right f
 /**
  * One labelled field of the row. A `<label>` wrapping its input rather than an
  * `aria-label`, so the name is on the screen as well as in the accessibility
- * tree — it is the thing that was missing.
+ * tree, it is the thing that was missing.
  */
 function Field({
   label,
@@ -41,7 +41,7 @@ function Field({
  *
  * A dialog per set is fifteen dismissals in a five-exercise session, each one
  * needing the hand that is holding a bar. This asks for nothing, stays put, and
- * survives walking off to the food tab to check a number — which is the whole
+ * survives walking off to the food tab to check a number, which is the whole
  * reason it is a bar and not a dialog.
  *
  * The figures are **placeholders**, not values. They hold what the plan expects
@@ -142,7 +142,7 @@ export function SessionBar() {
  * with one tap and no typing.
  *
  * Each field says what it is, in mono above it. Three bare boxes with numbers
- * ghosted in them is a puzzle at arm's length between sets — the placeholder
+ * ghosted in them is a puzzle at arm's length between sets, the placeholder
  * tells you what will be logged, not what the box is for, and the two are only
  * the same thing to somebody who already knew. §10.5 puts a unit *inside* a
  * field, and that is right for a field on its own; a row of three at 375px has

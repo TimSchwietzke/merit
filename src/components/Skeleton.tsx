@@ -3,7 +3,7 @@
  *
  * The point is the *shape*, not the notice. Every loading state used to be one
  * mono line saying `wird geladen` where a whole screen was about to arrive, so
- * the page jumped the moment it did — which is the flicker. A placeholder that
+ * the page jumped the moment it did, which is the flicker. A placeholder that
  * occupies roughly the room the real thing will occupy has nothing to jump
  * from.
  *
@@ -72,7 +72,7 @@ export function RowsSkeleton({ rows = 3 }: { rows?: number }) {
  *
  * The lazy-route fallback cannot know what is coming, so it holds the one thing
  * every screen here starts with: a heading and a first block. Deliberately
- * unlabelled — it is on screen for a frame or two and announcing it would be
+ * unlabelled, it is on screen for a frame or two and announcing it would be
  * noisier than the wait.
  */
 export function RouteSkeleton() {

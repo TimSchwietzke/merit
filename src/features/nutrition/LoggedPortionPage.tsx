@@ -30,7 +30,7 @@ export default function LoggedPortionPage() {
 
   const entry: LoggedFood | undefined = entries.find((row) => row.id === id)
 
-  // The row can be gone — deleted here, or on another device. Nothing to edit
+  // The row can be gone, deleted here, or on another device. Nothing to edit
   // then, and no reason to sit on a dead screen.
   useEffect(() => {
     if (status === 'ready' && !entry) navigate(`/food?date=${date}`, { replace: true })

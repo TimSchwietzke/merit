@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 /**
  * One domain, reported on the one screen that reports on all of them.
  *
- * The dashboard owns no colour of its own — it is where the four meet — so each
+ * The dashboard owns no colour of its own, it is where the four meet, so each
  * card carries `data-domain` and rebinds `accent` for everything inside it
  * (`tokens.css`). Four cards, four hues, no component here knowing which.
  *
@@ -20,7 +20,7 @@ export function DomainCard({
   note,
   children,
 }: {
-  /** Omitted for nutrition, which is moss — the default `accent`. */
+  /** Omitted for nutrition, which is moss, the default `accent`. */
   domain?: 'training' | 'weight' | 'cardio'
   to: string
   label: string

@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────
--- Erasure, Art. 17 — and the way consent is withdrawn under Art. 7(3).
+-- Erasure, Art. 17, and the way consent is withdrawn under Art. 7(3).
 --
 -- Every user-scoped table references `auth.users` with `on delete cascade`, so
 -- removing the account row removes the profile, the weigh-ins, the food log,
@@ -14,8 +14,8 @@
 -- caller-controlled path is the classic way to hand out the owner's rights.
 --
 -- **The shared catalogue is deliberately not deleted.** A food or an exercise
--- somebody added belongs to the group's catalogue, not to them — that is the
--- point of it growing itself (GOAL.md §3) — and those rows carry `created_by`
+-- somebody added belongs to the group's catalogue, not to them, that is the
+-- point of it growing itself (GOAL.md §3), and those rows carry `created_by`
 -- with `on delete set null`, so they survive without naming anybody. The
 -- privacy notice says so, because a promise to delete everything has to be
 -- true.

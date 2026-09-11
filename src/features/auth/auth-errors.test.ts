@@ -4,7 +4,7 @@ import { authErrorKey } from '@/features/auth/auth-errors'
 
 /**
  * The shapes below are the ones `@supabase/supabase-js` actually returns, not
- * invented ones — that is the whole value of this test. If a Supabase upgrade
+ * invented ones, that is the whole value of this test. If a Supabase upgrade
  * renames a code, this fails instead of the UI quietly falling back to the
  * generic message for every failure.
  */

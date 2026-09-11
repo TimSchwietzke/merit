@@ -9,7 +9,7 @@ import { writeFileSync } from 'node:fs'
  * The one question worth asking of the scanner is whether a barcode held in
  * front of it turns into a logged food, and that needs a barcode in the frame.
  *
- * ZXing ships no EAN writer — only the 2D ones — so the symbol is encoded here.
+ * ZXing ships no EAN writer, only the 2D ones, so the symbol is encoded here.
  * It is a table lookup: 95 modules, `101` and `101` at the ends, `01010` down
  * the middle, and the parity of the first six digits encoding the digit the
  * symbol does not draw.
@@ -42,7 +42,7 @@ const HEIGHT = 480
 
 /**
  * A YUV4MPEG2 file of one still frame repeated. I420: a full-size luma plane
- * and two quarter-size chroma planes held at neutral, which is grey — the
+ * and two quarter-size chroma planes held at neutral, which is grey, the
  * symbol lives entirely in luma, which is what a barcode reader looks at.
  */
 export function writeBarcodeVideo(path: string, code: string, frames = 50): void {

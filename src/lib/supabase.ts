@@ -18,7 +18,7 @@ if (!url || !anonKey) {
  * the service-role key never appears in client code (CLAUDE.md hard rule 2).
  *
  * On storage: supabase-js keeps the session in `localStorage`. This is the one
- * exception to hard rule 4 and DESIGN.md §17, and it is deliberate — the rule
+ * exception to hard rule 4 and DESIGN.md §17, and it is deliberate, the rule
  * is about *application* data, and GOAL.md §8 already assumes the auth session
  * token exists ("as long as the only cookie/token is the auth session, no
  * cookie banner is required"). `sessionStorage` would sign the user out every

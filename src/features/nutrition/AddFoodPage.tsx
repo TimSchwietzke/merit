@@ -168,7 +168,7 @@ export default function AddFoodPage() {
         fibre_100g: food.values.fibre,
         salt_100g: food.values.salt,
         // Typed in by a person, so it is a community entry whatever it
-        // describes — the chip on a search result says so (GOAL.md §4).
+        // describes. The chip on a search result says so (GOAL.md §4).
         source: 'community',
         created_by: session.user.id,
       })

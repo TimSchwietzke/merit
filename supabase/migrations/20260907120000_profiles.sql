@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────
--- profiles — one row per auth user.
+-- profiles, one row per auth user.
 --
 -- The first user-scoped table, so it sets the pattern the rest follow:
 -- a `user_id` referencing auth.users, RLS enabled, and a policy per verb

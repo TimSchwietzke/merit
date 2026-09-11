@@ -12,7 +12,7 @@ import type { FoodNutrients, MealType } from '@/lib/nutrition'
  * every meal already logged from it, and a copy cannot.
  *
  * Writes are optimistic and roll back from a ref, for the same reason the
- * weight log does — see `useWeightLogs`.
+ * weight log does, see `useWeightLogs`.
  */
 export interface LoggedFood {
   id: string

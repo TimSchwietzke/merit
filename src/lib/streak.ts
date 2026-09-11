@@ -6,13 +6,13 @@ import { weekOf } from '@/lib/schedule'
  *
  * A streak here is a count of what happened, and nothing else. It is never
  * rendered with a flame, never counts down to being lost, and never sends a
- * notification — those are the app leaning on somebody about their own body,
+ * notification, those are the app leaning on somebody about their own body,
  * which is the one thing it does not do (PRODUCT.md). The number is a fact.
  *
  * The two domains count different things because they *are* different things.
  * Logging food is the behaviour on the nutrition side, so days logged is the
  * honest unit. Training is planned in weekdays, so a daily count would break on
- * every rest day the plan itself asked for — it counts weeks that met their own
+ * every rest day the plan itself asked for, it counts weeks that met their own
  * plan instead.
  */
 
@@ -50,7 +50,7 @@ export interface PlannedWeek {
  * Consecutive weeks that met their own plan, most recent first.
  *
  * The current week is counted only once it is already met, and is otherwise
- * skipped rather than counted as a failure — it is Tuesday and there are four
+ * skipped rather than counted as a failure, it is Tuesday and there are four
  * days left. Same grace as the daily count, one unit up.
  *
  * A week that planned nothing is met by definition. That is not a loophole: a
@@ -76,7 +76,7 @@ export function weeklyStreak(weeks: readonly PlannedWeek[], today: string): numb
 }
 
 /**
- * The trailing run of periods as filled/empty cells, oldest last on the right —
+ * The trailing run of periods as filled/empty cells, oldest last on the right:
  * the mosaic §10.10 renders a consistency mark as.
  *
  * Deliberately boolean: a cell is met or it is not. A half-filled cell invites

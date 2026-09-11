@@ -7,7 +7,7 @@
 -- employment context the only workable one is (a): the data subject's explicit
 -- consent for a specified purpose.
 --
--- Explicit means a deliberate act, informed, and separable from anything else —
+-- Explicit means a deliberate act, informed, and separable from anything else,
 -- so it is its own screen, not a checkbox beside a password field, and it names
 -- the categories rather than pointing at a document.
 --

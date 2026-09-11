@@ -8,7 +8,7 @@ import { isEmpty, type Document as LegalDocument } from '@/features/legal/docume
  * The frame both legal documents render in.
  *
  * Long-form, so `text-prose` at 16px and a measure capped near 72ch (§4.3,
- * §5.3) — these are the only screens in the app somebody reads rather than
+ * §5.3), these are the only screens in the app somebody reads rather than
  * scans, and the interface's 15px density is wrong for that.
  *
  * Nothing here is behind authentication. A privacy notice only a signed-in user
@@ -65,7 +65,7 @@ export function LegalPage({
 /**
  * A generated document, rendered in the reader's language.
  *
- * Plain text only — headings, paragraphs and lists. What a generator produces
+ * Plain text only, headings, paragraphs and lists. What a generator produces
  * is prose, and giving it a markup language to be parsed would mean a parser
  * standing between a legal text and the person reading it.
  */

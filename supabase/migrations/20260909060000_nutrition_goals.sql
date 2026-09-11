@@ -1,5 +1,5 @@
 -- ─────────────────────────────────────────────────────────────────────
--- nutrition_goals — the daily targets a day's totals are measured against
+-- nutrition_goals. The daily targets a day's totals are measured against
 -- (GOAL.md §7).
 --
 -- Kept as a history rather than one editable row. `valid_from` means a target

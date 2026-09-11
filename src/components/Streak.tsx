@@ -2,7 +2,7 @@
  * A consistency mark: what the count is, and the run behind it (DESIGN.md
  * §10.10).
  *
- * The mosaic is the house motif — hard-edged cells, 2px apart, filled in
+ * The mosaic is the house motif, hard-edged cells, 2px apart, filled in
  * `accent` where the period was met and `line` where it was not. Told apart by
  * fill, not by hue, so it survives a greyscale printout and a red-green
  * deficiency; the domain's own colour arrives through `accent` and needs no
@@ -24,7 +24,7 @@ export function Streak({
   count: number
   /** Oldest first; the most recent period is the rightmost cell. */
   cells: boolean[]
-  /** The unit, already pluralised — `12 Tage`, `3 Wochen`. */
+  /** The unit, already pluralised, `12 Tage`, `3 Wochen`. */
   caption: string
 }) {
   return (
@@ -41,7 +41,7 @@ export function Streak({
           to. */}
       <div
         role="img"
-        aria-label={`${caption} — ${label}`}
+        aria-label={`${caption}, ${label}`}
         className="flex items-end gap-[2px]"
       >
         {cells.map((met, index) => (

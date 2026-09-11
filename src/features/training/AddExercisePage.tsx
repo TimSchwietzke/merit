@@ -24,7 +24,10 @@ export default function AddExercisePage() {
 
   return (
     <>
-      <PageHeader title={t('pages.training.add.title')} lead={t('pages.training.add.lead')} />
+      {/* No lead. The screen is a search field over a catalogue with an "add
+          one" at the end of it, and a sentence saying so is a sentence read
+          once and skipped forever after (§14). */}
+      <PageHeader title={t('pages.training.add.title')} />
 
       <ExerciseCatalogue
         date={date}

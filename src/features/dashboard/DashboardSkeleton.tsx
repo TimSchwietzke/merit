@@ -5,8 +5,8 @@ import { Loading, Skeleton } from '@/components/Skeleton'
 /**
  * The dashboard's shape before its numbers arrive.
  *
- * It mirrors the real layout block for block — a date, a body, the asymmetric
- * grid, the sentence — because a placeholder that does not match the thing it
+ * It mirrors the real layout block for block, a date, a body, the asymmetric
+ * grid, the sentence, because a placeholder that does not match the thing it
  * stands in for moves the page twice instead of not at all.
  */
 export function DashboardSkeleton() {

@@ -4,12 +4,12 @@ import { useEffect, useRef, useState, type PointerEvent, type ReactNode } from '
  * A row whose destructive action lives behind a swipe (DESIGN.md §10.1).
  *
  * A delete control sitting 8px from a value in a 52px row gets hit by accident,
- * and a plain tap that deletes is worse still — it makes every mis-tap
+ * and a plain tap that deletes is worse still, it makes every mis-tap
  * destructive. So the row itself does the non-destructive thing, and the
  * dangerous one costs a deliberate sideways drag.
  *
  * The drag is written straight to the element rather than through state. React
- * re-rendering the row on every `pointermove` — 120 times a second on a phone —
+ * re-rendering the row on every `pointermove`, 120 times a second on a phone:
  * is what a swipe feels like when it feels wrong: the row arrives a frame or
  * two behind the finger and the whole gesture reads as sticky. State is touched
  * once, on release.
@@ -73,7 +73,7 @@ export function SwipeRow({
     if (panelRef.current) panelRef.current.style.justifyContent = x < 0 ? 'flex-end' : 'flex-start'
   }
 
-  // Follows the row being closed from outside — which is how opening one row
+  // Follows the row being closed from outside, which is how opening one row
   // closes the last.
   useEffect(() => {
     if (!drag.current) place(open ? ACTION_WIDTH * side : 0, true)

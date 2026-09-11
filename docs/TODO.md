@@ -26,23 +26,22 @@ somebody something.
 
 ## Wording: small, and the cheapest wins here
 
-### Remove the explanatory in-between texts
-- Sentences like *"The average is the mean of every weigh-in in the 7 days
-  ending on that day. Days without one are left out, not filled in."*
-  (`pages.weight.averageNote`) explain a chart that should explain itself.
-- Sweep every long body string in `de.json`/`en.json`, keep the ones that carry
-  legal or safety weight (consent, deletion, the shared-catalogue warning), and
-  cut or shorten the rest. A screen that has to describe itself is a screen
-  that needs a better label, not a better paragraph.
-- Accessibility `aria` descriptions stay, since they are not visible prose.
+### What is left of the anti-slop pass
+The wording pass and the em dash sweep are done (see `chore/anti-slop`). Three
+judgement calls are not, because each one changes how the app looks or what a
+legal text says:
 
-### Make "volume" and "sessions" mean something
-- `TrainingStats` shows *volumen* and *einheiten* side by side with the same
-  "/ woche" underneath and no unit on the first. Nobody can tell what either
-  number is counting.
-- Volume is tonnes moved per week (sets × reps × weight); sessions is how many
-  times you trained. Say so in the label or in one word beneath it, and put the
-  unit on the number.
+- **The radius ladder.** `index.css` runs 4/8/16/22; `DESIGN.md` §1 says nothing
+  is rounder than 6px and §6 lists 3/5/10/14. The code won that argument in #16
+  for a stated reason, and the doc was never updated. A 16px row and a 22px
+  filled card with no border is also the most-cited signature of a generated
+  interface. Decide one ladder and make both say it.
+- **Mono density.** 143 `font-mono` and 131 `text-2xs` against three uses of the
+  serif statement. Mono labels are the signature (§4.1); decorative mono is a
+  tell. The counterweight the signature depends on is on three screens.
+- **Em dashes in the legal texts.** 17 of them in `documents.ts`, in prose that
+  came from a German legal generator. Re-punctuating a privacy notice is a
+  change to a legal text, not a formatting pass, so it was left alone.
 
 ---
 

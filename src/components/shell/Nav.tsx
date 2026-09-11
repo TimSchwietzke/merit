@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 /**
  * One component, both layouts: a bottom tab bar below `lg`, a sidebar from `lg`
  * up, same routes and same labels (DESIGN.md §7). The switch is CSS, not a
- * media-query hook — a hook would render the wrong bar for one frame.
+ * media-query hook. A hook would render the wrong bar for one frame.
  *
  * Every tab carries an icon *and* a label: an icon-only tab bar is a guessing
  * game in a second language (§12). Labels wrap rather than truncate, because
@@ -18,7 +18,7 @@ import { cn } from '@/lib/utils'
  *
  * **The dashboard is not a tab.** It reports across all four domains rather
  * than being a fifth one, so it sits between them as a raised disc carrying the
- * wordmark — a different shape for a different kind of destination. That also
+ * wordmark. A different shape for a different kind of destination. That also
  * keeps the four tabs at four, which was the real point of the old ceiling: a
  * fifth *peer* means the information architecture is wrong, and this is not a
  * peer.
@@ -36,7 +36,7 @@ export function Nav() {
 
   return (
     <>
-      {/* Sidebar — lg and up. 240px, bordered, not shadowed. There is room for
+      {/* Sidebar, lg and up. 240px, bordered, not shadowed. There is room for
           a list here, so the dashboard is simply the first row and needs no
           special shape. */}
       <nav
@@ -66,7 +66,7 @@ export function Nav() {
         )}
       </nav>
 
-      {/* Bottom bar — below lg. A plane, not a floating translucent pill:
+      {/* Bottom bar, below lg. A plane, not a floating translucent pill:
           it has to stay legible over a scrolling chart (§7). */}
       <nav
         aria-label={t('nav.label')}
@@ -87,12 +87,12 @@ export function Nav() {
           {/* The centre. It breaks the row's rhythm on purpose: a disc rather
               than a cell, lifted above the bar's own edge. It is the only
               destination here that is not one of the four, and it is the only
-              one shaped like that. Moss when it is where you are — the brand's
+              one shaped like that. Moss when it is where you are, the brand's
               own colour, which no domain owns.
 
               A drawn icon, not the wordmark's `m`: §17 rules out a text
               character standing in for an icon, and it was doing exactly that.
-              Four panes in one frame is also what the screen is — the four
+              Four panes in one frame is also what the screen is, the four
               essentials read together. */}
           <li className="shrink-0 px-1">
             <NavLink

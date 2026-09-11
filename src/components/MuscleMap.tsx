@@ -4,8 +4,8 @@ import { BACK, FRONT, OUTLINE, SILHOUETTE, VIEW_BOX } from '@/components/muscle-
  * A body with regions lit to whatever degree the caller asks for.
  *
  * Two screens want this and they want different things from it. An exercise
- * wants two states — what it works and what it helps with. The dashboard wants
- * a continuous one — how long ago each part was trained, brightest today and
+ * wants two states, what it works and what it helps with. The dashboard wants
+ * a continuous one. How long ago each part was trained, brightest today and
  * dark after a week. So the component takes an intensity per region rather than
  * a category, and both callers describe themselves in the same vocabulary.
  *
@@ -16,7 +16,7 @@ import { BACK, FRONT, OUTLINE, SILHOUETTE, VIEW_BOX } from '@/components/muscle-
  * through `accent`, so the body is oxide inside training and moss on the
  * dashboard without being told which.
  *
- * Regions that are not muscles at all — head, hands, feet — stay silhouette
+ * Regions that are not muscles at all (head, hands, feet) stay silhouette
  * whatever is passed for them.
  *
  * `role="img"` with a written label: an SVG of ninety paths is otherwise
@@ -69,7 +69,7 @@ export function MuscleMap({
                 key={`${slug}-${index}`}
                 d={d}
                 fill={fill(slug)}
-                // A reading arriving rather than one already there — the same
+                // A reading arriving rather than one already there, the same
                 // authored moment a bar makes, on a shape instead of a length.
                 // Once, on mount; `prefers-reduced-motion` lands it on the end
                 // state in the first frame.

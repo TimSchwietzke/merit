@@ -38,7 +38,7 @@ import {
 /**
  * The day: what was eaten, at which meal, and what it comes to.
  *
- * The day lives in the query string rather than in state, so a day is a link —
+ * The day lives in the query string rather than in state, so a day is a link:
  * the add screen can send you back to the one you came from, and a reload does
  * not silently jump to today (§7: one route, one file).
  */
@@ -60,7 +60,7 @@ export default function FoodPage() {
   const onTarget = daysOnTarget(history, goal?.kcal ?? 0, today, 14)
   // Two weeks, not four: twenty-eight cells across half a column are four
   // pixels each and read as a barcode. One cell per day, filled where the day
-  // landed inside the band and empty where it did not or was never logged —
+  // landed inside the band and empty where it did not or was never logged:
   // the same mosaic as the run below it, so the two are one vocabulary.
   const bandCells = kcalSeries(history, today, 14).map(
     (day) =>
@@ -154,7 +154,7 @@ export default function FoodPage() {
         <Panel className="px-4 py-5">
           {/* The ring, not a figure with a bar under it. A sum against a target
               is a ring (§10.10), it is nutrition's own motif, and it had ended
-              up only on the dashboard — so the screen the motif belongs to was
+              up only on the dashboard, so the screen the motif belongs to was
               the one screen not using it. */}
           {goal ? (
             <CalorieRing total={totals.kcal.value} target={goal.kcal} locale={locale} />
@@ -165,7 +165,7 @@ export default function FoodPage() {
           {/* Without a target there is nothing to compare against, so the line
               says how to get one rather than pretending the day is complete.
               With one, the ring above has already said the figure, the target
-              and what is left — repeating it as a bar underneath is the screen
+              and what is left. Repeating it as a bar underneath is the screen
               saying the same number twice. */}
           {goal ? null : (
             <div className="mt-4">
@@ -179,7 +179,7 @@ export default function FoodPage() {
           )}
 
           {/* EU label order, so the screen reads like the packaging (§10.10).
-              No bars yet — a bar needs a target, and targets are their own
+              No bars yet. A bar needs a target, and targets are their own
               slice. The values and the partial marker are the honest part. */}
           <ul className="mt-4 divide-y divide-line border-t border-line">
             {LABEL_ORDER.map((nutrient) => {

@@ -266,7 +266,6 @@
       },
       "add": {
         "title": "Übung hinzufügen",
-        "lead": "Wähle aus dem gemeinsamen Katalog oder lege eine fehlende Übung an.",
         "search": "suche",
         "searching": "wird gesucht",
         "noResults": "keine Übung gefunden",
@@ -643,12 +642,12 @@
     },
     "error": {
       "title": "Das hat nicht geladen",
-      "lead": "Auf dem Weg zu diesem Bildschirm ist etwas schiefgegangen. Es wurde protokolliert. Zurück zum Anfang behebt es meistens.",
+      "lead": "Auf dem Weg zu diesem Bildschirm ist etwas schiefgegangen. Zurück zum Anfang hilft meistens.",
       "reload": "Neu laden",
       "home": "Zurück zum Anfang",
       "stale": {
         "title": "merit wurde aktualisiert",
-        "lead": "Dieser Tab läuft noch auf einer älteren Version, und der Bildschirm ist umgezogen. Neu laden holt die neue Version; an deinen Einträgen ändert sich nichts."
+        "lead": "Dieser Tab läuft noch auf einer älteren Version. Neu laden holt die neue; deine Einträge bleiben, wie sie sind."
       }
     },
     "legal": {

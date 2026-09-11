@@ -6,7 +6,7 @@ import { expect, stubBackend, test, waitForScreen } from './fixtures'
  * The visual harness captures a route's first screen, and this route has nine:
  * four panels and five questions. So this walks the path the way somebody
  * arriving for the first time does, captures each screen as it passes, and
- * asserts it ends on the dashboard — which is the one thing about the
+ * asserts it ends on the dashboard, which is the one thing about the
  * walkthrough that would be silently broken by a wrong step order.
  */
 const PANELS = ['merit', 'food', 'training', 'weight']

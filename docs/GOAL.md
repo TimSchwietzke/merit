@@ -1,6 +1,6 @@
-# Merit — Project Goal
+# Merit: Project Goal
 
-**Merit** — *Meals, Exercise, Reps, Intake, Training*.
+**Merit**: *Meals, Exercise, Reps, Intake, Training*.
 A self-hosted, invite-only web app for tracking nutrition and strength training.
 
 ---
@@ -36,7 +36,7 @@ for at least three months.
 The first sign-in walks the user through setting up: display name, then the
 numbers the app needs to be useful (weight, height, birth date, sex, activity
 level, goal), then a short tour of what each screen does. Classic mobile-app
-introduction, skippable, resumable — a user who quits halfway is asked for the
+introduction, skippable, resumable, a user who quits halfway is asked for the
 rest the next time rather than starting over.
 
 Everything it collects already exists as a field somewhere else; onboarding is
@@ -50,7 +50,7 @@ Everything still open, MVP and after, is listed with its reasoning in
 
 1. Own recipes / composite meals (define once, log as a single item)
 2. Cardio tracking
-3. Apple Health / wearable import (steps, active calories) — manual entry for
+3. Apple Health / wearable import (steps, active calories), manual entry for
    these is explicitly *not* worth building, nobody keeps it up
 4. Social features: friends, groups, comparing progress, sharing recipes
 
@@ -67,19 +67,19 @@ Everything still open, MVP and after, is listed with its reasoning in
 
 - **Invite-only** for the MVP. Later: registration with an invite code.
 - Every user sees **only their own** logs.
-- The food catalogue and exercise catalogue are **shared across all users** —
+- The food catalogue and exercise catalogue are **shared across all users**:
   if one person adds a product, everybody has it. This is deliberate: it makes
   the catalogue grow by itself.
 
 ---
 
-## 4. Food data — where nutrition values come from
+## 4. Food data: where nutrition values come from
 
 Lookup order when a user adds a food:
 
-1. **Own database** (`foods` table) — already known products and anything users
+1. **Own database** (`foods` table), already known products and anything users
    have added by hand.
-2. **Open Food Facts API** — barcode lookup for packaged products, and a text
+2. **Open Food Facts API**: barcode lookup for packaged products, and a text
    search for the packet whose barcode will not scan.
    Read requests need no API key, only a custom `User-Agent`
    (`Merit/1.0 (contact@example.com)`).
@@ -89,21 +89,21 @@ Lookup order when a user adds a food:
    answers without an `Access-Control-Allow-Origin` header, so a browser will
    not hand the response to the page, and the older `/cgi/search.pl` answers
    503. It goes through an Edge Function, which means ten searches a minute for
-   everybody together — which is why that one is a button rather than something
+   everybody together, which is why that one is a button rather than something
    that fires while you type.
-   Licence: ODbL — requires attribution in the app.
-3. **USDA FoodData Central** — text search for unpackaged whole foods
+   Licence: ODbL, requires attribution in the app.
+3. **USDA FoodData Central**: text search for unpackaged whole foods
    (banana, chicken breast, rice), which Open Food Facts covers poorly.
-   Licence: CC0 / public domain — no attribution or share-alike required.
+   Licence: CC0 / public domain, no attribution or share-alike required.
    Needs a free api.data.gov key. **The key must never reach the client or the
-   repo** — proxy this through a Supabase Edge Function with the key stored as
+   repo**. Proxy this through a Supabase Edge Function with the key stored as
    a secret.
-4. **Manual entry** — the user types name and nutrition values. Saved to the
+4. **Manual entry**: the user types name and nutrition values. Saved to the
    shared `foods` table with `source = 'community'`, so the next person who
    scans that barcode gets a hit.
 
-Nutrition detail: Merit tracks the full EU mandatory declaration — energy, fat,
-of which saturates, carbohydrate, of which sugars, protein, salt — plus fibre.
+Nutrition detail: Merit tracks the full EU mandatory declaration, energy, fat,
+of which saturates, carbohydrate, of which sugars, protein, salt, plus fibre.
 These are real columns on `foods`, because they appear on every European package
 and Open Food Facts fills them reliably. Displayed in EU label order so the screen
 matches the packaging that was just scanned (DESIGN.md §10.10).
@@ -140,7 +140,7 @@ and minerals is too patchy to show meaningful daily targets.
   sessions can be moved or edited without breaking the plan; the plan itself can
   also be edited as a whole.
 - **Set logging:** exercise, set number, reps, weight, and optional RIR
-  (reps in reserve — how many more reps would have been possible).
+  (reps in reserve. How many more reps would have been possible).
 - **Progression display:** when logging an exercise, show what was done last
   time for that exercise ("last time: 3×8 @ 60 kg").
 - **Exercise images:** schematic illustrations, not photos of people. Ship the
@@ -148,7 +148,7 @@ and minerals is too patchy to show meaningful daily targets.
   Exercise DB). The schema has an `image_url` from day one; it just stays empty.
 - **Offline:** workout logging must work without a connection (gyms often have
   no signal in the basement). Write locally, sync when the connection returns.
-  Nutrition and barcode scanning may stay online-only — scanning needs the API
+  Nutrition and barcode scanning may stay online-only, scanning needs the API
   anyway.
 
 ---
@@ -175,29 +175,29 @@ never copied into log rows.
 
 **Shared (global, not user-scoped)**
 
-- `foods` — id, barcode (unique, nullable), name, brand, kcal_100g, fat_100g,
+- `foods`: id, barcode (unique, nullable), name, brand, kcal_100g, fat_100g,
   saturated_fat_100g, carbs_100g, sugars_100g, fibre_100g, protein_100g, salt_100g,
   micros (jsonb, nullable), serving_size_g, serving_label,
   source (`off` | `usda` | `community`), created_by, created_at
-- `exercises` — id, name_en, name_de, muscle_group, equipment, image_url
+- `exercises`: id, name_en, name_de, muscle_group, equipment, image_url
   (nullable), source, created_by
 
 **User-scoped**
 
-- `profiles` — user_id, display_name, locale, theme, height_cm, birth_date, sex,
+- `profiles`: user_id, display_name, locale, theme, height_cm, birth_date, sex,
   activity_level, goal
-- `nutrition_goals` — user_id, mode (`manual` | `calculated`), kcal, protein_g,
+- `nutrition_goals`: user_id, mode (`manual` | `calculated`), kcal, protein_g,
   fat_g, carbs_g, valid_from
-- `weight_logs` — user_id, date, weight_kg, body_fat_pct (nullable),
+- `weight_logs`: user_id, date, weight_kg, body_fat_pct (nullable),
   measurements (jsonb, nullable)
-- `food_logs` — user_id, date, meal_type, food_id, quantity_g
-- `food_favourites` — user_id, food_id
-- `routines` — user_id, name, position
-- `routine_exercises` — routine_id, exercise_id, position, target_sets,
+- `food_logs`: user_id, date, meal_type, food_id, quantity_g
+- `food_favourites`: user_id, food_id
+- `routines`: user_id, name, position
+- `routine_exercises`: routine_id, exercise_id, position, target_sets,
   target_reps
-- `scheduled_sessions` — user_id, routine_id, scheduled_date, status
-- `workouts` — user_id, date, routine_id (nullable), notes
-- `workout_sets` — workout_id, exercise_id, set_number, reps, weight_kg,
+- `scheduled_sessions`: user_id, routine_id, scheduled_date, status
+- `workouts`: user_id, date, routine_id (nullable), notes
+- `workout_sets`: workout_id, exercise_id, set_number, reps, weight_kg,
   rir (nullable)
 
 **Rules**
@@ -205,7 +205,7 @@ never copied into log rows.
 - Every user-scoped table has a `user_id` and an RLS policy `user_id = auth.uid()`.
 - `foods` and `exercises`: read allowed for all authenticated users; insert
   allowed for all authenticated users; update only by `created_by`.
-- Free-logging (picking an exercise without a routine) must stay possible —
+- Free-logging (picking an exercise without a routine) must stay possible:
   `workouts.routine_id` is nullable for exactly this reason.
 
 ---
@@ -225,7 +225,7 @@ not optional even for a small private group.
 - No analytics or tracking in the MVP. As long as the only cookie/token is the
   auth session, no cookie banner is required.
 
-*Not legal advice — verify before opening this beyond a private circle.*
+*Not legal advice. Verify before opening this beyond a private circle.*
 
 ---
 
@@ -234,11 +234,11 @@ not optional even for a small private group.
 - No premature abstraction. Two similar components are fine; extract on the third.
 - No state management library until `useState` and Supabase's own cache
   demonstrably fall short.
-- No new design language. `DESIGN.md` is the authority and it is already written —
+- No new design language. `DESIGN.md` is the authority and it is already written,
   it is the house style shared with NCLA, adapted for a phone. Do not invent
   tokens, do not add a colour, do not import a component library's own look.
 - shadcn/ui is a **behaviour layer, not a visual one.** It is used for the Radix
-  primitives that are tedious and easy to get subtly wrong — focus traps, ARIA
+  primitives that are tedious and easy to get subtly wrong, focus traps, ARIA
   wiring, portals, dismiss handling. Every component it provides is restyled to
   `DESIGN.md` §3.2 in the same commit that adds it. Layout and list primitives
   (Panel, Rows, SectionHead, Statement) are Merit's own; see `DESIGN.md` §3.3 for

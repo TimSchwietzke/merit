@@ -10,14 +10,14 @@ import { cn } from '@/lib/utils'
  * variants are deleted rather than left unused, per §3.2.
  *
  * Gone from the shadcn original, deliberately:
- *   - `ring-3` focus — Merit's focus ring is a 2px accent outline defined once
+ *   - `ring-3` focus. Merit's focus ring is a 2px accent outline defined once
  *     globally in index.css (§16.2). shadcn's `outline-none` goes with it: it
  *     lands in Tailwind's `utilities` layer, the global rule lands in `base`,
- *     and utilities win — so leaving it in silently deleted the focus ring from
+ *     and utilities win, so leaving it in silently deleted the focus ring from
  *     every button in the app.
- *   - `rounded-lg` (6px) — buttons sit at radius 5 (`rounded-md`).
- *   - `h-8` / `h-9` — every touch target is at least 44px (§5.2).
- *   - `active:translate-y-px` — motion is feedback, not decoration (§13).
+ *   - `rounded-lg` (6px), buttons sit at radius 5 (`rounded-md`).
+ *   - `h-8` / `h-9`: every touch target is at least 44px (§5.2).
+ *   - `active:translate-y-px`: motion is feedback, not decoration (§13).
  */
 const buttonVariants = cva(
   `inline-flex shrink-0 items-center justify-center gap-2 rounded-md border border-transparent
@@ -28,7 +28,7 @@ const buttonVariants = cva(
     variants: {
       variant: {
         // One per screen at most. The accent fill cannot go to surface-2 on
-        // press, so it deepens instead — the point is that *something* answers
+        // press, so it deepens instead, the point is that *something* answers
         // the tap (§6).
         primary: 'bg-accent text-bg hover:opacity-90 active:opacity-80',
         // The important-but-not-only action. Hover inverts; press completes it.
@@ -63,7 +63,7 @@ export function Button({
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
     /** A button that writes to the database is disabled while the write is in
-     *  flight — on a phone connection the gap is long enough to tap twice
+     *  flight. On a phone connection the gap is long enough to tap twice
      *  (DESIGN.md §10.4). */
     pending?: boolean
   }) {

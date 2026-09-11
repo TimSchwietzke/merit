@@ -52,7 +52,7 @@ export function ConsentGate() {
   //
   // Only a deployed build. A developer running this locally is not a data
   // subject being asked for anything, and a gate that also blocks the test
-  // suite would be removed within the week — which is how forcing functions
+  // suite would be removed within the week, which is how forcing functions
   // die. It complains loudly in the console instead.
   if (PRIVACY_VERSION === '') {
     if (import.meta.env.PROD) {

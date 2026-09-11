@@ -11,7 +11,7 @@ export interface DayTotal {
  *
  * Every function here reads only the days that were actually logged. An
  * unlogged day is not a zero-calorie day, and averaging one in would report
- * somebody as eating far less than they did — which is the same mistake as
+ * somebody as eating far less than they did, which is the same mistake as
  * summing a missing nutrient as zero, one level up (PRODUCT.md).
  */
 
@@ -65,7 +65,7 @@ export function daysOnTarget(
  * The window as a dense series for a chart, oldest first, with unlogged days
  * carried as null.
  *
- * Null, not zero, for the same reason as above — and Recharts draws a gap for
+ * Null, not zero, for the same reason as above, and Recharts draws a gap for
  * null, which is the honest rendering: the line stops where the data stops
  * rather than diving to the floor and back.
  */

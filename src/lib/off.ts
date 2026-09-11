@@ -8,7 +8,7 @@ import { supabase } from '@/lib/supabase'
  * purpose, so the 15-per-minute limit applies per user rather than to a server
  * everybody shares.
  *
- * A browser cannot set `User-Agent` — it is a forbidden header name, so the
+ * A browser cannot set `User-Agent`: it is a forbidden header name, so the
  * custom agent the OFF docs ask for is impossible here. Their documented
  * alternative for browser apps is to identify the caller in the query string
  * instead, which is what `IDENTITY` below is.
@@ -73,7 +73,7 @@ const num = (value: number | string | undefined): number | null => {
 /**
  * A value that survives the table's own check constraint, or null.
  *
- * Open Food Facts is crowd-sourced and carries genuine nonsense — 1000 g of fat
+ * Open Food Facts is crowd-sourced and carries genuine nonsense, 1000 g of fat
  * per 100 g, energy in the tens of thousands, negative values. Storing those
  * would put a food in the shared catalogue that poisons every day it is logged
  * to, and the insert would be rejected anyway.
@@ -84,7 +84,7 @@ const inRange = (value: number | null, { min, max }: { min: number; max: number 
 /**
  * Map a product, or null if it cannot be logged.
  *
- * The four nutrients with user-set targets are required — a product with no
+ * The four nutrients with user-set targets are required, a product with no
  * energy value cannot be counted against a calorie budget, and inventing a zero
  * for it is exactly the lie GOAL.md §4 rules out. The rest stay null when the
  * packaging did not declare them.
@@ -162,8 +162,8 @@ export async function lookupOffProduct(barcode: string, signal?: AbortSignal): P
     const response = await fetch(`${BASE}/${barcode}.json?fields=${FIELDS}&${IDENTITY}`, { signal })
 
     // 404 is the answer "no such product" and is the only status that means it.
-    // Everything else — 429 from the 15-per-minute limit, a 5xx, the 503 their
-    // search endpoint hands out under load — is the service being unavailable,
+    // Everything else, 429 from the 15-per-minute limit, a 5xx, the 503 their
+    // search endpoint hands out under load, is the service being unavailable,
     // and reporting that as "this food does not exist" sends somebody off to
     // hand-type a product Open Food Facts already has.
     if (response.status === 404) return { kind: 'missing' }

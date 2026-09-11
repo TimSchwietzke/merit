@@ -6,7 +6,7 @@
 -- table.
 --
 -- Routines, their exercises and scheduled sessions are the next slice and are
--- not created here. Free logging — picking an exercise without a routine — has
+-- not created here. Free logging, picking an exercise without a routine, has
 -- to work on its own (GOAL.md §7), so a workout needs nothing from them, and
 -- `workouts.routine_id` arrives with the tables it points at.
 -- ─────────────────────────────────────────────────────────────────────

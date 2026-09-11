@@ -2,7 +2,7 @@
  * The catalogue's muscle names, and where they land on the body map.
  *
  * Two vocabularies meet here. The exercise data names seventeen muscles the way
- * a lifter does — `lats`, `traps`, `quadriceps`; the silhouette names the
+ * a lifter does, `lats`, `traps`, `quadriceps`; the silhouette names the
  * regions it can draw. Neither is wrong and neither is going to change, so the
  * translation is written down once rather than guessed at each call site.
  *
@@ -63,7 +63,7 @@ export function onBody(muscles: readonly string[]): string[] {
 }
 
 /**
- * The coarse group a muscle belongs to — the eight the catalogue is filtered
+ * The coarse group a muscle belongs to, the eight the catalogue is filtered
  * and grouped by (§10.11). Seventeen filter options is a list nobody reads.
  */
 const GROUP: Record<Muscle, string> = {

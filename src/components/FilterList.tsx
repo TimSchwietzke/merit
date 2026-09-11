@@ -7,8 +7,8 @@ import { SectionHead } from '@/components/SectionHead'
  * One facet of a filter, as a column of rows (DESIGN.md §10.11).
  *
  * A chip row exists to survive on a crowded screen. Inside a sheet nothing is
- * crowded, and the trade a chip makes — short label, wrapped into a block,
- * several per line — buys nothing and costs the scannability a column has. So
+ * crowded, and the trade a chip makes, short label, wrapped into a block,
+ * several per line, buys nothing and costs the scannability a column has. So
  * each option is a row at the list height, with its state on the left where a
  * column of them reads down.
  *

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 /**
  * A block that arrives from one side the first time it is scrolled to.
  *
- * Once, per block, on the way in — never again, and never on the way back up.
+ * Once, per block, on the way in, never again, and never on the way back up.
  * The point is that a screen assembles itself as you move down it rather than
  * being fully drawn behind the fold; repeating it on every pass would turn a
  * flourish into a fidget.

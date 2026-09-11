@@ -5,7 +5,7 @@ import { ChevronDown } from 'lucide-react'
 /**
  * A group that can be folded away (DESIGN.md §10.11).
  *
- * Radix for the wiring — `aria-expanded`, `aria-controls`, the id pairing — and
+ * Radix for the wiring (`aria-expanded`, `aria-controls`, the id pairing) and
  * for `--radix-collapsible-content-height`, which is what makes the height
  * animation possible at all: the panel's natural height is not a number CSS can
  * interpolate from `auto`, and Radix measures it. §13 permits height here and

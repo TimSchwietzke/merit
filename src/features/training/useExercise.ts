@@ -8,7 +8,7 @@ import type { ExerciseRef } from '@/features/training/useWorkout'
  * One exercise by id.
  *
  * The day's own query only knows the exercises that appear in it, so an
- * exercise just picked — which by definition has no sets yet — has to be
+ * exercise just picked, which by definition has no sets yet, has to be
  * fetched to be named. It is a single row on the way into logging a set.
  */
 export function useExercise(id: string | null): ExerciseRef | null {

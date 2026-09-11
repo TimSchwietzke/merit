@@ -35,7 +35,7 @@ export interface SetGroup {
 }
 
 /**
- * Collapse a list of sets into the shape people say out loud — `3 × 8 @ 60 kg`.
+ * Collapse a list of sets into the shape people say out loud, `3 × 8 @ 60 kg`.
  *
  * Only *consecutive* sets are collapsed. 8/8/6 at the same weight is two lines,
  * not one, because the drop is the interesting part; merging by value would
@@ -181,7 +181,7 @@ export function activeSet(sets: readonly LoggedSet[], chosen: string | null): Lo
   return id ? (sets.find((set) => set.id === id) ?? null) : null
 }
 
-/** The first outstanding set of one exercise — what tapping its card selects. */
+/** The first outstanding set of one exercise, what tapping its card selects. */
 export function firstOutstandingOf(
   sets: readonly LoggedSet[],
   exerciseId: string,

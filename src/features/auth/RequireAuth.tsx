@@ -17,7 +17,7 @@ export function RequireAuth() {
 
   if (status === 'signedOut') {
     // Remember where they were headed so signing in lands there, not on the
-    // dashboard — a deep link from a bookmark should survive the detour.
+    // dashboard. A deep link from a bookmark should survive the detour.
     return <Navigate to="/sign-in" replace state={{ from: location.pathname + location.search }} />
   }
 

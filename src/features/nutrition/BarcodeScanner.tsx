@@ -15,7 +15,7 @@ import { hasValidCheckDigit } from '@/lib/barcode'
  * No overlay animation and no scanning laser.
  *
  * Decoding is ZXing rather than the platform's `BarcodeDetector`. The native
- * API is not in Safari, and Merit is used on iPhones — so the native path was
+ * API is not in Safari, and Merit is used on iPhones, so the native path was
  * a decoder that worked for nobody who actually uses this app, plus a second
  * code path neither of us could test. One decoder, everywhere.
  *
@@ -50,8 +50,8 @@ type CameraState = 'starting' | 'running' | 'denied'
 /**
  * The torch, where the camera has one.
  *
- * `torch` is not in the TypeScript DOM types and not in every browser — it is
- * still a draft — so it is read off the track's own capabilities and the button
+ * `torch` is not in the TypeScript DOM types and not in every browser, it is
+ * still a draft, so it is read off the track's own capabilities and the button
  * only exists where the answer is yes. A toggle that does nothing is worse than
  * no toggle: in a dark aisle it reads as the app being broken rather than as
  * the phone not offering it.
@@ -96,7 +96,7 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
     hints.set(DecodeHintType.POSSIBLE_FORMATS, FORMATS)
     // Without this the 1D readers only sample a few horizontal lines through
     // the middle of the frame, so a barcode that is slightly high, low or
-    // tilted never reads — which looks exactly like a camera that is not
+    // tilted never reads, which looks exactly like a camera that is not
     // scanning at all. It costs frames; a phone held over a packet has them.
     hints.set(DecodeHintType.TRY_HARDER, true)
     const reader = new BrowserMultiFormatReader(hints, { delayBetweenScanAttempts: 250 })
@@ -113,7 +113,7 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
         video.srcObject = stream
         trackRef.current = stream.getVideoTracks()[0] ?? null
         // Safari will not start a stream it was merely handed, and a paused
-        // video decodes nothing while showing a picture — which is the exact
+        // video decodes nothing while showing a picture, which is the exact
         // shape of "the camera works but it never scans".
         video.playsInline = true
         video.muted = true
@@ -125,7 +125,7 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
             if (stopped || !result) return
             // No check-digit filter here. ZXing's 1D readers validate the
             // checksum themselves before returning a result, so this would only
-            // ever reject something they had already accepted — and it does:
+            // ever reject something they had already accepted, and it does:
             // a UPC-E check digit is computed over the expanded twelve-digit
             // form, not over the eight digits that come back, so every UPC-E
             // read was being dropped in silence. The typed field keeps the
@@ -249,7 +249,7 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
         </div>
       ) : null}
 
-      {/* In place, not on another screen (§10.10) — but plainly the other way
+      {/* In place, not on another screen (§10.10), but plainly the other way
           of doing this, not the button that works the camera. Without the rule
           and the word on it, a field with a button beside it sitting under a
           viewport reads as "press here to scan". */}

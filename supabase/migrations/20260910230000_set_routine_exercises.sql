@@ -1,7 +1,7 @@
 -- ─────────────────────────────────────────────────────────────────────
 -- Saving a routine's exercises in one write.
 --
--- The editor holds a draft now — you can rename, reorder, retype the reps and
+-- The editor holds a draft now, you can rename, reorder, retype the reps and
 -- drop a lift, and none of it is written until you say so, which is what makes
 -- a cancel button mean anything. Four round trips per save could half-apply on
 -- a gym connection and leave a routine holding neither the old list nor the new
@@ -10,7 +10,7 @@
 --
 -- So the whole list goes over at once and is replaced inside one statement.
 -- Wholesale rather than diffed: the rows carry no identity anybody outside this
--- table refers to — starting a routine copies its plan onto the workout — and a
+-- table refers to, starting a routine copies its plan onto the workout, and a
 -- diff is more code than the writes it saves.
 -- ─────────────────────────────────────────────────────────────────────
 

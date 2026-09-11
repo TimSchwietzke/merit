@@ -4,7 +4,7 @@
  * Two rules run through all of it.
  *
  * **Everything is stored per 100 g** and scaled on the way out (GOAL.md §5), at
- * full precision. Rounding happens in the formatter, never here — round a
+ * full precision. Rounding happens in the formatter, never here, round a
  * hundred logged portions on the way in and the day's total is wrong by the
  * time anybody reads it.
  *
@@ -32,7 +32,7 @@ export type OptionalNutrient = (typeof OPTIONAL_NUTRIENTS)[number]
 export type Nutrient = RequiredNutrient | OptionalNutrient
 
 /**
- * EU label order — fat, saturates, carbohydrate, sugars, fibre, protein, salt —
+ * EU label order. Fat, saturates, carbohydrate, sugars, fibre, protein, salt,
  * so the screen reads in the same order as the packaging that was just scanned
  * (GOAL.md §4). Energy sits above it rather than in it.
  */
@@ -103,7 +103,7 @@ export function portionTotals(portion: Portion): Record<Nutrient, number | null>
 }
 
 /**
- * Sum a set of portions — a meal, a day, a week; the function does not care
+ * Sum a set of portions. A meal, a day, a week; the function does not care
  * which. Portions with no value for a nutrient are left out of that nutrient's
  * sum and counted, rather than added as zero.
  */
@@ -130,7 +130,7 @@ export function sumPortions(portions: readonly Portion[]): DayTotals {
  * The energy in a macro split, from the macros rather than from `kcal`.
  *
  * Atwater factors: 4 kcal per gram of protein and of carbohydrate, 9 per gram
- * of fat. Used for the macro ring's proportions only (§10.10) — the calorie
+ * of fat. Used for the macro ring's proportions only (§10.10), the calorie
  * figure on screen is always the food's own, because a label's energy value and
  * its macros rarely reconcile exactly and the label is what the user ate.
  */

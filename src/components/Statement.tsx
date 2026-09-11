@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-/** The accent edge — the one piece of pure voice. In Merit it carries the
+/** The accent edge, the one piece of pure voice. In Merit it carries the
  *  dashboard's single sentence about the day. Two per screen cancel out. */
 export function Statement({ children }: { children: ReactNode }) {
   return (

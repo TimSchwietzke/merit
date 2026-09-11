@@ -10,7 +10,7 @@
 --
 -- **The data only, deliberately not the images.** That dataset ships two
 -- photographs per exercise and they are photographs of people in gyms. Merit
--- draws a silhouette with the worked muscles filled in instead — always
+-- draws a silhouette with the worked muscles filled in instead, always
 -- present, always the same, painted from the app's own tokens, and it answers
 -- what somebody actually scans a catalogue for. `image_url` stays null and
 -- stays available for the day a set of schematics exists.
@@ -22,8 +22,8 @@
 --
 -- Names are imported in English into both columns. Machine-translating nine
 -- hundred exercise names would put a wrong German name on the screen, which is
--- worse than an English one — half of them are said in English in a German gym
--- anyway — and the catalogue is shared, so a correction by one person fixes it
+-- worse than an English one. Half of them are said in English in a German gym
+-- anyway, and the catalogue is shared, so a correction by one person fixes it
 -- for everyone.
 -- ─────────────────────────────────────────────────────────────────────
 
@@ -932,7 +932,7 @@ from (values
   ('Zottman Preacher Curl', 'Zottman Preacher Curl', 'arms', 'dumbbell', array['biceps']::text[], array['forearms']::text[])
 ) as v(name_en, name_de, muscle_group, equipment, primary_muscles, secondary_muscles)
 -- The unique is on (name_en, equipment), so a lift already in the table keeps
--- its id — routines and logged sets point at it — and only learns its muscles.
+-- its id, routines and logged sets point at it, and only learns its muscles.
 on conflict (name_en, equipment) do update
   set primary_muscles   = excluded.primary_muscles,
       secondary_muscles = excluded.secondary_muscles,

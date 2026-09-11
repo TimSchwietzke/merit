@@ -7,9 +7,9 @@ import { useSession } from '@/features/auth/useSession'
 
 /**
  * The sticky chrome (DESIGN.md §7). Thin: a hairline, a translucent page fill
- * and a blur — never an opaque bar with a shadow.
+ * and a blur, never an opaque bar with a shadow.
  *
- * From `lg` it carries the path bar — `merit / ernährung / heute` — and not a
+ * From `lg` it carries the path bar, `merit / ernährung / heute`: and not a
  * page title. This is a carried-over signature rather than decoration: the
  * file-tree reading is what makes Merit read as a tool instead of a dashboard
  * template, so it is the header's whole job. Below `lg` it collapses to a
@@ -18,7 +18,7 @@ import { useSession } from '@/features/auth/useSession'
  * Its inner column repeats `<main>`'s width and gutters so the path sits on the
  * same left edge as the content beneath it.
  *
- * The avatar on the right is where the account lives — goals, language, theme,
+ * The avatar on the right is where the account lives, goals, language, theme,
  * export, signing out. It used to be a `more` tab, which spent one of four
  * places on the thing you touch least and put a daily number like weight behind
  * a menu. An account is not a section of the product; it is who is using it,
@@ -69,7 +69,7 @@ export function AppHeader() {
               <span key={`${segment.labelKey}-${index}`} className="flex items-center">
                 {index > 0 ? (
                   // A thin separator in line-strong, not a character doing an
-                  // icon's job — it is punctuation and reads as punctuation.
+                  // icon's job, it is punctuation and reads as punctuation.
                   <span aria-hidden className="px-1.5 text-line-strong">
                     /
                   </span>
@@ -94,8 +94,8 @@ export function AppHeader() {
           })}
         </nav>
 
-        {/* Pushed right, and pulled 8px past the gutter so the glyph — not the
-            44px target around it — lines up with the content's edge. */}
+        {/* Pushed right, and pulled 8px past the gutter so the glyph, not the
+            44px target around it, lines up with the content's edge. */}
         <NavLink
           to="/account"
           aria-label={t('nav.account')}

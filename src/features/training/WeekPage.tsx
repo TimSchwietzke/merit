@@ -27,7 +27,7 @@ import { isoWeekday } from '@/lib/training'
 
 /**
  * Training (GOAL.md §5, §6): the week, the day you are looking at, and the
- * routines both are made of — one screen, in that order.
+ * routines both are made of, one screen, in that order.
  *
  * The week is a strip of seven tiles rather than a seven-item list, which is
  * how every calendar on the phone this runs on behaves and how the Fitness app
@@ -35,7 +35,7 @@ import { isoWeekday } from '@/lib/training'
  * eight, so the day below it gets the room, and moving between days changes
  * that block in place rather than pushing a new screen.
  *
- * Each tile carries the mosaic mark from §10.10 — the same three states told
+ * Each tile carries the mosaic mark from §10.10, the same three states told
  * apart by fill density rather than hue, so a week reads at a glance without
  * anyone having to learn a colour key: `line` for a rest day, half-strength
  * accent for a session that is planned, full accent for one that has been
@@ -223,7 +223,7 @@ interface Marked {
  * why the screen read flat: a week strip, a day and a routine list in three
  * identical bordered boxes are three things all claiming to be the subject. One
  * marked block against two plain ones needs no boxes at all. Its muted twin in
- * `line-strong` — §6's own answer for something provisional — marks a rest day,
+ * `line-strong`, §6's own answer for something provisional, marks a rest day,
  * so an empty day is visibly the same object in a quieter state rather than a
  * different component.
  *
@@ -417,7 +417,7 @@ function DayCard({
  * routine is the thing this feature is made of, and the week above is only a
  * projection of it.
  *
- * The bottom padding is for the button floating over this list — a fixed
+ * The bottom padding is for the button floating over this list, a fixed
  * element takes no space in the flow and would otherwise sit on the last row.
  */
 function RoutineList({
@@ -442,7 +442,7 @@ function RoutineList({
       />
 
       {/* §10.1: a delete 8px from a value in a 52px row gets hit by accident,
-          so it costs a deliberate sideways drag — the same gesture the food log
+          so it costs a deliberate sideways drag, the same gesture the food log
           uses, and the same undo behind it (§17). */}
 
       {status === 'error' ? (
@@ -511,7 +511,7 @@ function RoutineList({
  * of the screen then, and two floating things fighting for that corner is how
  * the wrong one gets tapped between sets.
  *
- * Square with a 5px radius, not a circle — §6 allows a pill for a progress
+ * Square with a 5px radius, not a circle, §6 allows a pill for a progress
  * track and a sheet's drag handle, and nothing else. §6 does allow the shadow:
  * this genuinely floats, which is the same licence the session bar has.
  */

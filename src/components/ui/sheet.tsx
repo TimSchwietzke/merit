@@ -3,7 +3,7 @@ import { Dialog } from 'radix-ui'
 import { X } from 'lucide-react'
 
 /**
- * A bottom sheet below `md`, a centred dialog from `md` up — one wrapper so
+ * A bottom sheet below `md`, a centred dialog from `md` up, one wrapper so
  * call sites do not branch (DESIGN.md §8).
  *
  * Written on Radix `Dialog` rather than taken from shadcn: the behaviour worth

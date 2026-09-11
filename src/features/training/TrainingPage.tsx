@@ -56,7 +56,7 @@ export default function TrainingPage() {
   const today = todayKey()
   const date = params.get('date') ?? today
   // The bar and this list read the same query, and `useWorkout` publishes every
-  // write to all of its readers — so logging a set from the bar cannot leave
+  // write to all of its readers, so logging a set from the bar cannot leave
   // the list behind it showing older figures.
   const { active, choose } = useActiveSession()
   const { sets, exercises, history, status, offline, unsent, rejected, addSet, updateSet, removeSet } =
@@ -220,7 +220,7 @@ function Exercise({
 
   /**
    * A new set starts from the one before it, because that is what usually
-   * happens next — and never from zero, which is a weight nobody lifts and a
+   * happens next, and never from zero, which is a weight nobody lifts and a
    * rep count nobody does.
    */
   async function addOne() {
@@ -237,7 +237,7 @@ function Exercise({
 
   return (
     // One bordered envelope per exercise. The block used to be a header rule, a
-    // row list and three bordered inputs per set — ten hairlines of equal
+    // row list and three bordered inputs per set, ten hairlines of equal
     // weight, so nothing announced where one exercise ended and the next began.
     <section className="mb-6 overflow-hidden rounded-lg border border-line bg-surface last:mb-0">
       {/* Tapping the card moves the active set to this exercise's first
@@ -345,7 +345,7 @@ function Exercise({
  * There is no edit mode and nothing to open: every figure on this screen can be
  * changed where it stands. An editor that replaced the row meant the layout
  * moved under the thumb that opened it, and it meant reaching every set through
- * a tap that did nothing but make the row editable — which it may as well have
+ * a tap that did nothing but make the row editable, which it may as well have
  * been all along.
  *
  * Committed on blur rather than on keystroke (§10.5). A value is written once

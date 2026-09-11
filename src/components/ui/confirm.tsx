@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
  * One question and two answers. A bottom sheet below `md`, a centred dialog
  * above (§8), on Radix `Dialog` for the focus trap and the dismiss handling.
  *
- * Used where an action rearranges something the user cannot see all of — a swap
+ * Used where an action rearranges something the user cannot see all of, a swap
  * moves two days at once, and the sentence names both so nobody has to infer
  * what they just agreed to.
  */

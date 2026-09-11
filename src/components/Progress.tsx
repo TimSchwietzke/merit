@@ -11,7 +11,7 @@ import { progress } from '@/lib/goals'
  * rightwards, with a 1px tick left standing at the 100% position so the
  * overshoot is measurable rather than just red.
  *
- * Undershooting is the same mechanism and deliberately quieter — the bar simply
+ * Undershooting is the same mechanism and deliberately quieter, the bar simply
  * is not full. A day in progress is not a failed day, and this screen is looked
  * at mid-afternoon more often than at midnight.
  *
@@ -29,7 +29,7 @@ export function Progress({
   total: number
   target: number
   /** The line beneath, already formatted. Omitted where the row around the bar
-   *  already carries the figures — the nutrient panel, for one. */
+   *  already carries the figures, the nutrient panel, for one. */
   label?: React.ReactNode
   ariaLabel: string
 }) {

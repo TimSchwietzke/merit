@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { Plus, X } from 'lucide-react'
+import { Check, Plus, X } from 'lucide-react'
 
 import { EmptyState } from '@/components/EmptyState'
 import { PageHeader } from '@/components/PageHeader'
@@ -24,7 +24,7 @@ import { addTo, removeFrom, replaceOn, upcomingInstances, weekOf } from '@/lib/s
  * is actually going to happen: a set fewer, an exercise dropped, or a different
  * training day altogether. Changing which routine the day runs lives here
  * rather than on the calendar, because this is already the screen that means
- * "today, adjusted" — and it keeps the calendar's move control to one meaning.
+ * "today, adjusted", and it keeps the calendar's move control to one meaning.
  *
  * A change is kept for today, for every future session, or for a set of days
  * picked by hand. The pattern itself is only touched by the middle one.
@@ -148,7 +148,7 @@ export default function SessionPage() {
   }
 
   /**
-   * Starting a session planned for another day moves it to today — which is the
+   * Starting a session planned for another day moves it to today, which is the
    * ordinary case of "I could not go on Monday". It asks first, because it
    * takes the session off the day it was on.
    */
@@ -385,7 +385,7 @@ export default function SessionPage() {
       </Sheet>
 
       {/* The instances, as a list of the days this routine actually falls on.
-          Selected is `accent`, the rest are `ink` — §2.4 rules out a second
+          Selected is `accent`, the rest are `ink`, §2.4 rules out a second
           hue, and three weights carry the same three states. */}
       <Sheet
         open={pickOpen}
@@ -406,9 +406,7 @@ export default function SessionPage() {
                 <span className={`min-w-0 flex-1 truncate ${on ? 'text-accent' : 'text-ink'}`}>
                   {formatDayShort(day, locale)}
                 </span>
-                {on ? (
-                  <span className="shrink-0 font-mono text-2xs text-accent">✓</span>
-                ) : null}
+                {on ? <Check size={14} strokeWidth={2} className="shrink-0 text-accent" /> : null}
               </Row>
             )
           })}

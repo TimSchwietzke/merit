@@ -15,7 +15,7 @@ export type AuthErrorKey =
   | 'auth.errors.unknown'
 
 /** Supabase returns `code` on newer errors and only `status` on older ones, so
- *  both are read. Nothing here assumes a message string — those are English,
+ *  both are read. Nothing here assumes a message string, those are English,
  *  server-side, and not stable enough to match on. */
 interface AuthErrorish {
   code?: string
@@ -28,7 +28,7 @@ export function authErrorKey(error: unknown): AuthErrorKey {
 
   const { code, status, name } = error as AuthErrorish
 
-  // A failed fetch has no HTTP status at all — the request never landed.
+  // A failed fetch has no HTTP status at all, the request never landed.
   if (code === 'network_error' || name === 'AuthRetryableFetchError' || name === 'TypeError') {
     return 'auth.errors.offline'
   }

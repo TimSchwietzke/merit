@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 /**
  * What is shown when a route throws.
  *
- * Without this, React Router renders its own developer screen — the stack, the
+ * Without this, React Router renders its own developer screen, the stack, the
  * module URL, and a cheerful note addressed to whoever wrote the app. That is
  * the right default for a framework and the wrong thing for somebody standing
  * in a gym: it says nothing they can act on and quite a lot about the machine.
@@ -16,7 +16,7 @@ import { Button } from '@/components/ui/button'
  * split into lazily-loaded routes, and a deploy replaces those files with new
  * hashed names. A tab left open across a deploy asks for a file that no longer
  * exists, and the browser reports it as a failed dynamic import. Reloading
- * fetches the new index and the problem is gone — so when the failure looks
+ * fetches the new index and the problem is gone, so when the failure looks
  * like that, reloading is the *primary* action and the copy says so plainly
  * rather than apologising.
  *
@@ -72,7 +72,7 @@ export default function RouteError() {
  * differently and none of them gives it a class of its own: Chrome says
  * "Failed to fetch dynamically imported module", Safari "Importing a module
  * script failed", Firefox "error loading dynamically imported module". A
- * mismatch here costs the reader nothing — they get the ordinary error screen,
+ * mismatch here costs the reader nothing, they get the ordinary error screen,
  * which offers the same reload one button further along.
  */
 function isStaleChunk(error: unknown): boolean {

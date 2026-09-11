@@ -8,14 +8,14 @@ import { supabase } from '@/lib/supabase'
 /**
  * What was eaten on each day of a trailing window, as one number per day.
  *
- * Calories only, and no macros: the three things reading this — the
- * consistency mark, the running average and the days-on-target count — all ask
+ * Calories only, and no macros: the three things reading this, the
+ * consistency mark, the running average and the days-on-target count, all ask
  * about energy, and pulling every nutrient of every portion for a month to
  * answer them would be the most expensive query in the app for the least
  * information in it.
  *
  * A day is present here only if something was logged on it. Absent is not zero
- * — nobody ate nothing — and the maths downstream depends on being able to tell
+ *, nobody ate nothing, and the maths downstream depends on being able to tell
  * an unlogged day from an empty one.
  */
 export interface FoodHistory {
@@ -48,7 +48,7 @@ export function useFoodHistory(today: string, days = 90): FoodHistory {
         for (const row of data as unknown as Row[]) {
           const kcal = row.foods.kcal_100g
           // A food with no energy value contributes nothing and still marks the
-          // day as logged — the day happened even if this portion cannot be
+          // day as logged. The day happened even if this portion cannot be
           // counted.
           const add = kcal === null ? 0 : (kcal * row.quantity_g) / 100
           byDay.set(row.date, (byDay.get(row.date) ?? 0) + add)

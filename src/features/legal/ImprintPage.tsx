@@ -6,7 +6,7 @@ import { IMPRINT } from '@/features/legal/documents'
 /**
  * The imprint, § 5 DDG.
  *
- * merit is private and makes no money, and a *purely* private site is exempt —
+ * merit is private and makes no money, and a *purely* private site is exempt,
  * but the exemption is read narrowly, `geschäftsmäßig` covers sustained activity
  * with or without profit, and this is also a portfolio piece, which is a
  * professional purpose. Having one that is not required costs nothing; the

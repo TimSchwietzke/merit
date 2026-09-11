@@ -10,7 +10,7 @@
  * Vendored rather than depended on for two reasons. The package renders through
  * `react-native-svg`, which this app does not have and does not want; and the
  * part worth having is the path data, which is static and needs no runtime.
- * Colour is stripped on the way in — the original ships a fill per part, and
+ * Colour is stripped on the way in, the original ships a fill per part, and
  * Merit paints from its own tokens so the highlight follows whichever domain
  * the map is rendered inside.
  *
