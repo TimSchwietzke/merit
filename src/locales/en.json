@@ -13,7 +13,10 @@
     "account": "account",
     "goals": "goals",
     "routines": "routines",
-    "session": "session"
+    "session": "session",
+    "profile": "profile",
+    "appearance": "appearance",
+    "data": "your data"
   },
   "common": {
     "notBuiltYet": "not built yet",
@@ -40,7 +43,8 @@
       "next": "Next week",
       "label": "this week"
     },
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "backTo": "back to {{screen}}"
   },
   "auth": {
     "signIn": {
@@ -548,7 +552,40 @@
       "undoFailed": "That could not be put back. Check your connection and try again."
     },
     "account": {
-      "planned": "Settings, data export and the legal pages go here.",
+      "profile": {
+        "name": {
+          "label": "name",
+          "field": "display name",
+          "placeholder": "Your name",
+          "save": "Save name",
+          "saving": "Saving …",
+          "saved": "Saved.",
+          "failed": "The name was not saved. Check your connection and try again."
+        },
+        "email": {
+          "label": "email",
+          "current": "signed in as",
+          "field": "new address",
+          "save": "Change address",
+          "saving": "Changing …",
+          "sent": "Confirmation email on its way. Open the link in it, and check the spam folder too.",
+          "unchanged": "That is the address you are already signed in with.",
+          "failed": "The address was not changed. Check your connection and try again."
+        },
+        "password": {
+          "label": "password",
+          "current": "current password",
+          "field": "new password",
+          "repeat": "repeat new password",
+          "save": "Change password",
+          "saving": "Changing …",
+          "saved": "Password changed.",
+          "tooShort": "At least eight characters.",
+          "mismatch": "The two entries do not match.",
+          "wrongCurrent": "That is not the current password.",
+          "failed": "The password was not changed. Check your connection and try again."
+        }
+      },
       "preferences": {
         "label": "preferences",
         "language": "language",
@@ -570,16 +607,10 @@
         "signOut": "Sign out",
         "signingOut": "Signing out…"
       },
-      "tracking": {
-        "label": "tracking",
-        "goals": "goals"
-      },
       "data": {
         "label": "your data",
-        "lead": "Everything this account holds, and the way out of it.",
         "export": "Download my data",
         "exporting": "Preparing…",
-        "exportHint": "One JSON file: your profile, weigh-ins, food log, targets, routines and every set. Article 15 and 20.",
         "exportFailed": "That did not download. Check your connection and try again.",
         "delete": "Delete my account",
         "deleting": "Deleting…",

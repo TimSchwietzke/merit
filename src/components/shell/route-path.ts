@@ -22,6 +22,9 @@ export interface PathSegment {
     | 'pages.legal.imprint.title'
     | 'nav.weight'
     | 'nav.goals'
+    | 'nav.profile'
+    | 'nav.appearance'
+    | 'nav.data'
     | 'nav.routines'
     | 'nav.session'
     | 'common.today'
@@ -44,6 +47,9 @@ const PATHS: Record<string, PathSegment[]> = {
   '/training/day': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'common.today' }],
   '/training/session': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'nav.session' }],
   '/account': [ROOT, { labelKey: 'nav.account' }],
+  '/account/profile': [ROOT, { labelKey: 'nav.account', to: '/account' }, { labelKey: 'nav.profile' }],
+  '/account/appearance': [ROOT, { labelKey: 'nav.account', to: '/account' }, { labelKey: 'nav.appearance' }],
+  '/account/data': [ROOT, { labelKey: 'nav.account', to: '/account' }, { labelKey: 'nav.data' }],
   '/legal/privacy': [ROOT, { labelKey: 'pages.legal.privacy.title' }],
   '/legal/imprint': [ROOT, { labelKey: 'pages.legal.imprint.title' }],
   '/cardio': [ROOT, { labelKey: 'nav.cardio' }],
@@ -70,6 +76,28 @@ export function pathSegments(pathname: string): PathSegment[] {
     .sort((a, b) => b.length - a.length)[0]
 
   return parent ? PATHS[parent] : NOT_FOUND
+}
+
+/**
+ * Where "back" goes from here, or null when there is nowhere above.
+ *
+ * Below `lg` the path bar is hidden (§7), so a nested screen has no way out
+ * but the browser's own gesture, and inside an installed PWA there is not
+ * always one. The header needs the answer, and the path table already holds
+ * it: the segment before the screen's own is its parent.
+ *
+ * Two-segment paths have no parent worth offering. Those are the tab screens,
+ * and the tab bar is already the way off them; a back arrow there would point
+ * at the dashboard as though it were above `food`, which it is not.
+ */
+export function backTo(pathname: string): PathSegment | null {
+  const segments = pathSegments(pathname)
+  const screen = segments.findLastIndex(
+    (segment) => segment.labelKey !== 'common.today',
+  )
+
+  const parent = segments[screen - 1]
+  return screen > 1 && parent?.to ? parent : null
 }
 
 /**

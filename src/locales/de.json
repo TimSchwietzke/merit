@@ -13,7 +13,10 @@
     "account": "konto",
     "goals": "ziele",
     "routines": "routinen",
-    "session": "einheit"
+    "session": "einheit",
+    "profile": "profil",
+    "appearance": "darstellung",
+    "data": "deine daten"
   },
   "common": {
     "notBuiltYet": "noch nicht gebaut",
@@ -40,7 +43,8 @@
       "next": "Woche vor",
       "label": "diese woche"
     },
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "backTo": "zurück zu {{screen}}"
   },
   "auth": {
     "signIn": {
@@ -548,7 +552,40 @@
       "undoFailed": "Das konnte nicht wiederhergestellt werden. Prüfe dein Netz und versuche es noch einmal."
     },
     "account": {
-      "planned": "Hier stehen Einstellungen, Datenexport und die rechtlichen Seiten.",
+      "profile": {
+        "name": {
+          "label": "name",
+          "field": "anzeigename",
+          "placeholder": "Dein Name",
+          "save": "Namen speichern",
+          "saving": "Wird gespeichert …",
+          "saved": "Gespeichert.",
+          "failed": "Der Name wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal."
+        },
+        "email": {
+          "label": "e-mail",
+          "current": "angemeldet als",
+          "field": "neue adresse",
+          "save": "Adresse ändern",
+          "saving": "Wird geändert …",
+          "sent": "Bestätigungsmail unterwegs. Öffne den Link darin, und prüfe auch den Spam-Ordner.",
+          "unchanged": "Das ist die Adresse, mit der du angemeldet bist.",
+          "failed": "Die Adresse wurde nicht geändert. Prüfe dein Netz und versuche es noch einmal."
+        },
+        "password": {
+          "label": "passwort",
+          "current": "aktuelles passwort",
+          "field": "neues passwort",
+          "repeat": "neues passwort wiederholen",
+          "save": "Passwort ändern",
+          "saving": "Wird geändert …",
+          "saved": "Passwort geändert.",
+          "tooShort": "Mindestens acht Zeichen.",
+          "mismatch": "Die beiden Eingaben sind nicht gleich.",
+          "wrongCurrent": "Das aktuelle Passwort stimmt nicht.",
+          "failed": "Das Passwort wurde nicht geändert. Prüfe dein Netz und versuche es noch einmal."
+        }
+      },
       "preferences": {
         "label": "einstellungen",
         "language": "sprache",
@@ -570,16 +607,10 @@
         "signOut": "Abmelden",
         "signingOut": "Wird abgemeldet …"
       },
-      "tracking": {
-        "label": "erfassung",
-        "goals": "ziele"
-      },
       "data": {
         "label": "deine daten",
-        "lead": "Alles, was dieses Konto enthält, und der Weg hinaus.",
         "export": "Meine Daten herunterladen",
         "exporting": "Wird vorbereitet …",
-        "exportHint": "Eine JSON-Datei: dein Profil, Wiegungen, Ernährungstagebuch, Ziele, Routinen und jeder Satz. Artikel 15 und 20.",
         "exportFailed": "Der Download hat nicht geklappt. Prüfe dein Netz und versuche es noch einmal.",
         "delete": "Mein Konto löschen",
         "deleting": "Wird gelöscht …",
