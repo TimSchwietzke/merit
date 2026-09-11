@@ -160,10 +160,9 @@
       },
       "add": {
         "title": "Lebensmittel hinzufügen",
-        "lead": "Durchsuche den Katalog, für Obst, Gemüse und Fleisch auch die USDA-Datenbank. Fehlt etwas, trage es ein.",
         "search": "suche",
-        "searchHint": " · mindestens zwei buchstaben",
-        "searching": "wird gesucht",
+        "searchHint": " · name eintippen, dann suchen",
+        "searching": "sucht …",
         "noResults": "kein treffer",
         "addYourself": "Selbst eintragen",
         "searchFailed": "Die Suche ist nicht durchgekommen. Prüfe dein Netz und versuche es noch einmal.",
@@ -173,7 +172,16 @@
         "usda": "usda",
         "searchingUsda": "usda wird durchsucht …",
         "usdaFailed": "usda war nicht erreichbar. Der Katalog oben ist vollständig.",
-        "usdaBusy": "usda ist gerade ausgelastet. Versuch es in ein paar Minuten noch einmal."
+        "usdaBusy": "usda ist gerade ausgelastet. Versuch es in ein paar Minuten noch einmal.",
+        "off": "open food facts",
+        "searchOff": "Open Food Facts durchsuchen",
+        "offSearching": "wird gesucht …",
+        "offNone": "kein treffer",
+        "offBusy": "gerade zu viele suchen",
+        "offFailed": "nicht erreichbar",
+        "scan": "Scannen",
+        "elsewhere": "wenn nichts passt",
+        "go": "Suchen"
       },
       "portion": {
         "quantity": "menge",

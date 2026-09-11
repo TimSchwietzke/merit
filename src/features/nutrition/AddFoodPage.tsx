@@ -1,25 +1,33 @@
-import { lazy, Suspense, useState } from 'react'
+import { ScanBarcode } from 'lucide-react'
+import { lazy, Suspense, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 
 import { PageHeader } from '@/components/PageHeader'
 import { Row, Rows } from '@/components/Rows'
+import { SectionHead } from '@/components/SectionHead'
 import { Collapsible } from '@/components/ui/collapsible'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { NewFoodForm, type NewFood } from '@/features/nutrition/NewFoodForm'
 import { resolveBarcode } from '@/features/nutrition/resolve-barcode'
+import { cacheOffFood } from '@/features/nutrition/resolve-barcode'
 import { resolveUsdaFood } from '@/features/nutrition/resolve-usda'
 import { PortionForm } from '@/features/nutrition/PortionForm'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
 import { useFoodSearch } from '@/features/nutrition/useFoodSearch'
-import { type CatalogueFood } from '@/features/nutrition/catalogue'
+import {
+  FOOD_SELECT,
+  toCatalogueFood,
+  type CatalogueFood,
+  type FoodRow,
+} from '@/features/nutrition/catalogue'
 import { useRecentFoods } from '@/features/nutrition/useRecentFoods'
 import { useSession } from '@/features/auth/useSession'
 import { todayKey } from '@/lib/date'
 import { formatNumber } from '@/lib/format'
-import { ATTRIBUTION_URL } from '@/lib/off'
+import { ATTRIBUTION_URL, type OffFood } from '@/lib/off'
 import { supabase } from '@/lib/supabase'
 import type { MealType } from '@/lib/nutrition'
 import type { UsdaFood } from '@/lib/usda'
@@ -59,7 +67,13 @@ export default function AddFoodPage() {
   const meal = (params.get('meal') as MealType | null) ?? undefined
 
   const [query, setQuery] = useState('')
-  const { results, status, usda, remoteStatus } = useFoodSearch(query)
+  // What was typed, and what was asked. A search happens because somebody
+  // asked for one: it is one press rather than one per keystroke, which is
+  // what makes it affordable to ask Open Food Facts every time (ten searches a
+  // minute for the whole project) and what makes the screen quiet until there
+  // is something to say.
+  const [term, setTerm] = useState('')
+  const { results, status, usda, usdaStatus, off, offStatus } = useFoodSearch(term)
   const recent = useRecentFoods()
   const [folded, setFolded] = useState<Set<string>>(new Set())
 
@@ -79,7 +93,6 @@ export default function AddFoodPage() {
   const [failed, setFailed] = useState(false)
   const [scanResult, setScanResult] = useState<'missing' | 'offline' | null>(null)
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null)
-
   const { add } = useFoodLog(date)
 
   async function logPortion({ quantityG, mealType }: { quantityG: number; mealType: MealType }) {
@@ -122,6 +135,17 @@ export default function AddFoodPage() {
     else setFailed(true)
   }
 
+  async function pickOff(food: OffFood) {
+    if (!session || pending) return
+    setPending(true)
+    setFailed(false)
+
+    const cached = await cacheOffFood(food, session.user.id)
+    setPending(false)
+    if (cached) setPicked(cached)
+    else setFailed(true)
+  }
+
   async function createFood(food: NewFood) {
     if (!session) return
     setPending(true)
@@ -148,7 +172,7 @@ export default function AddFoodPage() {
         source: 'community',
         created_by: session.user.id,
       })
-      .select('id, name, brand, source, serving_size_g, serving_label')
+      .select(FOOD_SELECT)
       .single()
 
     setPending(false)
@@ -158,25 +182,7 @@ export default function AddFoodPage() {
     }
 
     // Straight on to the quantity: the food was added in order to log it.
-    setPicked({
-      id: data.id,
-      name: data.name,
-      brand: data.brand,
-      source: data.source,
-      fdcId: null,
-      servingSizeG: data.serving_size_g,
-      servingLabel: data.serving_label,
-      nutrients: {
-        kcal: food.values.kcal ?? 0,
-        fat: food.values.fat ?? 0,
-        carbs: food.values.carbs ?? 0,
-        protein: food.values.protein ?? 0,
-        saturatedFat: food.values.saturatedFat,
-        sugars: food.values.sugars,
-        fibre: food.values.fibre,
-        salt: food.values.salt,
-      },
-    })
+    setPicked(toCatalogueFood(data as FoodRow))
     setCreating(false)
   }
 
@@ -248,37 +254,71 @@ export default function AddFoodPage() {
     )
   }
 
+  const asked = term.length > 0
+  const searching =
+    status === 'searching' || usdaStatus === 'searching' || offStatus === 'searching'
+  const nothing =
+    asked && !searching && results.length === 0 && usda.length === 0 && off.length === 0
+
+  function search(event: FormEvent) {
+    event.preventDefault()
+    setTerm(query.trim())
+  }
+
   return (
     <>
-      <PageHeader title={t('pages.food.add.title')} lead={t('pages.food.add.lead')} />
+      {/* No lead. The screen is a search field with its own label, and a
+          paragraph naming the databases behind it is a paragraph nobody reads
+          twice (§14, and the wording pass on docs/TODO.md). */}
+      <PageHeader title={t('pages.food.add.title')} />
 
-      <div className="flex flex-col gap-2">
+      {/* A form, so the keyboard's own go key does what the button does. */}
+      <form onSubmit={search} className="flex flex-col gap-2">
         <Label htmlFor="food-search">
           {t('pages.food.add.search')}
           <span className="text-ink-faint">{t('pages.food.add.searchHint')}</span>
         </Label>
-        <Input
-          id="food-search"
-          type="search"
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          autoComplete="off"
-          autoCapitalize="none"
-          spellCheck={false}
-        />
-      </div>
 
-      {/* The fastest path to a packaged product, so it is not buried under the
-          search results (GOAL.md §5: repeating a log must be one tap). */}
-      <Button variant="tinted" className="mt-4 w-full md:w-auto" onClick={() => setScanning(true)}>
+        <div className="flex items-start gap-2">
+          <Input
+            id="food-search"
+            type="search"
+            value={query}
+            onChange={(event) => {
+              setQuery(event.target.value)
+              // Emptying the field puts the screen back where it started,
+              // rather than leaving results under a search that is no longer
+              // written anywhere.
+              if (event.target.value.trim() === '') setTerm('')
+            }}
+            autoComplete="off"
+            autoCapitalize="none"
+            spellCheck={false}
+            className="min-w-0 flex-1"
+          />
+          <Button type="submit" variant="primary" className="shrink-0" disabled={searching}>
+            {t(searching ? 'pages.food.add.searching' : 'pages.food.add.go')}
+          </Button>
+        </div>
+      </form>
+
+      {/* The other way of asking the same question, and the fastest one for a
+          packet. Under the field rather than beside it: three controls on one
+          row at 375px is a row nobody can hit (§5.2). */}
+      <Button variant="tinted" className="mt-3 w-full" onClick={() => setScanning(true)}>
+        <ScanBarcode aria-hidden />
         {t('pages.food.scan.open')}
       </Button>
 
-      <section className="mt-6">
-        {/* First among the results and narrowed by nothing (§10.11). GOAL.md §5
-            calls repeating a previous meal the feature that decides whether the
-            app gets used daily. */}
-        {recent.length > 0 ? (
+      <section className="mt-8">
+        {/* Before a search, the screen is the list of things logged lately.
+            GOAL.md §5 calls repeating a previous meal the feature that decides
+            whether the app gets used daily, and §10.11 puts it first.
+
+            After a search it goes: what was asked for is what the screen is
+            about, and every one of these rows is in the catalogue anyway, so
+            the results hold whichever of them matched. */}
+        {!asked && recent.length > 0 ? (
           <Collapsible
             label={t('pages.food.add.recent')}
             count={recent.length}
@@ -298,7 +338,7 @@ export default function AddFoodPage() {
           </Collapsible>
         ) : null}
 
-        {status === 'searching' ? (
+        {searching ? (
           <p className="font-mono text-2xs text-ink-faint">{t('pages.food.add.searching')}</p>
         ) : null}
 
@@ -308,7 +348,7 @@ export default function AddFoodPage() {
           </p>
         ) : null}
 
-        {status === 'ready' && results.length > 0 ? (
+        {results.length > 0 ? (
           <Collapsible
             label={t('pages.food.add.catalogue')}
             count={results.length}
@@ -328,15 +368,9 @@ export default function AddFoodPage() {
           </Collapsible>
         ) : null}
 
-        {/* USDA under the catalogue, because the catalogue answers instantly
-            and this is a round trip. A result here is not a row yet: picking
-            one writes it into the shared catalogue first (GOAL.md §4). */}
-        {remoteStatus === 'searching' && status === 'ready' ? (
-          <p className="mt-4 font-mono text-2xs text-ink-faint">
-            {t('pages.food.add.searchingUsda')}
-          </p>
-        ) : null}
-
+        {/* The outside services under the catalogue, which answers instantly
+            while they are round trips. A row here is not in the catalogue yet:
+            picking one writes it there first (GOAL.md §4). */}
         {usda.length > 0 ? (
           <div className="mt-4">
             <Collapsible
@@ -359,36 +393,67 @@ export default function AddFoodPage() {
           </div>
         ) : null}
 
-        {/* Silent when the proxy has no key: that is a deployment that has not
-            been finished, and there is nothing the reader could do about it. */}
-        {remoteStatus === 'error' || remoteStatus === 'rateLimited' ? (
-          <p className="mt-4 font-mono text-2xs text-ink-faint">
-            {t(`pages.food.add.usda${remoteStatus === 'rateLimited' ? 'Busy' : 'Failed'}`)}
+        {off.length > 0 ? (
+          <div className="mt-4">
+            <Collapsible
+              label={t('pages.food.add.off')}
+              count={off.length}
+              open={!folded.has('off')}
+              onOpenChange={(open) => fold('off', open)}
+            >
+              <FoodRows
+                foods={off.map((food) => ({
+                  key: food.barcode,
+                  name: food.name,
+                  brand: food.brand,
+                  kcal: food.nutrients.kcal,
+                  pick: () => void pickOff(food),
+                }))}
+                locale={locale}
+              />
+            </Collapsible>
+          </div>
+        ) : null}
+
+        {nothing ? (
+          <p className="font-mono text-2xs text-ink-faint">{t('pages.food.add.noResults')}</p>
+        ) : null}
+
+        {/* One line, and only when a service actually failed. A search that
+            found nothing has already said so above; a service that was not
+            reachable is a different fact and the reason a result might be
+            missing. Nothing is said about a proxy without its key: that is a
+            deployment nobody reading this screen can finish. */}
+        {asked && !searching && (usdaStatus === 'error' || usdaStatus === 'rateLimited') ? (
+          <p className="mt-3 font-mono text-2xs text-ink-faint">
+            {t(`pages.food.add.usda${usdaStatus === 'rateLimited' ? 'Busy' : 'Failed'}`)}
           </p>
         ) : null}
 
-        {/* The most important empty state in the app: it is the path by which
-            the shared catalogue grows (§10.8). The next step is offered in
-            place, not on another screen. */}
-        {(status === 'ready' &&
-          results.length === 0 &&
-          usda.length === 0 &&
-          remoteStatus !== 'searching') ||
-        status === 'idle' ? (
-          <div className="rounded-lg border border-line bg-surface px-4 py-6 text-center">
-            {status === 'ready' ? (
-              <p className="text-sm text-ink-muted">{t('pages.food.add.noResults')}</p>
-            ) : null}
-            <Button
-              variant="tinted"
-              className={status === 'ready' ? 'mt-4' : ''}
-              onClick={() => setCreating(true)}
-            >
-              {t('pages.food.add.addYourself')}
-            </Button>
-          </div>
+        {asked && !searching && (offStatus === 'error' || offStatus === 'rateLimited') ? (
+          <p className="mt-3 font-mono text-2xs text-ink-faint">
+            {t(offStatus === 'rateLimited' ? 'pages.food.add.offBusy' : 'pages.food.add.offFailed')}
+          </p>
         ) : null}
       </section>
+
+      {/* Only once a search has been run. Before that there is nothing it could
+          not fit, and a screen that opens by offering to give up is a screen
+          that has already given up. It stays for a search that found things
+          too: finding four pastas is not the same as finding yours. */}
+      {asked && !searching ? (
+        <section className="mt-8">
+          <SectionHead label={t('pages.food.add.elsewhere')} />
+          <Rows>
+            <Row onClick={() => setCreating(true)}>
+              <span className="min-w-0 flex-1">{t('pages.food.add.addYourself')}</span>
+              <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
+                →
+              </span>
+            </Row>
+          </Rows>
+        </section>
+      ) : null}
 
       <Attribution />
 

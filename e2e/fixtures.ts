@@ -495,6 +495,40 @@ export async function stubBackend(
     }),
   )
 
+  // The Open Food Facts search proxy, answered locally. Two hits: one the
+  // catalogue already holds, so the screen has the deduplication to do, and
+  // one it does not.
+  await page.route('**/functions/v1/off-search', (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        products: [
+          {
+            code: '5711953068881',
+            product_name: 'Skyr, natur',
+            brands: ['Arla'],
+            nutriments: {
+              'energy-kcal_100g': 63, fat_100g: 0.2, carbohydrates_100g: 4,
+              proteins_100g: 11, salt_100g: 0.1,
+            },
+          },
+          {
+            code: '4316268627979',
+            product_name: 'Skyr Vanille',
+            brands: ['Milbona', 'Lidl'],
+            serving_size: '150 g',
+            serving_quantity: 150,
+            nutriments: {
+              'energy-kcal_100g': 88, fat_100g: 0.2, carbohydrates_100g: 12.7,
+              proteins_100g: 8.5, sugars_100g: 11.9, salt_100g: 0.12,
+            },
+          },
+        ],
+      }),
+    }),
+  )
+
   // Nothing else should reach the network. Fail loudly rather than hanging.
   await page.route('**/auth/v1/**', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: '{}' }),

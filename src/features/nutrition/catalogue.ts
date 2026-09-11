@@ -14,14 +14,15 @@ export interface CatalogueFood {
   name: string
   brand: string | null
   source: string
-  /** Set on rows cached from a USDA search, which is how they are deduplicated. */
+  /** Both are identity from outside: a packet's barcode, a whole food's FDC id. */
+  barcode: string | null
   fdcId: number | null
   servingSizeG: number | null
   servingLabel: string | null
   nutrients: FoodNutrients
 }
 
-export const FOOD_SELECT = `id, name, brand, source, fdc_id, serving_size_g, serving_label,
+export const FOOD_SELECT = `id, name, brand, source, barcode, fdc_id, serving_size_g, serving_label,
   kcal_100g, fat_100g, carbs_100g, protein_100g,
   saturated_fat_100g, sugars_100g, fibre_100g, salt_100g`
 
@@ -30,6 +31,7 @@ export interface FoodRow {
   name: string
   brand: string | null
   source: string
+  barcode: string | null
   fdc_id: number | null
   serving_size_g: number | null
   serving_label: string | null
@@ -48,6 +50,7 @@ export const toCatalogueFood = (row: FoodRow): CatalogueFood => ({
   name: row.name,
   brand: row.brand,
   source: row.source,
+  barcode: row.barcode,
   fdcId: row.fdc_id,
   servingSizeG: row.serving_size_g,
   servingLabel: row.serving_label,

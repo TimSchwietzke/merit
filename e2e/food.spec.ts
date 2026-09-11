@@ -166,3 +166,40 @@ test('tapping a logged row opens it for editing, not for deleting', async ({ pag
   // The keyboard route to the same thing the swipe reveals.
   await expect(page.getByRole('button', { name: 'Aus dem Tag entfernen' })).toBeVisible()
 })
+
+test('one search asks every source, and typing asks none', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 900 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+
+  // Every call to the proxy is counted. Open Food Facts allows ten searches a
+  // minute for the whole project, so "a search happens because somebody asked
+  // for one" is a promise with a number behind it, and a regression into
+  // searching per keystroke would be invisible on screen.
+  let searches = 0
+  await page.route('**/functions/v1/off-search', async (route) => {
+    searches += 1
+    await route.fallback()
+  })
+
+  await page.goto('/food/add')
+  await waitForScreen(page)
+  await page.locator('#food-search').fill('skyr')
+  await page.waitForTimeout(700)
+  expect(searches, 'typing does not spend the quota').toBe(0)
+
+  await page.getByRole('button', { name: 'Suchen' }).click()
+
+  // One press, and all three answer into one list.
+  await expect(page.getByRole('button', { name: /katalog/ })).toBeVisible()
+  await expect(page.getByRole('button', { name: /open food facts/ })).toBeVisible()
+  await expect(page.getByText('Skyr Vanille')).toBeVisible()
+  expect(searches).toBe(1)
+
+  // The packet the catalogue already holds is not offered twice: the group
+  // carries one of the stub's two products.
+  await expect(page.getByRole('button', { name: /open food facts/ })).toContainText('1')
+
+  // Picking one writes it into the shared catalogue and goes to the quantity.
+  await page.getByRole('button', { name: /Skyr Vanille/ }).click()
+  await expect(page.getByLabel('menge')).toBeVisible()
+})

@@ -1,27 +1,30 @@
 import { useEffect, useState } from 'react'
 
-import { supabase } from '@/lib/supabase'
 import {
   FOOD_SELECT,
   toCatalogueFood,
   type CatalogueFood,
   type FoodRow,
 } from '@/features/nutrition/catalogue'
+import { searchOffProducts, type OffFood } from '@/lib/off'
+import { supabase } from '@/lib/supabase'
 import type { UsdaFood } from '@/lib/usda'
 
 /**
- * Search by name: the shared catalogue first, USDA behind it.
+ * One search term, asked of everywhere merit knows to ask.
  *
- * This is the lookup order in GOAL.md §4 with the steps that exist so far.
- * Merit's own catalogue answers instantly and holds everything anybody has
- * scanned or typed in; FoodData Central covers the whole foods nobody scans,
- * which is the gap that made the search useless for a banana. Open Food Facts
- * has a text search too, and it is not here: it covers packaged goods, which
- * arrive by barcode already.
+ * The lookup order in GOAL.md §4, run at once rather than one service at a
+ * time: merit's own catalogue answers instantly and holds everything anybody
+ * has scanned or typed in, USDA covers the whole foods nobody scans, and Open
+ * Food Facts covers the packet whose barcode will not read. Nobody asking for
+ * a food should have to know which of the three has it.
  *
- * Both searches hang off one debounce. The USDA call goes through an Edge
- * Function because the api.data.gov key must never reach the browser
- * (CLAUDE.md, hard rule 1); nothing about the user goes with it.
+ * **It runs on a term that was submitted, not on one being typed.** That is
+ * what makes asking all three affordable: Open Food Facts allows ten searches a
+ * minute for the whole project (see `supabase/functions/off-search`), which a
+ * search-per-keystroke would spend in seconds and a search-per-press never
+ * will. The answer to a term is also kept for the life of the page, so
+ * pressing the same search twice costs nothing.
  */
 export type SearchStatus = 'idle' | 'searching' | 'ready' | 'error'
 
@@ -31,109 +34,118 @@ export type SearchStatus = 'idle' | 'searching' | 'ready' | 'error'
  */
 export type RemoteStatus = SearchStatus | 'off' | 'rateLimited'
 
+export interface FoundFoods {
+  /** Merit's own catalogue. */
+  results: CatalogueFood[]
+  status: SearchStatus
+  /** FoodData Central, for whole foods. */
+  usda: UsdaFood[]
+  usdaStatus: RemoteStatus
+  /** Open Food Facts, for packaged ones. */
+  off: OffFood[]
+  offStatus: RemoteStatus
+}
+
 /** Below this a search matches most of the catalogue and helps nobody. */
 const MIN_QUERY = 2
+/** The outside services are asked for something more specific than that. */
+const MIN_REMOTE = 3
 const LIMIT = 25
-const DEBOUNCE = 250
 
-export function useFoodSearch(query: string) {
-  // The query the results belong to is held with them, so "too short" and
-  // "still searching" are read off the current query during render rather than
-  // written into state at the top of an effect.
+export function useFoodSearch(term: string): FoundFoods {
   const [answered, setAnswered] = useState<{
-    query: string
+    term: string
     results: CatalogueFood[]
     error: boolean
-  }>({ query: '', results: [], error: false })
+  }>({ term: '', results: [], error: false })
 
-  const [remote, setRemote] = useState<{
-    query: string
+  const [usda, setUsda] = useState<{
+    term: string
     foods: UsdaFood[]
     status: Exclude<RemoteStatus, 'idle' | 'searching'>
-  }>({ query: '', foods: [], status: 'ready' })
+  }>({ term: '', foods: [], status: 'ready' })
 
-  const trimmed = query.trim()
-  const tooShort = trimmed.length < MIN_QUERY
+  const [off, setOff] = useState<{
+    term: string
+    foods: OffFood[]
+    status: Exclude<RemoteStatus, 'idle' | 'searching'>
+  }>({ term: '', foods: [], status: 'ready' })
+
+  const tooShort = term.length < MIN_QUERY
 
   useEffect(() => {
     if (tooShort) return
     let active = true
 
-    // Typing is faster than a round trip on a phone connection, so the query
-    // waits for a pause rather than firing per keystroke.
-    const timer = setTimeout(() => {
-      void supabase
-        .from('foods')
-        .select(FOOD_SELECT)
-        .ilike('name', `%${trimmed}%`)
-        .order('name')
-        .limit(LIMIT)
-        .then(({ data, error }) => {
-          if (!active) return
-          if (error || !data) {
-            setAnswered({ query: trimmed, results: [], error: true })
-            return
-          }
-          setAnswered({
-            query: trimmed,
-            error: false,
-            results: (data as FoodRow[]).map(toCatalogueFood),
-          })
+    void supabase
+      .from('foods')
+      .select(FOOD_SELECT)
+      .ilike('name', `%${term}%`)
+      .order('name')
+      .limit(LIMIT)
+      .then(({ data, error }) => {
+        if (!active) return
+        setAnswered({
+          term,
+          error: Boolean(error) || !data,
+          results: error || !data ? [] : (data as FoodRow[]).map(toCatalogueFood),
         })
-    }, DEBOUNCE)
+      })
 
     return () => {
       active = false
-      clearTimeout(timer)
     }
-  }, [trimmed, tooShort])
+  }, [term, tooShort])
 
-  // A second effect rather than one: the catalogue is a few milliseconds away
-  // and USDA is a proxied round trip, and the near answer should not wait for
-  // the far one.
+  // The two outside services, each in its own effect: they answer at their own
+  // speeds and the catalogue, which is milliseconds away, waits for neither.
   useEffect(() => {
-    if (tooShort) return
+    if (term.length < MIN_REMOTE) return
     let active = true
 
-    const timer = setTimeout(() => {
-      void supabase.functions
-        .invoke<{ foods?: UsdaFood[]; error?: string }>('usda', { body: { query: trimmed } })
-        .then(async ({ data, error }) => {
-          if (!active) return
-          if (!error) {
-            setRemote({ query: trimmed, foods: data?.foods ?? [], status: 'ready' })
-            return
-          }
-          // The function answers a refusal with a status and a reason, and
-          // supabase-js reports both as one error with the body attached.
-          const reason =
-            error instanceof Error && 'context' in error
-              ? await (error.context as Response)
-                  .clone()
-                  .json()
-                  .then((body: { error?: string }) => body.error)
-                  .catch(() => undefined)
-              : undefined
-          if (!active) return
-          setRemote({
-            query: trimmed,
-            foods: [],
-            status:
-              reason === 'not_configured' ? 'off' : reason === 'rate_limited' ? 'rateLimited' : 'error',
-          })
+    void supabase.functions
+      .invoke<{ foods?: UsdaFood[]; error?: string }>('usda', { body: { query: term } })
+      .then(async ({ data, error }) => {
+        if (!error) {
+          if (active) setUsda({ term, foods: data?.foods ?? [], status: 'ready' })
+          return
+        }
+        const reason = await refusal(error)
+        if (!active) return
+        setUsda({
+          term,
+          foods: [],
+          status:
+            reason === 'not_configured' ? 'off' : reason === 'rate_limited' ? 'rateLimited' : 'error',
         })
-    }, DEBOUNCE)
+      })
 
     return () => {
       active = false
-      clearTimeout(timer)
     }
-  }, [trimmed, tooShort])
+  }, [term])
 
-  const answersThis = answered.query === trimmed
+  useEffect(() => {
+    if (term.length < MIN_REMOTE) return
+    let active = true
+
+    void searchOffProducts(term).then((found) => {
+      if (!active) return
+      setOff({
+        term,
+        foods: found.kind === 'found' ? found.foods : [],
+        status: found.kind === 'found' ? 'ready' : found.kind === 'busy' ? 'rateLimited' : 'error',
+      })
+    })
+
+    return () => {
+      active = false
+    }
+  }, [term])
+
   const status: SearchStatus = tooShort
     ? 'idle'
-    : !answersThis
+    : answered.term !== term
       ? 'searching'
       : answered.error
         ? 'error'
@@ -141,25 +153,49 @@ export function useFoodSearch(query: string) {
 
   const results = status === 'ready' ? answered.results : []
 
-  const remoteAnswersThis = remote.query === trimmed
-  const remoteStatus: RemoteStatus = tooShort
-    ? 'idle'
-    : !remoteAnswersThis
-      ? 'searching'
-      : remote.status
+  const remote = (
+    state: { term: string; status: Exclude<RemoteStatus, 'idle' | 'searching'> },
+  ): RemoteStatus =>
+    term.length < MIN_REMOTE ? 'idle' : state.term !== term ? 'searching' : state.status
 
-  // What the catalogue already holds is not offered a second time from USDA:
+  const usdaStatus = remote(usda)
+  const offStatus = remote(off)
+
+  // What the catalogue already holds is not offered a second time from outside:
   // the cached row is the one to log, because it carries the id the day's
-  // entries point at. Matched on the FoodData Central id, and on the name for
-  // rows cached before that id was kept.
-  const known = new Set(results.map((food) => food.fdcId))
+  // entries point at. Matched on the id the outside service knows it by, and on
+  // the name for rows cached before merit kept that id.
+  const knownFdc = new Set(results.map((food) => food.fdcId))
+  const knownBarcodes = new Set(results.map((food) => food.barcode))
   const knownNames = new Set(results.map((food) => food.name.toLowerCase()))
-  const usda =
-    remoteStatus === 'ready'
-      ? remote.foods.filter(
-          (food) => !known.has(food.fdcId) && !knownNames.has(food.name.toLowerCase()),
-        )
-      : []
 
-  return { results, status, usda, remoteStatus }
+  return {
+    results,
+    status,
+    usda:
+      usdaStatus === 'ready'
+        ? usda.foods.filter(
+            (food) => !knownFdc.has(food.fdcId) && !knownNames.has(food.name.toLowerCase()),
+          )
+        : [],
+    usdaStatus,
+    off: offStatus === 'ready' ? off.foods.filter((food) => !knownBarcodes.has(food.barcode)) : [],
+    offStatus,
+  }
+}
+
+/**
+ * The reason a function refused, from the body it refused with.
+ *
+ * supabase-js reports the status and the body as one error with the response
+ * hanging off it, so the sentence the screen shows is in there rather than in
+ * the message.
+ */
+async function refusal(error: unknown): Promise<string | undefined> {
+  if (!(error instanceof Error) || !('context' in error)) return undefined
+  return await (error.context as Response)
+    .clone()
+    .json()
+    .then((body: { error?: string }) => body.error)
+    .catch(() => undefined)
 }
