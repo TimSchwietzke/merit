@@ -43,6 +43,9 @@ Everything it collects already exists as a field somewhere else; onboarding is
 a path through them, not a new data model. The point is that a new user should
 never meet an empty dashboard with no idea what to do first.
 
+Everything still open, MVP and after, is listed with its reasoning in
+`docs/TODO.md`.
+
 ### 2.2 Next iteration (after MVP, in this order)
 
 1. Own recipes / composite meals (define once, log as a single item)
