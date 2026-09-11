@@ -12,7 +12,7 @@ import { PRIVACY_VERSION } from '../src/features/legal/version'
  * locally.
  *
  * This is a *visual* harness, not an end-to-end test. The real e2e specs
- * CLAUDE.md asks for — log in, log a food, log a set — assert behaviour against
+ * CLAUDE.md asks for (log in, log a food, log a set) assert behaviour against
  * a local Supabase and belong with the features they cover.
  */
 
@@ -140,7 +140,7 @@ export async function stubBackend(
 
   // A day's foods, joined as PostgREST returns them, plus a catalogue for the
   // search. One portion is missing its fibre and salt so the `partial` marker
-  // — the whole point of the missing-is-not-zero rule — is in every capture.
+  //, the whole point of the missing-is-not-zero rule, is in every capture.
   const FOODS = [
     {
       id: 'f1', name: 'Skyr, natur', brand: 'Arla', source: 'off', barcode: '5711953068881',
@@ -268,7 +268,7 @@ export async function stubBackend(
   )
 
   // Today's sets and a session a few days back, so the comparison line under
-  // each exercise — the reason §10.10 gives for opening this tab — has
+  // each exercise, the reason §10.10 gives for opening this tab, has
   // something to compare against.
   //
   // Ending a session is a real write, so the stub remembers it: the sets query
@@ -326,7 +326,7 @@ export async function stubBackend(
   })
 
   // Three routines: two with exercises on opposite halves of the week, and one
-  // with none at all — which is the case the list marks `unfinished` and the
+  // with none at all, which is the case the list marks `unfinished` and the
   // week is not allowed to plan.
   await page.route('**/rest/v1/routines*', (route) => {
     if (route.request().method() !== 'GET') {
@@ -455,7 +455,7 @@ export async function stubBackend(
         consent_at: '2026-09-01T09:00:00.000Z',
         // Whatever the current notice is. While there is none the gate lets a
         // development build through anyway, and once there is one this matches
-        // it — so the screen tests never sit behind the consent question.
+        // it, so the screen tests never sit behind the consent question.
         consent_version: PRIVACY_VERSION,
         // Past the first-run walkthrough as well: every screen test is about
         // an account that is set up. The walkthrough is captured on its own
@@ -540,7 +540,7 @@ export async function stubBackend(
  *
  * `main` alone is not enough: it is visible from the first frame, and the lazy
  * routes (`React.lazy` behind a `Suspense` with no fallback) leave it empty
- * until their chunk arrives. Waiting on visibility captured a blank page — and
+ * until their chunk arrives. Waiting on visibility captured a blank page, and
  * a probe that measures nothing passes.
  */
 export async function waitForScreen(page: Page) {

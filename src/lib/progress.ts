@@ -70,7 +70,7 @@ export function weeklyVolume(
 
 /**
  * How the latest week compares with the average of the ones before it, as a
- * fraction — `0.12` is twelve percent above.
+ * fraction, `0.12` is twelve percent above.
  *
  * Against the mean of the earlier weeks rather than against last week alone: a
  * single light week would otherwise make the next one look like a breakthrough.
@@ -88,7 +88,7 @@ export function trend(points: readonly WeekPoint[]): number | null {
 
 /**
  * Each of the last `weeks` weeks with what the plan asked for and what happened,
- * oldest first — what `weeklyStreak` and `weekCells` read.
+ * oldest first, what `weeklyStreak` and `weekCells` read.
  *
  * The plan is the weekly pattern, so what it asks for is the same every week:
  * one session per routine per weekday it names. Per-date exceptions move a

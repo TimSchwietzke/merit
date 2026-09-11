@@ -2,7 +2,7 @@ import { expect, stubBackend, test, waitForScreen } from './fixtures'
 
 /**
  * Weight screen behaviour, against the stubbed backend rather than a database.
- * The database paths CLAUDE.md asks for — log in, log a food, log a set — are a
+ * The database paths CLAUDE.md asks for (log in, log a food, log a set) are a
  * separate job needing a local Supabase; this covers what the screen does once
  * the rows are in hand.
  */

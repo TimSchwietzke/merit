@@ -5,8 +5,8 @@ import { isoWeekday } from '@/lib/training'
  * What is on which day.
  *
  * The weekly pattern is the plan and never changes when a week goes sideways.
- * Everything that can happen to a single day — moving a session, swapping two,
- * replacing one, adding a second — is expressed as an exception to the pattern
+ * Everything that can happen to a single day, moving a session, swapping two,
+ * replacing one, adding a second, is expressed as an exception to the pattern
  * for that date, so next Monday is still Monday's session however this Monday
  * went.
  */
@@ -52,7 +52,7 @@ export function scheduledOn(
 /**
  * Take a routine off a day.
  *
- * An exception is undone by deleting it rather than by adding its opposite —
+ * An exception is undone by deleting it rather than by adding its opposite:
  * otherwise a day swapped back and forth accumulates a row per change and the
  * schedule becomes a ledger of everything anyone ever did to it.
  */
@@ -95,7 +95,7 @@ export function swap(
 
 /**
  * Run one routine on a day instead of another. The displaced one loses this
- * date only — the pattern is untouched, so it is back next week.
+ * date only. The pattern is untouched, so it is back next week.
  */
 export function replaceOn(
   overrides: readonly Override[],
@@ -114,7 +114,7 @@ export function weekOf(date: string): string[] {
 
 /**
  * The next `weeks` worth of days a routine falls on, pattern and exceptions
- * together — what the "pick the instances" screen lists.
+ * together, what the "pick the instances" screen lists.
  */
 export function upcomingInstances(
   routines: readonly PlannedRoutine[],

@@ -9,7 +9,7 @@ import type { WeightEntry } from '@/lib/weight'
  *
  * No cache library and no store (GOAL.md §9). A private group logging once a
  * day produces a few hundred rows a year, so the whole table is read once and
- * the ranges are sliced from it in memory — which is also what makes the `all`
+ * the ranges are sliced from it in memory, which is also what makes the `all`
  * range and the seven-day average free rather than another round trip.
  *
  * Writes are optimistic and roll back. The screen is used standing on a scale,
@@ -36,7 +36,7 @@ export function useWeightLogs(): WeightLogs {
 
   // The list is mirrored in a ref so a write can roll back to what was actually
   // on screen when it started. Closing over `entries` instead would capture a
-  // stale list — the undo in a five-second toast is issued long after the
+  // stale list. The undo in a five-second toast is issued long after the
   // delete that created it, and would otherwise restore a list from before it.
   const entriesRef = useRef(entries)
   const apply = useCallback((next: (current: WeightEntry[]) => WeightEntry[]) => {

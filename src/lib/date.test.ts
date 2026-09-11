@@ -45,7 +45,7 @@ describe('addDays', () => {
 
   it('crosses the spring DST change without losing a day', () => {
     // 2026-03-29 is the European change; the day is 23 hours long, so adding
-    // 86400000ms to midnight lands at 01:00 on the 30th — still the right day
+    // 86400000ms to midnight lands at 01:00 on the 30th, still the right day
     // here, but 25-hour days in autumn land at 23:00 on the day before.
     expect(addDays('2026-03-28', 2)).toBe('2026-03-30')
     expect(addDays('2026-10-24', 2)).toBe('2026-10-26')

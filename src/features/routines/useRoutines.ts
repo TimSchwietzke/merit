@@ -35,7 +35,7 @@ export interface Routine {
  * The routines the week is built from.
  *
  * A routine with no exercises is a name and nothing else, so it is never
- * planned into a week — otherwise a day announces a session that turns out to
+ * planned into a week. Otherwise a day announces a session that turns out to
  * be empty when you open it. It stays in the list, marked unfinished, until it
  * has something in it.
  */
@@ -190,8 +190,8 @@ export function useRoutines(): RoutinesState {
    * Put a deleted routine back, with its days and its exercises.
    *
    * A new row rather than the old one: the delete cascaded, so there is nothing
-   * left to revive. Nothing outside the routine refers to those ids — a started
-   * session copies the plan onto the workout — so a restored routine is the
+   * left to revive. Nothing outside the routine refers to those ids, a started
+   * session copies the plan onto the workout, so a restored routine is the
    * same routine to everything that can see it.
    */
   const restore = useCallback(

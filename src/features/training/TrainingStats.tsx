@@ -13,7 +13,7 @@ import type { SessionSets } from '@/lib/training'
  * What the last eight weeks of training look like, as two readings side by
  * side (GOAL.md §2.1).
  *
- * The training screen had no answer to "is anything moving" — the reason
+ * The training screen had no answer to "is anything moving", the reason
  * anybody opens this tab on a rest day. Two cards answer it: how much was
  * lifted, and how often. A number at full size with its shape underneath, which
  * is the arrangement an instrument uses when the value matters more than the
@@ -52,7 +52,10 @@ export function TrainingStats({
         id="stat-volume"
         label={t('pages.training.stats.volume')}
         value={formatNumber(latest.volumeKg / 1000, locale, 1)}
-        unit="t"
+        // Tonnes a week, not tonnes. The figure beside it is sessions a week,
+        // and two numbers under one `/ woche` was one of them borrowing a unit
+        // it had not been given.
+        unit={`t ${t('pages.training.stats.perWeek')}`}
         // A change against the weeks before it, said as a number rather than
         // coloured green or red: §17 forbids a traffic-light scale on a figure,
         // and a light week is not a failure.

@@ -7,7 +7,7 @@ import type { Pending } from '@/lib/offline/queue'
  *
  * GOAL.md §5: gym basements have no signal, and a set logged there has to land
  * somewhere durable before it lands on a server. IndexedDB through Dexie, per
- * CLAUDE.md hard rule 4 — never `localStorage`, which is synchronous, small,
+ * CLAUDE.md hard rule 4, never `localStorage`, which is synchronous, small,
  * and the wrong place for application data.
  *
  * Two tables and a note of whose they are:

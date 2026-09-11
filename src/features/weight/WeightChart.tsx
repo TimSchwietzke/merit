@@ -15,7 +15,7 @@ import { AVERAGE_WINDOW_DAYS, weightDomain, type WeightPoint } from '@/lib/weigh
 
 /**
  * Weight over time: the raw daily values and the seven-day rolling average as
- * two series (GOAL.md §5). Recharts, rendering SVG — a diagram is DOM here, not
+ * two series (GOAL.md §5). Recharts, rendering SVG, a diagram is DOM here, not
  * canvas (DESIGN.md §11).
  *
  * The two series differ in stroke as well as in colour: raw is a 1px line with
@@ -31,7 +31,7 @@ const RAW = 'var(--merit-chart-4)'
 // The series that matters wears the domain's colour, not a palette entry: this
 // chart is the whole point of the weight screen, and the screen is steel. The
 // raw daily line stays neutral so the two are still told apart by more than
-// hue — 1px with half-opacity dots against 2px solid (§11).
+// hue, 1px with half-opacity dots against 2px solid (§11).
 const AVERAGE = 'var(--merit-accent)'
 const AXIS = 'var(--merit-line-strong)'
 const LABEL = 'var(--merit-ink-faint)'
@@ -78,7 +78,7 @@ export function WeightChart({ points, locale }: { points: WeightPoint[]; locale:
               minTickGap={44}
               interval="preserveStartEnd"
             />
-            {/* The unit is named once in the section head — `trend · kg` — and
+            {/* The unit is named once in the section head, `trend · kg`: and
                 not repeated on five ticks: 64px of axis is a fifth of a 375px
                 screen, and §11 asks for a labelled axis, not a loud one. */}
             <YAxis
@@ -149,7 +149,7 @@ export function WeightChart({ points, locale }: { points: WeightPoint[]; locale:
 
           `sr-only` goes on a wrapping div, not on the table: it hides by way of
           `width: 1px` plus `overflow: hidden`, and a table treats a width as a
-          minimum — it lays out at its content width regardless, which made this
+          minimum, it lays out at its content width regardless, which made this
           screen 544px wide on a 375px phone and took the fixed tab bar with it
           (§8: no horizontal scrolling, ever). A block box does clip. */}
       <div className="sr-only">

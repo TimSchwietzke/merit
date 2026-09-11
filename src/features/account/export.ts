@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
  *
  * Article 20 asks for a *structured, commonly used, machine-readable* format,
  * which is the whole specification: JSON, one key per table, rows as they are
- * stored rather than as a screen renders them. It is not a report — it is the
+ * stored rather than as a screen renders them. It is not a report, it is the
  * data, so that somebody can take it somewhere else or read it themselves.
  *
  * No server code and no new endpoint. Row Level Security already scopes every
@@ -15,7 +15,7 @@ import { supabase } from '@/lib/supabase'
  *
  * The shared catalogues are deliberately absent. A food or an exercise somebody
  * added belongs to the group (GOAL.md §3), and those rows are not personal data
- * about the person who typed them once `created_by` is released — which is what
+ * about the person who typed them once `created_by` is released, which is what
  * deletion does. Including everybody's catalogue in one person's export would
  * hand them other people's contributions.
  */
@@ -72,7 +72,7 @@ export async function buildExport(): Promise<ExportFile | null> {
  *
  * A blob and an object URL rather than a data URI: an export of a year's
  * logging is megabytes, and a data URI that long is refused by some browsers
- * and truncated by others. The URL is revoked on the next tick — the download
+ * and truncated by others. The URL is revoked on the next tick, the download
  * has started by then, and leaving it alive keeps the whole file in memory for
  * as long as the tab is open.
  */

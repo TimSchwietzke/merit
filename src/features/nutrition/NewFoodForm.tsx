@@ -10,7 +10,7 @@ import { parseDecimalInput } from '@/lib/format'
 import { KCAL_LIMITS, LABEL_ORDER, NUTRIENT_LIMITS, type Nutrient } from '@/lib/nutrition'
 
 /**
- * Manual entry — step four of the lookup order, and the one that makes the
+ * Manual entry. Step four of the lookup order, and the one that makes the
  * catalogue grow (GOAL.md §4). It is reached from the search's empty state,
  * which §10.8 calls the most important empty state in the app.
  *

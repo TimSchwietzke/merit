@@ -55,7 +55,7 @@ export function rollingAverage(
 
 /**
  * One point per calendar day between `from` and `to`, so the x-axis is time and
- * not a list of the days that happen to have data — a fortnight away shows as a
+ * not a list of the days that happen to have data, a fortnight away shows as a
  * fortnight-wide gap rather than as one short step.
  *
  * The average is only computed on days that carry a weigh-in. Continuing it
@@ -88,7 +88,7 @@ const TICK_STEPS = [0.25, 0.5, 1, 2, 5, 10, 25]
 const TICK_INTERVALS = 4
 
 /**
- * The y-axis bounds. Never zero-based — a 2 kg movement inside an 80 kg number
+ * The y-axis bounds. Never zero-based, a 2 kg movement inside an 80 kg number
  * is the entire signal, and a zero baseline flattens it to nothing (§11).
  *
  * Padded by 15% of the visible spread with a 0.5 kg floor so a single point, or

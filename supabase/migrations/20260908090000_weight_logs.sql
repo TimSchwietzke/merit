@@ -1,9 +1,9 @@
 -- ─────────────────────────────────────────────────────────────────────
--- weight_logs — one weigh-in per user per day (GOAL.md §7).
+-- weight_logs, one weigh-in per user per day (GOAL.md §7).
 --
 -- The primary key is (user_id, date) rather than a surrogate id. A day has one
 -- weight: stepping on the scale twice does not produce two facts, it corrects
--- one. That makes logging an upsert, which is what the form needs — re-logging
+-- one. That makes logging an upsert, which is what the form needs, re-logging
 -- today replaces today rather than growing a second row the chart would have to
 -- pick between.
 --

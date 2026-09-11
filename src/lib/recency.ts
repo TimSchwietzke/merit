@@ -54,7 +54,7 @@ export function daysSinceWorked(
  *
  * Linear over a week rather than stepped: the question is "how long ago", which
  * is continuous, and three buckets would make day three and day five look
- * identical when they are not. Undefined — never trained — is 0, the same as a
+ * identical when they are not. Undefined, never trained, is 0, the same as a
  * fortnight ago, because past a week the distinction stops being useful and
  * starts being a reproach.
  */
@@ -67,7 +67,7 @@ export function glow(days: number | undefined): number {
  * The region that has waited longest, for the line under the map.
  *
  * A region absent from the map has had nothing at all in the window, which is
- * the *most* neglected state rather than an unknown — somebody who has never
+ * the *most* neglected state rather than an unknown, somebody who has never
  * trained legs is exactly who this line is for. It sorts above every region
  * that has a number, and carries `days: null` to say so.
  */

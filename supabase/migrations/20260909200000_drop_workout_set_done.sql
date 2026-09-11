@@ -2,7 +2,7 @@
 -- `done` goes.
 --
 -- It existed so a routine could put sets on a day before they were performed,
--- which meant a control on every row to say "this one happened" — a tick that
+-- which meant a control on every row to say "this one happened", a tick that
 -- earned its place only because the column existed. Once every row is directly
 -- editable, entering the set *is* doing the set, and a set that did not happen
 -- is one you swipe away.

@@ -8,7 +8,7 @@ import type { Goal, GoalMode } from '@/lib/goals'
  * Just the target history, for screens that measure a day against it.
  *
  * Separate from `useGoals`, which also loads the body figures and the last
- * weigh-in the targets screen needs — the day view has no use for either and
+ * weigh-in the targets screen needs, the day view has no use for either and
  * should not pay for two more round trips to render a bar.
  */
 export function useGoalHistory(): { goals: Goal[]; status: 'loading' | 'ready' | 'error' } {

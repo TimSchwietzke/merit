@@ -82,7 +82,7 @@ test('a barcode held in front of the camera resolves without anyone typing', asy
   test.slow()
   // The one question worth asking of a scanner. Chromium's own synthetic camera
   // is a rolling colour pattern, so it is replaced with a file containing an
-  // actual EAN-13 — which needs its own browser, because the flag is a launch
+  // actual EAN-13, which needs its own browser, because the flag is a launch
   // option and every other test wants the ordinary fake camera.
   const video = testInfo.outputPath('ean13.y4m')
   writeBarcodeVideo(video, '3017620422003')
@@ -134,7 +134,7 @@ test('a logged row opens on tap and only gives up its delete to a swipe', async 
 
   // Mid-drag, still held: the row is where the finger is. A transition left on
   // during the gesture, or a re-render per pointermove, shows up here as the
-  // row trailing the pointer — which is what "unsmooth" actually is.
+  // row trailing the pointer, which is what "unsmooth" actually is.
   const held = await row.evaluate(
     (el) => new DOMMatrix(getComputedStyle(el.parentElement!).transform).m41,
   )
@@ -146,7 +146,7 @@ test('a logged row opens on tap and only gives up its delete to a swipe', async 
   const remove = page.getByRole('button', { name: 'Entfernen' })
   await expect(remove).toBeVisible()
 
-  // It stays open — the swipe is a latch, not a flick that springs back.
+  // It stays open. The swipe is a latch, not a flick that springs back.
   await page.waitForTimeout(400)
   await expect(remove).toBeVisible()
 

@@ -70,7 +70,7 @@ describe('parseDecimalInput', () => {
 
   it('accepts whole numbers only where no decimals are allowed', () => {
     // `decimals: 0` built the quantifier `{1,0}`, which throws rather than
-    // failing to match — so the first screen to want whole numbers crashed on
+    // failing to match, so the first screen to want whole numbers crashed on
     // render instead of refusing the input.
     const whole = { min: 500, max: 10000, decimals: 0 }
     expect(parseDecimalInput('2100', whole)).toBe(2100)
@@ -102,7 +102,7 @@ describe('formatForInput', () => {
     expect(formatForInput(82, 'en', 2)).toBe('82')
   })
 
-  it('never groups thousands — the field has to parse back', () => {
+  it('never groups thousands, the field has to parse back', () => {
     expect(formatForInput(1082.5, 'en', 2)).toBe('1082.5')
   })
 })

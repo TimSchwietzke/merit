@@ -19,7 +19,7 @@ const isThemePref = (value: string): value is ThemePref =>
  *
  * The two are stored differently on purpose. The theme also lives in
  * `localStorage` because it has to be readable before first paint (§2.5), so
- * the profile only seeds a device that has never chosen one — see
+ * the profile only seeds a device that has never chosen one, see
  * `hasStoredPref`. The locale has no pre-paint constraint, so the profile is
  * simply the answer once it arrives, and browser detection is the fallback
  * until then.
@@ -51,7 +51,7 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
         if (isLocale(data.locale) && data.locale !== i18n.language) {
           void i18n.changeLanguage(data.locale)
         }
-        // Seeded onto a device that has never chosen — but only a real
+        // Seeded onto a device that has never chosen, but only a real
         // choice, never the default.
         //
         // The local copy exists so the pre-paint bootstrap can read it and not
@@ -75,8 +75,8 @@ export function PreferencesProvider({ children }: { children: ReactNode }) {
   // broken on a phone connection.
   //
   // Each update ends in `.select().single()` rather than trusting `error` to be
-  // null. An update that RLS refuses is not an error to PostgREST — it matches
-  // zero rows and returns success — so without asking for the row back, a
+  // null. An update that RLS refuses is not an error to PostgREST, it matches
+  // zero rows and returns success, so without asking for the row back, a
   // silently denied write would look exactly like a saved one.
   const setLocale = useCallback(
     (next: Locale) => {

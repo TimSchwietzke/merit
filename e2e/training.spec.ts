@@ -86,7 +86,7 @@ test('groups fold and unfold, and a folded group still says how many it holds', 
   await expect(chest).toHaveAttribute('aria-expanded', 'false')
   await expect(panel.getByRole('button', { name: /Bankdrücken/ })).toBeHidden()
 
-  // The count survives the fold — it is what says whether to open it again.
+  // The count survives the fold, it is what says whether to open it again.
   await expect(chest).toContainText('1')
 })
 
@@ -97,7 +97,7 @@ test('a filter narrows the catalogue and leaves recently-used alone', async ({ p
   await waitForScreen(page)
 
   // The count rides on the button, so the state is readable without opening it
-  // — the condition §10.11 attaches to putting facets behind a control.
+  //. The condition §10.11 attaches to putting facets behind a control.
   const filters = page.getByRole('button', { name: 'Filter' })
   await expect(filters).toBeVisible()
 
@@ -112,7 +112,7 @@ test('a filter narrows the catalogue and leaves recently-used alone', async ({ p
   await expect(page.getByRole('button', { name: /^rücken/ })).toBeVisible()
   await expect(page.getByRole('button', { name: /^beine/ })).toHaveCount(0)
 
-  // Recently used ignores the facets entirely (§10.11) — the bench press is a
+  // Recently used ignores the facets entirely (§10.11), the bench press is a
   // barbell lift and is still there.
   const recent = page.getByRole('button', { name: /zuletzt benutzt/ })
   await expect(recent).toBeVisible()
@@ -127,7 +127,7 @@ test('the week strip changes the day below it without leaving the screen', async
   await waitForScreen(page)
 
   // The tiles are Monday to Sunday whatever day it is, and the fixture plans
-  // one routine on Mon/Thu and the other on Tue/Fri — so the week reads the
+  // one routine on Mon/Thu and the other on Tue/Fri, so the week reads the
   // same however long this test outlives the day it was written on.
   const days = page.getByRole('radio')
   // The day's own link, not the routine of the same name further down the
@@ -245,7 +245,7 @@ test('a write from one screen refetches for every reader, with no reload', async
   // Two components read today's sets: the session-bar provider above the
   // router, and whichever screen is mounted. They used to hold separate
   // refetch counters, so a write made through one was invisible to the other
-  // until a reload remounted it — the bar stayed hidden after starting a
+  // until a reload remounted it, the bar stayed hidden after starting a
   // routine.
   let reads = 0
   await page.route('**/rest/v1/workout_sets*', (route) => {

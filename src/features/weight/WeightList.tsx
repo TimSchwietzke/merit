@@ -14,7 +14,7 @@ import type { WeightEntry } from '@/lib/weight'
  * destructive control 8px from a value in a 52px row gets hit by accident. The
  * form below is where a day is corrected or removed.
  *
- * Each row carries its change against the weigh-in before it — a number with a
+ * Each row carries its change against the weigh-in before it, a number with a
  * comparison rather than a bare figure (§14). It is the previous *entry*, not
  * the previous day, so a gap does not produce a delta of nothing.
  */
@@ -27,7 +27,7 @@ export function WeightList({
   /** Ascending by date, as the hook holds them. */
   entries: WeightEntry[]
   selected: string
-  /** Why the list is empty — nothing logged at all reads differently from
+  /** Why the list is empty, nothing logged at all reads differently from
    *  nothing logged in the range on screen (§14). */
   empty: string
   onSelect: (date: string) => void

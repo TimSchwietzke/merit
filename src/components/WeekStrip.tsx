@@ -14,7 +14,7 @@ import { isoWeekday } from '@/lib/training'
  * gets the room, and moving between days changes that block in place rather
  * than pushing a new screen.
  *
- * **Choosing a day changes the block below it and nothing else** — no route, no
+ * **Choosing a day changes the block below it and nothing else**: no route, no
  * push, no back button. That is the whole reason it exists rather than a list
  * of seven rows, which cost a screen of height to say the same thing and made
  * the day you cared about scroll.
@@ -52,7 +52,7 @@ export function WeekStrip({
   onShift: (by: -1 | 1) => void
   /** Which way the last week change went, so the row can arrive from there. */
   direction: -1 | 0 | 1
-  /** Names the group for a screen reader — `this week`. */
+  /** Names the group for a screen reader, `this week`. */
   label: string
 }) {
   const { t } = useTranslation()
@@ -94,7 +94,7 @@ export function WeekStrip({
           and arrow keys should walk the week (§10.7).
 
           Keyed on the week so a change of week remounts the row and it arrives
-          from the side it came from — the chevron says which way, and the row
+          from the side it came from, the chevron says which way, and the row
           agrees with it. */}
       <div
         key={week[0]}

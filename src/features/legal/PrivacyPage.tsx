@@ -6,7 +6,7 @@ import { PRIVACY } from '@/features/legal/documents'
 /**
  * The privacy notice, Art. 13 GDPR.
  *
- * The text comes from `documents.ts` and is not written in this repository —
+ * The text comes from `documents.ts` and is not written in this repository:
  * see the note there. This file is the route and the rendering, which are the
  * parts that belong in code.
  */

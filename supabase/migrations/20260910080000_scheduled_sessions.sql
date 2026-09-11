@@ -48,7 +48,7 @@ create index scheduled_sessions_user_date_idx
   on public.scheduled_sessions (user_id, scheduled_date);
 
 -- ── several sessions in a day ────────────────────────────────────────
--- "You have already trained today — a second session?" is a question the old
+-- "You have already trained today, a second session?" is a question the old
 -- constraint answered with an error.
 alter table public.workouts drop constraint workouts_user_id_date_key;
 

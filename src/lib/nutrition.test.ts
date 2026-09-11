@@ -72,7 +72,7 @@ describe('sumPortions', () => {
 
   it('leaves a missing nutrient out of its sum instead of adding zero', () => {
     // Two 100 g portions, one with no fibre value. The fibre total is the one
-    // portion that had it, and it says so — not 3 g reported as though both
+    // portion that had it, and it says so, not 3 g reported as though both
     // foods had been measured.
     const totals = sumPortions([portion(100), portion(100, { fibre: null })])
     expect(totals.fibre).toEqual({ value: 3, known: 1, total: 2 })

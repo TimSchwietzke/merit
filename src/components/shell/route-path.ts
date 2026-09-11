@@ -1,8 +1,8 @@
 /**
  * What the header path bar says on each route (DESIGN.md §7).
  *
- * The vocabulary is deliberately the navigation's own — `nav.*`, not a second
- * set of page titles — so the sidebar, the tab bar, the path bar and the
+ * The vocabulary is deliberately the navigation's own, `nav.*`, not a second
+ * set of page titles, so the sidebar, the tab bar, the path bar and the
  * screen's `h1` can never drift into two casings of the same word.
  *
  * Segments before the last are links; the last is where you are. The three
@@ -62,7 +62,7 @@ const PATHS: Record<string, PathSegment[]> = {
 const NOT_FOUND: PathSegment[] = [ROOT, { labelKey: 'common.notFound' }]
 
 /**
- * Paths with an id in them — a routine, a logged portion — are not keys in the
+ * Paths with an id in them (a routine, a logged portion) are not keys in the
  * table above, so the longest listed path they sit under answers for them. A
  * routine's editor is `merit / training / routines`, which is where it is,
  * rather than "not found", which is what an exact-match lookup called it.
@@ -106,7 +106,7 @@ export function backTo(pathname: string): PathSegment | null {
  *
  * The screen is the last segment that names a place: the root is the app, and a
  * trailing `today` qualifies a screen rather than being one. Taking the second
- * segment instead would name a nested screen after the section it hangs under —
+ * segment instead would name a nested screen after the section it hangs under:
  * `/weight` would announce itself as `more`.
  */
 export function screenLabelKey(pathname: string): PathSegment['labelKey'] {

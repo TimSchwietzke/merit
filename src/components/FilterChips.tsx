@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next'
  * A facet of a list, as pressable chips (DESIGN.md §10.11).
  *
  * §10.6's chip made interactive: `surface-2` at rest, `accent-soft` when on.
- * Several can be on at once — that is the difference from a segmented control
+ * Several can be on at once, that is the difference from a segmented control
  * and the reason §10.7's "above four options it becomes a select" does not
  * apply. A select would hide the options until tapped, allow one, and hide the
  * current state behind a closed control.

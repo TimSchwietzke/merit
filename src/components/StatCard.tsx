@@ -9,7 +9,7 @@ import { Panel } from '@/components/Panel'
  *
  * The arrangement an instrument uses when the value matters more than the curve
  * but the curve is why you believe the value. The chart has no axes, no
- * gridlines and no tooltip — at 165px wide those are illegible ornament, and
+ * gridlines and no tooltip. At 165px wide those are illegible ornament, and
  * the full series with its axes belongs on a screen of its own.
  *
  * The colour is `accent`, so the card is oxide on training, moss on nutrition

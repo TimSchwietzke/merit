@@ -83,7 +83,7 @@ test('no horizontal scroll at any width, in German', async ({ page }) => {
   await stubBackend(page, { theme: 'light', locale: 'de' })
   // Each screen is loaded once and then resized, rather than reloaded at every
   // width. Overflow is a layout property, so a resize answers the question just
-  // as well — and it leaves the time budget to actually wait for the screen to
+  // as well, and it leaves the time budget to actually wait for the screen to
   // finish rendering. Measuring straight after `goto` measures the skeleton,
   // which is how a 544px-wide table got past this probe.
   for (const path of ['/', '/food', '/food/add', '/training', '/training/add', '/training/routines', '/cardio', '/account', '/account/profile', '/account/appearance', '/account/data', '/weight', '/goals']) {
@@ -114,7 +114,7 @@ test('page gutters never exceed 24px, and the column caps at 860px', async ({ pa
       const s = getComputedStyle(el)
       return { left: s.paddingLeft, right: s.paddingRight, w: el.getBoundingClientRect().width }
     })
-    // §5.2: 16px on mobile, 24px from md — and no more than 24px at any width.
+    // §5.2: 16px on mobile, 24px from md, and no more than 24px at any width.
     expect(parseFloat(box.left), `${width}px`).toBeLessThanOrEqual(24)
     expect(box.left, `${width}px`).toBe(box.right)
     expect(box.w, `${width}px`).toBeLessThanOrEqual(860)
@@ -136,7 +136,7 @@ test('every touch target clears 44px at 375px, on every screen', async ({ page }
       await page.goto(route.path)
       await waitForScreen(page)
       // `waitForScreen` returns as soon as `main` has children, which is before
-      // the layout has settled — measured there, a 44px control reports 43.99
+      // the layout has settled, measured there, a 44px control reports 43.99
       // and the probe fails on a screen that is fine. This asserts an invariant
       // about the finished layout, so it waits for one.
       await page.waitForTimeout(250)
@@ -178,7 +178,7 @@ test('the undo toast clears the tab bar', async ({ page }) => {
   const toast = await undo.evaluate(
     (el) => el.closest('[data-sonner-toast]')?.getBoundingClientRect().bottom ?? 0,
   )
-  // Not `nav` — there are three, and the header's path bar is the last of them.
+  // Not `nav`: there are three, and the header's path bar is the last of them.
   const bar = await page
     .locator('nav.fixed')
     .evaluate((el) => el.getBoundingClientRect().top)
@@ -238,7 +238,7 @@ test('nothing is stored on the device before the user acts', async ({ page }) =>
   await stubBackend(page, { theme: 'light', locale: 'de', seedTheme: false })
 
   // An account that has never chosen a theme. The default fixture simulates one
-  // that has, and a theme chosen on another device is a choice — this test is
+  // that has, and a theme chosen on another device is a choice, this test is
   // about the device that has made none.
   await page.route('**/rest/v1/profiles*', (route) =>
     route.fulfill({
@@ -262,8 +262,8 @@ test('nothing is stored on the device before the user acts', async ({ page }) =>
   // is strictly necessary for the service the user asked for. Merit's answer is
   // to write nothing at all until somebody acts.
   //
-  // The sign-in token is the one exception the law names — it keeps the login
-  // the user explicitly requested — and the harness seeds it, so it is the only
+  // The sign-in token is the one exception the law names, it keeps the login
+  // the user explicitly requested, and the harness seeds it, so it is the only
   // key allowed here. `merit.theme` must be *absent*: it is written when a
   // theme is chosen, and a profile that says `system` is not a choice. That is
   // the whole reason this app needs no consent banner, so it is asserted rather

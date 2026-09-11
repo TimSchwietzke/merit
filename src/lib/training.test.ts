@@ -238,7 +238,7 @@ describe('the active set, when sets were done out of order', () => {
 
   it('finishes the exercise it is in before moving to another one', () => {
     // Tapping set 3 and logging it used to jump to another exercise while sets
-    // one and two of this one were still outstanding — you log a set, look
+    // one and two of this one were still outstanding, you log a set, look
     // down, and the highlight is somewhere else entirely.
     const sets = [bench(1), bench(2), bench(3, true), row(1)]
     expect(nextActive(sets, sets[2])).toBe('bench-1')

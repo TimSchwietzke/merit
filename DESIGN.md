@@ -1,7 +1,7 @@
-# DESIGN.md — Merit
+# DESIGN.md: Merit
 
-Merit's design language. It is the house style — same paper, same ink, same restraint, same voice as
-NCLA — bent where a phone in a gym demands something a desktop tool does not.
+Merit's design language. It is the house style. Same paper, same ink, same restraint, same voice as
+NCLA, bent where a phone in a gym demands something a desktop tool does not.
 
 **How to use this file.** It is binding. Where it contradicts a component library's defaults, this
 file wins and the component gets overridden. Sections 1–17 are plain CSS and prose. The appendices
@@ -9,7 +9,7 @@ give the ready-made `tokens.css`, the shadcn bridge, the Tailwind v4 mapping, an
 primitives.
 
 **What is fixed and what is not.** The neutrals, the font families, the border-over-shadow rule, the
-6px radius ceiling and the voice are fixed — those carry the signature across projects. The accent
+tight-radius ladder and the voice are fixed, those carry the signature across projects. The accent
 hue, the layout and the component inventory are Merit's own.
 
 **What changed relative to the desktop house style, and why.** Four things, each with a reason:
@@ -32,7 +32,8 @@ Everything else is carried over unchanged and deliberately so.
 ## 1. The signature in one paragraph
 
 Warm paper in light, warm black in dark. Structure comes from 1px hairlines, never from shadows.
-Nothing is rounder than 6px. One muted accent — moss green — spent only on the active thing, links,
+Corners are tight and scale with the thing: 6px on a control, 10px on a container, 14px on a bottom
+sheet, and nothing is ever a pill. One muted accent, moss green, spent only on the active thing, links,
 the focus ring and a single left edge; everything else is greyscale, and importance is carried by
 weight and emphasis instead of hue. Three typefaces with three jobs: sans for the interface, mono for
 anything machine-shaped and for every small label, serif for the one sentence per screen worth
@@ -54,19 +55,19 @@ exception, and it lives in its own namespace so it cannot leak into the interfac
 |---|---|
 | `bg` | The page itself. The largest area on screen. |
 | `surface` | Anything raised out of the page: panels, rows, inputs, the bottom bar. |
-| `surface-2` | The second plane — sidebar, table headers, hover fills, the scanner sheet. |
+| `surface-2` | The second plane. Sidebar, table headers, hover fills, the scanner sheet. |
 | `line` | Default hairline. Separates without being noticed. |
 | `line-strong` | A hairline meant to be noticed: muted left edges, disabled marks, chart gridlines. |
 | `ink` | Primary text. Also the "on" state of a value. |
 | `ink-muted` | Body copy, secondary values, descriptions. |
 | `ink-faint` | Labels, counters, metadata, placeholders, units. |
 | `accent` | The single colour. Active nav, links, focus ring, the one value worth finding. |
-| `accent-soft` | The accent's own background — active pills, selection, the tinted button. |
+| `accent-soft` | The accent's own background, active pills, selection, the tinted button. |
 | `danger` | Destructive actions only. Never a judgement about food or a missed session. |
 
 Two notes that matter more than they look:
 
-- `ink-muted` and `ink-faint` are deliberately close. They are not "70% and 50%" — they are two nearly
+- `ink-muted` and `ink-faint` are deliberately close. They are not "70% and 50%", they are two nearly
   identical greys differing just enough to build a third level of hierarchy without a visible fourth
   colour.
 - The page is the darkest surface in dark mode and the *second* lightest in light mode. Each plane
@@ -103,7 +104,7 @@ Unchanged from the house style. Paper and ink, from the Vitesse lineage.
 
 Pure black and pure white appear nowhere.
 
-### 2.3 The accent — Moss
+### 2.3 The accent: Moss
 
 Merit's accent is **Moss**, taken from the house palette. It reads calm and organic, suits a health
 tool, and separates Merit from NCLA's ochre without leaving the family.
@@ -115,12 +116,12 @@ tool, and separates Merit from NCLA's ochre without leaving the family.
 
 Worst contrast ratio across all required pairs: **5.31:1**. Verified with the script in §16.3.
 
-Moss is the only accent. No secondary accent, no success-green (the accent *is* green — a second
+Moss is the only accent. No secondary accent, no success-green (the accent *is* green, a second
 green would be indistinguishable), no info-blue. If a second colour feels necessary, the answer is
 weight, emphasis, or an icon.
 
 A note specific to this hue: because the accent is green, **green must not double as a
-"target met" signal**. Not for ethical reasons but for legibility — if the accent means both "active"
+"target met" signal**. Not for ethical reasons but for legibility: if the accent means both "active"
 and "on target", neither reading survives. Target status is carried by the bar, the emphasis and the
 number itself (§10.9), and the accent goes on carrying the active thing.
 
@@ -133,7 +134,7 @@ number itself (§10.9), and the accent goes on carrying the active thing.
   They are told apart by their name and their fixed position. The chart palette (§11) is the single
   scoped exception and never appears outside a chart.
 - **`danger` is for destructive actions and for the single highest-severity mark.** Deleting a log,
-  deleting an account — and, if the project decides so, a target overshoot large enough to be worth
+  deleting an account, and (if the project decides so) a target overshoot large enough to be worth
   noticing. It is never a verdict on a food, and never used on a missed session.
 - **No traffic light.** There is no green/amber/red scale: `danger` is one mark, not the top of a
   gradient, and the accent is already green (§2.3). Over, under and on target are told apart by the
@@ -164,7 +165,7 @@ attribute on `<html>`.
 Non-negotiable details:
 
 - **The bootstrap script is inline and duplicated from the theme module on purpose.** It cannot
-  import anything — it has to run before the bundle exists. Without it every reload flashes the wrong
+  import anything: it has to run before the bundle exists. Without it every reload flashes the wrong
   theme, which is the single most obvious quality tell in a themed app. In an installed PWA opened
   from the home screen it is even more visible, because there is no browser chrome to distract from
   the flash.
@@ -174,7 +175,7 @@ Non-negotiable details:
   correct before the script runs and with JS disabled.
 - Set `color-scheme` in both blocks so form controls, scrollbars and the on-screen keyboard follow.
 - When "system" is selected, listen to the media query and re-apply while the app is open.
-- **Set `<meta name="theme-color">` per theme** and update it when the theme changes — it colours the
+- **Set `<meta name="theme-color">` per theme** and update it when the theme changes, it colours the
   status bar area of the installed PWA. A light status bar above a dark app is the PWA equivalent of
   the theme flash.
 - Storage failures (private mode, blocked storage) must never prevent the theme from being applied.
@@ -183,13 +184,13 @@ Non-negotiable details:
 
 ---
 
-## 3. shadcn/ui — how it fits
+## 3. shadcn/ui: how it fits
 
 Merit uses shadcn/ui. This is deliberate and it does not weaken the house style, because shadcn is
 not a component library in the usual sense: the components are **copied into `src/components/ui` and
 owned by this repo**. Overriding them is the intended workflow, not a fight with a dependency.
 
-What Merit takes from it: Radix behaviour — focus traps, roving tabindex, `aria-*` wiring, portals,
+What Merit takes from it is Radix behaviour: focus traps, roving tabindex, `aria-*` wiring, portals,
 scroll locking, dismiss-on-escape, controlled/uncontrolled state. All the things that are tedious to
 build, easy to build subtly wrong, and invisible until someone uses a screen reader or a keyboard.
 
@@ -203,7 +204,7 @@ references a house token directly, and no house token is ever renamed to please 
 
 Two mappings are counter-intuitive and cause real bugs when skipped:
 
-- **shadcn's `--accent` is not the brand accent.** In shadcn it means "subtle hover fill" — what this
+- **shadcn's `--accent` is not the brand accent.** In shadcn it means "subtle hover fill", what this
   document calls `surface-2`. Merit's brand accent maps to shadcn's `--primary`. Wiring
   `--accent → accent` produces a UI where every hover state is moss green.
 - **shadcn's `--muted` is a background, `--muted-foreground` is text.** The house style's `ink-muted`
@@ -218,7 +219,7 @@ The rest is direct: `--background → bg`, `--foreground → ink`, `--card → s
 - **`--radius: 5px`.** shadcn ships `0.5rem`, and its `rounded-xl` on a button is a pill. Controls
   are tight; large surfaces take §6's larger radii.
 - **Remove every shadow.** shadcn puts `shadow-sm` on cards, buttons and inputs. Structure comes from
-  hairlines. Shadows survive only on true overlays — dialog, popover, dropdown, sheet — where an
+  hairlines. Shadows survive only on true overlays (dialog, popover, dropdown, sheet) where an
   element genuinely floats above the page.
 - **Re-map the size scale.** shadcn's `default` button is `h-9` with `text-sm` at Tailwind's 14px.
   Merit's `text-sm` is 13px and its minimum touch height is 44px. See §5.2 for the table.
@@ -238,13 +239,13 @@ The rest is direct: `--background → bg`, `--foreground → ink`, `--card → s
 | `sonner` (toasts) | Use sparingly. Merit prefers in-place state to notifications. |
 | `calendar` | Use for the date picker; restyle heavily, it is the most opinionated component in the set. |
 | `card` | **Do not use.** Merit's `Panel` (§10.2) is six lines and shadow-free by construction. |
-| `accordion`, `collapsible` | **Do not use on a logging screen** (§7). On a browse or catalogue screen, use — expanded by default, and remember what the reader collapsed (§10.11). |
+| `accordion`, `collapsible` | **Do not use on a logging screen** (§7). On a browse or catalogue screen, use. Expanded by default, and remember what the reader collapsed (§10.11). |
 | `alert`, `badge` | **Do not use.** Merit has `Chip` (§10.6) and plain prose. |
 | `table` | **Do not use below `md`.** Merit's `Rows` (§10.1) is the list primitive; tables are a desktop affordance only. |
 | `avatar`, `carousel`, `breadcrumb` | Not needed. Do not add speculatively. |
 
 A component is added when a screen needs it, never in advance. `npx shadcn@latest add <name>`, then
-apply §3.2 before the first commit that uses it — restyling later means finding every instance.
+apply §3.2 before the first commit that uses it. Restyling later means finding every instance.
 
 ---
 
@@ -252,7 +253,7 @@ apply §3.2 before the first commit that uses it — restyling later means findi
 
 ### 4.1 Three families, three jobs
 
-IBM Plex, bundled from npm — never a CDN, never a `<link>` to a font host. A PWA that has to reach a
+IBM Plex, bundled from npm, never a CDN, never a `<link>` to a font host. A PWA that has to reach a
 font host is not offline-capable.
 
 ```
@@ -267,7 +268,7 @@ font host is not offline-capable.
 --font-serif: "IBM Plex Serif", ui-serif, Georgia, serif;
 ```
 
-Import only the weights actually used, and subset to latin — three families is already a lot of bytes
+Import only the weights actually used, and subset to latin: three families is already a lot of bytes
 over a phone connection.
 
 **Sans** is the interface: body text, headings, buttons, navigation.
@@ -278,8 +279,8 @@ duration, and **every short section label**. The rule: if a human wrote it as pr
 A food name is sans. `183 g` is mono.
 
 **A label long enough to truncate is sans, and may wrap.** Mono is wider per character than sans at
-the same size, so a long compound — `davon gesättigte fettsäuren` is the app's worst case, and it did
-truncate — loses its ending in a font chosen for the numbers beside it. The label is the part that
+the same size, so a long compound is the app's worst case: `davon gesättigte
+fettsäuren` did truncate, losing its ending in a font chosen for the numbers beside it. The label is the part that
 says what the number *is*; losing its ending to a font choice is the wrong trade. Short structural
 labels stay mono, which is nearly all of them.
 
@@ -287,7 +288,7 @@ labels stay mono, which is nearly all of them.
 remembering. In Merit that is the dashboard's one-line statement about the day, and nothing else. Not
 in body copy, not in labels, not in empty states.
 
-**Numbers use tabular figures.** `font-variant-numeric: tabular-nums` on every changing value —
+**Numbers use tabular figures.** `font-variant-numeric: tabular-nums` on every changing value:
 remaining calories, a weight in a set row, a chart axis. Without it the dashboard jitters as you
 type.
 
@@ -313,7 +314,7 @@ deliberately smaller than framework defaults.
 purpose, it is always mono, and it is nearly always `ink-faint`.
 
 **`text-input` exists for one reason.** iOS Safari zooms the viewport when a focused input computes
-below 16px, and no `user-scalable=no` should ever be used to suppress that — it breaks pinch-zoom for
+below 16px, and no `user-scalable=no` should ever be used to suppress that, it breaks pinch-zoom for
 everyone who needs it. Every `<input>`, `<textarea>` and `<select>` is `text-input` below `md`. It
 may drop to `text-sm` from `md` up, where there is no mobile Safari.
 
@@ -335,21 +336,21 @@ may drop to `text-sm` from `md` up, where there is no mobile Safari.
 
 Section labels are **lowercase or sentence case in mono**, small and faint. Small caps and
 all-uppercase wide tracking are both out. Where uppercase appears it is on a mono label at 12px with
-normal tracking — a technical marker, not a decorative one.
+normal tracking, a technical marker, not a decorative one.
 
 **Navigation, labels and the product name are lowercase.** `merit` · `nutrition` · `training` ·
 `settings` · `today` · `last session`. Not `Merit`, not `Nutrition`, not Title Case anywhere in
-chrome. Sentence case is for prose — a full sentence starts with a capital and ends with a full stop.
+chrome. Sentence case is for prose. A full sentence starts with a capital and ends with a full stop.
 A nav item is not a sentence.
 
-This applies to the wordmark too: the app is `merit`, lowercase, in every place it renders —
+This applies to the wordmark too: the app is `merit`, lowercase, in every place it renders,
 including the `<title>`, which is the first piece of the brand anybody sees and had no business
 disagreeing with the wordmark two centimetres below it. `Merit` appears capitalised only in legal
 text and the README, where it is a proper noun in someone else's sentence rather than a piece of
 this interface.
 
 Units are lowercase and follow SI: `g`, `kg`, `ml`, `kcal`, `cm`. Never `Kcal`, never `KG`. A unit is
-always mono, always `ink-faint`, and always separated from its number by a space — never glued on.
+always mono, always `ink-faint`, and always separated from its number by a space, never glued on.
 
 ---
 
@@ -368,7 +369,7 @@ Anything not on this list is a mistake or needs a comment explaining the optical
 ### 5.2 Padding recipes, and the 44px floor
 
 **Every interactive element is at least 44×44px on touch.** Where the visual box is smaller than
-that, the *hit area* is enlarged with padding or a pseudo-element — the design does not grow, the
+that, the *hit area* is enlarged with padding or a pseudo-element, the design does not grow, the
 target does.
 
 | Container | Mobile | `md` and up |
@@ -391,7 +392,7 @@ a mis-tap waiting to happen, and in Merit a mis-tap deletes a logged meal.
 ### 5.3 Vertical rhythm
 
 - **32px (`mb-8`)** between sections on the dashboard.
-- **24px (`mb-6`)** between sections inside a logging flow — tighter, because the screen is a task.
+- **24px (`mb-6`)** between sections inside a logging flow, tighter, because the screen is a task.
 - **36px (`mb-9`)** between sections of a long-form document (privacy policy, imprint).
 - **24–32px** below a page header.
 - **12px** between a section head and its content.
@@ -411,13 +412,13 @@ Pick one rhythm per page type and hold it.
 | Modal dialog (`md` and up) | 420–520px |
 
 **A wide screen is not an invitation to add whitespace.** Merit is a dense tool; on a 1440px display
-the content column is capped and *centred*, with 24px gutters — the extra width becomes empty page,
+the content column is capped and *centred*, with 24px gutters, the extra width becomes empty page,
 not extra padding inside panels. Row padding, panel padding and the gap between sections stay within
 a step or two of their mobile values. Interfaces that scale their own padding with the viewport are
 the single most reliable tell of a generated layout: everything breathes uniformly and nothing has a
 hierarchy. Density is the signature; keep it at every width.
 
-### 5.5 Composition — one thing wins
+### 5.5 Composition: one thing wins
 
 Every screen has exactly one element that is the subject, and it must be obvious which one within a
 second of the screen appearing. This is the rule the rest of this file assumed and never wrote down,
@@ -431,18 +432,18 @@ The ladder, loudest first. **A screen uses one rung from the top two and nothing
 |---|---|---|
 | Subject | The accent edge (§6) or the ring (§10.10), with its figure at `text-2xl` | Once. Never twice. |
 | Support | A `Panel`, a `Rows` list under a §10.3 head | As often as needed |
-| Reference | Bare on the page — no border, no fill, mono labels in `ink-faint` | As often as needed |
+| Reference | Bare on the page. No border, no fill, mono labels in `ink-faint` | As often as needed |
 
 Two consequences worth stating, because both were got wrong before this was written:
 
 - **A frame is not free.** Wrapping something in a `Panel` promotes it, and a screen where everything
-  is promoted has no subject. The week strip on `/training` is reference — it is what you consult to
-  change the subject, not the subject itself — so it sits bare on the page and the day it selects
+  is promoted has no subject. The week strip on `/training` is reference, it is what you consult to
+  change the subject, not the subject itself, so it sits bare on the page and the day it selects
   takes the edge. Reach for `Panel` when a group needs to be told apart from what surrounds it, not
   as the default wrapper for a section.
 - **The subject earns the top of the type scale.** `text-2xl` is the in-app ceiling (§4.2) and it is
   reserved for the one figure or name the screen exists to show. A screen whose largest text is
-  `text-xl` — the `h1` size — has no subject, only a title.
+  `text-xl`: the `h1` size, has no subject, only a title.
 
 The muted twin of the accent edge (`line-strong`, §6) is how the subject looks when there is nothing
 in it. A rest day, an empty log, a goal not yet set: same block, same size, quieter edge. An empty
@@ -454,14 +455,14 @@ state that is a different component from its full state makes the screen change 
 
 **Borders instead of shadows.** 1px hairlines in `line` define every boundary: panels, rows, inputs,
 the bottom bar, the sidebar edge. Shadows exist only on things that genuinely float: dialog, popover,
-dropdown, bottom sheet. A shadowed card grid is the clearest sign the language has been abandoned —
+dropdown, bottom sheet. A shadowed card grid is the clearest sign the language has been abandoned,
 and it is exactly what shadcn ships by default, so §3.2 is not optional.
 
 **Radius scales with the size of the thing:**
 
 ```css
 --radius-sm: 3px;   /* inline code, chart cells, tiny marks */
---radius-md: 5px;   /* buttons, inputs, chips, nav items */
+--radius-md: 6px;   /* buttons, inputs, chips, nav items */
 --radius-lg: 10px;  /* panels, row lists, cards */
 --radius-xl: 14px;  /* bottom sheets and dialogs */
 ```
@@ -469,9 +470,15 @@ and it is exactly what shadcn ships by default, so §3.2 is not optional.
 The old ceiling was 6px on everything, inherited from a desktop editor where every surface is a
 panel a few pixels from its neighbour. It does not survive the move to a phone: a full-width bottom
 sheet with 6px corners reads as a web page that failed to load its styling, not as a tight interface,
-because every sheet the reader has ever pulled up on that device is rounder. A control stays tight —
-a 5px button is right and a 12px one is a pill in disguise — but a large surface takes a larger
+because every sheet the reader has ever pulled up on that device is rounder. A control stays tight:
+a 6px button is right and a 12px one is a pill in disguise, but a large surface takes a larger
 radius, which is the same rule the ceiling was reaching for, applied proportionally.
+
+**The ladder ran 4/8/16/22 for a while and that was too far.** It was reaching for the softness a
+phone wants and arrived at the shape every generated interface ships: a 16px row, a 22px filled
+rectangle with nothing drawn on it, and no radius left over for whatever sits inside a 16px pad. The
+grouped list of rows this app is mostly made of is the pattern iOS draws its own settings with, and
+iOS draws it at 10. Structure comes from the hairline here, so the corner never had to carry it.
 
 Still no pills. `border-radius: 9999px` is allowed for exactly two things: a thin progress track, and
 the drag handle of a bottom sheet. A fully rounded button is toy UI at any size.
@@ -485,7 +492,7 @@ bg            the page
 ```
 
 **Hover and press.** Rows fill with `surface-2` on hover. On touch there is no hover, so **every row
-and button needs a visible `:active` state** — `surface-2` fill, applied instantly, no transition.
+and button needs a visible `:active` state**, `surface-2` fill, applied instantly, no transition.
 Without it a tap on a slow connection feels like nothing happened and gets repeated. Nothing scales,
 nothing lifts, nothing casts a shadow.
 
@@ -508,7 +515,7 @@ accent edges on one screen cancel out.
   component that switches on the breakpoint. Four tabs at most: dashboard, food, training, more.
   A fifth tab means the information architecture is wrong.
 - **The bottom bar is `surface` with a `border-t` in `line`**, plus `padding-bottom:
-  env(safe-area-inset-bottom)`. Not translucent, not blurred, not floating — it is a plane, and it
+  env(safe-area-inset-bottom)`. Not translucent, not blurred, not floating: it is a plane, and it
   must stay legible over a scrolling chart.
 - **From `lg`, the header carries a path bar**, not a page title. Mono `text-2xs`, `ink-faint`, with
   the current segment promoted to `ink`, separated by a thin `/` in `line-strong`:
@@ -517,7 +524,7 @@ accent edges on one screen cancel out.
 
   This is a carried-over signature, not decoration: the file-tree reading is what makes the app feel
   like a tool rather than a dashboard template. Below `lg` it is replaced by a single mono label for
-  the current screen — a three-segment path on a 375px screen is noise.
+  the current screen. A three-segment path on a 375px screen is noise.
 
 - **Sticky chrome is thin**: a header of `border-b` + `bg/90` + `backdrop-blur`, never an opaque bar
   with a shadow.
@@ -530,15 +537,15 @@ accent edges on one screen cancel out.
   damage, and the set form, the day's totals and the comparison line are all on screen at once.
 
   **This is a rule about logging, not about every screen.** It was written with one screen in mind
-  and its own justification says so. A screen whose job is *finding* something among many — the
-  exercise catalogue, the food catalogue, a long log — has the opposite need: structure is the point
+  and its own justification says so. A screen whose job is *finding* something among many (the
+  exercise catalogue, the food catalogue, a long log) has the opposite need: structure is the point
   there, and a flat list of two hundred rows with a search box is the worse interface. Those screens
   are governed by §10.11, which requires grouping and filtering and permits collapsing, and which
   forbids the thing this rule was actually protecting against: content hidden *by default*.
 
   The test is what the person came to do. Acting on something already decided → show everything.
   Looking for one thing among many → help them narrow it.
-- **Four tabs, and everything else lives under `more` — so `more` is grouped, never a flat list.**
+- **Four tabs, and everything else lives under `more`: so `more` is grouped, never a flat list.**
   The ceiling is real and worth keeping, but it makes one screen the home of weight, goals, settings,
   export and the legal pages, and a flat list of those is the junk drawer the ceiling was avoiding.
   Sections with §10.3 heads, ordered by how often they are opened, daily things first.
@@ -554,7 +561,7 @@ accent edges on one screen cancel out.
 The house style had nothing to say here because a fixed desktop window never asks. Merit's primary
 target is a phone.
 
-**Breakpoints** — Tailwind defaults, used deliberately:
+**Breakpoints**: Tailwind defaults, used deliberately:
 
 | | Width | What it is |
 |---|---|---|
@@ -573,16 +580,16 @@ target that this section exists to prevent.
 - **Modals become bottom sheets below `md`.** A centred dialog on a phone puts its actions under the
   thumb of nobody. Use shadcn's `drawer`/`sheet` below `md` and `dialog` above, behind one wrapper
   component so call sites do not branch.
-- **Safe areas are respected on all four edges** — `env(safe-area-inset-*)`. The installed PWA has no
+- **Safe areas are respected on all four edges**: `env(safe-area-inset-*)`. The installed PWA has no
   browser chrome to absorb the notch or the home indicator.
 - **Use `dvh`, not `vh`.** Mobile browser chrome changes height as you scroll; `100vh` produces a
   layout that is cut off exactly when the keyboard is open.
 - **Numeric inputs set `inputMode`**: `decimal` for weights and portions, `numeric` for reps and
-  integers. Never `type="number"` alone — it brings spinner arrows nobody can hit and rejects commas,
+  integers. Never `type="number"` alone, it brings spinner arrows nobody can hit and rejects commas,
   which is how half of Europe writes a decimal.
 - **The on-screen keyboard must never cover the field being typed into.** Test every logging form
   with the keyboard open; scroll the focused field into view.
-- **Charts get a readable state at 375px.** If a chart does not fit, simplify it — fewer ticks, fewer
+- **Charts get a readable state at 375px.** If a chart does not fit, simplify it, fewer ticks, fewer
   series, a shorter range. Never shrink it.
 - **Test in German.** See §9.
 
@@ -602,7 +609,7 @@ in the codebase.
   combination the author actually uses.
 - **Dates, numbers and units are formatted with `Intl`**, using the active locale. `1.234,5` in
   German, `1,234.5` in English. Never hand-format a number.
-- **Units stay metric in both languages** — kg, g, ml, cm, kcal. The English UI is for
+- **Units stay metric in both languages**: kg, g, ml, cm, kcal. The English UI is for
   English-speaking friends in Germany, not for the US.
 - **Decimal input accepts both `.` and `,`** and normalises on parse. Somebody will type `82,4`.
 - **Never concatenate translated fragments.** Use interpolation with named variables, so word order
@@ -616,7 +623,7 @@ in the codebase.
 The standard set. Building them the same way each time is most of the recognisability. Where a
 shadcn component is the base, that is noted.
 
-### 10.1 Rows — the default list
+### 10.1 Rows: the default list
 
 Lists are bordered rows, never a grid of cards. One container with a border and radius, dividers
 between children, `surface-2` on hover and on `:active`.
@@ -655,7 +662,7 @@ label in mono 12px, ink-faint              optional action →
 
 Baseline-aligned, 12px of space below the rule. Appears on nearly every screen.
 
-### 10.4 Buttons — four kinds and no more
+### 10.4 Buttons: four kinds and no more
 
 Base: shadcn `button`, with its variant set replaced by these four. Delete the shadcn variants that
 do not appear here rather than leaving them unused.
@@ -685,7 +692,7 @@ the input takes 36px of left padding.
 
 **Inside a bordered row, an input drops its border and takes a `surface-2` fill instead.** A set row
 carries three fields; bordered, that is three outlines inside the row's outline inside the panel's,
-and a screen of them reads as a mesh with nothing heavier than anything else — which is exactly the
+and a screen of them reads as a mesh with nothing heavier than anything else, which is exactly the
 complaint that a card grid with shadows is usually reached for to fix. A filled cell on a bordered
 surface reads as a field and costs no lines, and it is the same `bg → surface → surface-2` ladder §6
 already uses for a nested plane. The focus ring is unchanged and does the work the border was doing.
@@ -702,7 +709,7 @@ it with two 44px `Bare` buttons for −/+; typing must still work.
 ### 10.6 Chips and labels
 
 A chip is a mono `text-2xs` pill: `border-line`, `bg-surface-2`, `text-ink-muted`, radius 5. Linked
-chips gain `border-line-strong` and `text-ink` on hover. Chips never carry a category colour — a
+chips gain `border-line-strong` and `text-ink` on hover. Chips never carry a category colour, a
 `community` source chip and an `off` source chip look identical apart from their text.
 
 A label is mono `text-2xs`, `ink-faint`, optionally uppercase, never wide tracking.
@@ -715,12 +722,12 @@ Base: shadcn `toggle-group` with `type="single"`, restyled to a single bordered 
 meal type, chart range, and any 2–4 way exclusive choice.
 
 **It is a radio group, not a row of toggles.** `role="radiogroup"` with an `aria-label`, each option
-`role="radio"` with `aria-checked` — which is what `toggle-group type="single"` renders, so it comes
+`role="radio"` with `aria-checked`: which is what `toggle-group type="single"` renders, so it comes
 for free along with arrow-key roving focus. This replaces an earlier `role="group"` + `aria-pressed`
 spec, and the distinction is not pedantry: `aria-pressed` describes buttons that happen to be
 mutually exclusive, so a screen reader announces three independent toggles and leaves the user to
 infer that exactly one can win. `radiogroup` announces "2 of 3" and makes the exclusivity part of
-what is read out. Selecting the active option again must not clear it — a segmented control has no
+what is read out. Selecting the active option again must not clear it, a segmented control has no
 empty state.
 
 Above four options it becomes a `select`. A five-segment control on a 375px screen has 60px segments.
@@ -735,12 +742,12 @@ These carry a surprising amount of the personality.
 - **Not built yet**: the muted accent edge (`line-strong`) with a mono label naming the milestone and
   one sentence saying what will go there.
 - **Offline**: a mono `text-2xs` line in the header, `ink-faint`, stating the fact and the
-  consequence — `offline · sets are saved on this device`. Not a banner, not a toast, not a modal.
+  consequence: `offline · sets are saved on this device`. Not a banner, not a toast, not a modal.
   It disappears when the connection returns and the queue is empty.
-- **Pending sync**: the same treatment with a count — `3 sets waiting to sync`. Never a spinner that
+- **Pending sync**: the same treatment with a count, `3 sets waiting to sync`. Never a spinner that
   never resolves.
 - **A lookup that found nothing**: say so in the space it would occupy, and offer the next step
-  inline — `no product for this barcode · add it yourself`. This is the most important empty state in
+  inline: `no product for this barcode · add it yourself`. This is the most important empty state in
   the app; it is the path by which the shared catalogue grows.
 
 ### 10.9 Progress
@@ -761,17 +768,17 @@ mid-afternoon more often than at midnight.
 
 ### 10.10 Merit-specific components
 
-- **Day summary** — the dashboard's top block, inside one `Panel`.
+- **Day summary**: the dashboard's top block, inside one `Panel`.
 
   **The calorie ring.** A sum against a target is a ring, not a bar: an SVG circle, 8px stroke,
   `line` track, `accent` fill, starting at 12 o'clock and running clockwise. The remaining figure
   sits centred inside at `text-3xl`, mono, tabular, with its unit beneath in `ink-faint`. Past the
   target the ring keeps going into a second lap drawn in `danger` over the first, with the 100%
   position marked by a 2px `bg`-coloured gap so the overshoot stays measurable (§10.9). The ring is
-  `role="img"` with the same figures as its `aria-label` — a ring is unreadable to a screen reader
+  `role="img"` with the same figures as its `aria-label`: a ring is unreadable to a screen reader
   otherwise.
 
-- **Nutrient panel** — everything below the ring, as `Rows` in **EU label order**, so the screen
+- **Nutrient panel**: everything below the ring, as `Rows` in **EU label order**, so the screen
   matches the packaging that was just scanned:
 
   ```
@@ -802,16 +809,16 @@ mid-afternoon more often than at midnight.
     could do.
   - **Only calories, protein, fat and carbohydrate have user-set targets.** Fibre, sugars, saturates
     and salt use reference values with their source named in settings, and any of them can be
-    switched off entirely — most people do not want seven bars every morning. Default on: calories,
+    switched off entirely. Most people do not want seven bars every morning. Default on: calories,
     protein, fat, carbohydrate. Default off: the rest.
 
-- **Macro split ring** — the one place colour distinguishes nutrients, because there they are parts
+- **Macro split ring**: the one place colour distinguishes nutrients, because there they are parts
   of one sum rather than entries in a list: an optional second, thinner ring inside the calorie ring,
   or a separate donut, splitting the day's energy across protein / fat / carbohydrate in
   `--chart-1..3`. Never more than three segments; sugars and saturates are not separate energy
   sources and do not belong in it.
 
-- **Consistency heatmap** — the GitHub-style overview, one cell per day, weeks as columns. Cells are
+- **Consistency heatmap**: the GitHub-style overview, one cell per day, weeks as columns. Cells are
   7×18px with a 2px gap and a 1px radius, grouped by month with a mono numeral beneath each cluster.
 
   Three states, and they are **told apart by fill density, not by hue**:
@@ -824,24 +831,24 @@ mid-afternoon more often than at midnight.
 
   The target band is configurable and defaults to ±20% of the calorie target. Why opacity rather
   than grey/amber/green: the accent is already green (§2.3), and amber against green is the single
-  worst pair for the ~8% of men with a red-green deficiency — in a group of ten that is not a
+  worst pair for the ~8% of men with a red-green deficiency, in a group of ten that is not a
   hypothetical. If a hue variant is wanted anyway, the middle state must additionally differ in
-  form — an outlined cell rather than a filled one — so the information survives without colour.
+  form, an outlined cell rather than a filled one, so the information survives without colour.
 
   The whole cluster is one link with a `title` and an `aria-label` spelling out what the cells
   encode, and each cell has its own date and value in a `title`.
 
-- **Quick-add row** — recently used and favourite foods as a horizontally scrollable strip of chips
+- **Quick-add row**: recently used and favourite foods as a horizontally scrollable strip of chips
   above the day's list. One tap re-logs yesterday's breakfast. This is the single feature that
   decides whether the app gets used daily, and it deserves the position it takes.
-- **Set row** — exercise name, then a mono line of `set · reps · weight · rir`. Below it, in
+- **Set row**: exercise name, then a mono line of `set · reps · weight · rir`. Below it, in
   `text-2xs` `ink-faint`, last session's figures for the same exercise. That comparison line is the
   reason anyone opens the training tab between sets; it is not optional detail.
-- **Scanner viewport** — full-bleed camera feed with a `surface-2` frame at 6px radius, a single
+- **Scanner viewport**: full-bleed camera feed with a `surface-2` frame at 6px radius, a single
   centred reticle drawn in `line-strong`, and one mono line of instruction beneath. No overlay
   animation, no scanning laser. On failure it falls through to manual entry in the same sheet, not on
   a different screen.
-- **Week strip** — the training screen's top block: seven tiles, Monday to Sunday, above the detail
+- **Week strip**: the training screen's top block: seven tiles, Monday to Sunday, above the detail
   for whichever one is selected. A tile is a weekday in mono `text-2xs`, the day of the month in mono
   below it, and a 4px mosaic mark beneath that. The mark is the consistency heatmap's vocabulary
   applied to one week and told apart by fill density rather than hue: half-strength `accent` for a
@@ -851,7 +858,7 @@ mid-afternoon more often than at midnight.
   do.
 
   Selection is `accent` border on `accent-soft`; today, unselected, is `line-strong` with its weekday
-  label in `accent`. It is a `radiogroup` — exactly one day is being looked at, and the arrow keys
+  label in `accent`. It is a `radiogroup`: exactly one day is being looked at, and the arrow keys
   should walk the week. **Choosing a day changes the block below it and nothing else**: no route, no
   push, no back button. That is the whole reason the strip exists rather than a list of seven rows,
   which cost a screen of height to say the same thing and made the day you cared about scroll.
@@ -860,7 +867,7 @@ mid-afternoon more often than at midnight.
   pulled 4px past it and its gap drops to the mosaic's 2px. The mark is a fixed 24px, not the tile's
   width: on a desktop column the tile is 100px and a mark that fills it stops being a mark.
 
-- **Multi-step form** — a screen that asks for several things of different sizes splits into steps
+- **Multi-step form**: a screen that asks for several things of different sizes splits into steps
   named by a §10.7 segmented control at the top, `1 · name & days` / `2 · exercises`. The control is
   the way back as well as the progress: a stepper you cannot walk backwards through is a wizard, and
   wizards are how people get stuck.
@@ -870,24 +877,24 @@ mid-afternoon more often than at midnight.
   long one first, and gating the short one behind it, is the arrangement that made the routine editor
   feel wrong even though every field on it was correct.
 
-  Each step ends in a pair of buttons, the way out on the left and the way on on the right — `Cancel`
+  Each step ends in a pair of buttons, the way out on the left and the way on on the right, `Cancel`
   / `Next`, then `Back` / `Save`. A step's `Next` is disabled until that step is answered; `Save` is
   disabled while the thing would be invalid, with the reason in mono `text-2xs` beneath it rather
   than in a toast after the tap.
 
   **A form with a Save button holds a draft and writes nothing before it.** This is the condition, not
   a preference: a screen that saves each field as it is touched has nothing for Cancel to undo, which
-  is how one ends up offering Delete and a back link instead — the two things you are left with when
+  is how one ends up offering Delete and a back link instead, the two things you are left with when
   arriving somewhere has already changed the data. Where the draft is a list, it goes over in one
   call so a save cannot half-apply.
 
-- **Floating add** — the one place Merit floats a control over the page instead of putting it in the
+- **Floating add**: the one place Merit floats a control over the page instead of putting it in the
   flow: adding to the list a screen is *about*, on a screen you scroll. 56px, `accent` on `bg`, a
-  lucide `+` at 22px, `radius-md` and square — a circle is a pill and §6 allows exactly two of those.
+  lucide `+` at 22px, `radius-md` and square. A circle is a pill and §6 allows exactly two of those.
   It takes the shadow the session bar takes, on the same licence: it genuinely floats.
 
   It sits 12px above the tab bar, right-aligned, and **the list beneath it carries the padding to
-  clear it** — a fixed element takes no space in the flow and will otherwise sit on the last row.
+  clear it**. A fixed element takes no space in the flow and will otherwise sit on the last row.
   **Only one floating thing at a time**: where the session bar can appear, the button hides. Two
   targets fighting for the corner a thumb rests on is how the wrong one gets hit between sets.
 
@@ -895,12 +902,12 @@ mid-afternoon more often than at midnight.
   under the thing it acts on; this is for a list that grows, where the action outlives the scroll
   position.
 
-- **Rest-day / next-session line** — one sentence, sans, `ink-muted`, on the dashboard, naming when
+- **Rest-day / next-session line**: one sentence, sans, `ink-muted`, on the dashboard, naming when
   the next session is due.
-- **Streak / consistency mark** — a mono `text-2xs` line with the significant number promoted to
+- **Streak / consistency mark**: a mono `text-2xs` line with the significant number promoted to
   `ink`: `4 weeks · 3 sessions each`. Rendered as text and, where it earns the space, as a dense
   strip of small hard-edged cells (7×18px, 2px gap, 1px radius, filled in `accent`, empty in `line`)
-  — the mosaic pattern from the house style, one cell per day or per session.
+ . The mosaic pattern from the house style, one cell per day or per session.
 
   Two constraints on it, both practical rather than moral. **Count sessions, not logging.** A streak
   that breaks because somebody forgot to log a lunch punishes the record-keeping, not the behaviour,
@@ -918,13 +925,13 @@ no-hiding rule.
 
 **Filter chips, not a select.** §10.6's chip, made pressable: `border-line` / `bg-surface-2` /
 `ink-muted` at rest, `border-accent` / `bg-accent-soft` / `text-accent` when active, in a wrapping
-row above the list. Multi-select within a facet, union within it and intersection across facets —
-picking `chest` and `back` shows both; picking `chest` and `barbell` shows the overlap. A `select`
+row above the list. Multi-select within a facet, union within it and intersection across facets.
+Picking `chest` and `back` shows both; picking `chest` and `barbell` shows the overlap. A `select`
 hides the options until tapped, allows one, and hides the current state behind a closed control;
 none of that is what filtering wants. §10.7's "above four options it becomes a select" governs a
 single-choice *setting*, not a filter.
 
-The active count is visible without opening anything, and there is always a way back to everything —
+The active count is visible without opening anything, and there is always a way back to everything:
 a `clear` chip that appears only when something is filtered, never a permanently disabled control.
 
 **The chips may live behind a control, and on a phone they usually should.** Fourteen chips at the
@@ -935,13 +942,13 @@ numeral, so the state is still readable without opening anything. A filter contr
 many* filters are on is the `select` this section rejected, wearing an icon.
 
 **Inside the sheet the facets are stacked lists, not chips.** A chip row exists to survive on a
-crowded screen; a sheet is not crowded, and the trade a chip makes — short label, wrapped into a
-block, several per line — buys nothing there and costs the scannability §10.1 gets from a column.
+crowded screen; a sheet is not crowded, and the trade a chip makes, short label, wrapped into a
+block, several per line, buys nothing there and costs the scannability §10.1 gets from a column.
 So: one facet per section under a §10.3 head, one option per row at the 52px list height, with its
 state on the left where a column of them reads down. It is the same list primitive as everywhere
 else, and it is why the sheet can carry every facet at once where the inline row could carry one.
 
-**Grouping is structure, not decoration.** Results in a long list are grouped under §10.3 heads —
+**Grouping is structure, not decoration.** Results in a long list are grouped under §10.3 heads:
 muscle group for exercises, meal for a day's food. A group states how many rows it holds, in mono
 `text-2xs`, because that is the number that tells a reader whether to bother opening it.
 
@@ -963,11 +970,11 @@ first and it belongs at the top where a thumb finds it; pushing it down the scre
 results is a worse trade than the prominence recently-used gains by being first.
 
 **Search narrows, it does not replace.** The field filters the same grouped, faceted list rather
-than swapping it for a flat set of results — otherwise typing one letter destroys the structure the
+than swapping it for a flat set of results. Otherwise typing one letter destroys the structure the
 rest of this section built, and clearing it rebuilds a screen the reader has to re-orient in.
 
 **An empty result names the way out.** Not `no results`, but which filter is responsible and how to
-drop it — and, where the catalogue is one everybody extends, the offer to add the missing thing
+drop it, and (where the catalogue is one everybody extends) the offer to add the missing thing
 (§10.8). That is the path by which both catalogues grow.
 
 ---
@@ -996,7 +1003,7 @@ The palette is five entries, ordered, and each is distinguishable in greyscale:
 
 Slots 1–3 exist for exactly one figure: the macro split, where three values compose one sum. They do
 **not** apply to the nutrient panel (§10.10), where seven values form a list and colour would be
-noise. Sugars, saturates, fibre and salt have no chart colour at all — if a nutrient needs its own
+noise. Sugars, saturates, fibre and salt have no chart colour at all, if a nutrient needs its own
 line chart later, it is drawn in `accent` against `line` gridlines like every other single series.
 
 **Never encode meaning in colour alone.** Every series carries a label, and the two weight series
@@ -1022,7 +1029,7 @@ and solid. That difference survives a greyscale printout and a colour-blind read
 - **Lucide only.** Tree-shakeable, bundled, no runtime fetch.
 - **Size 16–18px on mobile chrome**, 14–15px from `md` up, 12–13px inline next to `text-2xs`.
 - **`strokeWidth={1.75}`** by default; `2` for chevrons and arrows that must stay legible small.
-- Icons are `shrink-0` in flex rows, and `aria-hidden` unless they are the button's only label — in
+- Icons are `shrink-0` in flex rows, and `aria-hidden` unless they are the button's only label, in
   which case the button needs an `aria-label` and a visually hidden text label.
 - **Never a character as an icon.** No `▸`, no `✓`, no emoji standing in for a glyph. The permitted
   exceptions are typographic characters used as *text*: the `·` separator, `→` and `↗` inside a
@@ -1039,7 +1046,7 @@ Motion is feedback. It confirms something happened; it never announces, decorate
 | What | Duration | Easing |
 |---|---|---|
 | Hover state | 120–160ms | default |
-| **Press / `:active` state** | **0ms — instant** | — |
+| **Press / `:active` state** | **0ms, instant** |, |
 | Disclosure, chevron rotation | 150ms | default |
 | Bottom sheet in/out | 250ms | `cubic-bezier(.4,0,.2,1)` |
 | Value change in a chart | 320ms | default |
@@ -1059,19 +1066,19 @@ Rules:
 - **The press state is never transitioned.** A 150ms fade-in on `:active` reads as lag on touch,
   where there is no hover to precede it.
 - **One authored moment per screen, and it is a measurement arriving.** A bar or a ring fills from
-  nothing to its value once, when it mounts, over 460ms — never again, never on scroll, never on a
+  nothing to its value once, when it mounts, over 460ms, never again, never on scroll, never on a
   loop. Watching a measurement stop somewhere says more about where the day stands than finding it
   already stopped, and it is the only thing on a screen allowed to move on its own. Everything else
   moves because the reader did something.
 
   This replaces an earlier flat ban on self-running animation. The ban was aimed at the right target
-  — the looping shimmer, the scroll-triggered entrance on every section, the number that counts up
-  because counting up looks expensive — and it caught the one honest case along with them. The rule
+ . The looping shimmer, the scroll-triggered entrance on every section, the number that counts up
+  because counting up looks expensive, and it caught the one honest case along with them. The rule
   is *once, on the measurement, on the element the screen is about*. A second sweep on the same
   screen means the screen has two subjects, which is a composition problem (§5.5), not a motion one.
 - Transform and opacity only, **with one exception: a disclosure may animate its own height** at
   150ms, matching the chevron beside it. The motion table above has always listed disclosure, and
-  every other way of animating one is unavailable — `interpolate-size` and `calc-size()` are
+  every other way of animating one is unavailable, `interpolate-size` and `calc-size()` are
   Chromium-only, and Merit is used on iPhones. The choice was never "transform or height", it was
   "height or nothing", and a section that snaps open gives no sense of where its content came from.
   Nothing else animates a size. No animated grid columns (§7).
@@ -1087,7 +1094,7 @@ The writing is half the signature, and in a health app it is also most of the et
 
 **Register.** Direct, quiet, technically literate. Second person. Complete sentences with real
 punctuation, including em dashes. Never exclamation marks. Never "Oops!". Never an emoji in the
-interface. The same in both languages — the German is written, not translated word-for-word.
+interface. The same in both languages. The German is written, not translated word-for-word.
 
 **Labels are lowercase mono.** `logged today` · `last session` · `not synced yet` · `community entry`.
 
@@ -1101,7 +1108,7 @@ but `82.4 kg · −0.3 vs. last week`.
 distinction is the whole rule.
 
 *Clear is required.* Whether a target was met, missed or exceeded is the primary thing the dashboard
-exists to answer. It is shown plainly and immediately — the bar, the emphasis, the number (§10.9).
+exists to answer. It is shown plainly and immediately, the bar, the emphasis, the number (§10.9).
 Hiding it out of delicacy makes the app useless. Consistency over time is worth showing too, and a
 completed session is worth acknowledging.
 
@@ -1109,7 +1116,7 @@ completed session is worth acknowledging.
 
 | Reports | Evaluates |
 |---|---|
-| `280 over` | `you went over — try to do better tomorrow` |
+| `280 over` | `you went over, try to do better tomorrow` |
 | `last session: 6 days ago` | `you're falling behind` |
 | `4 weeks · 3 sessions each` | `don't break your streak!` |
 | `183 g · 340 kcal` | a red badge on a food, a "healthy" score |
@@ -1120,7 +1127,7 @@ Concretely:
   Merit reports what a food contains; what to do with that is the user's business.
 - **A missed session is a fact, not a rebuke.** Name when the next one is due and stop there.
 - **Acknowledgement after a session is one quiet sentence**, and it credits the act, never the body.
-- **No comparison against other users**, no leaderboard, no group ranking — including once friends
+- **No comparison against other users**, no leaderboard, no group ranking, including once friends
   and groups arrive in a later iteration. Comparing training volume between friends is a different
   product with a different set of failure modes.
 - **Never pressure about tomorrow.** No notification about a streak at risk, no countdown, no daily
@@ -1139,7 +1146,7 @@ removed optimistically. Deleting a day's food by mis-tap and having no way back 
 this app can do.
 
 **Errors** name what failed and what to do, in one sentence, without apology. Failures that block
-nothing fail silently — a barcode that did not resolve is an empty state, not an error dialog.
+nothing fail silently. A barcode that did not resolve is an empty state, not an error dialog.
 
 **The footer is one quiet mono line** stating what Merit is and one true fact about it, plus the
 link to the source (§15).
@@ -1157,7 +1164,7 @@ Merit is installed to a home screen and used in places with no signal.
   all, it does so from a line in settings.
 - **Workout logging works fully offline.** Sets are written to IndexedDB (Dexie) immediately and
   queued for sync; the UI shows the queue state per §10.8 and never blocks on the network.
-- **Nutrition and barcode lookup may be online-only** — scanning needs the API. When offline, the
+- **Nutrition and barcode lookup may be online-only**: scanning needs the API. When offline, the
   scanner says so in place rather than failing at the moment of the tap.
 - **`localStorage` holds exactly one thing: the theme preference** (§2.5). Application data lives in
   IndexedDB or Supabase. Nothing else goes into `localStorage`, ever.
@@ -1165,7 +1172,7 @@ Merit is installed to a home screen and used in places with no signal.
   offline is a set logged at 18:42, not at 21:10 when the phone found wifi.
 - **A source link is visible to users of the hosted app.** Merit is open source (MIT); the link to
   the repository lives in the footer of the settings screen as a plain mono line. The licence does
-  not compel it — showing people the code behind a health tool holding their data does.
+  not compel it. Showing people the code behind a health tool holding their data does.
 
 ---
 
@@ -1179,7 +1186,7 @@ Run this before calling a screen done.
 - [ ] The accent clears 4.5:1 on `bg`, `surface`, `surface-2` **and** on `accent-soft`.
 - [ ] `bg` used as text on an `accent` fill clears 4.5:1 (the primary button inverts).
 - [ ] Every chart series is distinguishable from its neighbours **in greyscale**.
-- [ ] Hairlines are exempt and expected to be low-contrast (~1.2–1.6:1) — they are decorative
+- [ ] Hairlines are exempt and expected to be low-contrast (~1.2–1.6:1), they are decorative
       separators, not controls. Anything conveying *state* through its border must clear 3:1; that is
       why the focus ring is the accent and not `line`.
 
@@ -1224,7 +1231,7 @@ export const ratio = (a, b) => {
 
 ## 17. Anti-patterns
 
-If any of these appear, the design language has been left behind — regardless of whether the tokens
+If any of these appear, the design language has been left behind, regardless of whether the tokens
 are still in use.
 
 **Carried over from the house style**
@@ -1241,18 +1248,18 @@ are still in use.
 - A spinner where a real empty state belongs.
 - A theme that flashes the wrong colours on reload.
 - Content collapsed by default on a screen someone opened to read it. The component was never the
-  problem — a section that opens expanded and *can* be collapsed hides nothing and adds a control
+  problem. A section that opens expanded and *can* be collapsed hides nothing and adds a control
   (§10.11). Starting collapsed is what costs a tap to reach what they came for.
 
 **Merit's own**
 
-- A shadcn component shipped with its default styling — a `shadow-sm`, a `rounded-xl`, an `h-9`
+- A shadcn component shipped with its default styling, a `shadow-sm`, a `rounded-xl`, an `h-9`
   button, or shadcn's focus ring.
 - An input under 16px on mobile, or `user-scalable=no` used to hide the resulting zoom.
 - A touch target under 44px, or two targets closer than 8px.
 - `100vh` anywhere.
 - A green/amber/red scale on a number, or the accent used to mean "on target" (§2.3).
-- A screen where you cannot tell at a glance whether the target was met — the opposite failure, and
+- A screen where you cannot tell at a glance whether the target was met, the opposite failure, and
   the more likely one when this list is followed too literally.
 - A per-food score, a "healthy" badge, or any judgement attached to an item rather than a total.
 - A flame, a streak-at-risk notification, or a congratulation aimed at a body rather than an act.
@@ -1268,7 +1275,7 @@ are still in use.
 
 ---
 
-## Appendix A — `tokens.css`
+## Appendix A: `tokens.css`
 
 Drop-in, with Merit's Moss accent. Tokens are prefixed `--merit-` so they cannot collide with
 shadcn's or any library's own custom properties, and so a grep for the palette is unambiguous.
@@ -1279,7 +1286,7 @@ shadcn's or any library's own custom properties, and so a grep for the palette i
  * on <html> by the bootstrap script in index.html before the first paint.
  *
  * Neutrals follow the Vitesse editor themes, shared with NCLA.
- * Accent: Moss. Worst contrast ratio 5.31:1 — see DESIGN.md §16.3.
+ * Accent: Moss. Worst contrast ratio 5.31:1, see DESIGN.md §16.3.
  */
 
 :root {
@@ -1359,7 +1366,7 @@ appear in the same chart as each other.
 
 ---
 
-## Appendix B — Tailwind v4 and the shadcn bridge
+## Appendix B: Tailwind v4 and the shadcn bridge
 
 Tailwind v4 needs no config file. One `@theme inline` block maps the house tokens onto utilities, and
 one `:root` block maps shadcn's expected variable names onto the same tokens. Both resolve at runtime,
@@ -1391,7 +1398,7 @@ so the themes keep working.
   --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Code", Consolas, monospace;
   --font-serif: "IBM Plex Serif", ui-serif, Georgia, serif;
 
-  /* One step up from NCLA — a phone held at arm's length. See DESIGN.md §4.2. */
+  /* One step up from NCLA, a phone held at arm's length. See DESIGN.md §4.2. */
   --text-2xs: 0.75rem;
   --text-xs: 0.8125rem;
   --text-sm: 0.875rem;
@@ -1437,7 +1444,7 @@ so the themes keep working.
   --muted: var(--merit-surface-2);
   --muted-foreground: var(--merit-ink-muted);
 
-  --accent: var(--merit-surface-2);        /* hover fill — see note above */
+  --accent: var(--merit-surface-2);        /* hover fill, see note above */
   --accent-foreground: var(--merit-ink);
 
   --destructive: var(--merit-danger);
@@ -1508,7 +1515,7 @@ so the themes keep working.
 ```
 
 Long-form copy (privacy policy, imprint) gets a small hand-written prose class rather than the
-typography plugin — it is thirty lines and it stays under control:
+typography plugin, it is thirty lines and it stays under control:
 
 ```css
 .prose-app { font-size: var(--text-prose); line-height: 1.7; }
@@ -1527,7 +1534,7 @@ typography plugin — it is thirty lines and it stays under control:
 
 ---
 
-## Appendix C — React primitives
+## Appendix C: React primitives
 
 The components worth writing on day one. Everything else grows from them, and the shadcn components
 sit alongside rather than replacing them.
@@ -1544,7 +1551,7 @@ export function PageHeader({ title, lead }: { title: string; lead?: string }) {
   );
 }
 
-/** A bordered region. Borders define structure here — shadows are for overlays only.
+/** A bordered region. Borders define structure here, shadows are for overlays only.
  *  Used instead of shadcn's Card, which ships a shadow. */
 export function Panel({ children, className = "" }: { children: ReactNode; className?: string }) {
   return <div className={`rounded-lg border border-line bg-surface ${className}`}>{children}</div>;
@@ -1565,7 +1572,7 @@ export function SectionHead({ label, hint }: { label: string; hint?: ReactNode }
 }
 
 /** A list rendered as bordered rows rather than a grid of cards.
- *  Rows are 52px minimum on touch — see DESIGN.md §5.2. */
+ *  Rows are 52px minimum on touch, see DESIGN.md §5.2. */
 export function Rows({ children }: { children: ReactNode }) {
   return (
     <ul className="divide-y divide-line overflow-hidden rounded-lg border border-line bg-surface">
@@ -1610,7 +1617,7 @@ export function Value({ n, unit, size = "base" }: { n: string; unit?: string; si
 }
 ```
 
-And the accent edge, the one piece of pure voice — in Merit it carries the dashboard's single
+And the accent edge, the one piece of pure voice, in Merit it carries the dashboard's single
 sentence about the day:
 
 ```tsx
@@ -1625,7 +1632,7 @@ export function Statement({ children }: { children: ReactNode }) {
 
 ---
 
-## Appendix D — Starting work
+## Appendix D: Starting work
 
 1. `tokens.css` and this file into the repo. `DESIGN.md` at the root, `tokens.css` in `src/styles/`.
 2. Install Tailwind v4, then `npx shadcn@latest init`. Answer its questions, then **overwrite the CSS
@@ -1635,7 +1642,7 @@ export function Statement({ children }: { children: ReactNode }) {
 4. Install the three IBM Plex packages from npm; import only the weights in use.
 5. Drop in the primitives from Appendix C.
 6. Add shadcn components one at a time, as screens need them, applying §3.2 in the same commit.
-7. Build the dashboard first — it uses more of this document than any other screen. Then read §17
+7. Build the dashboard first, it uses more of this document than any other screen. Then read §17
    with it open at 375px, in German, in both themes, and fix whatever is listed.
 
 Two habits worth keeping from the start: no literal colour ever reaches a component, and every piece

@@ -60,13 +60,13 @@ const draftOf = (routine: Routine): Draft => ({
  * in it.
  *
  * One screen asked for a name, a set of weekdays and a list of exercises all at
- * once — three decisions of different sizes in one wall — and it put the days
+ * once, three decisions of different sizes in one wall, and it put the days
  * *after* the exercises, so planning a routine meant finishing the longest part
  * before the app would take the shortest. Naming it and saying when comes first,
  * because that is the order anybody thinks in.
  *
  * **Nothing is written until Save.** The old screen saved every field as it was
- * touched, which left nothing for a cancel button to do — so there was no cancel
+ * touched, which left nothing for a cancel button to do, so there was no cancel
  * button, only a delete and a way back, which is what you are reduced to
  * offering when arriving on a screen has already changed the data. The exercises
  * go over in one call (`set_routine_exercises`) so a save cannot half-apply.
@@ -93,7 +93,7 @@ export default function RoutineEditorPage() {
     )
   }
 
-  // Keyed on the routine, so the draft below is simply its initial state — no
+  // Keyed on the routine, so the draft below is simply its initial state, no
   // effect copying one into the other, and no window where the screen is
   // holding a draft of something else.
   return (
@@ -199,7 +199,7 @@ function Editor({
                   stray. A weekday strip that breaks its line has to be read
                   twice, and the seventh day looks like a different kind of
                   thing. Flush children with a divider, the segmented control's
-                  shape (§10.7) — several can be on at once, which is the only
+                  shape (§10.7), several can be on at once, which is the only
                   way it differs. */}
               <div
                 role="group"
@@ -390,7 +390,7 @@ function PlannedExercise({
 }) {
   const { t } = useTranslation()
   // One field per set, because a routine that can only say `3 × 8` cannot say
-  // 12/10/8 — which is what most people actually write down.
+  // 12/10/8, which is what most people actually write down.
   const [reps, setReps] = useState(entry.setReps.map(String))
 
   function commit(next: string[]) {

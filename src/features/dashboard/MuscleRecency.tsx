@@ -10,7 +10,7 @@ import type { SessionSets } from '@/lib/training'
  *
  * The picture says it and nothing repeats it in words. A caption under a
  * drawing this legible is the screen explaining its own illustration, and
- * naming the coldest region in a sentence turns a glance into a verdict — which
+ * naming the coldest region in a sentence turns a glance into a verdict, which
  * is the one thing this is not for. The sentence survives as the map's label,
  * where somebody who cannot see the picture still gets it.
  *
@@ -74,7 +74,7 @@ export function MuscleRecency({
         regions={regions}
         reveal
         label={
-          line ? `${t('pages.dashboard.recency.label')} — ${line}` : t('pages.dashboard.recency.label')
+          line ? `${t('pages.dashboard.recency.label')}, ${line}` : t('pages.dashboard.recency.label')
         }
         className="h-72"
       />

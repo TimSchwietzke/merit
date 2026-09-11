@@ -9,7 +9,7 @@ import { Sheet } from '@/components/ui/sheet'
  *
  * Fourteen chips at the 44px floor is four wrapped rows and a quarter of a
  * 375px screen spent before the first result. This gives that space back for
- * one tap — on the condition §10.11 attaches to it: **the active count is on
+ * one tap. On the condition §10.11 attaches to it: **the active count is on
  * the button**, so the state is still readable without opening anything. A
  * filter control that hides how many filters are on is the `select` that
  * section rejected wearing an icon.

@@ -4,8 +4,8 @@ import { Label as LabelPrimitive } from 'radix-ui'
 import { cn } from '@/lib/utils'
 
 /**
- * shadcn's `label` over the Radix primitive — kept for the `htmlFor`/click
- * wiring — restyled to Merit's label: mono `text-2xs` in `ink-faint`, never
+ * shadcn's `label` over the Radix primitive, kept for the `htmlFor`/click
+ * wiring, restyled to Merit's label: mono `text-2xs` in `ink-faint`, never
  * uppercase with wide tracking (DESIGN.md §10.6, §17).
  */
 export function Label({

@@ -12,7 +12,7 @@ import {
  * A barcode to a food, in the order GOAL.md §4 sets out.
  *
  * 1. Merit's own catalogue. Every resolved product is written back here, so the
- *    same barcode never hits Open Food Facts twice — for this user or for
+ *    same barcode never hits Open Food Facts twice, for this user or for
  *    anyone else, since the catalogue is shared.
  * 2. Open Food Facts.
  * 3. Neither: the caller offers manual entry, which is how the catalogue grows.

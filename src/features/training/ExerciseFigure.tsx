@@ -3,7 +3,7 @@ import { onBody, worksRegions } from '@/lib/muscles'
 import type { ExerciseRef } from '@/features/training/useWorkout'
 
 /**
- * What an exercise looks like — the picture beside its name.
+ * What an exercise looks like, the picture beside its name.
  *
  * One slot, two sources. If a schematic exists for this lift it is shown; if
  * not, the body with its worked muscles filled in stands in. Today that is
@@ -26,7 +26,7 @@ export function ExerciseFigure({
   exercise: Pick<ExerciseRef, 'primaryMuscles' | 'secondaryMuscles'> & {
     imageUrl?: string | null
   }
-  /** Names the picture — the exercise's own name in the reader's language. */
+  /** Names the picture. The exercise's own name in the reader's language. */
   label: string
   className?: string
 }) {

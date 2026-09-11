@@ -11,7 +11,7 @@ import { SessionBar } from '@/features/training/SessionBar'
 import { useActiveSession } from '@/features/training/useActiveSession'
 
 /**
- * The frame every route renders inside. `dvh`, never `vh` — mobile browser
+ * The frame every route renders inside. `dvh`, never `vh`: mobile browser
  * chrome changes height as you scroll and `100vh` cuts the layout off exactly
  * when the keyboard is open (DESIGN.md §8).
  *
@@ -55,8 +55,8 @@ function Frame() {
     // One attribute rebinds `accent` for everything inside it (tokens.css).
     <div data-domain={domainOf(pathname)} className="contents">
       {/* 
-          The domain is the part of the body the screen is about — what you eat,
-          what you lift, what you weigh — so the colour is never decoration and
+          The domain is the part of the body the screen is about, what you eat,
+          what you lift, what you weigh, so the colour is never decoration and
           never arbitrary. The dashboard has none: it reports on all three, and
           each block there carries its own. */}
       <div className="min-h-[100dvh] lg:flex">
@@ -73,7 +73,7 @@ function Frame() {
             {/* No spinner, and no longer nothing either. A split chunk arrives
                 in a frame or two on a good connection and in rather more on a
                 gym one, and a blank `main` for that long is the first half of
-                the flicker — the second being the screen's own data landing.
+                the flicker. The second being the screen's own data landing.
                 A shape holds the space for both. */}
             <Suspense fallback={<RouteSkeleton />}>
               <Outlet />

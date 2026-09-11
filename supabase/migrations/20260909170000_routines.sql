@@ -2,7 +2,7 @@
 -- routines, routine_exercises, the weekly plan, and planned sets
 -- (GOAL.md §5, §7).
 --
--- A routine is a reusable training day — "Oberkörper 1" — holding exercises in
+-- A routine is a reusable training day, "Oberkörper 1", holding exercises in
 -- order with a target number of sets and reps. Starting one materialises those
 -- targets as real, not-yet-done sets on today's workout, which is what makes
 -- "change it for today only" and "change it from now on" two different writes
@@ -145,7 +145,7 @@ alter table public.workout_sets
 comment on column public.workout_sets.done is
   'False for a set a routine planned that has not been performed. Defaults true so every set logged before routines existed stays what it was: done.';
 
--- Every figure Merit reports — volume, the comparison line, the dashboard —
+-- Every figure Merit reports, volume, the comparison line, the dashboard:
 -- counts done sets only. A plan is not an achievement.
 create index workout_sets_done_idx on public.workout_sets (user_id, done);
 

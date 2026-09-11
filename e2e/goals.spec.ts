@@ -3,7 +3,7 @@ import { expect, stubBackend, test, waitForScreen } from './fixtures'
 /**
  * The targets screen has two modes and the captures only ever showed one of
  * them, because the seeded goal is a calculated one. The entered mode is the
- * branch that parses what the user typed — and it threw on render the first
+ * branch that parses what the user typed, and it threw on render the first
  * time anything asked for a whole number.
  */
 test('both target modes render, including the one that parses what you type', async ({ page }) => {

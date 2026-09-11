@@ -4,13 +4,13 @@ import { Toaster as Sonner } from 'sonner'
 /**
  * The toast layer. sonner is used for exactly one thing (DESIGN.md §3.3: "use
  * sparingly. Merit prefers in-place state to notifications"): the undo that has
- * to follow every deletion (§14). Nothing else in Merit toasts — a failed save
+ * to follow every deletion (§14). Nothing else in Merit toasts, a failed save
  * is a line under the field that failed, not a notification.
  *
  * `unstyled` per §3.2: sonner's own look is a white rounded-xl card with a
  * shadow and its own type scale, none of which is Merit's. The classes below
  * are the whole appearance. The shadow survives because a toast is a true
- * overlay — the one place §6 allows one.
+ * overlay, the one place §6 allows one.
  */
 /** The 56px tab bar, the home indicator, a gutter, and the toast's own height. */
 const OVER_TAB_BAR =
@@ -28,7 +28,7 @@ export function Toaster() {
       mobileOffset={{ bottom: OVER_TAB_BAR, left: '1rem', right: '1rem' }}
       // sonner's surface, border and radius come from these four variables, so
       // the house tokens are handed over rather than fought with. `unstyled`
-      // would take its positioning with its look — the toast then lays out from
+      // would take its positioning with its look, the toast then lays out from
       // the top of a zero-height container and lands under the tab bar.
       style={
         {

@@ -16,7 +16,7 @@ import {
 import { supabase } from '@/lib/supabase'
 
 /**
- * The exercise catalogue: search, two facets, grouped results, recents on top —
+ * The exercise catalogue: search, two facets, grouped results, recents on top:
  * the browse screen §10.11 was written for.
  *
  * Grouped by muscle group, each group collapsible and open until somebody folds
@@ -30,7 +30,7 @@ import { supabase } from '@/lib/supabase'
  * facets still holds the moment a second one earns its place.
  *
  * It is a component rather than a screen because it is needed in two places
- * that disagree about what a pick costs. Picking for the day is a navigation —
+ * that disagree about what a pick costs. Picking for the day is a navigation:
  * you leave, and the exercise opens on the day you left for. Picking for a
  * routine is one item in a draft you are still assembling, and sending you back
  * and forth through this screen to add four lifts was the flow it replaced, so
@@ -45,7 +45,7 @@ const GROUP_ORDER = ['legs', 'glutes', 'back', 'chest', 'shoulders', 'arms', 'co
 /**
  * Which groups the reader folded, kept for the session rather than in storage.
  * §15 allows exactly one thing in `localStorage` and this is not it, and a
- * folded section is not application data — it is where somebody left a screen.
+ * folded section is not application data, it is where somebody left a screen.
  */
 const folded = new Set<string>()
 
@@ -74,7 +74,7 @@ export function ExerciseCatalogue({
   }
 
   const { history } = useWorkout(date)
-  // The whole catalogue, once — around nine hundred rows since the import, and
+  // The whole catalogue, once. Around nine hundred rows since the import, and
   // roughly 130KB of JSON. Still one request rather than a round trip per
   // keystroke on a gym connection.
   useEffect(() => {
@@ -173,7 +173,7 @@ export function ExerciseCatalogue({
             <span className="block truncate">{name(exercise)}</span>
             {/* What it works, as words rather than as a drawing. A body per row
                 is ninety paths per row, and this list runs to nine hundred of
-                them — the silhouette belongs where one exercise is being looked
+                them. The silhouette belongs where one exercise is being looked
                 at, not where they are being scanned. */}
             {exercise.primaryMuscles.length > 0 ? (
               <span className="block truncate font-mono text-2xs text-ink-faint">

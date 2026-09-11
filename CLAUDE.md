@@ -10,10 +10,10 @@ loses and the component is overridden.
 ## Stack
 
 - **Vite + React 19 + TypeScript** (strict mode, no `any`)
-- **Tailwind CSS + shadcn/ui** — components are copied into `src/components/ui`
+- **Tailwind CSS + shadcn/ui**: components are copied into `src/components/ui`
   and owned by this repo, not imported from a library
-- **Supabase** — Postgres, Auth, Storage, Edge Functions. EU region (Frankfurt)
-- **react-i18next** — German and English
+- **Supabase**: Postgres, Auth, Storage, Edge Functions. EU region (Frankfurt)
+- **react-i18next**: German and English
 - **Recharts** for charts
 - **Dexie.js** (IndexedDB) for offline workout logging
 - **Vitest** for unit tests, **Playwright** for end-to-end tests
@@ -60,7 +60,7 @@ src/
 supabase/
   migrations/        SQL migrations, including RLS policies
   functions/         Edge Functions
-DESIGN.md            design system — root, read before any UI work
+DESIGN.md            design system, root, read before any UI work
 docs/                GOAL.md
 ```
 
@@ -77,7 +77,7 @@ docs/                GOAL.md
   goes in plain functions in `lib/`, not inside components. These are the
   functions that get unit tests.
 - Dates: store as `date` in Postgres and treat "today" in the user's local
-  timezone. Never rely on UTC for day boundaries — a meal logged at 23:30 belongs
+  timezone. Never rely on UTC for day boundaries, a meal logged at 23:30 belongs
   to that day.
 - Money-like precision matters for nutrition: round only for display, never in
   storage or intermediate calculations.
@@ -86,7 +86,7 @@ docs/                GOAL.md
 
 - Conventional Commits: `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `chore:`
 - Work on branches, merge into `main` via pull request
-- `main` must always be deployable — Vercel deploys it automatically
+- `main` must always be deployable, Vercel deploys it automatically
 
 ### Testing
 
@@ -117,9 +117,9 @@ docs/                GOAL.md
 
 ## External data sources
 
-- **Open Food Facts** — barcode lookups, client-side, custom `User-Agent`
+- **Open Food Facts**: barcode lookups, client-side, custom `User-Agent`
   required, 15 req/min/IP. ODbL: the app must show attribution and a link.
-- **USDA FoodData Central** — text search for whole foods, via Edge Function
+- **USDA FoodData Central**: text search for whole foods, via Edge Function
   proxy, 1000 req/hour. CC0: no attribution required.
 - Cache every resolved product into the `foods` table so the same lookup never
   hits an external API twice.

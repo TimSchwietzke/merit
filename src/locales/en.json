@@ -266,7 +266,6 @@
       },
       "add": {
         "title": "Add an exercise",
-        "lead": "Pick from the catalogue everyone shares, or add one that is missing.",
         "search": "search",
         "searching": "searching",
         "noResults": "no exercise matches",
@@ -643,12 +642,12 @@
     },
     "error": {
       "title": "That did not load",
-      "lead": "Something went wrong on the way to this screen. It has been logged. Going back to the start usually clears it.",
+      "lead": "Something went wrong on the way to this screen. Going back to the start usually helps.",
       "reload": "Reload",
       "home": "Back to the start",
       "stale": {
         "title": "merit was updated",
-        "lead": "This tab is running an older version and the screen you asked for has moved. Reloading picks up the new one; nothing you logged is affected."
+        "lead": "This tab is still running an older version. Reloading fetches the new one; your entries stay as they are."
       }
     },
     "legal": {

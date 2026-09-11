@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom'
 /**
  * One domain, reported on the one screen that reports on all of them.
  *
- * The dashboard owns no colour of its own — it is where the four meet — so each
+ * The dashboard owns no colour of its own, it is where the four meet, so each
  * card carries `data-domain` and rebinds `accent` for everything inside it
  * (`tokens.css`). Four cards, four hues, no component here knowing which.
  *
@@ -20,7 +20,7 @@ export function DomainCard({
   note,
   children,
 }: {
-  /** Omitted for nutrition, which is moss — the default `accent`. */
+  /** Omitted for nutrition, which is moss, the default `accent`. */
   domain?: 'training' | 'weight' | 'cardio'
   to: string
   label: string
@@ -36,10 +36,12 @@ export function DomainCard({
       data-domain={domain}
       // `h-full`: inside the carousel every card is as tall as the tallest, and
       // a short one that does not fill its slot makes the peek look broken.
-      // `rounded-xl` and no border: the fill alone is enough separation on this
-      // ground, and a hairline around each of four cards is what turns a strip
-      // into a row of boxes.
-      className="flex h-full flex-col gap-3 rounded-xl bg-surface p-5 transition-colors
+      // No border: the fill alone is enough separation on this ground, and a
+      // hairline around each of four cards is what turns a strip into a row of
+      // boxes. The corner is the container radius the whole app uses, though,
+      // because a 22px filled rectangle with nothing drawn on it is the shape
+      // every generated interface ships.
+      className="flex h-full flex-col gap-3 rounded-lg bg-surface p-5 transition-colors
                  [transition-duration:140ms] hover:bg-surface-2 active:bg-surface-2
                  active:[transition-duration:0ms]"
     >

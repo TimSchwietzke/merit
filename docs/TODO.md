@@ -26,23 +26,17 @@ somebody something.
 
 ## Wording: small, and the cheapest wins here
 
-### Remove the explanatory in-between texts
-- Sentences like *"The average is the mean of every weigh-in in the 7 days
-  ending on that day. Days without one are left out, not filled in."*
-  (`pages.weight.averageNote`) explain a chart that should explain itself.
-- Sweep every long body string in `de.json`/`en.json`, keep the ones that carry
-  legal or safety weight (consent, deletion, the shared-catalogue warning), and
-  cut or shorten the rest. A screen that has to describe itself is a screen
-  that needs a better label, not a better paragraph.
-- Accessibility `aria` descriptions stay, since they are not visible prose.
+### What is left of the anti-slop pass
+The wording pass, the em dash sweep and the radius ladder are done. Two things
+were looked at and deliberately left alone:
 
-### Make "volume" and "sessions" mean something
-- `TrainingStats` shows *volumen* and *einheiten* side by side with the same
-  "/ woche" underneath and no unit on the first. Nobody can tell what either
-  number is counting.
-- Volume is tonnes moved per week (sets × reps × weight); sessions is how many
-  times you trained. Say so in the label or in one word beneath it, and put the
-  unit on the number.
+- **Mono density.** 143 `font-mono` against three uses of the serif statement
+  looked lopsided until it was checked against what each face is for: the mono
+  is on numbers, units, counts and dates, which is measurement and exactly its
+  job (`PRODUCT.md`, Brand Commitments), and the serif carries one sentence on
+  the two screens that have one. Nothing to change.
+- **Em dashes in the legal texts.** 17 in `documents.ts`, in prose a German
+  legal generator produced. Left as they are, on the owner's call.
 
 ---
 

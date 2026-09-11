@@ -63,8 +63,8 @@ export function useConsent(): Consent {
 
   const give = useCallback(async () => {
     if (!userId) return false
-    // Update, not upsert: `profiles` has no insert policy on purpose — the row
-    // is written by a trigger on auth.users — and PostgREST sends an upsert as
+    // Update, not upsert: `profiles` has no insert policy on purpose, the row
+    // is written by a trigger on auth.users, and PostgREST sends an upsert as
     // INSERT … ON CONFLICT, which that policy refuses before it ever reaches
     // the update. `select` so a write that matched no row is a failure here
     // rather than a consent silently recorded nowhere.

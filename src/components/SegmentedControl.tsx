@@ -9,11 +9,11 @@ import { cn } from '@/lib/utils'
  *
  * Built on Radix `ToggleGroup type="single"`, which renders `role="radiogroup"`
  * with `role="radio"` + `aria-checked` on each option, and gives arrow-key
- * roving focus for free. That is the point of taking the primitive at all —
+ * roving focus for free. That is the point of taking the primitive at all:
  * the exclusivity is announced ("2 of 3") rather than left for the user to
  * infer from three independent toggle buttons.
  *
- * Above four options this becomes a `select` — at 375px a five-segment control
+ * Above four options this becomes a `select`: at 375px a five-segment control
  * gives 60px segments.
  */
 export interface Segment<T extends string> {
@@ -40,7 +40,7 @@ export function SegmentedControl<T extends string>({
       type="single"
       value={value}
       // Radix reports '' when the active option is pressed again. A segmented
-      // control has no empty state — there is always a theme — so that is
+      // control has no empty state, there is always a theme, so that is
       // swallowed rather than passed on as a change.
       onValueChange={(next) => {
         if (next) onChange(next as T)

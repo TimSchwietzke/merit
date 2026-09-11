@@ -6,7 +6,7 @@ import { SessionContext, type SessionState } from '@/features/auth/useSession'
 
 /**
  * Holds the auth session for the whole app. One subscription, one source of
- * truth — `onAuthStateChange` also fires on token refresh and on sign-out in
+ * truth, `onAuthStateChange` also fires on token refresh and on sign-out in
  * another tab, so nothing else needs to poll.
  */
 export function SessionProvider({ children }: { children: ReactNode }) {

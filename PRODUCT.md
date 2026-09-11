@@ -36,7 +36,7 @@ Three things a neighbouring tracker could not truthfully copy without changing
 what it is:
 
 - **It is honest about what it does not know.** A nutrient Open Food Facts has
-  no value for is reported as missing — `partial · 3 of 7 foods` — never summed
+  no value for is reported as missing, `partial · 3 of 7 foods`: never summed
   as zero. Every competitor quietly rounds absence down to nought, because a
   complete-looking number is easier to sell than a true one.
 - **It never judges a body or a day.** No flame, no streak-at-risk
@@ -46,11 +46,11 @@ what it is:
   product rule, not a stylistic preference.
 
   **A streak is wanted and is not a violation of it.** The owner asked for one
-  for both nutrition and training, and the line is not the count — it is the
+  for both nutrition and training, and the line is not the count, it is the
   pressure. A number that says what happened is a fact; a flame, a countdown to
   losing it, or a notification about it is the app leaning on somebody, and
-  those stay out. The streak is rendered in merit's own idiom — the mosaic strip
-  and a mono line — never as a badge.
+  those stay out. The streak is rendered in merit's own idiom, the mosaic strip
+  and a mono line, never as a badge.
 
   Each domain counts its own behaviour. Nutrition counts days with food logged,
   because logging *is* the behaviour there. Training counts weeks in which the
@@ -85,7 +85,7 @@ weekly pattern with per-date exceptions; set logging with reps, weight and
 optional RIR; weight charts; German/English; light and dark.
 
 Still to build for MVP: strength-progression charts, USDA text search, offline
-set logging (Dexie/IndexedDB), the PWA manifest, and the legal set — privacy
+set logging (Dexie/IndexedDB), the PWA manifest, and the legal set, privacy
 policy, imprint, consent, JSON export, account deletion.
 
 Deliberately out of scope, and future work must not add them: meal photos, meal
@@ -93,7 +93,7 @@ planning, coaching or AI suggestions, any dietary advice, public sign-up,
 payments.
 
 Terminology that has been argued over and settled: a reusable session is a
-**routine**, never a "training day" — you do not add a day, you add the thing
+**routine**, never a "training day", you do not add a day, you add the thing
 you do on it. A **session** is one instance of a routine on a date. Sets are
 **planned** when a routine is started and **logged** when they are performed.
 
@@ -106,14 +106,14 @@ not an acceptable answer.
 
 ## Brand Commitments
 
-- The product is **`merit`**, lowercase, everywhere it renders — including the
+- The product is **`merit`**, lowercase, everywhere it renders, including the
   document `<title>`. Capitalised only in legal text and the README, where it is
   a proper noun in someone else's sentence.
 - The name is an acronym: **M**eals, **E**xercise, **R**eps, **I**ntake,
   **T**raining.
 - **Moss green** is the brand colour and stays the brand colour.
 - **Navigation and labels are lowercase.** Not Title Case anywhere in chrome.
-- **Mono for anything machine-shaped** — numbers, units, counts, dates, labels.
+- **Mono for anything machine-shaped**: numbers, units, counts, dates, labels.
   Tabular figures so values do not jitter as they change.
 - **Voice:** direct, quiet, technically literate, second person. Complete
   sentences with real punctuation. Never an exclamation mark, never "Oops!",
@@ -121,15 +121,15 @@ not an acceptable answer.
 - **Binding visual references supplied by the user:** MCI (Personal Training AI,
   German App Store) for its per-section colour identity, card language and
   chart-forward composition; Apple's own apps for structural discipline. Neither
-  is to be cloned — MCI's streak flame and challenge gamification are
+  is to be cloned. MCI's streak flame and challenge gamification are
   specifically excluded by the no-judgement rule above.
 
 ## Evidence on Hand
 
-- `docs/GOAL.md` — scope, users, data sources, schema intent, milestones.
-- `CLAUDE.md` — working agreement, stack, hard rules.
-- `DESIGN.md` — the incumbent visual system, being replaced.
-- `e2e/shots/` — current-state captures of every screen, both themes, both
+- `docs/GOAL.md`: scope, users, data sources, schema intent, milestones.
+- `CLAUDE.md`: working agreement, stack, hard rules.
+- `DESIGN.md`: the incumbent visual system, being replaced.
+- `e2e/shots/`: current-state captures of every screen, both themes, both
   languages, five widths.
 - 34 seeded exercises in the database; a real Supabase project in the EU region;
   a live Vercel deployment.
@@ -153,7 +153,7 @@ or training authority. The app has no expert behind it and must never imply one.
 
 WCAG AA contrast on all text. 44px minimum touch targets with 8px minimum
 separation. `prefers-reduced-motion` honoured. No information carried by colour
-alone — every chart series and every state is distinguishable without hue.
+alone. Every chart series and every state is distinguishable without hue.
 Keyboard focus visible everywhere. Screen-reader labels on every icon-only
 control, and on any figure a sighted user reads from a shape rather than from
 text.

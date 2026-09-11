@@ -5,7 +5,7 @@ import { Label } from '@/components/ui/label'
 import { cn } from '@/lib/utils'
 
 /**
- * The number field — Merit's most-used control (DESIGN.md §10.5). A weight, a
+ * The number field, Merit's most-used control (DESIGN.md §10.5). A weight, a
  * portion, a rep count: mono tabular figures, right-aligned, with the unit as a
  * static `ink-faint` suffix inside the field rather than as a second label.
  *
@@ -54,7 +54,7 @@ export function NumberField({
             // Reserves the unit's column so a four-digit value cannot run
             // underneath it. `md:` as well: the input's own `md:px-3` sits in
             // a media query and would otherwise win back the right padding
-            // from `lg` up — where the collision is invisible until someone
+            // from `lg` up. Where the collision is invisible until someone
             // types four digits.
             'pr-12 text-right font-mono tabular-nums md:pr-12',
             error && 'border-danger',

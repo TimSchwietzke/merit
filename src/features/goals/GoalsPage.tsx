@@ -48,7 +48,7 @@ const SHARE_LIMITS = { min: 5, max: 70, decimals: 0 } as const
 /**
  * What a day is measured against.
  *
- * The calculated mode shows its working — resting, maintenance, then the shift —
+ * The calculated mode shows its working, resting, maintenance, then the shift,
  * because the target rests on an equation and a coarse activity multiplier, and
  * a single number with nothing beside it is one the user has to take on trust.
  *
@@ -440,7 +440,7 @@ function TargetsSection({
  *
  * Protein comes from body weight, fat from a share of the day's energy, and
  * carbohydrate from what is left. Both knobs are on screen with their defaults
- * filled in, and the three figures it produces stay editable — the arithmetic
+ * filled in, and the three figures it produces stay editable, the arithmetic
  * is the app's, the decision is not.
  */
 function MacroCalculator({

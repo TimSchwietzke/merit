@@ -8,7 +8,7 @@
 -- from the app's point of view nothing had happened.
 --
 -- A timestamp rather than a boolean: it answers the same question by being
--- null or not, and it also records when — which is the difference between a
+-- null or not, and it also records when, which is the difference between a
 -- session that was finished and one that was abandoned three days ago. It also
 -- avoids a second column called `done` sitting one join away from
 -- `workout_sets.done` and meaning something else.

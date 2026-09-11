@@ -3,7 +3,7 @@
  * `data-theme` attribute on <html>. See DESIGN.md §2.5.
  *
  * The pre-paint half of this lives inline in index.html and is duplicated on
- * purpose — it runs before the bundle exists, so it cannot import from here.
+ * purpose, it runs before the bundle exists, so it cannot import from here.
  * Any change to the resolution rules below has to be mirrored there.
  */
 
@@ -25,7 +25,7 @@ const THEME_COLOR: Record<Theme, string> = {
 
 /**
  * The one thing Merit keeps in localStorage. The theme is chrome, not
- * application data, and it has to be readable synchronously before paint —
+ * application data, and it has to be readable synchronously before paint:
  * see DESIGN.md §15. Nothing else goes in here, ever.
  */
 export function getStoredPref(): ThemePref {
@@ -43,7 +43,7 @@ export function getStoredPref(): ThemePref {
  *
  * The distinction matters for sync: `profiles.theme` is the preference that
  * travels between devices, but applying it over a local choice would repaint
- * after first paint — the flash §17 calls out. So the stored value wins where
+ * after first paint, the flash §17 calls out. So the stored value wins where
  * it exists, and the profile only seeds a device that has never chosen.
  */
 export function hasStoredPref(): boolean {

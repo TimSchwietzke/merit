@@ -7,7 +7,7 @@ import { ATWATER } from '@/lib/nutrition'
  * What this file does *not* do is recommend anything. It turns figures the user
  * entered about themselves into an energy figure and shows its working; it does
  * not decide what somebody should eat (CLAUDE.md hard rule 5). Macros are typed
- * in both modes for the same reason — GOAL.md §5 asks for the *calorie* goal to
+ * in both modes for the same reason, GOAL.md §5 asks for the *calorie* goal to
  * be calculable, and picking a protein split for a person is advice.
  */
 
@@ -27,8 +27,8 @@ export const ACTIVITY_LEVELS: readonly ActivityLevel[] = [
 export const DIRECTIONS: readonly Direction[] = ['lose', 'maintain', 'gain']
 
 /**
- * The usual multipliers on resting expenditure. They are coarse by nature —
- * anybody's real figure sits somewhere between two of them — which is why the
+ * The usual multipliers on resting expenditure. They are coarse by nature:
+ * anybody's real figure sits somewhere between two of them, which is why the
  * screen shows the maintenance number it derived rather than only the target.
  */
 export const ACTIVITY_FACTORS: Record<ActivityLevel, number> = {
@@ -160,7 +160,7 @@ export interface Progress {
  * A total against a target (DESIGN.md §10.9).
  *
  * Undershooting and overshooting are the same arithmetic, but the screen treats
- * them differently — a day in progress is not a failed day — so the overshoot
+ * them differently, a day in progress is not a failed day, so the overshoot
  * is separated out rather than left as a fraction above 1 for a bar to clamp.
  */
 export function progress(total: number, target: number): Progress {
@@ -177,7 +177,7 @@ export function progress(total: number, target: number): Progress {
  * Starting points for the macro split, both editable on screen.
  *
  * 1.8 g of protein per kilogram and 30% of energy from fat are the reference
- * points these calculators conventionally use — protein scaled to body mass,
+ * points these calculators conventionally use, protein scaled to body mass,
  * fat as a share of the day. Neither is Merit telling anybody what to eat: they
  * are the two knobs of an arithmetic split, shown next to the result, and the
  * three figures they produce stay editable afterwards.

@@ -29,7 +29,7 @@ import {
 /**
  * Body weight: where it is now, where it is going, and the day being logged.
  *
- * Top to bottom — the last weigh-in with its change against last week, the
+ * Top to bottom. The last weigh-in with its change against last week, the
  * trend, the form, then the log. The form sits in the lower half on purpose:
  * the top of a phone screen is the hardest place to reach one-handed and this
  * is a screen used standing on a scale (DESIGN.md §7).
@@ -53,13 +53,13 @@ export default function WeightPage() {
   const points = buildSeries(entries, from, today)
 
   // The chart and the log show the same stretch of time. They used to disagree
-  // — thirty days above, everything below — and "everything" is a hundred rows
+  // (thirty days above, everything below) and "everything" is a hundred rows
   // by spring. The range is the answer to how long the list is, which is why
   // its control appears at both ends of the screen: reading the log and having
   // to scroll back to the chart to change what the log shows is the annoyance.
   const visible = entries.filter((entry) => daysBetween(from, entry.date) >= 0)
 
-  // The range's own numbers. Only weigh-ins that happened — a day nobody stood
+  // The range's own numbers. Only weigh-ins that happened, a day nobody stood
   // on the scale is not a weight, and averaging it in as one would be the same
   // mistake as summing a missing nutrient as zero.
   const logged = visible.filter((entry) => entry.weightKg !== null)
@@ -179,7 +179,7 @@ export default function WeightPage() {
       </section>
 
       {/* Two readings over the range, in the same cards training and nutrition
-          use — the screen had a chart and no numbers off it, so the range
+          use. The screen had a chart and no numbers off it, so the range
           control changed a picture and nothing you could quote. */}
       {logged.length > 1 ? (
         <section className="mt-6 grid grid-cols-2 gap-3">

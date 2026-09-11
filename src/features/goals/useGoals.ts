@@ -9,7 +9,7 @@ import type { ActivityLevel, Direction, Goal, GoalMode, Sex, Targets } from '@/l
  * Everything the targets screen reads and writes: the target history, the body
  * figures the calculation needs, and the latest weigh-in.
  *
- * Weight is not asked for again — it is already logged, and a second copy would
+ * Weight is not asked for again, it is already logged, and a second copy would
  * be one the user has to remember to keep in step (GOAL.md §7 keeps a fact in
  * one place).
  */
