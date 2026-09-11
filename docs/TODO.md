@@ -110,6 +110,14 @@ somebody something.
   licence position of the data sources.
 - Clean-up pass: dead files, stale comments, the `NotBuiltYet` placeholders,
   and `docs/` gaining an index now that it holds five documents.
+- `humans.txt` beside the existing `robots.txt`: who built it, what it is built
+  with, what the data sources are. Ten lines, and a portfolio reader is exactly
+  the person who opens it.
+- **No `llms.txt`.** It is a map for assistants and crawlers to read a site, and
+  merit is a login wall that asks not to be indexed (`robots.txt`,
+  `meta robots`). Publishing one would advertise a service nobody outside the
+  household can reach, and would sit against the invite-only position in
+  `LEGAL-INPUTS.md` §1.
 
 ### Ultrareview
 - Run `/code-review ultra` over the whole branch history once the MVP is
