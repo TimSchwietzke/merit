@@ -43,7 +43,8 @@
       "next": "Next week",
       "label": "this week"
     },
-    "cancel": "Cancel"
+    "cancel": "Cancel",
+    "backTo": "back to {{screen}}"
   },
   "auth": {
     "signIn": {
@@ -567,7 +568,7 @@
           "field": "new address",
           "save": "Change address",
           "saving": "Changing …",
-          "sent": "Confirmation email on its way. Open the link in it — check the spam folder too.",
+          "sent": "Confirmation email on its way. Open the link in it, and check the spam folder too.",
           "unchanged": "That is the address you are already signed in with.",
           "failed": "The address was not changed. Check your connection and try again."
         },

@@ -11,8 +11,8 @@ import { supabase } from '@/lib/supabase'
 /**
  * The account screen is an index and nothing else.
  *
- * It used to hold six unrelated things on one scroll — goals, language, theme,
- * the signed-in address, export, deletion, legal — separated by panels and by
+ * It used to hold six unrelated things on one scroll (goals, language, theme,
+ * the signed-in address, export, deletion, legal) separated by panels and by
  * nothing else. Panels group; they do not explain, and a screen you have to
  * scan twice to find the language toggle is a screen with no shape.
  *

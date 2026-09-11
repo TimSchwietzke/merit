@@ -23,7 +23,7 @@ describe('passwordProblem', () => {
 
   it('names the length first when both entries are short and different', () => {
     // Otherwise the user fixes the typo and is then told the password is too
-    // short — two round trips for one form.
+    // short, so one form costs two round trips.
     expect(passwordProblem('abc', 'abd')).toBe('tooShort')
   })
 

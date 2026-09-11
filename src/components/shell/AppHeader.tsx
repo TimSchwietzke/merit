@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Link, NavLink, useLocation } from 'react-router-dom'
-import { User } from 'lucide-react'
+import { ChevronLeft, User } from 'lucide-react'
 
-import { pathSegments, screenLabelKey } from '@/components/shell/route-path'
+import { backTo, pathSegments, screenLabelKey } from '@/components/shell/route-path'
 import { useSession } from '@/features/auth/useSession'
 
 /**
@@ -28,6 +28,7 @@ export function AppHeader() {
   const { t } = useTranslation()
   const { pathname } = useLocation()
   const segments = pathSegments(pathname)
+  const back = backTo(pathname)
   const { session } = useSession()
   const email = session?.user.email ?? null
   // One letter, not a photo: nobody in a group of ten uploads one, and an
@@ -37,7 +38,25 @@ export function AppHeader() {
   return (
     <header className="sticky top-0 z-10 border-b border-line bg-bg/90 backdrop-blur">
       <div className="mx-auto flex w-full max-w-[860px] items-center gap-3 px-4 py-2.5 md:px-6">
-        {/* Below lg. Not a heading — the screen owns its h1; this is chrome. */}
+        {/* Below lg the path bar is hidden, so a nested screen would have no
+            way up but the browser gesture, which an installed PWA does not
+            always give you. A chevron, not a second label: the parent's name
+            beside the screen's own is the path bar again, at the width §7 says
+            to drop it. The destination is in the accessible name instead. */}
+        {back?.to ? (
+          <Link
+            to={back.to}
+            aria-label={t('common.backTo', { screen: t(back.labelKey) })}
+            className="-ml-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full
+                       text-ink-muted transition-colors [transition-duration:140ms]
+                       hover:bg-surface-2 hover:text-ink active:bg-surface-2
+                       active:[transition-duration:0ms] lg:hidden"
+          >
+            <ChevronLeft size={18} strokeWidth={1.75} aria-hidden />
+          </Link>
+        ) : null}
+
+        {/* Below lg. Not a heading: the screen owns its h1, this is chrome. */}
         <p className="font-mono text-2xs text-ink lg:hidden">{t(screenLabelKey(pathname))}</p>
 
         <nav

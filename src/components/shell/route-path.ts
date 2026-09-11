@@ -79,6 +79,28 @@ export function pathSegments(pathname: string): PathSegment[] {
 }
 
 /**
+ * Where "back" goes from here, or null when there is nowhere above.
+ *
+ * Below `lg` the path bar is hidden (§7), so a nested screen has no way out
+ * but the browser's own gesture, and inside an installed PWA there is not
+ * always one. The header needs the answer, and the path table already holds
+ * it: the segment before the screen's own is its parent.
+ *
+ * Two-segment paths have no parent worth offering. Those are the tab screens,
+ * and the tab bar is already the way off them; a back arrow there would point
+ * at the dashboard as though it were above `food`, which it is not.
+ */
+export function backTo(pathname: string): PathSegment | null {
+  const segments = pathSegments(pathname)
+  const screen = segments.findLastIndex(
+    (segment) => segment.labelKey !== 'common.today',
+  )
+
+  const parent = segments[screen - 1]
+  return screen > 1 && parent?.to ? parent : null
+}
+
+/**
  * The one label the header shows below `lg`. A three-segment path on a 375px
  * screen is noise (§7), so the screen names itself and the rest is dropped.
  *

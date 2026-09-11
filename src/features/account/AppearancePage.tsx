@@ -9,7 +9,7 @@ import type { Locale } from '@/lib/i18n'
 import type { ThemePref } from '@/lib/theme'
 
 /**
- * Language and theme. Two controls, no save button — both apply on the tap and
+ * Language and theme. Two controls, no save button: both apply on the tap and
  * roll back if the write fails (see PreferencesProvider).
  */
 export default function AppearancePage() {

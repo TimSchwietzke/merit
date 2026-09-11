@@ -9,7 +9,7 @@ somebody something.
 
 ---
 
-## MVP — blocks friends using this daily
+## MVP: blocks friends using this daily
 
 ### Profile settings, and a rebuilt account screen
 *In progress.*
@@ -20,7 +20,7 @@ somebody something.
   language, theme, the signed-in address, export, deletion, legal. The panels
   separate them visually but the screen tells no story.
 - Fix: the account screen becomes a plain list, and each area gets its own
-  screen — profile, appearance, your data, legal. The pattern already exists
+  screen: profile, appearance, your data, legal. The pattern already exists
   in the code (`Rows` + `Row to="/goals"`), it is just not carried through.
 - Email changes send a confirmation to both the old and the new address, and
   Supabase's default SMTP is rate-limited and lands in spam. The UI has to say
@@ -32,7 +32,7 @@ See `GOAL.md` §2.1.1.
 - A new account currently lands on an empty dashboard with no hint what to do
   first. Everything works and nothing has been entered, which reads as broken.
 - Collect, in order: display name, current weight, height, birth date, sex,
-  activity level, goal. All of these already exist as fields elsewhere —
+  activity level, goal. All of these already exist as fields elsewhere, so
   onboarding is a path through them, not a new data model.
 - **Ask how often they train per week**, then offer a matching example routine
   (2× full body, 3× upper/lower/full, 4× upper/lower split). Generated from the
@@ -40,7 +40,7 @@ See `GOAL.md` §2.1.1.
   like anything else. A plan somebody can change beats an empty plan screen.
 - Skippable and resumable: quitting halfway asks for the rest next time rather
   than starting over.
-- **Repeatable.** A way to run it again from the account screen — for somebody
+- **Repeatable.** A way to run it again from the account screen, for somebody
   who skipped it, whose circumstances changed, or who wants a fresh example
   plan. This also makes it testable without creating a new account.
 
@@ -62,19 +62,19 @@ See `GOAL.md` §2.1.1.
   homescreen and always opens with browser chrome around it.
 - For an app opened between two sets in a gym this is not cosmetic.
 - Small: a manifest, a maskable icon set, `apple-mobile-web-app-*` meta tags.
-  No service worker yet — that belongs with offline logging below.
+  No service worker yet, that belongs with offline logging below.
 
 ### Offline workout logging
 - Required by `GOAL.md` §5 and `CLAUDE.md`, and not started: Dexie is not even
   installed.
 - Gym basements have no signal. Sets logged there must land locally and sync
   when the connection returns, without the user thinking about it.
-- Nutrition and barcode scanning stay online-only on purpose — scanning needs
-  the network anyway.
+- Nutrition and barcode scanning stay online-only on purpose, since scanning
+  needs the network anyway.
 
 ---
 
-## Wording — small, and the cheapest wins here
+## Wording: small, and the cheapest wins here
 
 ### Remove the explanatory in-between texts
 - Sentences like *"The average is the mean of every weigh-in in the 7 days
@@ -84,7 +84,7 @@ See `GOAL.md` §2.1.1.
   legal or safety weight (consent, deletion, the shared-catalogue warning), and
   cut or shorten the rest. A screen that has to describe itself is a screen
   that needs a better label, not a better paragraph.
-- Accessibility `aria` descriptions stay — they are not visible prose.
+- Accessibility `aria` descriptions stay, since they are not visible prose.
 
 ### Make "volume" and "sessions" mean something
 - `TrainingStats` shows *volumen* and *einheiten* side by side with the same
@@ -101,7 +101,7 @@ See `GOAL.md` §2.1.1.
 ### Water tracker
 - Log glasses or millilitres per day, with a daily target. Same shape as the
   other day-scoped logs: one small table, RLS, one tile on the dashboard.
-- Deliberately simple — a counter with a plus button, not a hydration
+- Deliberately simple: a counter with a plus button, not a hydration
   programme.
 
 ### Recipes and composite meals
@@ -121,18 +121,18 @@ See `GOAL.md` §2.1.1.
 `GOAL.md` §2.2 item 3.
 
 - Import steps and active calories. Manual entry for these is explicitly not
-  worth building — nobody keeps it up.
+  worth building, because nobody keeps it up.
 - Needs research first: a web app cannot read HealthKit directly. Likely a
   file import or a shortcut, not a live integration. Scope it before promising
   it.
 
 ### Left over from GOAL.md
-- **Favourites** for foods — "recently used" exists, favourites do not.
+- **Favourites** for foods: "recently used" exists, favourites do not.
   §5 calls both first-class for fast logging.
-- **Body measurements** — the `measurements` column exists on `weight_logs`
+- **Body measurements**: the `measurements` column exists on `weight_logs`
   and nothing writes to it.
-- **Calorie/macro chart** and **strength progression chart** — §2.1 asks for
-  both; only the weight chart is built.
+- **Calorie/macro chart** and **strength progression chart**: §2.1 asks for
+  both, and only the weight chart is built.
 
 ### Demo account (open question)
 - Wanted for the portfolio. Currently deliberately absent.
@@ -141,7 +141,7 @@ See `GOAL.md` §2.1.1.
   with a real address would then be needed.
 - It also has to be genuinely read-only, enforced in RLS rather than in the UI,
   or the claim "visitors' input is not stored" is false.
-- Decide the imprint route first; the feature is the easy half.
+- Decide the imprint route first. The feature is the easy half.
 
 ---
 
@@ -156,9 +156,9 @@ See `GOAL.md` §2.1.1.
 
 ### Ultrareview
 - Run `/code-review ultra` over the whole branch history once the MVP is
-  complete — a deep multi-agent review, not the inline one.
+  complete. A deep multi-agent review, not the inline one.
 - Worth doing *after* profile and onboarding land, so it reviews the shape the
-  app will actually keep. It is user-triggered and billed; I cannot start it.
+  app will actually keep. It is user-triggered and billed, so I cannot start it.
 
 ### Accessibility
 - Basics are in place (semantic markup, `aria` labels on charts, focus
@@ -177,7 +177,7 @@ See `GOAL.md` §2.1.1.
 - `CLAUDE.md` says Docker is for the local development environment only, never
   for deployment. That environment does not exist yet.
 - Point: `docker compose up` gives a local Supabase and the dev server, so the
-  app can be worked on without touching the production project — and so the
+  app can be worked on without touching the production project, and so the
   repo is reproducible for anybody reading it as a portfolio piece.
 
 ---
@@ -186,3 +186,13 @@ See `GOAL.md` §2.1.1.
 
 - **One legal review** of the privacy notice and the consent screen before
   anybody outside the household is invited. `LEGAL-INPUTS.md` §8.
+
+---
+
+## House style
+
+- **No em dashes.** They read as machine-written. A colon, a comma, brackets or
+  a full stop covers every case one was doing, and usually reads better.
+- This applies to UI strings, documentation and code comments alike. The strings
+  written before this rule still carry them and are swept with the wording pass
+  above.

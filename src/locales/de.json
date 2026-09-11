@@ -43,7 +43,8 @@
       "next": "Woche vor",
       "label": "diese woche"
     },
-    "cancel": "Abbrechen"
+    "cancel": "Abbrechen",
+    "backTo": "zurück zu {{screen}}"
   },
   "auth": {
     "signIn": {
@@ -567,7 +568,7 @@
           "field": "neue adresse",
           "save": "Adresse ändern",
           "saving": "Wird geändert …",
-          "sent": "Bestätigungsmail unterwegs. Öffne den Link darin — prüfe auch den Spam-Ordner.",
+          "sent": "Bestätigungsmail unterwegs. Öffne den Link darin, und prüfe auch den Spam-Ordner.",
           "unchanged": "Das ist die Adresse, mit der du angemeldet bist.",
           "failed": "Die Adresse wurde nicht geändert. Prüfe dein Netz und versuche es noch einmal."
         },

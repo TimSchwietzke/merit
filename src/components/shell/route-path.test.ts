@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { pathSegments, screenLabelKey } from '@/components/shell/route-path'
+import { backTo, pathSegments, screenLabelKey } from '@/components/shell/route-path'
 
 describe('pathSegments', () => {
   it('starts every path at the app and links every segment but the last', () => {
@@ -81,5 +81,34 @@ describe('paths with an id in them', () => {
       'app.name',
       'common.notFound',
     ])
+  })
+})
+
+describe('backTo', () => {
+  it('leads a nested screen back to the section it hangs under', () => {
+    expect(backTo('/account/profile')?.to).toBe('/account')
+    expect(backTo('/goals')?.to).toBe('/account')
+    expect(backTo('/food/add')?.to).toBe('/food')
+    expect(backTo('/training/routines/17')?.to).toBe('/training')
+  })
+
+  it('names the parent, so the control can say where it goes', () => {
+    expect(backTo('/account/appearance')?.labelKey).toBe('nav.account')
+  })
+
+  it('offers nothing on a tab screen, where the tab bar is the way off', () => {
+    for (const path of ['/', '/food', '/training', '/weight', '/cardio', '/account']) {
+      expect(backTo(path), path).toBeNull()
+    }
+  })
+
+  it('does not mistake the day qualifier for the screen', () => {
+    // `/food` is [merit, ernährung, heute]. Counting from the end without
+    // skipping `heute` would make `ernährung` the parent of itself.
+    expect(backTo('/food')).toBeNull()
+  })
+
+  it('offers nothing from a path that does not exist', () => {
+    expect(backTo('/nowhere')).toBeNull()
   })
 })

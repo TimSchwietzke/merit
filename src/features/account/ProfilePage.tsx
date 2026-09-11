@@ -14,7 +14,7 @@ import { passwordProblem } from '@/lib/password'
 import { supabase } from '@/lib/supabase'
 
 /**
- * Name, address, password — the three things about the account itself.
+ * Name, address, password: the three things about the account itself.
  *
  * Three forms rather than one, because they fail and succeed independently and
  * they are not equally reversible: a name is a typo away from being fixed, an
@@ -220,7 +220,7 @@ function Password() {
 
     // Supabase changes a password on the strength of the session alone. A
     // borrowed unlocked phone is exactly that, so the current password is
-    // checked first — a sign-in with the same credentials, which either
+    // checked first, as a sign-in with the same credentials, which either
     // succeeds and refreshes the session we already hold, or proves the person
     // typing is not the one who set it.
     const { error: wrongCurrent } = await supabase.auth.signInWithPassword({
