@@ -39,6 +39,19 @@ loses and the component is overridden.
 5. **Never write medical, dietary, or coaching advice into the UI.** The app
    shows the user's own numbers. It does not tell anyone what to eat or how to
    train.
+6. **Production holds a real person's data (since 2026-09-13).** Nothing may
+   lose or corrupt it:
+   - Migrations are additive. Add tables and columns; never drop, rename, or
+     change the type of a column that holds data. Removing one is two releases:
+     the code stops using it first, the column goes later, after a backup.
+   - Every migration runs against a local Supabase (`supabase db reset`) before
+     it goes near production. No local environment, no `db push`.
+   - Take a dump (`supabase db dump --data-only`) immediately before every
+     `db push`, and keep it outside the repo.
+   - Never run `db reset`, `truncate`, or bulk `delete`/`update` against the
+     linked project.
+   - Offline data in IndexedDB is real data too: a Dexie schema change needs a
+     version upgrade, never a wipe.
 
 ---
 
