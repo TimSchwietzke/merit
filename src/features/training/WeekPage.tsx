@@ -5,6 +5,7 @@ import { ArrowUpDown, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { EmptyState } from '@/components/EmptyState'
+import { FloatingAdd } from '@/components/FloatingAdd'
 import { Progress } from '@/components/Progress'
 import { Row, RowBody, Rows } from '@/components/Rows'
 import { Loading, RowsSkeleton, Skeleton, StripSkeleton } from '@/components/Skeleton'
@@ -16,7 +17,6 @@ import { Button } from '@/components/ui/button'
 import { Confirm } from '@/components/ui/confirm'
 import { Sheet } from '@/components/ui/sheet'
 import { plannable, useRoutines, type Routine } from '@/features/routines/useRoutines'
-import { useActiveSession } from '@/features/training/useActiveSession'
 import { TrainingStats } from '@/features/training/TrainingStats'
 import { useSchedule, type DaySession, type ScheduleDay } from '@/features/training/useSchedule'
 import { useWorkout } from '@/features/training/useWorkout'
@@ -183,7 +183,7 @@ export default function WeekPage() {
         }}
       />
 
-      <AddRoutine onAdd={addRoutine} />
+      <FloatingAdd label={t('pages.routines.create')} onClick={addRoutine} />
 
       <Confirm
         open={pending !== null}
@@ -496,49 +496,5 @@ function RoutineList({
         </Rows>
       )}
     </section>
-  )
-}
-
-/**
- * Adding a routine, floating over the screen it belongs to.
- *
- * A name field and a button at the bottom of the page put the least-used
- * control on the screen in permanent view and made you scroll past the list to
- * reach it. This is one target in the corner the thumb is already at, and the
- * name is asked for once, in the editor it lands in, rather than twice.
- *
- * It is hidden while a session is running: the set you are on owns the bottom
- * of the screen then, and two floating things fighting for that corner is how
- * the wrong one gets tapped between sets.
- *
- * Square with a 5px radius, not a circle, §6 allows a pill for a progress
- * track and a sheet's drag handle, and nothing else. §6 does allow the shadow:
- * this genuinely floats, which is the same licence the session bar has.
- */
-function AddRoutine({ onAdd }: { onAdd: () => Promise<void> }) {
-  const { t } = useTranslation()
-  const { running } = useActiveSession()
-  const [pending, setPending] = useState(false)
-
-  if (running) return null
-
-  return (
-    <button
-      type="button"
-      aria-label={t('pages.routines.create')}
-      disabled={pending}
-      onClick={async () => {
-        setPending(true)
-        await onAdd()
-        setPending(false)
-      }}
-      className="fixed bottom-[calc(56px+0.75rem+env(safe-area-inset-bottom))] right-4 z-30 flex
-                 h-14 w-14 items-center justify-center rounded-md bg-accent text-bg shadow-lg
-                 transition-opacity [transition-duration:140ms] hover:opacity-90
-                 active:opacity-90 active:[transition-duration:0ms] disabled:opacity-35
-                 lg:bottom-4"
-    >
-      <Plus size={22} strokeWidth={2} aria-hidden />
-    </button>
   )
 }

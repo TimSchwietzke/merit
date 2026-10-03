@@ -403,6 +403,7 @@
       "back": "Back to the dashboard"
     },
     "weight": {
+      "add": "Log weight",
       "loadFailed": "Your weigh-ins could not be loaded. Check your connection and try again.",
       "deleted": "{{date}} deleted",
       "undoFailed": "That entry could not be put back. Log the day again.",

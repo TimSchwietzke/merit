@@ -130,6 +130,19 @@
    component was already written against `accent` rather than against a colour.
    `nutrition` is moss and so needs no rule: moss is the default and the
    wordmark keeps it wherever it renders. */
+/* The dashboard reports on every domain, so its own chrome (the nav item, the
+   account button) is ink rather than moss: green there would mean "merit" and
+   "nutrition" at once. The nutrition card names moss back explicitly. */
+[data-domain="home"] {
+  --merit-accent: var(--merit-ink);
+  --merit-accent-soft: var(--merit-surface-2);
+}
+
+[data-domain="nutrition"] {
+  --merit-accent: var(--merit-moss);
+  --merit-accent-soft: var(--merit-moss-soft);
+}
+
 [data-domain="training"] {
   --merit-accent: var(--merit-oxide);
   --merit-accent-soft: var(--merit-oxide-soft);

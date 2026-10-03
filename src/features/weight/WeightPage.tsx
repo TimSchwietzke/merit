@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 
 import { Cells } from '@/components/Cells'
+import { FloatingAdd } from '@/components/FloatingAdd'
 import { Panel } from '@/components/Panel'
 import { Loading, RowsSkeleton, Skeleton } from '@/components/Skeleton'
 import { StatCard } from '@/components/StatCard'
@@ -106,6 +107,18 @@ export default function WeightPage() {
       },
     })
     return true
+  }
+
+  // The form is already on the page, so the button is a way back to it from
+  // anywhere down the log: today's day, the field in view, the keyboard up.
+  // A frame later, because picking today remounts the form.
+  function addToday() {
+    setSelected(today)
+    requestAnimationFrame(() => {
+      const field = document.getElementById('weight-kg')
+      field?.scrollIntoView({ block: 'center', behavior: 'smooth' })
+      field?.focus({ preventScroll: true })
+    })
   }
 
   async function restore(entry: WeightEntry) {
@@ -230,7 +243,7 @@ export default function WeightPage() {
         />
       </section>
 
-      <section className="mt-8">
+      <section className="mt-8 pb-16">
         <SectionHead label={t('pages.weight.list.label')} hint={rangeControl} />
         {status === 'error' ? (
           <p role="alert" className="text-sm text-danger">
@@ -245,6 +258,8 @@ export default function WeightPage() {
           />
         )}
       </section>
+
+      <FloatingAdd label={t('pages.weight.add')} onClick={addToday} />
     </>
   )
 }

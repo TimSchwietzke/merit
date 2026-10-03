@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
+import { FloatingAdd } from '@/components/FloatingAdd'
 import { EmptyState } from '@/components/EmptyState'
 import { Panel } from '@/components/Panel'
 import { Loading, RowsSkeleton, Skeleton, StripSkeleton } from '@/components/Skeleton'
@@ -257,7 +258,7 @@ export default function FoodPage() {
         </section>
       ) : null}
 
-      <section className="mt-8">
+      <section className="mt-8 pb-16">
         <SectionHead label={t('pages.food.log.label')} />
 
         {status === 'error' ? (
@@ -283,17 +284,15 @@ export default function FoodPage() {
           ))
         )}
 
-        {/* The primary actions, in the lower half where a thumb reaches (§7).
-            Scanning is the tinted one rather than a second primary: §10.4 allows
-            one primary per screen, and the search covers what a scan cannot. */}
+        {/* Adding floats in the corner, as on every screen whose list grows,
+            so it is in reach however long the day gets. Scanning stays in the
+            flow, tinted: the floating button is this screen's one primary. */}
         <div className="mt-6 flex flex-col gap-3 md:flex-row">
-          <Button asChild variant="primary">
-            <Link to={`/food/add?date=${date}`}>{t('pages.food.log.add')}</Link>
-          </Button>
           <Button asChild variant="tinted">
             <Link to={`/food/add?date=${date}&scan=1`}>{t('pages.food.scan.open')}</Link>
           </Button>
         </div>
+        <FloatingAdd label={t('pages.food.log.add')} to={`/food/add?date=${date}`} />
       </section>
     </>
   )
