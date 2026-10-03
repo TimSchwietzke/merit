@@ -11,17 +11,6 @@ somebody something.
 
 ## MVP: blocks friends using this daily
 
-### Docker: a local stack, then a home-server stack
-- **Top priority since 2026-09-13.** Production has its first real user, and
-  CLAUDE.md rule 6 says no migration reaches production untested. Until a
-  local Supabase runs, no schema change can ship at all.
-- Step one, local development: `docker compose up` (or `supabase start`) gives
-  a local Supabase with every migration applied and the dev server against it,
-  so migrations and features are tested without touching production.
-- Step two, self-hosting: one compose file a home-server owner can run to get
-  their own instance. This reverses the old "Docker is not for deployment"
-  line and needs deciding first (see open questions in the PR).
-
 ### Offline training, the rest of it
 - Logging works offline: every training write lands in IndexedDB and is sent
   from a queue, so a set logged in a basement survives the app being closed and
@@ -52,6 +41,13 @@ were looked at and deliberately left alone:
 ---
 
 ## After the MVP
+
+### Self-hosting
+- One compose file a home-server owner can run to get their own instance.
+  Reverses the "Docker is for local development only" line in CLAUDE.md.
+- Deferred on 2026-10-04: a half-finished home-server app helps nobody. The
+  local development stack it would build on is done (CLAUDE.md, Local
+  development).
 
 ### Water tracker
 - Log glasses or millilitres per day, with a daily target. Same shape as the
