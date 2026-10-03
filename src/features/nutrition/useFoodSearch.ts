@@ -7,6 +7,7 @@ import {
   type FoodRow,
 } from '@/features/nutrition/catalogue'
 import { searchOffProducts, type OffFood } from '@/lib/off'
+import { rankByName, searchWords } from '@/lib/search-rank'
 import { supabase } from '@/lib/supabase'
 import type { UsdaFood } from '@/lib/usda'
 
@@ -51,6 +52,8 @@ const MIN_QUERY = 2
 /** The outside services are asked for something more specific than that. */
 const MIN_REMOTE = 3
 const LIMIT = 25
+/** Fetched before ranking, so the best match is not cut off alphabetically. */
+const FETCH = 100
 
 export function useFoodSearch(term: string): FoundFoods {
   const [answered, setAnswered] = useState<{
@@ -77,18 +80,22 @@ export function useFoodSearch(term: string): FoundFoods {
     if (tooShort) return
     let active = true
 
-    void supabase
-      .from('foods')
-      .select(FOOD_SELECT)
-      .ilike('name', `%${term}%`)
+    // Every word on its own, so "skyr natur" also finds "Natur Skyr".
+    let query = supabase.from('foods').select(FOOD_SELECT)
+    for (const word of searchWords(term)) query = query.ilike('name', `%${word}%`)
+
+    void query
       .order('name')
-      .limit(LIMIT)
+      .limit(FETCH)
       .then(({ data, error }) => {
         if (!active) return
         setAnswered({
           term,
           error: Boolean(error) || !data,
-          results: error || !data ? [] : (data as FoodRow[]).map(toCatalogueFood),
+          results:
+            error || !data
+              ? []
+              : rankByName((data as FoodRow[]).map(toCatalogueFood), term).slice(0, LIMIT),
         })
       })
 
@@ -107,7 +114,7 @@ export function useFoodSearch(term: string): FoundFoods {
       .invoke<{ foods?: UsdaFood[]; error?: string }>('usda', { body: { query: term } })
       .then(async ({ data, error }) => {
         if (!error) {
-          if (active) setUsda({ term, foods: data?.foods ?? [], status: 'ready' })
+          if (active) setUsda({ term, foods: rankByName(data?.foods ?? [], term), status: 'ready' })
           return
         }
         const reason = await refusal(error)
@@ -133,7 +140,7 @@ export function useFoodSearch(term: string): FoundFoods {
       if (!active) return
       setOff({
         term,
-        foods: found.kind === 'found' ? found.foods : [],
+        foods: found.kind === 'found' ? rankByName(found.foods, term) : [],
         status: found.kind === 'found' ? 'ready' : found.kind === 'busy' ? 'rateLimited' : 'error',
       })
     })

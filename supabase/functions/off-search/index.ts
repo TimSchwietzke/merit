@@ -39,6 +39,19 @@ const FIELDS = [
 
 const IDENTITY = 'Merit/1.0 (https://github.com/TimSchwietzke/merit)'
 
+/**
+ * Only what is sold in Germany. Unfiltered, "pasta" answers with American pasta
+ * sauce and every brand that has the word in its name, because the index is
+ * worldwide and scores a brand match like a name match.
+ *
+ * ponytail: one country for everybody, which is right while every user is
+ * German. Make it a request field from the user's settings when that changes.
+ */
+const COUNTRY = 'countries_tags:"en:germany"'
+
+/** The query language's own syntax, which a typed term must not reach. */
+const SYNTAX = /[:"'()[\]{}^~*?\\/!+\-<>=&|]/g
+
 const MIN_QUERY = 3
 const MAX_QUERY = 100
 const PAGE_SIZE = 20
@@ -107,7 +120,8 @@ Deno.serve(async (request: Request) => {
   if (!allow()) return json({ error: 'rate_limited' }, 429)
 
   const url = new URL(SEARCH)
-  url.searchParams.set('q', query)
+  url.searchParams.set('q', `${query.replace(SYNTAX, ' ')} ${COUNTRY}`)
+  url.searchParams.set('langs', 'de')
   url.searchParams.set('fields', FIELDS)
   url.searchParams.set('page_size', String(PAGE_SIZE))
 
