@@ -84,6 +84,22 @@ docs/                GOAL.md
 - Types generated from the database live in `src/types/database.ts` and are
   regenerated, never hand-edited
 
+### Local development
+
+Docker Desktop with WSL integration, then:
+
+```
+npm run db:start    # local Supabase, every migration and seed.sql applied; writes .env.localdb
+npm run dev:local   # dev server against it; sign in as dev@merit.local / merit-dev
+npm run db:reset    # rebuild the local database from the migrations
+npm run db:types    # regenerate src/types/database.ts from the local schema
+npm run db:stop
+```
+
+A schema change goes: write the migration, `db:reset`, `db:types`, build and
+test the feature locally, open the PR. Only then, and after asking: dump,
+`supabase db push`. `npm run dev` still talks to production through `.env`.
+
 ### Code
 
 - Business logic (calorie maths, macro sums, rolling averages, training volume)
