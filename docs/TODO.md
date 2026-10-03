@@ -11,6 +11,17 @@ somebody something.
 
 ## MVP: blocks friends using this daily
 
+### Docker: a local stack, then a home-server stack
+- **Top priority since 2026-09-13.** Production has its first real user, and
+  CLAUDE.md rule 6 says no migration reaches production untested. Until a
+  local Supabase runs, no schema change can ship at all.
+- Step one, local development: `docker compose up` (or `supabase start`) gives
+  a local Supabase with every migration applied and the dev server against it,
+  so migrations and features are tested without touching production.
+- Step two, self-hosting: one compose file a home-server owner can run to get
+  their own instance. This reverses the old "Docker is not for deployment"
+  line and needs deciding first (see open questions in the PR).
+
 ### Offline training, the rest of it
 - Logging works offline: every training write lands in IndexedDB and is sent
   from a queue, so a set logged in a basement survives the app being closed and
@@ -124,13 +135,6 @@ were looked at and deliberately left alone:
   loading states that flash, empty states that say nothing useful, touch
   targets under 44px, error messages that name no next step.
 - Collect them as they are noticed rather than planning them up front.
-
-### Docker for local development
-- `CLAUDE.md` says Docker is for the local development environment only, never
-  for deployment. That environment does not exist yet.
-- Point: `docker compose up` gives a local Supabase and the dev server, so the
-  app can be worked on without touching the production project, and so the
-  repo is reproducible for anybody reading it as a portfolio piece.
 
 ---
 
