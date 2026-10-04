@@ -80,24 +80,25 @@ export function useFoodSearch(term: string): FoundFoods {
     if (tooShort) return
     let active = true
 
-    // Every word on its own, so "skyr natur" also finds "Natur Skyr".
-    let query = supabase.from('foods').select(FOOD_SELECT)
-    for (const word of searchWords(term)) query = query.ilike('name', `%${word}%`)
+    // Every word on its own, so "skyr natur" also finds "Natur Skyr". The
+    // names that start with the term are asked for separately: the wide query
+    // is cut alphabetically, and "Milch" must not lose to a hundred
+    // "Alpenmilch"s before the ranking ever sees it.
+    let wide = supabase.from('foods').select(FOOD_SELECT)
+    for (const word of searchWords(term)) wide = wide.ilike('name', `%${word}%`)
+    const prefix = supabase.from('foods').select(FOOD_SELECT).ilike('name', `${term.trim()}%`).limit(LIMIT)
 
-    void query
-      .order('name')
-      .limit(FETCH)
-      .then(({ data, error }) => {
-        if (!active) return
-        setAnswered({
-          term,
-          error: Boolean(error) || !data,
-          results:
-            error || !data
-              ? []
-              : rankByName((data as FoodRow[]).map(toCatalogueFood), term).slice(0, LIMIT),
-        })
+    void Promise.all([prefix, wide.order('name').limit(FETCH)]).then(([first, rest]) => {
+      if (!active) return
+      const error = first.error || rest.error || !first.data || !rest.data
+      const rows = error ? [] : [...(first.data as FoodRow[]), ...(rest.data as FoodRow[])]
+      const unique = [...new Map(rows.map((row) => [row.id, row])).values()]
+      setAnswered({
+        term,
+        error: Boolean(error),
+        results: rankByName(unique.map(toCatalogueFood), term).slice(0, LIMIT),
       })
+    })
 
     return () => {
       active = false
