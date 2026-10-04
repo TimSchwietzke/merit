@@ -17,11 +17,8 @@ import { todayKey } from '@/lib/date'
 import { formatForInput, formatNumber, parseDecimalInput } from '@/lib/format'
 import { QUANTITY_LIMITS } from '@/lib/nutrition'
 
-/** A pot can weigh more than any one portion. */
-const TOTAL_LIMITS = { min: 1, max: 99999, decimals: 1 } as const
-
 /**
- * One recipe: its name, its made weight, its ingredients.
+ * One recipe: its name and its ingredients.
  *
  * Every change is written as it is made, there is no draft and no save
  * button. Adding an ingredient leaves this screen for the food search and comes
@@ -66,64 +63,37 @@ function Editor({
   const date = params.get('date') ?? todayKey()
 
   const [name, setName] = useState(recipe.name)
-  const [total, setTotal] = useState(
-    recipe.totalG === null ? '' : formatForInput(recipe.totalG, locale, TOTAL_LIMITS.decimals),
-  )
-  const [totalError, setTotalError] = useState(false)
   const [editing, setEditing] = useState<RecipeItem | null>(null)
 
   // What is typed, held where the unmount below can read it: the back gesture
   // leaves this screen without a blur, and the edit must not leave with it.
-  const typed = useRef({ name, total })
-  typed.current = { name, total }
+  const typed = useRef(name)
+  typed.current = name
   const latest = useRef(recipe)
   latest.current = recipe
 
-  function nameChange(value: string, current: Recipe) {
+  const changedName = (value: string, current: Recipe) => {
     const trimmed = value.trim()
     return trimmed && trimmed !== current.name ? trimmed : null
   }
 
-  function totalChange(value: string, current: Recipe): { totalG: number | null } | 'invalid' | null {
-    if (value.trim() === '') return current.totalG === null ? null : { totalG: null }
-    const parsed = parseDecimalInput(value, TOTAL_LIMITS)
-    if (parsed === null) return 'invalid'
-    return parsed === current.totalG ? null : { totalG: parsed }
-  }
-
   async function saveName() {
-    const next = nameChange(name, recipe)
     if (!name.trim()) return setName(recipe.name)
-    if (!next) return
-    if (!(await update(recipe.id, { name: next }))) {
+    const next = changedName(name, recipe)
+    if (next && !(await update(recipe.id, next))) {
       toast(t('pages.recipes.saveFailed'))
       setName(recipe.name)
     }
   }
 
-  async function saveTotal() {
-    const next = totalChange(total, recipe)
-    setTotalError(next === 'invalid')
-    if (!next || next === 'invalid') return
-    if (!(await update(recipe.id, next))) {
-      toast(t('pages.recipes.saveFailed'))
-      setTotal(recipe.totalG === null ? '' : formatForInput(recipe.totalG, locale, TOTAL_LIMITS.decimals))
-    }
-  }
-
   useEffect(
     () => () => {
-      const current = latest.current
-      const name = nameChange(typed.current.name, current)
-      const total = totalChange(typed.current.total, current)
-      if (name || (total && total !== 'invalid')) {
-        // Toasted on whatever screen comes next: sonner outlives this one.
-        void update(current.id, { ...(name ? { name } : {}), ...(total && total !== 'invalid' ? total : {}) }).then(
-          (ok) => {
-            if (!ok) toast(t('pages.recipes.saveFailed'))
-          },
-        )
-      }
+      const next = changedName(typed.current, latest.current)
+      // Toasted on whatever screen comes next: sonner outlives this one.
+      if (next)
+        void update(latest.current.id, next).then((ok) => {
+          if (!ok) toast(t('pages.recipes.saveFailed'))
+        })
     },
     // On unmount only; the refs carry the latest values.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -179,17 +149,6 @@ function Editor({
           />
         </div>
 
-        <NumberField
-          id="recipe-total"
-          label={t('pages.recipes.total')}
-          hint={t('pages.recipes.totalHint')}
-          unit="g"
-          value={total}
-          onChange={(event) => setTotal(event.target.value)}
-          onBlur={() => void saveTotal()}
-          onKeyDown={(event) => event.key === 'Enter' && event.currentTarget.blur()}
-          error={totalError ? t('pages.recipes.totalInvalid') : undefined}
-        />
       </div>
 
       <section className="mt-8">

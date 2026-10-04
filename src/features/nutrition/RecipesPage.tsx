@@ -52,7 +52,6 @@ export default function RecipesPage() {
                   <span className="block truncate">{recipe.name}</span>
                   <span className="block truncate font-mono text-2xs text-ink-faint">
                     {t('pages.recipes.ingredients', { count: recipe.items.length })}
-                    {recipe.totalG !== null ? ` · ${formatNumber(recipe.totalG, locale, 0)} g` : ''}
                   </span>
                 </span>
                 <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">

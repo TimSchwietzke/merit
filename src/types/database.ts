@@ -76,13 +76,13 @@ isOneToOne: false
                   ]
                 },"logged_recipes": {
                   Row: {
-                    "created_at": string,"date": string,"factor": number,"grams": number | null,"id": string,"meal_type": string,"name": string,"recipe_id": string | null,"user_id": string
+                    "created_at": string,"date": string,"factor": number,"id": string,"meal_type": string,"name": string,"recipe_id": string | null,"user_id": string
                   }
                   Insert: {
-                    "created_at"?: string,"date": string,"factor": number,"grams"?: number | null,"id"?: string,"meal_type": string,"name": string,"recipe_id"?: string | null,"user_id": string
+                    "created_at"?: string,"date": string,"factor": number,"id"?: string,"meal_type": string,"name": string,"recipe_id"?: string | null,"user_id": string
                   }
                   Update: {
-                    "created_at"?: string,"date"?: string,"factor"?: number,"grams"?: number | null,"id"?: string,"meal_type"?: string,"name"?: string,"recipe_id"?: string | null,"user_id"?: string
+                    "created_at"?: string,"date"?: string,"factor"?: number,"id"?: string,"meal_type"?: string,"name"?: string,"recipe_id"?: string | null,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -146,13 +146,13 @@ isOneToOne: false
                   ]
                 },"recipes": {
                   Row: {
-                    "created_at": string,"id": string,"name": string,"total_g": number | null,"updated_at": string,"user_id": string
+                    "created_at": string,"id": string,"name": string,"updated_at": string,"user_id": string
                   }
                   Insert: {
-                    "created_at"?: string,"id"?: string,"name": string,"total_g"?: number | null,"updated_at"?: string,"user_id": string
+                    "created_at"?: string,"id"?: string,"name": string,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"name"?: string,"total_g"?: number | null,"updated_at"?: string,"user_id"?: string
+                    "created_at"?: string,"id"?: string,"name"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -303,10 +303,13 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: undefined
                            },
 "log_recipe":
-{ Args: { "day": string,"factor": number,"grams"?: number,"meal": string,"recipe": string }; Returns: string
+{ Args: { "day": string,"factor": number,"meal": string,"recipe": string }; Returns: string
                            },
 "set_routine_exercises":
 { Args: { "items": Json,"routine": string }; Returns: undefined
+                           },
+"update_logged_recipe":
+{ Args: { "factor": number,"line": string,"meal": string }; Returns: undefined
                            }
           }
           Enums: {

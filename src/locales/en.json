@@ -703,8 +703,6 @@
       "ingredients_one": "{{count}} ingredient",
       "ingredients_other": "{{count}} ingredients",
       "name": "name",
-      "total": "weight when made",
-      "totalHint": " · to portion by the gram",
       "ingredientsLabel": "ingredients",
       "noIngredients": "no ingredients yet",
       "delete": "Delete recipe",
@@ -714,15 +712,12 @@
         "mode": "portion",
         "byWhole": "whole",
         "byParts": "share",
-        "byGrams": "grams",
         "whole": "whole recipe",
         "parts": "split into",
         "partsUnit": "parts",
-        "grams": "amount",
         "wholeInvalid": "Enter a number between 0.1 and 100.",
         "partsInvalid": "Enter a whole number between 1 and 100."
       },
-      "totalInvalid": "Enter a weight between 1 and 99,999 g.",
       "lineRemoved": "{{name}} removed",
       "undoFailed": "{{name}} could not be put back. Log it again.",
       "itemRemoved": "{{name}} removed",
@@ -730,7 +725,8 @@
       "adding": "Adding…",
       "addFailed": "The ingredient was not added. Try again.",
       "deleted": "{{name}} deleted",
-      "restoreFailed": "{{name}} could not be put back."
+      "restoreFailed": "{{name}} could not be put back.",
+      "backToLine": "Back to {{name}}"
     }
   }
 }

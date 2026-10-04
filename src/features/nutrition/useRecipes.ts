@@ -23,21 +23,26 @@ export interface RecipeItem {
 export interface Recipe {
   id: string
   name: string
-  /** The made weight, when the recipe is a pot that gets portioned by grams. */
-  totalG: number | null
   items: RecipeItem[]
   /** The whole recipe's nutrition, from its ingredients. */
   totals: DayTotals
 }
 
+/** A recipe's energy and macros, whole, as the portion form scales them. */
+export const wholeOf = (totals: DayTotals) => ({
+  kcal: totals.kcal.value,
+  protein: totals.protein.value,
+  fat: totals.fat.value,
+  carbs: totals.carbs.value,
+})
+
 type Row = {
   id: string
   name: string
-  total_g: number | null
   recipe_items: { id: string; quantity_g: number; created_at: string; foods: FoodRow }[]
 }
 
-const SELECT = `id, name, total_g, recipe_items ( id, quantity_g, created_at, foods!inner ( ${FOOD_SELECT} ) )`
+const SELECT = `id, name, recipe_items ( id, quantity_g, created_at, foods!inner ( ${FOOD_SELECT} ) )`
 
 const toRecipe = (row: Row): Recipe => {
   const items = [...row.recipe_items]
@@ -51,7 +56,6 @@ const toRecipe = (row: Row): Recipe => {
   return {
     id: row.id,
     name: row.name,
-    totalG: row.total_g,
     items,
     totals: sumPortions(items.map((item) => ({ nutrients: item.food.nutrients, quantityG: item.quantityG }))),
   }
@@ -128,16 +132,8 @@ export function useRecipes() {
   )
 
   const update = useCallback(
-    (id: string, fields: { name?: string; totalG?: number | null }) =>
-      write(() =>
-        supabase
-          .from('recipes')
-          .update({
-            ...(fields.name !== undefined ? { name: fields.name.trim() } : {}),
-            ...(fields.totalG !== undefined ? { total_g: fields.totalG } : {}),
-          })
-          .eq('id', id),
-      ),
+    (id: string, name: string) =>
+      write(() => supabase.from('recipes').update({ name: name.trim() }).eq('id', id)),
     [write],
   )
 
@@ -175,7 +171,7 @@ export function useRecipes() {
       if (!userId) return false
       const { error } = await supabase
         .from('recipes')
-        .insert({ id: recipe.id, user_id: userId, name: recipe.name, total_g: recipe.totalG })
+        .insert({ id: recipe.id, user_id: userId, name: recipe.name })
       if (error) return false
       return write(() =>
         supabase.from('recipe_items').insert(

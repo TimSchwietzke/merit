@@ -18,7 +18,8 @@ import { resolveUsdaFood } from '@/features/nutrition/resolve-usda'
 import { normaliseBarcode } from '@/lib/barcode'
 import { PortionForm } from '@/features/nutrition/PortionForm'
 import { RecipePortionForm } from '@/features/nutrition/RecipePortionForm'
-import { useRecipes, type Recipe } from '@/features/nutrition/useRecipes'
+import { useRecipes, wholeOf, type Recipe } from '@/features/nutrition/useRecipes'
+import { Panel } from '@/components/Panel'
 import { searchWords } from '@/lib/search-rank'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
 import { useFoodSearch } from '@/features/nutrition/useFoodSearch'
@@ -130,11 +131,11 @@ export default function AddFoodPage() {
     else toast(t('pages.recipes.createFailed'))
   }
 
-  async function logPickedRecipe(portion: { mealType: MealType; factor: number; grams: number | null }) {
+  async function logPickedRecipe({ mealType, share }: { mealType: MealType; share: number }) {
     if (!pickedRecipe) return
     setPending(true)
     setFailed(false)
-    const saved = await logRecipe(pickedRecipe.id, portion.mealType, portion)
+    const saved = await logRecipe(pickedRecipe.id, mealType, share)
     setPending(false)
     if (saved) navigate(`/food?date=${date}`)
     else setFailed(true)
@@ -230,13 +231,17 @@ export default function AddFoodPage() {
     return (
       <>
         <PageHeader title={title} />
-        <RecipePortionForm
-          recipe={pickedRecipe}
-          mealType={meal}
-          pending={pending}
-          failed={failed}
-          onSubmit={logPickedRecipe}
-        />
+        <Panel className="flex flex-col gap-5 p-4">
+          <p className="text-ink">{pickedRecipe.name}</p>
+          <RecipePortionForm
+            whole={wholeOf(pickedRecipe.totals)}
+            mealType={meal}
+            pending={pending}
+            failed={failed}
+            submitLabel={t(pending ? 'pages.food.portion.saving' : 'pages.food.portion.save')}
+            onSubmit={logPickedRecipe}
+          />
+        </Panel>
         <Button variant="bare" className="mt-4" onClick={() => setPickedRecipe(null)}>
           ← {t('pages.food.add.backToSearch')}
         </Button>

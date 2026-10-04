@@ -1,43 +1,44 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatRecipePortion, recipeShare } from '@/lib/recipe'
+import { formatRecipePortion, portionOf, recipeShare } from '@/lib/recipe'
 
 describe('recipeShare', () => {
-  it('counts servings as multiples of the whole recipe', () => {
-    expect(recipeShare({ kind: 'servings', count: 2 }, null)).toBe(2)
-    expect(recipeShare({ kind: 'servings', count: 0.5 }, null)).toBe(0.5)
+  it('counts the whole recipe as multiples', () => {
+    expect(recipeShare({ kind: 'whole', times: 2 })).toBe(2)
+    expect(recipeShare({ kind: 'whole', times: 0.5 })).toBe(0.5)
   })
 
-  it('turns one in n into a share', () => {
-    expect(recipeShare({ kind: 'fraction', of: 8 }, 1850)).toBe(0.125)
+  it('turns one part in n into a share', () => {
+    expect(recipeShare({ kind: 'part', of: 8 })).toBe(0.125)
   })
 
-  it('divides grams by the made weight', () => {
-    expect(recipeShare({ kind: 'grams', grams: 200 }, 1600)).toBe(0.125)
+  it('refuses anything at or below zero', () => {
+    expect(recipeShare({ kind: 'whole', times: 0 })).toBeNull()
+    expect(recipeShare({ kind: 'part', of: 0 })).toBeNull()
+  })
+})
+
+describe('portionOf', () => {
+  it('reads one in n back out of a share', () => {
+    expect(portionOf(0.125)).toEqual({ kind: 'part', of: 8 })
+    expect(portionOf(1 / 3)).toEqual({ kind: 'part', of: 3 })
   })
 
-  it('refuses grams without a made weight, and anything at or below zero', () => {
-    expect(recipeShare({ kind: 'grams', grams: 200 }, null)).toBeNull()
-    expect(recipeShare({ kind: 'servings', count: 0 }, null)).toBeNull()
-    expect(recipeShare({ kind: 'fraction', of: 0 }, 1000)).toBeNull()
-    expect(recipeShare({ kind: 'grams', grams: 0 }, 1000)).toBeNull()
+  it('keeps everything else as a multiple of the whole', () => {
+    expect(portionOf(1)).toEqual({ kind: 'whole', times: 1 })
+    expect(portionOf(0.75)).toEqual({ kind: 'whole', times: 0.75 })
+    expect(portionOf(2)).toEqual({ kind: 'whole', times: 2 })
   })
 })
 
 describe('formatRecipePortion', () => {
-  it('shows grams when the portion was weighed', () => {
-    expect(formatRecipePortion(0.125, 200, 'de')).toBe('200 g')
-  })
-
   it('shows one in n as a fraction', () => {
-    expect(formatRecipePortion(0.125, null, 'de')).toBe('1/8')
-    expect(formatRecipePortion(1 / 3, null, 'de')).toBe('1/3')
+    expect(formatRecipePortion(0.125, 'de')).toBe('1/8')
   })
 
   it('shows other shares as a multiple, in the locale', () => {
-    expect(formatRecipePortion(1, null, 'de')).toBe('1×')
-    expect(formatRecipePortion(2, null, 'en')).toBe('2×')
-    expect(formatRecipePortion(1.5, null, 'de')).toBe('1,5×')
-    expect(formatRecipePortion(0.75, null, 'en')).toBe('0.75×')
+    expect(formatRecipePortion(1, 'de')).toBe('1×')
+    expect(formatRecipePortion(1.5, 'de')).toBe('1,5×')
+    expect(formatRecipePortion(0.75, 'en')).toBe('0.75×')
   })
 })

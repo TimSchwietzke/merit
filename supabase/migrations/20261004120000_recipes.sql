@@ -7,8 +7,9 @@
 -- still come from real foods only, one ingredient can be changed for that
 -- day alone, and editing the recipe later leaves past days as they were eaten.
 --
--- total_g is the whole recipe's weight once made (the cooked pot). With it a
--- portion can be given in grams; without it only as a share.
+-- A portion is a share of the whole: twice the shake, an eighth of the pot.
+-- Not grams: the ingredients are weighed raw, and a cooked pot weighs more
+-- than they add up to, so grams off the plate would overcount.
 --
 -- Additive only: two new tables, one new table for the logged line, and a
 -- nullable column on food_logs that every existing row leaves empty.
@@ -18,7 +19,6 @@ create table public.recipes (
   id          uuid primary key default gen_random_uuid(),
   user_id     uuid not null references auth.users (id) on delete cascade,
   name        text not null check (length(trim(name)) between 1 and 120),
-  total_g     numeric(7, 1) check (total_g > 0),
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );
@@ -81,10 +81,8 @@ create table public.logged_recipes (
   -- name is copied for the same reason, and survives a rename.
   recipe_id   uuid references public.recipes (id) on delete set null,
   name        text not null check (length(trim(name)) between 1 and 120),
-  -- The share of the recipe eaten (0.125 for an eighth, 2 for a double shake),
-  -- and the grams it was given in, when it was given in grams.
+  -- The share of the recipe eaten: 0.125 for an eighth, 2 for a double shake.
   factor      numeric(8, 5) not null check (factor > 0 and factor <= 100),
-  grams       numeric(7, 1) check (grams > 0),
   created_at  timestamptz not null default now()
 );
 
@@ -119,7 +117,7 @@ create index food_logs_group_idx on public.food_logs (group_id) where group_id i
 
 -- Logging a recipe is several rows, written in one transaction so a bad
 -- connection cannot leave half a shake in the day.
-create function public.log_recipe(recipe uuid, day date, meal text, factor numeric, grams numeric default null)
+create function public.log_recipe(recipe uuid, day date, meal text, factor numeric)
 returns uuid
 language plpgsql
 -- Invoker: every read and write below answers to the caller's RLS.
@@ -128,7 +126,6 @@ set search_path = ''
 as $$
 declare
   source public.recipes%rowtype;
-  share numeric := factor;
   line uuid;
 begin
   select * into source from public.recipes where id = recipe;
@@ -136,29 +133,51 @@ begin
     raise exception 'recipe not found';
   end if;
 
-  -- Grams are a share of the made weight, which only a recipe with one has.
-  if grams is not null then
-    if source.total_g is null then
-      raise exception 'recipe has no total weight';
-    end if;
-    share := grams / source.total_g;
-  end if;
-
-  insert into public.logged_recipes (user_id, date, meal_type, recipe_id, name, factor, grams)
-  values ((select auth.uid()), day, meal, source.id, source.name, share, grams)
+  insert into public.logged_recipes (user_id, date, meal_type, recipe_id, name, factor)
+  values ((select auth.uid()), day, meal, source.id, source.name, factor)
   returning id into line;
 
   -- Rounded to the column's 0.1 g, and never below it: an eighth of a pinch of
-  -- salt is still in the pot, and the column refuses zero.
-  insert into public.food_logs (user_id, date, meal_type, food_id, quantity_g, group_id)
+  -- salt is still in the pot, and the column refuses zero. A microsecond apart,
+  -- so the day lists them in the recipe's order rather than at random.
+  insert into public.food_logs (user_id, date, meal_type, food_id, quantity_g, group_id, created_at)
   select (select auth.uid()), day, meal, item.food_id,
-         greatest(round(item.quantity_g * share, 1), 0.1), line
+         greatest(round(item.quantity_g * factor, 1), 0.1), line,
+         now() + (row_number() over (order by item.created_at)) * interval '1 microsecond'
     from public.recipe_items item
-   where item.recipe_id = source.id
-   order by item.created_at;
+   where item.recipe_id = source.id;
 
   return line;
 end;
 $$;
 
-grant execute on function public.log_recipe(uuid, date, text, numeric, numeric) to authenticated;
+grant execute on function public.log_recipe(uuid, date, text, numeric) to authenticated;
+
+
+-- Changing a logged line's portion or meal: every row under it is scaled by
+-- the same ratio, so an ingredient corrected for that day stays corrected in
+-- proportion, and the meal moves with the line. One transaction, as above.
+create function public.update_logged_recipe(line uuid, factor numeric, meal text)
+returns void
+language plpgsql
+security invoker
+set search_path = ''
+as $$
+declare
+  previous numeric;
+begin
+  select l.factor into previous from public.logged_recipes l where l.id = line;
+  if previous is null then
+    raise exception 'logged recipe not found';
+  end if;
+
+  update public.logged_recipes l set factor = update_logged_recipe.factor, meal_type = meal where l.id = line;
+
+  update public.food_logs f
+     set quantity_g = least(greatest(round(f.quantity_g * update_logged_recipe.factor / previous, 1), 0.1), 10000),
+         meal_type = meal
+   where f.group_id = line;
+end;
+$$;
+
+grant execute on function public.update_logged_recipe(uuid, numeric, text) to authenticated;

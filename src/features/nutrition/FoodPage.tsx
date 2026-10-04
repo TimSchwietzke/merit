@@ -1,5 +1,4 @@
-import { ChevronRight } from 'lucide-react'
-import { Fragment, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -344,9 +343,6 @@ function Meal({
   onRemoveGroup: (rows: LoggedFood[]) => void
 }) {
   const { t } = useTranslation()
-  // Unfolded until folded: the ingredients are what gets corrected, and a line
-  // that hides them by default would have to be opened on every visit.
-  const [folded, setFolded] = useState<Set<string>>(new Set())
   const kcal = sumPortions(
     entries.map((entry) => ({ nutrients: entry.food.nutrients, quantityG: entry.quantityG })),
   ).kcal.value
@@ -403,67 +399,34 @@ function Meal({
           }
 
           const group = line.rows[0].group!
-          const open = !folded.has(line.id)
           const lineKcal = sumPortions(
             line.rows.map((row) => ({ nutrients: row.food.nutrients, quantityG: row.quantityG })),
           ).kcal.value
           return (
-            <Fragment key={line.id}>
-              {/* Removing the line removes the meal it stands for. */}
-              <SwipeRow
-                open={openRow === line.id}
-                onOpenChange={(next) => onOpenRow(next ? line.id : null)}
-                actions={remove(line.id, () => onRemoveGroup(line.rows))}
-              >
-                <RowBody
-                  expanded={open}
-                  onClick={() =>
-                    setFolded((current) => {
-                      const next = new Set(current)
-                      if (open) next.add(line.id)
-                      else next.delete(line.id)
-                      return next
-                    })
-                  }
-                >
-                  <span className="min-w-0 flex-1">
-                    <span className="flex items-center gap-1.5">
-                      <ChevronRight
-                        aria-hidden
-                        size={14}
-                        className={`shrink-0 text-ink-faint transition-transform ${open ? 'rotate-90' : ''}`}
-                      />
-                      <span className="truncate">{group.name}</span>
-                    </span>
+            // One line for the meal it stands for. Tapping opens its screen,
+            // where the portion, the meal and each ingredient change; the swipe
+            // removes the whole of it, and that screen has a button for it too.
+            <SwipeRow
+              key={line.id}
+              open={openRow === line.id}
+              onOpenChange={(next) => onOpenRow(next ? line.id : null)}
+              actions={remove(line.id, () => onRemoveGroup(line.rows))}
+            >
+              <RowBody to={`/food/meal/${line.id}?date=${date}`}>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate">{group.name}</span>
+                  <span className="block truncate text-sm text-ink-muted">
+                    {line.rows.map((row) => row.food.name).join(' · ')}
                   </span>
-                  <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
-                    {formatRecipePortion(group.factor, group.grams, locale)}
-                  </span>
-                  <span className="shrink-0">
-                    <Value n={formatNumber(lineKcal, locale, 0)} unit="kcal" />
-                  </span>
-                </RowBody>
-              </SwipeRow>
-              {open ? (
-                <li>
-                  <ul className="divide-y divide-line">
-                    {line.rows.map((row) => (
-                      <li key={row.id} className="pl-5">
-                        <EntryBody entry={row} date={date} locale={locale} />
-                      </li>
-                    ))}
-                    {/* Out of sight at rest, a destructive control does not sit
-                        in the list (§10.1), but there for a keyboard or a screen
-                        reader, which cannot swipe. */}
-                    <li className="sr-only pl-5 focus-within:not-sr-only">
-                      <RowBody onClick={() => onRemoveGroup(line.rows)}>
-                        <span className="min-w-0 flex-1 text-sm text-danger">{t('pages.food.entry.delete')}</span>
-                      </RowBody>
-                    </li>
-                  </ul>
-                </li>
-              ) : null}
-            </Fragment>
+                </span>
+                <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
+                  {formatRecipePortion(group.factor, locale)}
+                </span>
+                <span className="shrink-0">
+                  <Value n={formatNumber(lineKcal, locale, 0)} unit="kcal" />
+                </span>
+              </RowBody>
+            </SwipeRow>
           )
         })}
       </Rows>

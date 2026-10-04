@@ -28,7 +28,6 @@ export interface LoggedRecipe {
   recipeId: string | null
   name: string
   factor: number
-  grams: number | null
 }
 
 export interface FoodLog {
@@ -40,7 +39,9 @@ export interface FoodLog {
   remove: (id: string) => Promise<boolean>
   restore: (entry: LoggedFood) => Promise<boolean>
   /** A recipe, scaled, as one line of ingredient rows (`log_recipe`). */
-  logRecipe: (recipeId: string, mealType: MealType, portion: { factor: number; grams: number | null }) => Promise<boolean>
+  logRecipe: (recipeId: string, mealType: MealType, factor: number) => Promise<boolean>
+  /** A logged recipe line's portion and meal, every row under it with it. */
+  updateGroup: (groupId: string, factor: number, mealType: MealType) => Promise<boolean>
   /** A logged recipe line and every row under it. */
   removeGroup: (groupId: string) => Promise<boolean>
   /** Undo for `removeGroup`: the line and its rows come back as they were. */
@@ -49,7 +50,7 @@ export interface FoodLog {
 
 /** The columns a portion needs, and the shape the maths expects. */
 const SELECT = `id, meal_type, quantity_g,
-  logged_recipes!food_logs_group_fkey ( id, recipe_id, name, factor, grams ),
+  logged_recipes!food_logs_group_fkey ( id, recipe_id, name, factor ),
   foods!inner (
     id, name, brand,
     kcal_100g, fat_100g, carbs_100g, protein_100g,
@@ -60,7 +61,7 @@ type Row = {
   id: string
   meal_type: string
   quantity_g: number
-  logged_recipes: { id: string; recipe_id: string | null; name: string; factor: number; grams: number | null } | null
+  logged_recipes: { id: string; recipe_id: string | null; name: string; factor: number } | null
   foods: {
     id: string
     name: string
@@ -101,7 +102,6 @@ const toEntry = (row: Row): LoggedFood => ({
         recipeId: row.logged_recipes.recipe_id,
         name: row.logged_recipes.name,
         factor: row.logged_recipes.factor,
-        grams: row.logged_recipes.grams,
       }
     : null,
 })
@@ -258,20 +258,25 @@ export function useFoodLog(date: string): FoodLog {
   )
 
   const logRecipe = useCallback(
-    async (recipeId: string, mealType: MealType, portion: { factor: number; grams: number | null }) => {
+    async (recipeId: string, mealType: MealType, factor: number) => {
       if (!userId) return false
-      const { error } = await supabase.rpc('log_recipe', {
-        recipe: recipeId,
-        day: date,
-        meal: mealType,
-        factor: portion.factor,
-        grams: portion.grams ?? undefined,
-      })
+      const { error } = await supabase.rpc('log_recipe', { recipe: recipeId, day: date, meal: mealType, factor })
       if (error) return false
       setVersion((v) => v + 1)
       return true
     },
     [date, userId],
+  )
+
+  const updateGroup = useCallback(
+    async (groupId: string, factor: number, mealType: MealType) => {
+      if (!userId) return false
+      const { error } = await supabase.rpc('update_logged_recipe', { line: groupId, factor, meal: mealType })
+      if (error) return false
+      setVersion((v) => v + 1)
+      return true
+    },
+    [userId],
   )
 
   const removeGroup = useCallback(
@@ -309,14 +314,15 @@ export function useFoodLog(date: string): FoodLog {
           recipe_id: group.recipeId,
           name: group.name,
           factor: group.factor,
-          grams: group.grams,
         })
         .select('id')
         .single()
       if (!line || error) return false
 
       const { error: rowsError } = await supabase.from('food_logs').insert(
-        rows.map((row) => ({
+        // Apart in time, so they come back in the order they were listed.
+        rows.map((row, index) => ({
+          created_at: new Date(Date.now() + index).toISOString(),
           user_id: userId,
           date,
           meal_type: row.mealType,
@@ -331,5 +337,5 @@ export function useFoodLog(date: string): FoodLog {
     [date, userId],
   )
 
-  return { entries, status, add, update, remove, restore, logRecipe, removeGroup, restoreGroup }
+  return { entries, status, add, update, remove, restore, logRecipe, updateGroup, removeGroup, restoreGroup }
 }

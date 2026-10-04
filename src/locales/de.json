@@ -703,8 +703,6 @@
       "ingredients_one": "{{count}} Zutat",
       "ingredients_other": "{{count}} Zutaten",
       "name": "name",
-      "total": "fertiggewicht",
-      "totalHint": " · für portionen nach gramm",
       "ingredientsLabel": "zutaten",
       "noIngredients": "noch keine Zutaten",
       "delete": "Rezept löschen",
@@ -714,15 +712,12 @@
         "mode": "portion",
         "byWhole": "ganz",
         "byParts": "anteil",
-        "byGrams": "gramm",
         "whole": "ganzes rezept",
         "parts": "aufgeteilt in",
         "partsUnit": "teile",
-        "grams": "menge",
         "wholeInvalid": "Trage eine Zahl zwischen 0,1 und 100 ein.",
         "partsInvalid": "Trage eine ganze Zahl zwischen 1 und 100 ein."
       },
-      "totalInvalid": "Trage ein Gewicht zwischen 1 und 99.999 g ein.",
       "lineRemoved": "{{name}} entfernt",
       "undoFailed": "{{name}} konnte nicht wiederhergestellt werden. Trage es noch einmal ein.",
       "itemRemoved": "{{name}} entfernt",
@@ -730,7 +725,8 @@
       "adding": "Wird hinzugefügt …",
       "addFailed": "Die Zutat wurde nicht hinzugefügt. Versuche es noch einmal.",
       "deleted": "{{name}} gelöscht",
-      "restoreFailed": "{{name}} konnte nicht wiederhergestellt werden."
+      "restoreFailed": "{{name}} konnte nicht wiederhergestellt werden.",
+      "backToLine": "Zurück zu {{name}}"
     }
   }
 }

@@ -29,6 +29,8 @@ export default function LoggedPortionPage() {
   const [failed, setFailed] = useState(false)
 
   const entry: LoggedFood | undefined = entries.find((row) => row.id === id)
+  // An ingredient was opened from its recipe line, and goes back there.
+  const back = entry?.group ? `/food/meal/${entry.group.id}?date=${date}` : `/food?date=${date}`
 
   // The row can be gone, deleted here, or on another device. Nothing to edit
   // then, and no reason to sit on a dead screen.
@@ -50,7 +52,7 @@ export default function LoggedPortionPage() {
     setFailed(false)
     const saved = await update(id, { quantityG, mealType })
     setPending(false)
-    if (saved) navigate(`/food?date=${date}`)
+    if (saved) navigate(back)
     else setFailed(true)
   }
 
@@ -60,7 +62,7 @@ export default function LoggedPortionPage() {
     setFailed(false)
     const removed = await remove(id)
     setPending(false)
-    if (removed) navigate(`/food?date=${date}`)
+    if (removed) navigate(back)
     else setFailed(true)
   }
 
@@ -92,10 +94,10 @@ export default function LoggedPortionPage() {
       </Button>
 
       <Link
-        to={`/food?date=${date}`}
+        to={back}
         className="mt-8 flex min-h-11 items-center font-mono text-2xs text-accent underline decoration-1 underline-offset-2"
       >
-        ← {t('pages.food.add.back')}
+        ← {entry.group ? t('pages.recipes.backToLine', { name: entry.group.name }) : t('pages.food.add.back')}
       </Link>
     </>
   )
