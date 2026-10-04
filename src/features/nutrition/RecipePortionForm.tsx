@@ -5,20 +5,21 @@ import { NumberField } from '@/components/NumberField'
 import { Panel } from '@/components/Panel'
 import { SegmentedControl } from '@/components/SegmentedControl'
 import { Button } from '@/components/ui/button'
+import { MacroLine, MealPicker } from '@/features/nutrition/PortionForm'
 import type { Recipe } from '@/features/nutrition/useRecipes'
-import { formatNumber, parseDecimalInput } from '@/lib/format'
-import { MEAL_TYPES, QUANTITY_LIMITS, type MealType } from '@/lib/nutrition'
+import { parseDecimalInput } from '@/lib/format'
+import { QUANTITY_LIMITS, type MealType } from '@/lib/nutrition'
 import { recipeShare, type RecipePortion } from '@/lib/recipe'
 
-/** Up to a hundred shakes or a pot in a hundred parts; past that it is a typo. */
-const COUNT_LIMITS = { min: 0.1, max: 100, decimals: 2 } as const
+/** A hundred shakes, or a pot in a hundred parts; past that it is a typo. */
+const WHOLE_LIMITS = { min: 0.1, max: 100, decimals: 2 } as const
 const PARTS_LIMITS = { min: 1, max: 100, decimals: 0 } as const
 
+type Mode = 'whole' | 'fraction' | 'grams'
+
 /**
- * How much of a recipe, and at which meal.
- *
- * A recipe without a made weight is counted in servings (one shake, two). A
- * pot with one is portioned as one part in n, or in grams off the scale.
+ * How much of a recipe, and at which meal: the whole recipe (once, twice), a
+ * part of it (split into n), or grams off the scale when it has a made weight.
  */
 export function RecipePortionForm({
   recipe,
@@ -33,65 +34,64 @@ export function RecipePortionForm({
   failed: boolean
   onSubmit: (portion: { mealType: MealType; factor: number; grams: number | null }) => void
 }) {
-  const { t, i18n } = useTranslation()
-  const locale = i18n.language
-  const pot = recipe.totalG !== null
+  const { t } = useTranslation()
+  const weighed = recipe.totalG !== null
 
-  const [mode, setMode] = useState<'fraction' | 'grams'>('fraction')
-  const [value, setValue] = useState(pot ? '' : '1')
+  // A recipe with a made weight is a pot, and a pot is rarely eaten whole.
+  const [mode, setMode] = useState<Mode>(weighed ? 'fraction' : 'whole')
+  const [value, setValue] = useState(weighed ? '' : '1')
   const [mealType, setMealType] = useState<MealType>(initialMeal)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState(false)
 
-  const portion: RecipePortion | null = (() => {
-    if (!pot) {
-      const count = parseDecimalInput(value, COUNT_LIMITS)
-      return count === null ? null : { kind: 'servings', count }
-    }
-    if (mode === 'grams') {
-      const grams = parseDecimalInput(value, QUANTITY_LIMITS)
-      return grams === null ? null : { kind: 'grams', grams }
-    }
-    const of = parseDecimalInput(value, PARTS_LIMITS)
-    return of === null ? null : { kind: 'fraction', of }
-  })()
+  const FIELDS = {
+    whole: { label: t('pages.recipes.portion.whole'), unit: '×', placeholder: '1', limits: WHOLE_LIMITS, invalid: t('pages.recipes.portion.wholeInvalid') },
+    fraction: { label: t('pages.recipes.portion.parts'), unit: t('pages.recipes.portion.partsUnit'), placeholder: '8', limits: PARTS_LIMITS, invalid: t('pages.recipes.portion.partsInvalid') },
+    grams: { label: t('pages.recipes.portion.grams'), unit: 'g', placeholder: '300', limits: QUANTITY_LIMITS, invalid: t('pages.food.portion.quantityInvalid') },
+  }
+  const field = FIELDS[mode]
+
+  const parsed = parseDecimalInput(value, field.limits)
+  const portion: RecipePortion | null =
+    parsed === null
+      ? null
+      : mode === 'whole'
+        ? { kind: 'servings', count: parsed }
+        : mode === 'fraction'
+          ? { kind: 'fraction', of: parsed }
+          : { kind: 'grams', grams: parsed }
   const share = portion ? recipeShare(portion, recipe.totalG) : null
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (share === null || portion === null) {
-      setError(t('pages.recipes.portion.invalid'))
-      return
-    }
-    setError(null)
+    if (share === null || portion === null) return setError(true)
+    setError(false)
     onSubmit({ mealType, factor: share, grams: portion.kind === 'grams' ? portion.grams : null })
   }
 
-  const field = !pot
-    ? { label: t('pages.recipes.portion.servings'), unit: '×', placeholder: '1' }
-    : mode === 'grams'
-      ? { label: t('pages.recipes.portion.grams'), unit: 'g', placeholder: '300' }
-      : { label: t('pages.recipes.portion.parts'), unit: t('pages.recipes.portion.partsUnit'), placeholder: '8' }
+  const modes: Mode[] = weighed ? ['whole', 'fraction', 'grams'] : ['whole', 'fraction']
+  const LABELS = {
+    whole: t('pages.recipes.portion.byWhole'),
+    fraction: t('pages.recipes.portion.byParts'),
+    grams: t('pages.recipes.portion.byGrams'),
+  }
 
   return (
     <form onSubmit={submit} noValidate>
       <Panel className="flex flex-col gap-5 p-4">
         <p className="text-ink">{recipe.name}</p>
 
-        {pot ? (
-          <SegmentedControl<'fraction' | 'grams'>
+        <div className="flex flex-col items-start">
+          <SegmentedControl<Mode>
             label={t('pages.recipes.portion.mode')}
             value={mode}
             onChange={(next) => {
               setMode(next)
-              setValue('')
-              setError(null)
+              setValue(next === 'whole' ? '1' : '')
+              setError(false)
             }}
-            segments={[
-              { value: 'fraction', label: t('pages.recipes.portion.byParts') },
-              { value: 'grams', label: t('pages.recipes.portion.byGrams') },
-            ]}
+            segments={modes.map((item) => ({ value: item, label: LABELS[item] }))}
           />
-        ) : null}
+        </div>
 
         <NumberField
           id="recipe-portion"
@@ -100,32 +100,24 @@ export function RecipePortionForm({
           value={value}
           onChange={(event) => setValue(event.target.value)}
           placeholder={field.placeholder}
-          error={error ?? undefined}
+          error={error ? field.invalid : undefined}
           required
         />
 
-        <div className="flex flex-col items-start gap-2">
-          <p className="font-mono text-2xs text-ink-faint">{t('pages.food.portion.meal')}</p>
-          <SegmentedControl<MealType>
-            label={t('pages.food.portion.meal')}
-            value={mealType}
-            onChange={setMealType}
-            segments={MEAL_TYPES.map((meal) => ({ value: meal, label: t(`pages.food.meals.${meal}`) }))}
-          />
-        </div>
+        <MealPicker value={mealType} onChange={setMealType} />
 
-        <p className="font-mono text-2xs text-ink-faint">
-          {share === null ? (
-            ' '
-          ) : (
-            <>
-              <span className="text-ink">{formatNumber(recipe.totals.kcal.value * share, locale, 0)}</span> kcal ·{' '}
-              {formatNumber(recipe.totals.protein.value * share, locale, 1)} g {t('pages.food.nutrients.protein')} ·{' '}
-              {formatNumber(recipe.totals.fat.value * share, locale, 1)} g {t('pages.food.nutrients.fat')} ·{' '}
-              {formatNumber(recipe.totals.carbs.value * share, locale, 1)} g {t('pages.food.nutrients.carbs')}
-            </>
-          )}
-        </p>
+        <MacroLine
+          values={
+            share === null
+              ? null
+              : {
+                  kcal: recipe.totals.kcal.value * share,
+                  protein: recipe.totals.protein.value * share,
+                  fat: recipe.totals.fat.value * share,
+                  carbs: recipe.totals.carbs.value * share,
+                }
+          }
+        />
 
         {failed ? (
           <p role="alert" className="text-sm text-danger">

@@ -26,6 +26,7 @@ export interface PathSegment {
     | 'nav.appearance'
     | 'nav.data'
     | 'nav.routines'
+    | 'nav.recipes'
     | 'nav.session'
     | 'common.today'
     | 'common.add'
@@ -42,6 +43,7 @@ const PATHS: Record<string, PathSegment[]> = {
   '/food': [ROOT, { labelKey: 'nav.food', to: '/food' }, { labelKey: 'common.today' }],
   '/training': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'common.today' }],
   '/food/add': [ROOT, { labelKey: 'nav.food', to: '/food' }, { labelKey: 'common.add' }],
+  '/food/recipes': [ROOT, { labelKey: 'nav.food', to: '/food' }, { labelKey: 'nav.recipes' }],
   '/training/add': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'common.add' }],
   '/training/routines': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'nav.routines' }],
   '/training/day': [ROOT, { labelKey: 'nav.training', to: '/training' }, { labelKey: 'common.today' }],

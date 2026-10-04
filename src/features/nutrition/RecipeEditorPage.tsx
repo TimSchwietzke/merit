@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -9,7 +9,6 @@ import { PageHeader } from '@/components/PageHeader'
 import { Row, Rows } from '@/components/Rows'
 import { SectionHead } from '@/components/SectionHead'
 import { Button } from '@/components/ui/button'
-import { Confirm } from '@/components/ui/confirm'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Sheet } from '@/components/ui/sheet'
@@ -49,9 +48,14 @@ function Editor({
   recipe,
   update,
   remove,
+  restore,
+  addItem,
   updateItem,
   removeItem,
-}: { recipe: Recipe } & Pick<ReturnType<typeof useRecipes>, 'update' | 'remove' | 'updateItem' | 'removeItem'>) {
+}: { recipe: Recipe } & Pick<
+  ReturnType<typeof useRecipes>,
+  'update' | 'remove' | 'restore' | 'addItem' | 'updateItem' | 'removeItem'
+>) {
   const { t, i18n } = useTranslation()
   const locale = i18n.language
   const navigate = useNavigate()
@@ -63,32 +67,79 @@ function Editor({
   )
   const [totalError, setTotalError] = useState(false)
   const [editing, setEditing] = useState<RecipeItem | null>(null)
-  const [deleting, setDeleting] = useState(false)
 
-  async function saved(ok: Promise<boolean>) {
-    if (!(await ok)) toast(t('pages.recipes.saveFailed'))
+  // What is typed, held where the unmount below can read it: the back gesture
+  // leaves this screen without a blur, and the edit must not leave with it.
+  const typed = useRef({ name, total })
+  typed.current = { name, total }
+  const latest = useRef(recipe)
+  latest.current = recipe
+
+  function nameChange(value: string, current: Recipe) {
+    const trimmed = value.trim()
+    return trimmed && trimmed !== current.name ? trimmed : null
   }
 
-  function saveName() {
-    const trimmed = name.trim()
-    if (!trimmed) return setName(recipe.name)
-    if (trimmed !== recipe.name) void saved(update(recipe.id, { name: trimmed }))
+  function totalChange(value: string, current: Recipe): { totalG: number | null } | 'invalid' | null {
+    if (value.trim() === '') return current.totalG === null ? null : { totalG: null }
+    const parsed = parseDecimalInput(value, TOTAL_LIMITS)
+    if (parsed === null) return 'invalid'
+    return parsed === current.totalG ? null : { totalG: parsed }
   }
 
-  function saveTotal() {
-    if (total.trim() === '') {
-      setTotalError(false)
-      if (recipe.totalG !== null) void saved(update(recipe.id, { totalG: null }))
-      return
+  async function saveName() {
+    const next = nameChange(name, recipe)
+    if (!name.trim()) return setName(recipe.name)
+    if (!next) return
+    if (!(await update(recipe.id, { name: next }))) {
+      toast(t('pages.recipes.saveFailed'))
+      setName(recipe.name)
     }
-    const parsed = parseDecimalInput(total, TOTAL_LIMITS)
-    setTotalError(parsed === null)
-    if (parsed !== null && parsed !== recipe.totalG) void saved(update(recipe.id, { totalG: parsed }))
+  }
+
+  async function saveTotal() {
+    const next = totalChange(total, recipe)
+    setTotalError(next === 'invalid')
+    if (!next || next === 'invalid') return
+    if (!(await update(recipe.id, next))) {
+      toast(t('pages.recipes.saveFailed'))
+      setTotal(recipe.totalG === null ? '' : formatForInput(recipe.totalG, locale, TOTAL_LIMITS.decimals))
+    }
+  }
+
+  useEffect(
+    () => () => {
+      const current = latest.current
+      const name = nameChange(typed.current.name, current)
+      const total = totalChange(typed.current.total, current)
+      if (name || (total && total !== 'invalid')) {
+        void update(current.id, { ...(name ? { name } : {}), ...(total && total !== 'invalid' ? total : {}) })
+      }
+    },
+    // On unmount only; the refs carry the latest values.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
+
+  async function deleteRecipe() {
+    if (!(await remove(recipe.id))) return toast(t('pages.recipes.saveFailed'))
+    navigate('/food/recipes')
+    // Undo rather than a question first (§14).
+    toast(t('pages.recipes.deleted', { name: recipe.name }), {
+      action: { label: t('common.undo'), onClick: () => void restore(recipe) },
+    })
+  }
+
+  async function removeIngredient(item: RecipeItem) {
+    if (!(await removeItem(item.id))) return toast(t('pages.recipes.saveFailed'))
+    toast(t('pages.recipes.itemRemoved', { name: item.food.name }), {
+      action: { label: t('common.undo'), onClick: () => void addItem(recipe.id, item.food.id, item.quantityG) },
+    })
   }
 
   return (
     <>
-      <PageHeader title={recipe.name} />
+      <PageHeader title={name.trim() || recipe.name} />
 
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-2">
@@ -102,7 +153,7 @@ function Editor({
             autoFocus={params.get('new') === '1'}
             onFocus={(event) => params.get('new') === '1' && event.target.select()}
             onChange={(event) => setName(event.target.value)}
-            onBlur={saveName}
+            onBlur={() => void saveName()}
             onKeyDown={(event) => event.key === 'Enter' && event.currentTarget.blur()}
           />
         </div>
@@ -114,9 +165,9 @@ function Editor({
           unit="g"
           value={total}
           onChange={(event) => setTotal(event.target.value)}
-          onBlur={saveTotal}
+          onBlur={() => void saveTotal()}
           onKeyDown={(event) => event.key === 'Enter' && event.currentTarget.blur()}
-          error={totalError ? t('pages.recipes.portion.invalid') : undefined}
+          error={totalError ? t('pages.recipes.totalInvalid') : undefined}
         />
       </div>
 
@@ -153,7 +204,7 @@ function Editor({
       <Button
         variant="quiet"
         className="mt-8 text-danger hover:border-danger"
-        onClick={() => setDeleting(true)}
+        onClick={() => void deleteRecipe()}
       >
         {t('pages.recipes.delete')}
       </Button>
@@ -165,33 +216,22 @@ function Editor({
         ← {t('pages.recipes.back')}
       </Link>
 
+      {/* Keyed on what is open, so every opening starts from the saved amount
+          rather than from whatever was typed and dismissed last time. */}
       <ItemSheet
+        key={editing?.id ?? 'closed'}
         item={editing}
         onClose={() => setEditing(null)}
-        onSave={(quantityG) => {
-          if (editing) void saved(updateItem(editing.id, quantityG))
+        onSave={async (quantityG) => {
+          const item = editing
           setEditing(null)
+          if (item && !(await updateItem(item.id, quantityG))) toast(t('pages.recipes.saveFailed'))
         }}
         onRemove={() => {
-          if (editing) void saved(removeItem(editing.id))
+          if (editing) void removeIngredient(editing)
           setEditing(null)
         }}
       />
-
-      {/* Asked first: a recipe is typed in once and has no undo here. */}
-      <Confirm
-        open={deleting}
-        onOpenChange={setDeleting}
-        question={t('pages.recipes.deleteTitle')}
-        confirmLabel={t('pages.recipes.delete')}
-        cancelLabel={t('common.cancel')}
-        onConfirm={async () => {
-          if (await remove(recipe.id)) navigate('/food/recipes')
-          else toast(t('pages.recipes.saveFailed'))
-        }}
-      >
-        <p className="text-sm text-ink-muted">{t('pages.recipes.deleteBody')}</p>
-      </Confirm>
     </>
   )
 }
@@ -209,16 +249,10 @@ function ItemSheet({
   onRemove: () => void
 }) {
   const { t, i18n } = useTranslation()
-  const [value, setValue] = useState('')
+  const [value, setValue] = useState(() =>
+    item ? formatForInput(item.quantityG, i18n.language, QUANTITY_LIMITS.decimals) : '',
+  )
   const [error, setError] = useState(false)
-  const [shown, setShown] = useState<string | null>(null)
-
-  // A different ingredient opened: start from its amount.
-  if (item && shown !== item.id) {
-    setShown(item.id)
-    setValue(formatForInput(item.quantityG, i18n.language, QUANTITY_LIMITS.decimals))
-    setError(false)
-  }
 
   return (
     <Sheet open={item !== null} onOpenChange={(open) => !open && onClose()} title={item?.food.name ?? ''} closeLabel={t('common.close')}>

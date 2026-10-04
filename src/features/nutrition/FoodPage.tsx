@@ -102,12 +102,12 @@ export default function FoodPage() {
   async function onRemoveGroup(rows: LoggedFood[]) {
     const group = rows[0]?.group
     if (!group || !(await removeGroup(group.id))) return
-    toast(t('pages.recipes.deleted', { name: group.name }), {
+    toast(t('pages.recipes.lineRemoved', { name: group.name }), {
       action: {
         label: t('common.undo'),
         onClick: () => {
           void restoreGroup(rows).then((ok) => {
-            if (!ok) toast(t('pages.food.undoFailed'))
+            if (!ok) toast(t('pages.recipes.undoFailed', { name: group.name }))
           })
         },
       },
@@ -344,7 +344,9 @@ function Meal({
   onRemoveGroup: (rows: LoggedFood[]) => void
 }) {
   const { t } = useTranslation()
-  const [unfolded, setUnfolded] = useState<Set<string>>(new Set())
+  // Unfolded until folded: the ingredients are what gets corrected, and a line
+  // that hides them by default would have to be opened on every visit.
+  const [folded, setFolded] = useState<Set<string>>(new Set())
   const kcal = sumPortions(
     entries.map((entry) => ({ nutrients: entry.food.nutrients, quantityG: entry.quantityG })),
   ).kcal.value
@@ -361,10 +363,9 @@ function Meal({
     else lines.push({ kind: 'recipe', id: entry.group.id, rows: [entry] })
   }
 
-  const remove = (key: string, label: string, run: () => void) => (
+  const remove = (key: string, run: () => void) => (
     <button
       type="button"
-      aria-label={label}
       onClick={() => {
         onOpenRow(null)
         run()
@@ -394,7 +395,7 @@ function Meal({
                 key={entry.id}
                 open={openRow === entry.id}
                 onOpenChange={(open) => onOpenRow(open ? entry.id : null)}
-                actions={remove(entry.id, t('pages.food.log.remove'), () => onRemove(entry))}
+                actions={remove(entry.id, () => onRemove(entry))}
               >
                 <EntryBody entry={entry} date={date} locale={locale} />
               </SwipeRow>
@@ -402,27 +403,27 @@ function Meal({
           }
 
           const group = line.rows[0].group!
-          const open = unfolded.has(line.id)
+          const open = !folded.has(line.id)
           const lineKcal = sumPortions(
             line.rows.map((row) => ({ nutrients: row.food.nutrients, quantityG: row.quantityG })),
           ).kcal.value
           return (
             <Fragment key={line.id}>
-              {/* Removing the line removes the meal it stands for; the ingredient
-                  screens have their own delete, so this is never the only way to
-                  take one out. */}
+              {/* Removing the line removes the meal it stands for. The swipe is
+                  the quick way; the button under the ingredients is the one a
+                  keyboard or a screen reader reaches. */}
               <SwipeRow
                 open={openRow === line.id}
                 onOpenChange={(next) => onOpenRow(next ? line.id : null)}
-                actions={remove(line.id, t('pages.food.log.remove'), () => onRemoveGroup(line.rows))}
+                actions={remove(line.id, () => onRemoveGroup(line.rows))}
               >
                 <RowBody
                   expanded={open}
                   onClick={() =>
-                    setUnfolded((current) => {
+                    setFolded((current) => {
                       const next = new Set(current)
-                      if (open) next.delete(line.id)
-                      else next.add(line.id)
+                      if (open) next.add(line.id)
+                      else next.delete(line.id)
                       return next
                     })
                   }
@@ -447,12 +448,17 @@ function Meal({
               </SwipeRow>
               {open ? (
                 <li>
-                  <ul className="divide-y divide-line bg-surface-2">
+                  <ul className="divide-y divide-line">
                     {line.rows.map((row) => (
                       <li key={row.id} className="pl-5">
                         <EntryBody entry={row} date={date} locale={locale} />
                       </li>
                     ))}
+                    <li className="pl-5">
+                      <RowBody onClick={() => onRemoveGroup(line.rows)}>
+                        <span className="min-w-0 flex-1 text-sm text-danger">{t('pages.food.entry.delete')}</span>
+                      </RowBody>
+                    </li>
                   </ul>
                 </li>
               ) : null}

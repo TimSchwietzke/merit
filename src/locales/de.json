@@ -17,7 +17,8 @@
     "profile": "profil",
     "appearance": "darstellung",
     "data": "deine daten",
-    "welcome": "einrichtung"
+    "welcome": "einrichtung",
+    "recipes": "rezepte"
   },
   "common": {
     "notBuiltYet": "geplant",
@@ -702,26 +703,33 @@
       "ingredients_one": "{{count}} Zutat",
       "ingredients_other": "{{count}} Zutaten",
       "name": "name",
-      "total": "gewicht fertig",
-      "totalHint": " · optional",
+      "total": "fertiggewicht",
+      "totalHint": " · für portionen nach gramm",
       "ingredientsLabel": "zutaten",
       "noIngredients": "noch keine Zutaten",
       "delete": "Rezept löschen",
-      "deleteTitle": "Rezept löschen?",
-      "deleteBody": "Tage, an denen du es gegessen hast, bleiben unverändert.",
       "saveItem": "Menge speichern",
       "removeItem": "Zutat entfernen",
       "portion": {
         "mode": "portion",
-        "byParts": "Anteil",
-        "byGrams": "Gramm",
-        "servings": "portionen",
-        "parts": "anteil · 1 von",
-        "partsUnit": "teilen",
+        "byWhole": "ganz",
+        "byParts": "anteil",
+        "byGrams": "gramm",
+        "whole": "ganzes rezept",
+        "parts": "aufgeteilt in",
+        "partsUnit": "teile",
         "grams": "menge",
-        "invalid": "Trage eine gültige Menge ein."
+        "wholeInvalid": "Trage eine Zahl zwischen 0,1 und 100 ein.",
+        "partsInvalid": "Trage eine ganze Zahl zwischen 1 und 100 ein."
       },
-      "deleted": "{{name}} entfernt"
+      "totalInvalid": "Trage ein Gewicht zwischen 1 und 99.999 g ein.",
+      "lineRemoved": "{{name}} entfernt",
+      "undoFailed": "{{name}} konnte nicht wiederhergestellt werden. Trage es noch einmal ein.",
+      "itemRemoved": "{{name}} entfernt",
+      "addToRecipe": "Zum Rezept hinzufügen",
+      "adding": "Wird hinzugefügt …",
+      "addFailed": "Die Zutat wurde nicht hinzugefügt. Versuche es noch einmal.",
+      "deleted": "{{name}} gelöscht"
     }
   }
 }

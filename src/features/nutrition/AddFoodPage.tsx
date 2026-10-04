@@ -2,6 +2,7 @@ import { ScanBarcode } from 'lucide-react'
 import { lazy, Suspense, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import { PageHeader } from '@/components/PageHeader'
 import { Row, Rows } from '@/components/Rows'
@@ -96,7 +97,7 @@ export default function AddFoodPage() {
 
   const [picked, setPicked] = useState<CatalogueFood | null>(null)
   const [pickedRecipe, setPickedRecipe] = useState<Recipe | null>(null)
-  const { recipes, addItem } = useRecipes()
+  const { recipes, addItem, create: createRecipe } = useRecipes()
   const [creating, setCreating] = useState(false)
   const [scanning, setScanning] = useState(params.get('scan') === '1')
   const [pending, setPending] = useState(false)
@@ -115,6 +116,13 @@ export default function AddFoodPage() {
     setPending(false)
     if (saved) navigate(backTo)
     else setFailed(true)
+  }
+
+  // Straight into the editor, as the floating add on the recipe list does.
+  async function newRecipe() {
+    const id = await createRecipe(t('pages.recipes.defaultName'))
+    if (id) navigate(`/food/recipes/${id}?new=1`)
+    else toast(t('pages.recipes.createFailed'))
   }
 
   async function logPickedRecipe(portion: { mealType: MealType; factor: number; grams: number | null }) {
@@ -241,7 +249,12 @@ export default function AddFoodPage() {
           pending={pending}
           failed={failed}
           withMeal={!forRecipe}
-          submitLabel={pending ? t('pages.food.portion.saving') : t('pages.food.portion.save')}
+          failedMessage={forRecipe ? t('pages.recipes.addFailed') : undefined}
+          submitLabel={
+            forRecipe
+              ? t(pending ? 'pages.recipes.adding' : 'pages.recipes.addToRecipe')
+              : t(pending ? 'pages.food.portion.saving' : 'pages.food.portion.save')
+          }
           onSubmit={logPortion}
         />
         <Button variant="bare" className="mt-4" onClick={() => setPicked(null)}>
@@ -387,12 +400,14 @@ export default function AddFoodPage() {
                       </span>
                     </Row>
                   ))}
-                  {!asked ? <ManageRecipes label={t('pages.recipes.manage')} /> : null}
+                  {!asked ? (
+                    <ManageRecipes label={t('pages.recipes.manage')} to={`/food/recipes?date=${date}`} />
+                  ) : null}
                 </Rows>
               </Collapsible>
             ) : (
               <Rows>
-                <ManageRecipes label={t('pages.recipes.create')} />
+                <ManageRecipes label={t('pages.recipes.create')} onClick={() => void newRecipe()} />
               </Rows>
             )}
           </div>
@@ -567,9 +582,9 @@ function Attribution() {
 }
 
 /** The way from add-food to the recipe list, as the last row of the group. */
-function ManageRecipes({ label }: { label: string }) {
+function ManageRecipes({ label, to, onClick }: { label: string; to?: string; onClick?: () => void }) {
   return (
-    <Row to="/food/recipes">
+    <Row to={to} onClick={onClick}>
       <span className="min-w-0 flex-1 text-ink-muted">{label}</span>
       <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
         →

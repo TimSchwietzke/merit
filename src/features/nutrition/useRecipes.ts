@@ -50,6 +50,14 @@ const toRecipe = (row: Row): Recipe => {
   }
 }
 
+/**
+ * Every mounted list of recipes, told when any of them has written. The editor
+ * saves its last edit as it unmounts, and the list it returns to has already
+ * read by then; without this it would show the old name until a reload.
+ */
+const mounted = new Set<() => void>()
+const changed = () => mounted.forEach((reload) => reload())
+
 export function useRecipes() {
   const { session } = useSession()
   const userId = session?.user.id
@@ -59,6 +67,13 @@ export function useRecipes() {
   })
   const [version, setVersion] = useState(0)
   const reload = useCallback(() => setVersion((v) => v + 1), [])
+
+  useEffect(() => {
+    mounted.add(reload)
+    return () => {
+      mounted.delete(reload)
+    }
+  }, [reload])
 
   useEffect(() => {
     if (!userId) return
@@ -84,10 +99,10 @@ export function useRecipes() {
   const write = useCallback(
     async (run: () => PromiseLike<{ error: unknown }>) => {
       const { error } = await run()
-      if (!error) reload()
+      if (!error) changed()
       return !error
     },
-    [reload],
+    [],
   )
 
   const create = useCallback(
@@ -99,10 +114,10 @@ export function useRecipes() {
         .select('id')
         .single()
       if (!data || error) return null
-      reload()
+      changed()
       return data.id
     },
-    [reload, userId],
+    [userId],
   )
 
   const update = useCallback(
@@ -141,5 +156,24 @@ export function useRecipes() {
     [write],
   )
 
-  return { ...state, create, update, remove, addItem, updateItem, removeItem }
+  // Undo for `remove`: the recipe comes back under its own id, with its
+  // ingredients. Days it was logged on keep their line either way; the link
+  // from those lines to the recipe is not restored.
+  const restore = useCallback(
+    async (recipe: Recipe) => {
+      if (!userId) return false
+      const { error } = await supabase
+        .from('recipes')
+        .insert({ id: recipe.id, user_id: userId, name: recipe.name, total_g: recipe.totalG })
+      if (error) return false
+      return write(() =>
+        supabase.from('recipe_items').insert(
+          recipe.items.map((item) => ({ recipe_id: recipe.id, food_id: item.food.id, quantity_g: item.quantityG })),
+        ),
+      )
+    },
+    [userId, write],
+  )
+
+  return { ...state, create, update, remove, restore, addItem, updateItem, removeItem }
 }
