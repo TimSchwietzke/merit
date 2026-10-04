@@ -98,7 +98,9 @@ test('a barcode held in front of the camera resolves without anyone typing', asy
   try {
     const page = await browser.newPage({ viewport: { width: 375, height: 812 } })
     await stubBackend(page, { theme: 'light', locale: 'de' })
-    await page.goto('http://127.0.0.1:5173/food/add?scan=1')
+    // Its own browser has no baseURL, so it is taken from the config rather
+    // than written out, which pointed it at whatever else held the port.
+    await page.goto(`${testInfo.project.use.baseURL}/food/add?scan=1`)
     await waitForScreen(page)
 
     // Nothing is typed and nothing is pressed: the camera is the interface.
