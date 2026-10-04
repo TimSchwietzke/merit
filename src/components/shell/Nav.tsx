@@ -107,7 +107,7 @@ export function Nav() {
                   '-mt-5 flex size-14 items-center justify-center rounded-full border-4 border-bg',
                   'transition-colors [transition-duration:140ms] active:[transition-duration:0ms]',
                   isActive
-                    ? 'bg-[var(--merit-moss)] font-medium text-bg'
+                    ? 'bg-accent font-medium text-bg'
                     : 'bg-surface-2 text-ink ring-1 ring-line active:bg-surface',
                 )
               }

@@ -38,7 +38,8 @@ export function AppShell() {
 
 /** Which domain hue a route wears. Nutrition is moss, which is also the
  *  default, so it needs no name here. */
-function domainOf(pathname: string): 'training' | 'weight' | undefined {
+function domainOf(pathname: string): 'home' | 'training' | 'weight' | undefined {
+  if (pathname === '/') return 'home'
   if (pathname.startsWith('/training')) return 'training'
   if (pathname.startsWith('/weight')) return 'weight'
   return undefined
@@ -57,8 +58,8 @@ function Frame() {
       {/* 
           The domain is the part of the body the screen is about, what you eat,
           what you lift, what you weigh, so the colour is never decoration and
-          never arbitrary. The dashboard has none: it reports on all three, and
-          each block there carries its own. */}
+          never arbitrary. The dashboard is neutral ink: it reports on all three,
+          and each block there carries its own. */}
       <div className="min-h-[100dvh] lg:flex">
         <Nav />
         <div className="flex min-w-0 flex-1 flex-col">

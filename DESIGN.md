@@ -120,6 +120,17 @@ Moss is the only accent. No secondary accent, no success-green (the accent *is* 
 green would be indistinguishable), no info-blue. If a second colour feels necessary, the answer is
 weight, emphasis, or an icon.
 
+**Domain hues.** One accent *per screen*, not one for the app: `data-domain` on the frame rebinds
+`accent` to the screen's domain (`tokens.css`). Nutrition is moss, training oxide, weight steel,
+cardio plum. The dashboard reports on all of them and so is `home`: its own chrome (the nav disc,
+the account button) is ink, and every block on it carries its domain's hue. Green on the dashboard
+therefore means nutrition and nothing else. Hand-written CSS reads `var(--merit-accent)`, never
+`var(--color-accent)`, which resolves once at `:root` and stays moss on every screen.
+
+**Floating add on growing lists.** Routines and the food day put "add" in the same corner
+(§10.10, `FloatingAdd`). Weight does not: its form is on the page, and a second way to it would be
+the same action twice.
+
 A note specific to this hue: because the accent is green, **green must not double as a
 "target met" signal**. Not for ethical reasons but for legibility: if the accent means both "active"
 and "on target", neither reading survives. Target status is carried by the bar, the emphasis and the

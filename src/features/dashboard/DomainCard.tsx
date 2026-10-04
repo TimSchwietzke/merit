@@ -20,8 +20,7 @@ export function DomainCard({
   note,
   children,
 }: {
-  /** Omitted for nutrition, which is moss, the default `accent`. */
-  domain?: 'training' | 'weight' | 'cardio'
+  domain: 'nutrition' | 'training' | 'weight' | 'cardio'
   to: string
   label: string
   /** The one figure this card exists to show. Absent while it is unknown. */
