@@ -211,7 +211,7 @@ export default function SessionPage() {
                   <Button
                     variant="bare"
                     size="icon"
-                    aria-label={t('pages.training.session.removeExercise')}
+                    aria-label={t('pages.training.session.removeExercise', { name: entry.name })}
                     onClick={() =>
                       edit(current.filter((row) => row.routineExerciseId !== entry.routineExerciseId))
                     }
@@ -357,11 +357,11 @@ export default function SessionPage() {
         <Rows>
           {(
             [
-              ['today', 'scopeToday', 'scopeTodayHint'],
-              ['always', 'scopeAlways', 'scopeAlwaysHint'],
-              ['pick', 'scopePick', 'scopePickHint'],
+              ['today', 'scopeToday'],
+              ['always', 'scopeAlways'],
+              ['pick', 'scopePick'],
             ] as const
-          ).map(([scope, label, hint]) => (
+          ).map(([scope, label]) => (
             <Row
               key={scope}
               onClick={() => {
@@ -373,12 +373,7 @@ export default function SessionPage() {
                 void commit(scope)
               }}
             >
-              <span className="min-w-0 flex-1">
-                <span className="block truncate">{t(`pages.training.session.${label}`)}</span>
-                <span className="block truncate font-mono text-2xs text-ink-faint">
-                  {t(`pages.training.session.${hint}`)}
-                </span>
-              </span>
+              <span className="min-w-0 flex-1 truncate">{t(`pages.training.session.${label}`)}</span>
             </Row>
           ))}
         </Rows>

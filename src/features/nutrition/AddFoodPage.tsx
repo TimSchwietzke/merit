@@ -14,6 +14,7 @@ import { NewFoodForm, type NewFood } from '@/features/nutrition/NewFoodForm'
 import { resolveBarcode } from '@/features/nutrition/resolve-barcode'
 import { cacheOffFood } from '@/features/nutrition/resolve-barcode'
 import { resolveUsdaFood } from '@/features/nutrition/resolve-usda'
+import { normaliseBarcode } from '@/lib/barcode'
 import { PortionForm } from '@/features/nutrition/PortionForm'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
 import { useFoodSearch } from '@/features/nutrition/useFoodSearch'
@@ -121,7 +122,10 @@ export default function AddFoodPage() {
     // Not an error dialog: a barcode that did not resolve is an empty state,
     // and the next step is offered in place (§10.8, §14).
     setScanResult(resolved.kind)
-    if (resolved.kind === 'missing') setScannedBarcode(resolved.barcode)
+    // Every scan, not only a missing one: "Selbst eintragen" follows an
+    // unreachable lookup too, and must not carry the barcode of an earlier scan
+    // into the shared catalogue.
+    setScannedBarcode(normaliseBarcode(code))
   }
 
   async function pickUsda(food: UsdaFood) {
@@ -199,7 +203,7 @@ export default function AddFoodPage() {
           onSubmit={logPortion}
         />
         <Button variant="bare" className="mt-4" onClick={() => setPicked(null)}>
-          ← {t('pages.food.add.search')}
+          ← {t('pages.food.add.backToSearch')}
         </Button>
       </>
     )
@@ -218,25 +222,23 @@ export default function AddFoodPage() {
         {scanResult ? (
           <div className="mt-6 rounded-lg border border-line bg-surface px-4 py-6 text-center">
             <p className="text-sm text-ink-muted">{t(`pages.food.scan.${scanResult}`)}</p>
-            {scanResult === 'missing' ? (
-              <Button
-                variant="tinted"
-                className="mt-4"
-                onClick={() => {
-                  setScanning(false)
-                  setCreating(true)
-                }}
-              >
-                {t('pages.food.scan.addYourself')}
-              </Button>
-            ) : null}
+            <Button
+              variant="tinted"
+              className="mt-4"
+              onClick={() => {
+                setScanning(false)
+                setCreating(true)
+              }}
+            >
+              {t('pages.food.scan.addYourself')}
+            </Button>
           </div>
         ) : null}
 
         <Attribution />
 
         <Button variant="bare" className="mt-4" onClick={() => setScanning(false)}>
-          ← {t('pages.food.add.search')}
+          ← {t('pages.food.add.backToSearch')}
         </Button>
       </>
     )
@@ -248,7 +250,7 @@ export default function AddFoodPage() {
         <PageHeader title={t('pages.food.new.title')} />
         <NewFoodForm pending={pending} failed={failed} onSubmit={createFood} />
         <Button variant="bare" className="mt-4" onClick={() => setCreating(false)}>
-          ← {t('pages.food.add.search')}
+          ← {t('pages.food.add.backToSearch')}
         </Button>
       </>
     )
@@ -276,7 +278,6 @@ export default function AddFoodPage() {
       <form onSubmit={search} className="flex flex-col gap-2">
         <Label htmlFor="food-search">
           {t('pages.food.add.search')}
-          <span className="text-ink-faint">{t('pages.food.add.searchHint')}</span>
         </Label>
 
         <div className="flex items-start gap-2">
@@ -336,10 +337,6 @@ export default function AddFoodPage() {
               locale={locale}
             />
           </Collapsible>
-        ) : null}
-
-        {searching ? (
-          <p className="font-mono text-2xs text-ink-faint">{t('pages.food.add.searching')}</p>
         ) : null}
 
         {status === 'error' ? (

@@ -25,7 +25,7 @@ for (const theme of ['light', 'dark'] as const) {
 
     for (const [index, panel] of PANELS.entries()) {
       await shot(`panel-${index + 1}-${panel}`)
-      await page.getByRole('button', { name: index === PANELS.length - 1 ? "Los geht's" : 'Weiter' }).click()
+      await page.getByRole('button', { name: index === PANELS.length - 1 ? 'Einrichten' : 'Weiter' }).click()
       // The strip scrolls; the panel is only in place once it has stopped.
       await page.waitForTimeout(400)
     }

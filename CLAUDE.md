@@ -139,6 +139,11 @@ test the feature locally, open the PR. Only then, and after asking: dump,
 - **Say when something is a bad idea.** If a request conflicts with the data
   model, the licence terms, or the privacy rules above, say so instead of
   implementing it.
+- **Review before merge.** Every change that touches the UI gets a pass from
+  the `ui-slop-reviewer` agent (AI tells, unnecessary text, UI/UX bad
+  practice) before it is merged or deployed, and its findings are fixed or
+  answered in the PR. Text that explains what a control already shows is a
+  defect.
 - **Do not add dependencies casually.** Propose the dependency and the reason
   first; prefer the platform or a few lines of our own code.
 

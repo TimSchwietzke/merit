@@ -35,7 +35,7 @@ test('the macro calculator fills the three fields from the two knobs', async ({ 
   await waitForScreen(page)
 
   // Defaults are already in the knobs, so this is one tap from a fresh screen.
-  await page.getByRole('button', { name: 'Die drei Felder füllen' }).click()
+  await page.getByRole('button', { name: 'Makros übernehmen' }).click()
 
   // 83 kg × 1.8 = 149 g. The seeded goal is 2386 kcal calculated, so fat is
   // 30% of that over 9, and carbohydrate is whatever is left.

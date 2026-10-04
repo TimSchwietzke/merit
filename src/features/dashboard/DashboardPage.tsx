@@ -119,7 +119,6 @@ export default function DashboardPage() {
       <section aria-label={t('pages.dashboard.summary')} className="mt-8 grid grid-cols-2 gap-3">
         <Reveal from="left" className="row-span-2">
           <NutritionCard
-            entries={entries}
             goal={goal}
             status={status}
             totals={totals}
@@ -157,13 +156,11 @@ export default function DashboardPage() {
 
 /** The day's eating, as one card: the ring, and how much of the day is left. */
 function NutritionCard({
-  entries,
   goal,
   status,
   totals,
   locale,
 }: {
-  entries: unknown[]
   goal: { kcal: number; proteinG: number; fatG: number; carbsG: number } | null
   status: 'loading' | 'ready' | 'error'
   totals: ReturnType<typeof sumPortions>
@@ -206,11 +203,6 @@ function NutritionCard({
           the height of the other three, and a carousel where every card is as
           tall as the tallest turns that into dead space on all of them. The
           bars are one tap away on the screen this links to. */}
-      {entries.length === 0 ? (
-        <p className="text-center font-mono text-2xs text-ink-faint">
-          {t('pages.dashboard.nothingLogged')}
-        </p>
-      ) : null}
     </Link>
   )
 }
@@ -306,13 +298,7 @@ function StreakCard({
   // (PRODUCT.md). A card that says nothing is a card nobody should swipe to.
   const showTraining = streak > 0 && streak * 7 >= days
 
-  if (days <= 1 && streak === 0) {
-    return (
-      <DomainCard domain="training" to="/training" label={t('common.streak.training')} value="—">
-        <p className="font-mono text-2xs text-ink-faint">{t('common.streak.none')}</p>
-      </DomainCard>
-    )
-  }
+  if (days <= 1 && streak === 0) return null
 
   return showTraining ? (
     <DomainCard

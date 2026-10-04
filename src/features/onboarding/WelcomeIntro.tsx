@@ -71,9 +71,13 @@ export function WelcomeIntro({ onDone }: { onDone: () => void }) {
                 <Wordmark className="text-2xl" />
               )}
 
-              <p className="font-mono text-2xs text-ink-faint">
-                {t(`pages.welcome.intro.${key}.label`)}
-              </p>
+              {/* The first panel carries the wordmark, and a label under it
+                  would only say the name again. */}
+              {Icon ? (
+                <p className="font-mono text-2xs text-ink-faint">
+                  {t(`pages.welcome.intro.${key}.label`)}
+                </p>
+              ) : null}
               <h2 className="max-w-[20ch] font-serif text-2xl leading-snug tracking-tight text-balance">
                 {t(`pages.welcome.intro.${key}.line`)}
               </h2>

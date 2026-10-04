@@ -20,7 +20,7 @@
     "welcome": "einrichtung"
   },
   "common": {
-    "notBuiltYet": "noch nicht gebaut",
+    "notBuiltYet": "geplant",
     "today": "heute",
     "notFound": "nicht gefunden",
     "loading": "wird geladen",
@@ -31,13 +31,12 @@
     "filtersOpen": "Filter, {{count}} aktiv",
     "close": "Schließen",
     "streak": {
-      "nutrition": "dran geblieben",
-      "training": "wochen nach plan",
-      "days_one": "{{count}} Tag",
-      "days_other": "{{count}} Tage",
-      "weeks_one": "{{count}} Woche",
-      "weeks_other": "{{count}} Wochen",
-      "none": "noch nichts zu berichten"
+      "nutrition": "in folge",
+      "training": "nach plan",
+      "days_one": "Tag",
+      "days_other": "Tage",
+      "weeks_one": "Woche",
+      "weeks_other": "Wochen"
     },
     "week": {
       "previous": "Woche zurück",
@@ -50,7 +49,7 @@
   "auth": {
     "signIn": {
       "title": "Anmelden",
-      "lead": "Merit ist nur auf Einladung nutzbar. Konten werden von Hand angelegt, eine Registrierung gibt es nicht.",
+      "lead": "merit ist nur auf Einladung nutzbar. Konten werden von Hand angelegt, eine Registrierung gibt es nicht.",
       "email": "e-mail",
       "password": "passwort",
       "submit": "Anmelden",
@@ -70,21 +69,15 @@
       "over": "kcal darüber",
       "ringAria": "{{total}} von {{target}} kcal heute, {{remaining}} kcal vom Ziel entfernt.",
       "noTarget": "noch kein kalorienziel",
-      "setTarget": "Ziel festlegen",
-      "nothingLogged": "heute noch nichts erfasst",
-      "macros": "makros",
-      "logFood": "Essen erfassen",
       "training": {
-        "label": "training",
         "due": "{{name}} steht heute an.",
         "doneToday": "{{name}} erledigt.",
         "rest": "Heute ist Ruhetag.",
         "next": "Als Nächstes {{name}} am {{day}}.",
         "nextTomorrow": "Als Nächstes {{name}} morgen.",
-        "nothingPlanned": "Noch keine Routine eingeplant.",
-        "open": "Training"
+        "nothingPlanned": "Noch keine Routine eingeplant."
       },
-      "loadFailed": "Der heutige Tag konnte nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
+      "loadFailed": "nicht geladen",
       "weight": {
         "noTrend": "noch kein Trend",
         "week": "{{delta}} kg diese Woche"
@@ -110,21 +103,20 @@
       },
       "recency": {
         "label": "zuletzt trainiert",
-        "never": "{{region}} hatte noch gar nichts",
-        "cold": "{{region}} zuletzt vor über einer Woche",
-        "longest_one": "{{region}} zuletzt vor {{count}} Tag",
-        "longest_other": "{{region}} zuletzt vor {{count}} Tagen",
+        "never": "{{region}}: noch nie",
+        "cold": "{{region}}: vor über einer Woche",
+        "longest_one": "{{region}}: vor {{count}} Tag",
+        "longest_other": "{{region}}: vor {{count}} Tagen",
         "fresh": "alles in den letzten zwei Tagen"
       }
     },
     "food": {
-      "loadFailed": "Die Einträge des Tages konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
+      "loadFailed": "Die Einträge des Tages konnten nicht geladen werden. Lade die Seite neu.",
       "deleted": "{{name}} entfernt",
       "undoFailed": "Die Portion konnte nicht wiederhergestellt werden. Trage sie noch einmal ein.",
       "day": {
         "previous": "Vorheriger Tag",
-        "next": "Nächster Tag",
-        "today": "Zurück zu heute"
+        "next": "Nächster Tag"
       },
       "meals": {
         "breakfast": "frühstück",
@@ -146,86 +138,74 @@
         "label": "der tag",
         "partial": "unvollständig · {{known}} von {{total}}",
         "none": "keine angabe",
-        "left": "noch {{left}}",
-        "over": "{{over}} darüber",
-        "noTarget": "kalorienziel festlegen",
-        "ariaCalories": "Kalorien heute im Verhältnis zu deinem Ziel"
+        "noTarget": "kalorienziel festlegen"
       },
       "log": {
         "label": "erfasst",
         "empty": "noch nichts erfasst",
         "add": "Lebensmittel hinzufügen",
-        "swipe": "Wische die Zeile zur Seite, um sie zu entfernen.",
         "remove": "Entfernen"
       },
       "add": {
         "title": "Lebensmittel hinzufügen",
         "search": "suche",
-        "searchHint": " · name eintippen, dann suchen",
-        "searching": "sucht …",
+        "searching": "Sucht …",
         "noResults": "kein treffer",
         "addYourself": "Selbst eintragen",
-        "searchFailed": "Die Suche ist nicht durchgekommen. Prüfe dein Netz und versuche es noch einmal.",
+        "searchFailed": "Die Suche ist nicht durchgekommen. Versuche es noch einmal.",
         "back": "Zurück zum Tag",
         "recent": "zuletzt benutzt",
         "catalogue": "katalog",
         "usda": "usda",
-        "searchingUsda": "usda wird durchsucht …",
-        "usdaFailed": "usda war nicht erreichbar. Der Katalog oben ist vollständig.",
-        "usdaBusy": "usda ist gerade ausgelastet. Versuch es in ein paar Minuten noch einmal.",
+        "usdaFailed": "usda nicht erreichbar",
+        "usdaBusy": "usda ausgelastet",
         "off": "open food facts",
-        "searchOff": "Open Food Facts durchsuchen",
-        "offSearching": "wird gesucht …",
-        "offNone": "kein treffer",
-        "offBusy": "gerade zu viele suchen",
-        "offFailed": "nicht erreichbar",
-        "scan": "Scannen",
+        "offBusy": "open food facts ausgelastet",
+        "offFailed": "open food facts nicht erreichbar",
         "elsewhere": "wenn nichts passt",
-        "go": "Suchen"
+        "go": "Suchen",
+        "backToSearch": "Zurück zur Suche"
       },
       "portion": {
         "quantity": "menge",
         "meal": "mahlzeit",
-        "quantityInvalid": "Trage eine Menge zwischen 1 und 10000 g ein, zum Beispiel 250.",
-        "previewPending": "trage eine Menge ein, um die Werte zu sehen",
-        "saveFailed": "Die Portion wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+        "quantityInvalid": "Trage eine Menge zwischen 1 und 10.000 g ein, zum Beispiel 250.",
+        "saveFailed": "Die Portion wurde nicht gespeichert. Versuche es noch einmal.",
         "save": "Eintragen",
         "saving": "Wird eingetragen …"
       },
       "new": {
         "title": "Lebensmittel anlegen",
-        "shared": "Was du anlegst, sehen alle Merit-Nutzer. Werte je 100 g oder 100 ml, wie auf der Packung.",
+        "shared": "Was du anlegst, sehen alle merit-Nutzer. Werte je 100 g oder 100 ml, wie auf der Packung.",
         "name": "name",
         "brand": "marke",
         "optional": " · optional",
-        "required": "pflicht",
         "nameInvalid": "Gib dem Lebensmittel einen Namen.",
         "valueInvalid": "Trage eine Zahl ein oder lass das Feld leer, wenn die Packung nichts dazu sagt.",
-        "requiredInvalid": "Energie, Fett, Kohlenhydrate und Eiweiß werden gebraucht, um überhaupt etwas dagegen rechnen zu können.",
+        "requiredInvalid": "Pflichtfeld.",
         "subValueTooHigh": "Ein Teilwert kann nicht größer sein als der Wert, zu dem er gehört.",
         "save": "In den Katalog aufnehmen",
         "saving": "Wird angelegt …",
-        "saveFailed": "Das Lebensmittel wurde nicht angelegt. Prüfe dein Netz und versuche es noch einmal."
+        "saveFailed": "Das Lebensmittel wurde nicht angelegt. Versuche es noch einmal."
       },
       "scan": {
         "title": "Barcode scannen",
         "open": "Barcode scannen",
         "viewport": "Kamera, auf einen Barcode gerichtet",
-        "instruction": "barcode in den rahmen",
         "looking": "wird nachgeschlagen",
         "barcode": "barcode",
         "look": "Nachschlagen",
         "barcodeInvalid": "Das ist kein Barcode. Prüfe die Ziffern und versuche es noch einmal.",
-        "denied": "Merit hat keinen Zugriff auf die Kamera. Erlaube ihn im Browser und versuche es noch einmal, oder tippe die Nummer unten ein.",
-        "missing": "kein Produkt zu diesem Barcode",
-        "offline": "Open Food Facts war nicht erreichbar. Prüfe dein Netz oder trage das Lebensmittel selbst ein.",
+        "denied": "merit hat keinen Zugriff auf die Kamera. Erlaube ihn im Browser und versuche es noch einmal, oder tippe die Nummer unten ein.",
+        "missing": "Kein Produkt zu diesem Barcode.",
+        "offline": "Open Food Facts ist nicht erreichbar.",
         "addYourself": "Selbst eintragen",
         "attribution": "Produktdaten von Open Food Facts, unter der ODbL.",
         "starting": "kamera startet",
         "retry": "Kamera erneut versuchen",
         "torchOn": "Licht einschalten",
         "torchOff": "Licht ausschalten",
-        "or": "oder nummer eintippen"
+        "or": "oder"
       },
       "entry": {
         "title": "Erfasste Portion",
@@ -244,12 +224,11 @@
       }
     },
     "training": {
-      "loadFailed": "Die Sätze des Tages konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
+      "loadFailed": "Die Sätze des Tages konnten nicht geladen werden. Lade die Seite neu.",
       "empty": "noch nichts erfasst",
       "addExercise": "Übung hinzufügen",
       "deleted": "Satz entfernt",
       "undoFailed": "Der Satz konnte nicht wiederhergestellt werden. Trage ihn noch einmal ein.",
-      "swipe": "Wische die Zeile zur Seite, um sie zu entfernen.",
       "remove": "Entfernen",
       "lastTime": "letztes Mal",
       "never": "zum ersten Mal",
@@ -257,20 +236,13 @@
       "set": {
         "reps": "wdh",
         "weight": "gewicht",
-        "rir": "rir",
-        "rirHint": " · optional",
-        "add": "Satz eintragen",
-        "adding": "Wird eingetragen …",
-        "invalid": "Trage Wiederholungen und ein Gewicht ein. Null ist ein Gewicht, leer nicht.",
-        "addFailed": "Der Satz wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal."
+        "rir": "rir"
       },
       "add": {
         "title": "Übung hinzufügen",
         "search": "suche",
-        "searching": "wird gesucht",
-        "noResults": "keine Übung gefunden",
         "back": "Zurück zum Tag",
-        "searchFailed": "Die Suche ist nicht durchgekommen. Prüfe dein Netz und versuche es noch einmal.",
+        "searchFailed": "Die Suche ist nicht durchgekommen. Versuche es noch einmal.",
         "recent": "zuletzt benutzt",
         "filterEquipment": "gerät",
         "noMatch": "Nichts passt zu {{filters}}.",
@@ -298,12 +270,7 @@
         "full_body": "ganzkörper"
       },
       "setRow": {
-        "add": "Satz hinzufügen",
-        "done": "Als erledigt markieren",
-        "undone": "Als offen markieren",
-        "planned": "geplant",
-        "save": "Speichern",
-        "editing": "Satz {{n}} bearbeiten"
+        "add": "Satz hinzufügen"
       },
       "week": {
         "label": "diese woche",
@@ -311,59 +278,47 @@
         "nothing": "nichts geplant",
         "put": "Routine auf diesen Tag legen",
         "putTitle": "welche routine?",
-        "putFailed": "Das wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+        "putFailed": "Die Routine wurde nicht eingeplant. Versuche es noch einmal.",
         "open": "noch nicht gestartet",
         "progress": "{{logged}} von {{total}} Sätzen erledigt",
         "setCount_one": "{{count}} Satz",
         "setCount_other": "{{count}} Sätze",
-        "marks": "Ruhetag · geplant · erledigt",
         "move": "Diese Einheit verschieben",
         "moving": "Wähle den Tag, mit dem {{name}} getauscht wird.",
         "moveCancel": "Abbrechen",
         "swapConfirm": "{{a}} ({{aDay}}) mit {{b}} ({{bDay}}) tauschen?",
         "confirm": "Tauschen",
-        "loadFailed": "Deine Woche konnte nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
+        "loadFailed": "Deine Woche konnte nicht geladen werden. Lade die Seite neu.",
         "putNew": "Neue Routine anlegen"
       },
       "session": {
         "label": "die einheit",
         "changeRoutine": "Eine andere Routine machen",
         "changeRoutineTitle": "welche routine?",
-        "replaced": "{{wanted}} statt {{displaced}} an diesem Tag. {{displaced}} ist nächste Woche wieder da.",
         "start": "Einheit starten",
         "starting": "Wird gestartet …",
-        "startFailed": "Das hat nicht geklappt. Prüfe dein Netz und versuche es noch einmal.",
-        "resume": "Einheit öffnen",
-        "removeSet": "Ein Satz weniger",
+        "startFailed": "Die Einheit wurde nicht gestartet. Versuche es noch einmal.",
         "addSet": "Ein Satz mehr",
-        "removeExercise": "Heute nicht",
-        "sets": "{{sets}} × {{reps}}",
+        "removeExercise": "{{name}} heute auslassen",
         "empty": "in dieser Einheit ist nichts mehr übrig",
         "unsaved": "für heute geändert",
-        "save": "Änderung speichern",
         "scopeTitle": "änderung gilt für …",
         "scopeToday": "Nur heute",
-        "scopeTodayHint": "Die Routine selbst bleibt unberührt.",
         "scopeAlways": "Jede weitere Einheit",
-        "scopeAlwaysHint": "Ändert die Routine dauerhaft.",
         "scopePick": "Tage auswählen",
-        "scopePickHint": "Für eine Zeit, in der du weniger Zeit hast.",
         "pickTitle": "welche tage?",
         "pickDone": "Auf {{count}} Tage anwenden",
-        "saveFailed": "Die Änderung wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
         "moveHere": "Stattdessen heute trainieren?",
-        "moveHereBody": "{{name}} ist für {{day}} geplant. Wenn du jetzt startest, wird die Einheit auf heute verschoben.",
+        "moveHereBody": "{{name}} ist für {{day}} geplant.",
         "moveConfirm": "Auf heute verschieben"
       },
       "bar": {
-        "title": "Einheit läuft",
         "setOf": "Satz {{n}} von {{total}}",
         "log": "Satz eintragen",
         "logging": "Wird eingetragen …",
         "expand": "Einheit anzeigen",
         "collapse": "Einheit ausblenden",
         "finish": "Einheit beenden",
-        "finished": "Alles eingetragen.",
         "invalid": "Trage Wiederholungen und ein Gewicht ein."
       },
       "stats": {
@@ -395,7 +350,8 @@
       },
       "offline_one": "offline · 1 Satz wartet auf diesem Gerät",
       "offline_other": "offline · {{count}} Sätze warten auf diesem Gerät",
-      "syncRejected": "Eine Änderung hat der Server abgelehnt und sie ist verworfen. Prüfe die Sätze von heute."
+      "syncRejected": "Der Server hat eine Änderung abgelehnt, sie wurde verworfen. Prüfe die Sätze von heute.",
+      "swipe": "Wische die Zeile zur Seite, um sie zu entfernen."
     },
     "notFound": {
       "title": "Seite nicht gefunden",
@@ -403,7 +359,7 @@
       "back": "Zurück zur Übersicht"
     },
     "weight": {
-      "loadFailed": "Deine Wiegungen konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
+      "loadFailed": "Deine Wiegungen konnten nicht geladen werden. Lade die Seite neu.",
       "deleted": "{{date}} gelöscht",
       "undoFailed": "Der Eintrag konnte nicht wiederhergestellt werden. Trage den Tag noch einmal ein.",
       "range": "Zeitraum",
@@ -418,7 +374,7 @@
           "days": "{{days}} T",
           "all": "alle"
         },
-        "empty": "trage ein Gewicht ein, um den Verlauf zu sehen",
+        "empty": "noch kein Verlauf",
         "raw": "täglich",
         "average": "{{days}}-Tage-Schnitt",
         "aria": "Gewicht in Kilogramm, {{entries}} Wiegungen von {{from}} bis {{to}}, zwischen {{low}} und {{high}} kg. Die Tageswerte und ihr Sieben-Tage-Durchschnitt.",
@@ -437,10 +393,10 @@
         "bodyFatInvalid": "Trage einen Wert zwischen 1 und 75 Prozent ein, zum Beispiel 18,5, oder lass das Feld leer.",
         "save": "Gewicht speichern",
         "saving": "Wird gespeichert …",
-        "saveFailed": "Die Wiegung wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+        "saveFailed": "Die Wiegung wurde nicht gespeichert. Versuche es noch einmal.",
         "delete": "Eintrag löschen",
         "deleting": "Wird gelöscht …",
-        "deleteFailed": "Der Eintrag konnte nicht gelöscht werden. Prüfe dein Netz und versuche es noch einmal."
+        "deleteFailed": "Der Eintrag konnte nicht gelöscht werden. Versuche es noch einmal."
       },
       "list": {
         "label": "protokoll",
@@ -457,10 +413,10 @@
       }
     },
     "goals": {
-      "loadFailed": "Deine Ziele konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
+      "loadFailed": "Deine Ziele konnten nicht geladen werden. Lade die Seite neu.",
       "body": {
         "label": "du",
-        "lead": "Dient dazu auszurechnen, was ein Tag dich kostet.",
+        "lead": "Für die Berechnung deines Kalorienziels.",
         "height": "größe",
         "birthDate": "geburtsdatum",
         "sex": "geschlecht",
@@ -487,7 +443,7 @@
         "heightInvalid": "Trage die Größe in Zentimetern ein, zum Beispiel 181.",
         "save": "Speichern",
         "saving": "Wird gespeichert …",
-        "saveFailed": "Das wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal."
+        "saveFailed": "Deine Angaben wurden nicht gespeichert. Versuche es noch einmal."
       },
       "targets": {
         "label": "ziele",
@@ -503,17 +459,17 @@
         "resting": "in Ruhe",
         "maintenance": "um dein Gewicht zu halten",
         "needs": "Trage oben {{fields}} ein, um ein Ziel zu berechnen.",
-        "kcalInvalid": "Trage ein Kalorienziel zwischen 500 und 10000 ein.",
+        "kcalInvalid": "Trage ein Kalorienziel zwischen 500 und 10.000 ein.",
         "macroInvalid": "Trage einen Wert in Gramm ein.",
         "save": "Ziele speichern",
         "saving": "Wird gespeichert …",
-        "saveFailed": "Die Ziele wurden nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+        "saveFailed": "Die Ziele wurden nicht gespeichert. Versuche es noch einmal.",
         "appliesFrom": "gilt ab heute; frühere Tage behalten ihr damaliges Ziel",
         "calc": {
           "label": "makros ausrechnen",
           "proteinPerKg": "eiweiß je kg",
           "fatShare": "fettanteil",
-          "apply": "Die drei Felder füllen",
+          "apply": "Makros übernehmen",
           "needsWeight": "braucht zuerst eine Wiegung",
           "needsKcal": "braucht zuerst ein Kalorienziel",
           "invalid": "Trage eine Zahl ein."
@@ -525,13 +481,12 @@
       "empty": "noch keine routine",
       "defaultName": "Neue Routine",
       "create": "Routine anlegen",
-      "createFailed": "Das wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+      "createFailed": "Die Routine wurde nicht angelegt. Versuche es noch einmal.",
       "exerciseCount_one": "{{count}} Übung",
       "exerciseCount_other": "{{count}} Übungen",
       "unfinished": "noch keine Übungen",
       "noWeekday": "nicht fest eingeplant",
-      "loadFailed": "Deine Routinen konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
-      "back": "training",
+      "loadFailed": "Deine Routinen konnten nicht geladen werden. Lade die Seite neu.",
       "editor": {
         "unnamed": "eine neue routine",
         "steps": "die zwei Schritte einer Routine",
@@ -540,7 +495,7 @@
         "name": "name",
         "namePlaceholder": "Oberkörper 1",
         "weekdays": "eingeplant für",
-        "weekdaysHint": " · leer lassen, um sie jederzeit zu starten",
+        "weekdaysHint": " · optional",
         "exercises": "übungen",
         "addExercise": "Übung hinzufügen",
         "pickTitle": "welche übung?",
@@ -555,7 +510,7 @@
         "back": "Zurück",
         "save": "Speichern",
         "saving": "Wird gespeichert …",
-        "saveFailed": "Das wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+        "saveFailed": "Die Routine wurde nicht gespeichert. Versuche es noch einmal.",
         "setN": "satz {{n}}",
         "addSet": "Ein Satz mehr",
         "removeSet": "Satz {{n}} entfernen"
@@ -563,7 +518,7 @@
       "delete": "Löschen",
       "swipe": "Wische eine Routine zur Seite, um sie zu löschen.",
       "deleted": "{{name}} gelöscht",
-      "undoFailed": "Das konnte nicht wiederhergestellt werden. Prüfe dein Netz und versuche es noch einmal."
+      "undoFailed": "Die Routine konnte nicht wiederhergestellt werden."
     },
     "account": {
       "profile": {
@@ -574,7 +529,7 @@
           "save": "Namen speichern",
           "saving": "Wird gespeichert …",
           "saved": "Gespeichert.",
-          "failed": "Der Name wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal."
+          "failed": "Der Name wurde nicht gespeichert. Versuche es noch einmal."
         },
         "email": {
           "label": "e-mail",
@@ -584,7 +539,7 @@
           "saving": "Wird geändert …",
           "sent": "Bestätigungsmail unterwegs. Öffne den Link darin, und prüfe auch den Spam-Ordner.",
           "unchanged": "Das ist die Adresse, mit der du angemeldet bist.",
-          "failed": "Die Adresse wurde nicht geändert. Prüfe dein Netz und versuche es noch einmal."
+          "failed": "Die Adresse wurde nicht geändert. Versuche es noch einmal."
         },
         "password": {
           "label": "passwort",
@@ -597,11 +552,10 @@
           "tooShort": "Mindestens acht Zeichen.",
           "mismatch": "Die beiden Eingaben sind nicht gleich.",
           "wrongCurrent": "Das aktuelle Passwort stimmt nicht.",
-          "failed": "Das Passwort wurde nicht geändert. Prüfe dein Netz und versuche es noch einmal."
+          "failed": "Das Passwort wurde nicht geändert. Versuche es noch einmal."
         }
       },
       "preferences": {
-        "label": "einstellungen",
         "language": "sprache",
         "theme": "design",
         "languages": {
@@ -613,41 +567,37 @@
           "dark": "dunkel",
           "system": "system"
         },
-        "saveFailed": "Die Einstellung wurde nicht gespeichert und ist zurückgesetzt. Prüfe dein Netz und versuche es noch einmal."
+        "saveFailed": "Die Einstellung wurde nicht gespeichert und ist zurückgesetzt. Versuche es noch einmal."
       },
       "account": {
-        "label": "konto",
-        "signedInAs": "angemeldet als",
         "signOut": "Abmelden",
         "signingOut": "Wird abgemeldet …"
       },
       "data": {
-        "label": "deine daten",
         "export": "Meine Daten herunterladen",
         "exporting": "Wird vorbereitet …",
-        "exportFailed": "Der Download hat nicht geklappt. Prüfe dein Netz und versuche es noch einmal.",
+        "exportFailed": "Der Download hat nicht geklappt. Versuche es noch einmal.",
         "delete": "Mein Konto löschen",
         "deleting": "Wird gelöscht …",
         "deleteHint": "Löscht das Konto und alles, was daran hängt: Wiegungen, Ernährungstagebuch, Routinen, Sätze. Lebensmittel und Übungen, die du hinzugefügt hast, bleiben ohne deinen Namen im gemeinsamen Katalog. Das lässt sich nicht rückgängig machen.",
         "deleteConfirm": "Dieses Konto und alles darin löschen? Das lässt sich nicht rückgängig machen.",
         "deleteConfirmLabel": "Alles löschen",
-        "deleteFailed": "Das Konto wurde nicht gelöscht. Prüfe dein Netz und versuche es noch einmal.",
+        "deleteFailed": "Das Konto wurde nicht gelöscht. Versuche es noch einmal.",
         "legal": "rechtliches",
         "privacy": "Datenschutz",
         "imprint": "Impressum"
       }
     },
     "cardio": {
-      "planned": "Einheiten, Minuten und die Kalorien, die sie kosten. Sobald die vier Grundlagen stehen."
+      "planned": "Einheiten, Minuten und ihr Kalorienverbrauch."
     },
     "error": {
       "title": "Das hat nicht geladen",
-      "lead": "Auf dem Weg zu diesem Bildschirm ist etwas schiefgegangen. Zurück zum Anfang hilft meistens.",
       "reload": "Neu laden",
-      "home": "Zurück zum Anfang",
+      "home": "Zurück zur Übersicht",
       "stale": {
         "title": "merit wurde aktualisiert",
-        "lead": "Dieser Tab läuft noch auf einer älteren Version. Neu laden holt die neue; deine Einträge bleiben, wie sie sind."
+        "lead": "Dieser Tab läuft auf einer älteren Version. Deine Einträge bleiben erhalten."
       }
     },
     "legal": {
@@ -658,7 +608,7 @@
       "imprint": {
         "title": "Impressum"
       },
-      "missing": "Diese Seite ist nicht fertig. Der Text fehlt noch und muss stehen, bevor jemand eingeladen wird. Siehe docs/LEGAL-INPUTS.md."
+      "missing": "Diese Seite ist noch nicht verfügbar."
     },
     "consent": {
       "title": "Bevor es losgeht",
@@ -673,13 +623,13 @@
       "agree": "Ich willige ein",
       "saving": "Wird gespeichert …",
       "read": "Vollständige Datenschutzerklärung lesen",
-      "failed": "Das wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+      "failed": "Die Einwilligung wurde nicht gespeichert. Versuche es noch einmal.",
       "decline": "Wenn du lieber nicht möchtest, melde dich einfach ab. Bis zur Einwilligung wird nichts aufgezeichnet, und ein Konto ohne sie wird nie benutzt.",
-      "notReady": "merit kann noch nicht benutzt werden: die Datenschutzerklärung fehlt, also gibt es nichts, worin eingewilligt werden könnte. Siehe docs/LEGAL-INPUTS.md."
+      "notReady": "merit kann noch nicht benutzt werden: Die Datenschutzerklärung fehlt noch."
     },
     "welcome": {
-      "loadFailed": "Deine Angaben konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
-      "saveFailed": "Das wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+      "loadFailed": "Deine Angaben konnten nicht geladen werden. Lade die Seite neu.",
+      "saveFailed": "Deine Angaben wurden nicht gespeichert. Versuche es noch einmal.",
       "next": "Weiter",
       "later": "später",
       "back": "zurück",
@@ -687,10 +637,10 @@
       "intro": {
         "panel": "Einführung, Bild {{n}} von {{total}}",
         "next": "Weiter",
-        "start": "Los geht's",
+        "start": "Einrichten",
         "skip": "überspringen",
         "merit": {
-          "label": "was das hier ist",
+          "label": "",
           "line": "Deine Zahlen, an einem Ort.",
           "body": "merit hält fest, was du isst, was du hebst und was du wiegst. Bewertet wird nichts davon."
         },
@@ -713,7 +663,7 @@
       "steps": {
         "name": {
           "title": "Wie heißt du?",
-          "lead": "Steht oben auf der Übersicht. Lässt sich jederzeit ändern."
+          "lead": ""
         },
         "body": {
           "title": "Was wiegst du, und wie groß bist du?",
@@ -726,13 +676,13 @@
         },
         "goal": {
           "title": "Wie viel bewegst du dich, und wohin soll es gehen?",
-          "lead": "Das bestimmt, wie weit dein Ziel von deinem Erhaltungsbedarf abweicht."
+          "lead": ""
         },
         "target": {
           "title": "Dein Tagesziel",
           "lead": "Aus deinen Angaben gerechnet, gültig ab heute.",
           "save": "Ziel speichern",
-          "note": "eiweiß und fett sind startwerte: 1,8 g je kg und 30 % der energie. unter zielen änderbar."
+          "note": "Eiweiß 1,8 g je kg, Fett 30 % der Energie. Unter „ziele“ änderbar."
         }
       }
     }

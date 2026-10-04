@@ -280,10 +280,10 @@ function Exercise({
       <ul>
         {sets.map((set, index) => (
           <SwipeRow
+            label={t('pages.training.swipe')}
             key={set.id}
             open={openRow === set.id}
             onOpenChange={(open) => onOpenRow(open ? set.id : null)}
-            label={t('pages.training.swipe')}
             actions={
               <button
                 type="button"

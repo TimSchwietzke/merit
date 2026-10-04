@@ -223,13 +223,11 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
         // nothing else.
         <div className="flex items-center justify-between gap-3">
           <p className="min-w-0 font-mono text-2xs text-ink-faint">
-            {t(
-              busy
-                ? 'pages.food.scan.looking'
-                : camera === 'starting'
-                  ? 'pages.food.scan.starting'
-                  : 'pages.food.scan.instruction',
-            )}
+            {busy
+              ? t('pages.food.scan.looking')
+              : camera === 'starting'
+                ? t('pages.food.scan.starting')
+                : '\u00a0'}
           </p>
 
           {torch === 'unavailable' ? null : (
