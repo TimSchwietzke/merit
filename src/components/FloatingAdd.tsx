@@ -8,8 +8,8 @@ import { useActiveSession } from '@/features/training/useActiveSession'
  * Adding to the list a screen is about, floating over it (DESIGN.md §10.10).
  *
  * One target in the corner the thumb is already at, on every screen whose list
- * grows: routines, the food day, the weigh-ins. The same place on all three,
- * so nobody has to learn where "add" lives per screen.
+ * grows: routines and the food day. Weight has its form on the page instead,
+ * and a button that only leads back to it would be the same action twice.
  *
  * It is hidden while a session is running: the set you are on owns the bottom
  * of the screen then, and two floating things fighting for that corner is how

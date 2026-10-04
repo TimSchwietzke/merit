@@ -403,7 +403,6 @@
       "back": "Zurück zur Übersicht"
     },
     "weight": {
-      "add": "Gewicht eintragen",
       "loadFailed": "Deine Wiegungen konnten nicht geladen werden. Prüfe dein Netz und versuche es noch einmal.",
       "deleted": "{{date}} gelöscht",
       "undoFailed": "Der Eintrag konnte nicht wiederhergestellt werden. Trage den Tag noch einmal ein.",
