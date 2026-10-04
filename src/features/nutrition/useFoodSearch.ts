@@ -7,6 +7,7 @@ import {
   type FoodRow,
 } from '@/features/nutrition/catalogue'
 import { searchOffProducts, type OffFood } from '@/lib/off'
+import { rankByName, searchWords } from '@/lib/search-rank'
 import { supabase } from '@/lib/supabase'
 import type { UsdaFood } from '@/lib/usda'
 
@@ -51,6 +52,8 @@ const MIN_QUERY = 2
 /** The outside services are asked for something more specific than that. */
 const MIN_REMOTE = 3
 const LIMIT = 25
+/** Fetched before ranking, so the best match is not cut off alphabetically. */
+const FETCH = 100
 
 export function useFoodSearch(term: string): FoundFoods {
   const [answered, setAnswered] = useState<{
@@ -77,20 +80,25 @@ export function useFoodSearch(term: string): FoundFoods {
     if (tooShort) return
     let active = true
 
-    void supabase
-      .from('foods')
-      .select(FOOD_SELECT)
-      .ilike('name', `%${term}%`)
-      .order('name')
-      .limit(LIMIT)
-      .then(({ data, error }) => {
-        if (!active) return
-        setAnswered({
-          term,
-          error: Boolean(error) || !data,
-          results: error || !data ? [] : (data as FoodRow[]).map(toCatalogueFood),
-        })
+    // Every word on its own, so "skyr natur" also finds "Natur Skyr". The
+    // names that start with the term are asked for separately: the wide query
+    // is cut alphabetically, and "Milch" must not lose to a hundred
+    // "Alpenmilch"s before the ranking ever sees it.
+    let wide = supabase.from('foods').select(FOOD_SELECT)
+    for (const word of searchWords(term)) wide = wide.ilike('name', `%${word}%`)
+    const prefix = supabase.from('foods').select(FOOD_SELECT).ilike('name', `${term.trim()}%`).limit(LIMIT)
+
+    void Promise.all([prefix, wide.order('name').limit(FETCH)]).then(([first, rest]) => {
+      if (!active) return
+      const error = first.error || rest.error || !first.data || !rest.data
+      const rows = error ? [] : [...(first.data as FoodRow[]), ...(rest.data as FoodRow[])]
+      const unique = [...new Map(rows.map((row) => [row.id, row])).values()]
+      setAnswered({
+        term,
+        error: Boolean(error),
+        results: rankByName(unique.map(toCatalogueFood), term).slice(0, LIMIT),
       })
+    })
 
     return () => {
       active = false
@@ -107,7 +115,7 @@ export function useFoodSearch(term: string): FoundFoods {
       .invoke<{ foods?: UsdaFood[]; error?: string }>('usda', { body: { query: term } })
       .then(async ({ data, error }) => {
         if (!error) {
-          if (active) setUsda({ term, foods: data?.foods ?? [], status: 'ready' })
+          if (active) setUsda({ term, foods: rankByName(data?.foods ?? [], term), status: 'ready' })
           return
         }
         const reason = await refusal(error)
@@ -133,7 +141,7 @@ export function useFoodSearch(term: string): FoundFoods {
       if (!active) return
       setOff({
         term,
-        foods: found.kind === 'found' ? found.foods : [],
+        foods: found.kind === 'found' ? rankByName(found.foods, term) : [],
         status: found.kind === 'found' ? 'ready' : found.kind === 'busy' ? 'rateLimited' : 'error',
       })
     })
