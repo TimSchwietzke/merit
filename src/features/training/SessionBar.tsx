@@ -68,6 +68,7 @@ export function SessionBar() {
     // on something that genuinely floats, and this does.
     <div
       data-session-bar
+      data-domain="training"
       className="pointer-events-none fixed inset-x-0 bottom-[calc(56px+0.75rem+env(safe-area-inset-bottom))]
                  z-30 px-3 lg:bottom-3"
     >

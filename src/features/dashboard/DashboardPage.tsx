@@ -102,7 +102,9 @@ export default function DashboardPage() {
 
       {/* The body, on the ground rather than in a box. It is the thing only
           this screen can show, so it gets the room and nothing frames it. */}
-      <MuscleRecency history={workout.history} exercises={workout.exercises} today={today} />
+      <div data-domain="training">
+        <MuscleRecency history={workout.history} exercises={workout.exercises} today={today} />
+      </div>
 
       {/* Four readings in four different shapes, packed rather than stacked.
           The day's eating is tall and holds a ring, so it takes the left column

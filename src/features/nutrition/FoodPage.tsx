@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
 import { FloatingAdd } from '@/components/FloatingAdd'
+import { useActiveSession } from '@/features/training/useActiveSession'
 import { EmptyState } from '@/components/EmptyState'
 import { Panel } from '@/components/Panel'
 import { Loading, RowsSkeleton, Skeleton, StripSkeleton } from '@/components/Skeleton'
@@ -45,6 +46,7 @@ import {
  */
 export default function FoodPage() {
   const { t, i18n } = useTranslation()
+  const { running } = useActiveSession()
   const locale = i18n.language
   const [params, setParams] = useSearchParams()
 
@@ -285,9 +287,15 @@ export default function FoodPage() {
         )}
 
         {/* Adding floats in the corner, as on every screen whose list grows,
-            so it is in reach however long the day gets. Scanning stays in the
-            flow, tinted: the floating button is this screen's one primary. */}
+            so it is in reach however long the day gets. While a session owns
+            that corner the floating button hides, and adding comes back into
+            the flow here rather than disappearing. */}
         <div className="mt-6 flex flex-col gap-3 md:flex-row">
+          {running ? (
+            <Button asChild variant="primary">
+              <Link to={`/food/add?date=${date}`}>{t('pages.food.log.add')}</Link>
+            </Button>
+          ) : null}
           <Button asChild variant="tinted">
             <Link to={`/food/add?date=${date}&scan=1`}>{t('pages.food.scan.open')}</Link>
           </Button>
