@@ -31,12 +31,12 @@
     "filtersOpen": "Filter, {{count}} aktiv",
     "close": "Schließen",
     "streak": {
-      "nutrition": "tage in folge",
-      "training": "wochen nach plan",
-      "days_one": "{{count}} Tag",
-      "days_other": "{{count}} Tage",
-      "weeks_one": "{{count}} Woche",
-      "weeks_other": "{{count}} Wochen"
+      "nutrition": "in folge",
+      "training": "nach plan",
+      "days_one": "Tag",
+      "days_other": "Tage",
+      "weeks_one": "Woche",
+      "weeks_other": "Wochen"
     },
     "week": {
       "previous": "Woche zurück",
@@ -104,9 +104,9 @@
       "recency": {
         "label": "zuletzt trainiert",
         "never": "{{region}}: noch nie",
-        "cold": "{{region}} zuletzt vor über einer Woche",
-        "longest_one": "{{region}} zuletzt vor {{count}} Tag",
-        "longest_other": "{{region}} zuletzt vor {{count}} Tagen",
+        "cold": "{{region}}: vor über einer Woche",
+        "longest_one": "{{region}}: vor {{count}} Tag",
+        "longest_other": "{{region}}: vor {{count}} Tagen",
         "fresh": "alles in den letzten zwei Tagen"
       }
     },
@@ -149,7 +149,7 @@
       "add": {
         "title": "Lebensmittel hinzufügen",
         "search": "suche",
-        "searching": "sucht …",
+        "searching": "Sucht …",
         "noResults": "kein treffer",
         "addYourself": "Selbst eintragen",
         "searchFailed": "Die Suche ist nicht durchgekommen. Versuche es noch einmal.",
@@ -197,8 +197,8 @@
         "look": "Nachschlagen",
         "barcodeInvalid": "Das ist kein Barcode. Prüfe die Ziffern und versuche es noch einmal.",
         "denied": "merit hat keinen Zugriff auf die Kamera. Erlaube ihn im Browser und versuche es noch einmal, oder tippe die Nummer unten ein.",
-        "missing": "kein Produkt zu diesem Barcode",
-        "offline": "Open Food Facts nicht erreichbar.",
+        "missing": "Kein Produkt zu diesem Barcode.",
+        "offline": "Open Food Facts ist nicht erreichbar.",
         "addYourself": "Selbst eintragen",
         "attribution": "Produktdaten von Open Food Facts, unter der ODbL.",
         "starting": "kamera startet",
@@ -350,7 +350,8 @@
       },
       "offline_one": "offline · 1 Satz wartet auf diesem Gerät",
       "offline_other": "offline · {{count}} Sätze warten auf diesem Gerät",
-      "syncRejected": "Der Server hat eine Änderung abgelehnt, sie wurde verworfen. Prüfe die Sätze von heute."
+      "syncRejected": "Der Server hat eine Änderung abgelehnt, sie wurde verworfen. Prüfe die Sätze von heute.",
+      "swipe": "Wische die Zeile zur Seite, um sie zu entfernen."
     },
     "notFound": {
       "title": "Seite nicht gefunden",
@@ -622,9 +623,9 @@
       "agree": "Ich willige ein",
       "saving": "Wird gespeichert …",
       "read": "Vollständige Datenschutzerklärung lesen",
-      "failed": "Das wurde nicht gespeichert. Prüfe dein Netz und versuche es noch einmal.",
+      "failed": "Die Einwilligung wurde nicht gespeichert. Versuche es noch einmal.",
       "decline": "Wenn du lieber nicht möchtest, melde dich einfach ab. Bis zur Einwilligung wird nichts aufgezeichnet, und ein Konto ohne sie wird nie benutzt.",
-      "notReady": "merit kann noch nicht benutzt werden: die Datenschutzerklärung fehlt, also gibt es nichts, worin eingewilligt werden könnte. Siehe docs/LEGAL-INPUTS.md."
+      "notReady": "merit kann noch nicht benutzt werden: Die Datenschutzerklärung fehlt noch."
     },
     "welcome": {
       "loadFailed": "Deine Angaben konnten nicht geladen werden. Lade die Seite neu.",
@@ -639,7 +640,7 @@
         "start": "Einrichten",
         "skip": "überspringen",
         "merit": {
-          "label": "merit",
+          "label": "",
           "line": "Deine Zahlen, an einem Ort.",
           "body": "merit hält fest, was du isst, was du hebst und was du wiegst. Bewertet wird nichts davon."
         },

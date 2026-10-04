@@ -227,7 +227,7 @@ export function BarcodeScanner({ onCode, busy }: { onCode: (code: string) => voi
               ? t('pages.food.scan.looking')
               : camera === 'starting'
                 ? t('pages.food.scan.starting')
-                : null}
+                : '\u00a0'}
           </p>
 
           {torch === 'unavailable' ? null : (

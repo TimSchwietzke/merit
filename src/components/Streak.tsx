@@ -41,7 +41,7 @@ export function Streak({
           to. */}
       <div
         role="img"
-        aria-label={`${caption}, ${label}`}
+        aria-label={`${count} ${caption}, ${label}`}
         className="flex items-end gap-[2px]"
       >
         {cells.map((met, index) => (

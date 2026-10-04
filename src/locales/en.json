@@ -31,12 +31,12 @@
     "filtersOpen": "Filters, {{count}} active",
     "close": "Close",
     "streak": {
-      "nutrition": "days in a row",
-      "training": "weeks to plan",
-      "days_one": "{{count}} day",
-      "days_other": "{{count}} days",
-      "weeks_one": "{{count}} week",
-      "weeks_other": "{{count}} weeks"
+      "nutrition": "in a row",
+      "training": "to plan",
+      "days_one": "day",
+      "days_other": "days",
+      "weeks_one": "week",
+      "weeks_other": "weeks"
     },
     "week": {
       "previous": "Previous week",
@@ -104,9 +104,9 @@
       "recency": {
         "label": "last trained",
         "never": "{{region}}: never",
-        "cold": "{{region}} last, over a week ago",
-        "longest_one": "{{region}} last, {{count}} day ago",
-        "longest_other": "{{region}} last, {{count}} days ago",
+        "cold": "{{region}}: over a week ago",
+        "longest_one": "{{region}}: {{count}} day ago",
+        "longest_other": "{{region}}: {{count}} days ago",
         "fresh": "every part inside the last two days"
       }
     },
@@ -149,7 +149,7 @@
       "add": {
         "title": "Add food",
         "search": "search",
-        "searching": "searching…",
+        "searching": "Searching…",
         "noResults": "nothing found",
         "addYourself": "Type it in yourself",
         "searchFailed": "The search did not go through. Try again.",
@@ -197,7 +197,7 @@
         "look": "Look up",
         "barcodeInvalid": "That is not a barcode. Check the digits and try again.",
         "denied": "merit has no access to the camera. Allow it in the browser and try again, or type the number below.",
-        "missing": "no product for this barcode",
+        "missing": "No product for this barcode.",
         "offline": "Open Food Facts could not be reached.",
         "addYourself": "Add it yourself",
         "attribution": "Product data from Open Food Facts, under the ODbL.",
@@ -350,7 +350,8 @@
       },
       "offline_one": "offline · 1 set is waiting on this device",
       "offline_other": "offline · {{count}} sets are waiting on this device",
-      "syncRejected": "The server refused a change and it was dropped. Check today’s sets."
+      "syncRejected": "The server refused a change and it was dropped. Check today's sets.",
+      "swipe": "Swipe the row sideways to remove it."
     },
     "notFound": {
       "title": "Page not found",
@@ -622,9 +623,9 @@
       "agree": "I agree",
       "saving": "Saving…",
       "read": "Read the full privacy notice",
-      "failed": "That did not save. Check your connection and try again.",
+      "failed": "Your consent was not saved. Try again.",
       "decline": "If you would rather not, simply sign out. Nothing is recorded until you agree, and an account without this consent is never used.",
-      "notReady": "merit is not ready to be used yet: its privacy notice has not been published, so there is nothing to consent to. See docs/LEGAL-INPUTS.md."
+      "notReady": "merit cannot be used yet: the privacy policy is still missing."
     },
     "welcome": {
       "loadFailed": "Your details could not be loaded. Reload the page.",
@@ -639,7 +640,7 @@
         "start": "Set up",
         "skip": "skip",
         "merit": {
-          "label": "merit",
+          "label": "",
           "line": "Your numbers, in one place.",
           "body": "merit keeps what you eat, what you lift and what you weigh. None of it is graded."
         },

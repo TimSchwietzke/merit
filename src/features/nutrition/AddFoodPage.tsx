@@ -14,6 +14,7 @@ import { NewFoodForm, type NewFood } from '@/features/nutrition/NewFoodForm'
 import { resolveBarcode } from '@/features/nutrition/resolve-barcode'
 import { cacheOffFood } from '@/features/nutrition/resolve-barcode'
 import { resolveUsdaFood } from '@/features/nutrition/resolve-usda'
+import { normaliseBarcode } from '@/lib/barcode'
 import { PortionForm } from '@/features/nutrition/PortionForm'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
 import { useFoodSearch } from '@/features/nutrition/useFoodSearch'
@@ -121,7 +122,10 @@ export default function AddFoodPage() {
     // Not an error dialog: a barcode that did not resolve is an empty state,
     // and the next step is offered in place (§10.8, §14).
     setScanResult(resolved.kind)
-    if (resolved.kind === 'missing') setScannedBarcode(resolved.barcode)
+    // Every scan, not only a missing one: "Selbst eintragen" follows an
+    // unreachable lookup too, and must not carry the barcode of an earlier scan
+    // into the shared catalogue.
+    setScannedBarcode(normaliseBarcode(code))
   }
 
   async function pickUsda(food: UsdaFood) {

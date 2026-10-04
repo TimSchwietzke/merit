@@ -295,11 +295,7 @@ function StreakCard({
   // (PRODUCT.md). A card that says nothing is a card nobody should swipe to.
   const showTraining = streak > 0 && streak * 7 >= days
 
-  if (days <= 1 && streak === 0) {
-    return (
-      <DomainCard to="/training" label={t('common.streak.training')} value="—" />
-    )
-  }
+  if (days <= 1 && streak === 0) return null
 
   return showTraining ? (
     <DomainCard
