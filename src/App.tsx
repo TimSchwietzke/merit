@@ -18,6 +18,8 @@ import NotFoundPage from '@/features/account/NotFoundPage'
 import FoodPage from '@/features/nutrition/FoodPage'
 import AddFoodPage from '@/features/nutrition/AddFoodPage'
 import LoggedPortionPage from '@/features/nutrition/LoggedPortionPage'
+import RecipesPage from '@/features/nutrition/RecipesPage'
+import RecipeEditorPage from '@/features/nutrition/RecipeEditorPage'
 import GoalsPage from '@/features/goals/GoalsPage'
 import WeekPage from '@/features/training/WeekPage'
 import SessionPage from '@/features/training/SessionPage'
@@ -84,6 +86,8 @@ const router = createBrowserRouter([
                   { path: '/food', element: <FoodPage /> },
                   { path: '/food/add', element: <AddFoodPage /> },
                   { path: '/food/entry/:id', element: <LoggedPortionPage /> },
+                  { path: '/food/recipes', element: <RecipesPage /> },
+                  { path: '/food/recipes/:id', element: <RecipeEditorPage /> },
                   { path: '/training', element: <WeekPage /> },
                   { path: '/training/day', element: <TrainingPage /> },
                   { path: '/training/session', element: <SessionPage /> },

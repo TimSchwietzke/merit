@@ -19,20 +19,37 @@ export interface LoggedFood {
   mealType: MealType
   quantityG: number
   food: { id: string; name: string; brand: string | null; nutrients: FoodNutrients }
+  /** The logged recipe this row is an ingredient of, or null for a plain entry. */
+  group: LoggedRecipe | null
+}
+
+export interface LoggedRecipe {
+  id: string
+  recipeId: string | null
+  name: string
+  factor: number
+  grams: number | null
 }
 
 export interface FoodLog {
   entries: LoggedFood[]
   status: 'loading' | 'ready' | 'error'
-  add: (entry: { foodId: string; mealType: MealType; quantityG: number }) => Promise<boolean>
+  add: (entry: { foodId: string; mealType: MealType; quantityG: number; groupId?: string }) => Promise<boolean>
   /** Change a logged portion's quantity or the meal it belongs to. */
   update: (id: string, portion: { mealType: MealType; quantityG: number }) => Promise<boolean>
   remove: (id: string) => Promise<boolean>
   restore: (entry: LoggedFood) => Promise<boolean>
+  /** A recipe, scaled, as one line of ingredient rows (`log_recipe`). */
+  logRecipe: (recipeId: string, mealType: MealType, portion: { factor: number; grams: number | null }) => Promise<boolean>
+  /** A logged recipe line and every row under it. */
+  removeGroup: (groupId: string) => Promise<boolean>
+  /** Undo for `removeGroup`: the line and its rows come back as they were. */
+  restoreGroup: (rows: LoggedFood[]) => Promise<boolean>
 }
 
 /** The columns a portion needs, and the shape the maths expects. */
 const SELECT = `id, meal_type, quantity_g,
+  logged_recipes!food_logs_group_fkey ( id, recipe_id, name, factor, grams ),
   foods!inner (
     id, name, brand,
     kcal_100g, fat_100g, carbs_100g, protein_100g,
@@ -43,6 +60,7 @@ type Row = {
   id: string
   meal_type: string
   quantity_g: number
+  logged_recipes: { id: string; recipe_id: string | null; name: string; factor: number; grams: number | null } | null
   foods: {
     id: string
     name: string
@@ -77,6 +95,15 @@ const toEntry = (row: Row): LoggedFood => ({
       salt: row.foods.salt_100g,
     },
   },
+  group: row.logged_recipes
+    ? {
+        id: row.logged_recipes.id,
+        recipeId: row.logged_recipes.recipe_id,
+        name: row.logged_recipes.name,
+        factor: row.logged_recipes.factor,
+        grams: row.logged_recipes.grams,
+      }
+    : null,
 })
 
 export function useFoodLog(date: string): FoodLog {
@@ -92,6 +119,9 @@ export function useFoodLog(date: string): FoodLog {
     error: false,
   })
 
+  // Bumped after a write whose rows the server makes (a logged recipe), so the
+  // day is read again rather than rebuilt here.
+  const [version, setVersion] = useState(0)
   const loadedRef = useRef(loaded)
   const apply = useCallback((next: (current: LoggedFood[]) => LoggedFood[], forDate: string) => {
     loadedRef.current = { date: forDate, entries: next(loadedRef.current.entries), error: false }
@@ -120,14 +150,24 @@ export function useFoodLog(date: string): FoodLog {
     return () => {
       active = false
     }
-  }, [userId, date])
+  }, [userId, date, version])
 
   const isCurrent = loaded.date === date
   const entries = isCurrent ? loaded.entries : []
   const status: FoodLog['status'] = !isCurrent ? 'loading' : loaded.error ? 'error' : 'ready'
 
   const add = useCallback(
-    async ({ foodId, mealType, quantityG }: { foodId: string; mealType: MealType; quantityG: number }) => {
+    async ({
+      foodId,
+      mealType,
+      quantityG,
+      groupId,
+    }: {
+      foodId: string
+      mealType: MealType
+      quantityG: number
+      groupId?: string
+    }) => {
       if (!userId) return false
 
       // Not optimistic: the row comes back with the food embedded, and
@@ -135,7 +175,14 @@ export function useFoodLog(date: string): FoodLog {
       // values this hook exists to avoid copying.
       const { data, error } = await supabase
         .from('food_logs')
-        .insert({ user_id: userId, date, meal_type: mealType, food_id: foodId, quantity_g: quantityG })
+        .insert({
+          user_id: userId,
+          date,
+          meal_type: mealType,
+          food_id: foodId,
+          quantity_g: quantityG,
+          group_id: groupId ?? null,
+        })
         .select(SELECT)
         .single()
 
@@ -201,9 +248,88 @@ export function useFoodLog(date: string): FoodLog {
   // id. Nothing references a log row, so nothing notices.
   const restore = useCallback(
     (entry: LoggedFood) =>
-      add({ foodId: entry.food.id, mealType: entry.mealType, quantityG: entry.quantityG }),
+      add({
+        foodId: entry.food.id,
+        mealType: entry.mealType,
+        quantityG: entry.quantityG,
+        groupId: entry.group?.id,
+      }),
     [add],
   )
 
-  return { entries, status, add, update, remove, restore }
+  const logRecipe = useCallback(
+    async (recipeId: string, mealType: MealType, portion: { factor: number; grams: number | null }) => {
+      if (!userId) return false
+      const { error } = await supabase.rpc('log_recipe', {
+        recipe: recipeId,
+        day: date,
+        meal: mealType,
+        factor: portion.factor,
+        grams: portion.grams ?? undefined,
+      })
+      if (error) return false
+      setVersion((v) => v + 1)
+      return true
+    },
+    [date, userId],
+  )
+
+  const removeGroup = useCallback(
+    async (groupId: string) => {
+      if (!userId) return false
+      const previous = loadedRef.current.entries
+      apply((current) => current.filter((entry) => entry.group?.id !== groupId), date)
+
+      // The rows go with the line (on delete cascade).
+      const { data, error } = await supabase
+        .from('logged_recipes')
+        .delete()
+        .eq('id', groupId)
+        .eq('user_id', userId)
+        .select('id')
+        .single()
+
+      if (data && !error) return true
+      apply(() => previous, date)
+      return false
+    },
+    [apply, date, userId],
+  )
+
+  const restoreGroup = useCallback(
+    async (rows: LoggedFood[]) => {
+      const group = rows[0]?.group
+      if (!userId || !group) return false
+      const { data: line, error } = await supabase
+        .from('logged_recipes')
+        .insert({
+          user_id: userId,
+          date,
+          meal_type: rows[0].mealType,
+          recipe_id: group.recipeId,
+          name: group.name,
+          factor: group.factor,
+          grams: group.grams,
+        })
+        .select('id')
+        .single()
+      if (!line || error) return false
+
+      const { error: rowsError } = await supabase.from('food_logs').insert(
+        rows.map((row) => ({
+          user_id: userId,
+          date,
+          meal_type: row.mealType,
+          food_id: row.food.id,
+          quantity_g: row.quantityG,
+          group_id: line.id,
+        })),
+      )
+      setVersion((v) => v + 1)
+      return !rowsError
+    },
+    [date, userId],
+  )
+
+  return { entries, status, add, update, remove, restore, logRecipe, removeGroup, restoreGroup }
 }

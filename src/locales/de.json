@@ -685,6 +685,43 @@
           "note": "Eiweiß 1,8 g je kg, Fett 30 % der Energie. Unter „ziele“ änderbar."
         }
       }
+    },
+    "recipes": {
+      "label": "rezepte",
+      "title": "Rezepte",
+      "manage": "Rezepte bearbeiten",
+      "create": "Rezept anlegen",
+      "addIngredient": "Zutat hinzufügen",
+      "backToRecipe": "Zurück zum Rezept",
+      "back": "Zurück zu den Rezepten",
+      "defaultName": "Neues Rezept",
+      "empty": "noch keine Rezepte",
+      "loadFailed": "Deine Rezepte konnten nicht geladen werden. Lade die Seite neu.",
+      "createFailed": "Das Rezept wurde nicht angelegt. Versuche es noch einmal.",
+      "saveFailed": "Das Rezept wurde nicht gespeichert. Versuche es noch einmal.",
+      "ingredients_one": "{{count}} Zutat",
+      "ingredients_other": "{{count}} Zutaten",
+      "name": "name",
+      "total": "gewicht fertig",
+      "totalHint": " · optional",
+      "ingredientsLabel": "zutaten",
+      "noIngredients": "noch keine Zutaten",
+      "delete": "Rezept löschen",
+      "deleteTitle": "Rezept löschen?",
+      "deleteBody": "Tage, an denen du es gegessen hast, bleiben unverändert.",
+      "saveItem": "Menge speichern",
+      "removeItem": "Zutat entfernen",
+      "portion": {
+        "mode": "portion",
+        "byParts": "Anteil",
+        "byGrams": "Gramm",
+        "servings": "portionen",
+        "parts": "anteil · 1 von",
+        "partsUnit": "teilen",
+        "grams": "menge",
+        "invalid": "Trage eine gültige Menge ein."
+      },
+      "deleted": "{{name}} entfernt"
     }
   }
 }

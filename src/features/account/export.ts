@@ -32,6 +32,8 @@ export interface ExportFile {
   scheduledSessions: unknown[]
   workouts: unknown[]
   workoutSets: unknown[]
+  recipes: unknown[]
+  loggedRecipes: unknown[]
 }
 
 export async function buildExport(): Promise<ExportFile | null> {
@@ -39,18 +41,21 @@ export async function buildExport(): Promise<ExportFile | null> {
   if (!auth.user) return null
 
   // One round trip each, in parallel: the file is assembled once, by hand, and
-  // waiting for seven sequential queries on a phone connection is a spinner
+  // waiting for ten sequential queries on a phone connection is a spinner
   // nobody needs to see.
-  const [profile, weight, food, goals, routines, scheduled, workouts, sets] = await Promise.all([
-    supabase.from('profiles').select('*').maybeSingle(),
-    supabase.from('weight_logs').select('*').order('date'),
-    supabase.from('food_logs').select('*').order('date'),
-    supabase.from('nutrition_goals').select('*').order('valid_from'),
-    supabase.from('routines').select('*, routine_days (*), routine_exercises (*)').order('position'),
-    supabase.from('scheduled_sessions').select('*').order('scheduled_date'),
-    supabase.from('workouts').select('*').order('date'),
-    supabase.from('workout_sets').select('*'),
-  ])
+  const [profile, weight, food, goals, routines, scheduled, workouts, sets, recipes, loggedRecipes] =
+    await Promise.all([
+      supabase.from('profiles').select('*').maybeSingle(),
+      supabase.from('weight_logs').select('*').order('date'),
+      supabase.from('food_logs').select('*').order('date'),
+      supabase.from('nutrition_goals').select('*').order('valid_from'),
+      supabase.from('routines').select('*, routine_days (*), routine_exercises (*)').order('position'),
+      supabase.from('scheduled_sessions').select('*').order('scheduled_date'),
+      supabase.from('workouts').select('*').order('date'),
+      supabase.from('workout_sets').select('*'),
+      supabase.from('recipes').select('*, recipe_items (*)').order('name'),
+      supabase.from('logged_recipes').select('*').order('date'),
+    ])
 
   return {
     format: 'merit.export.v1',
@@ -64,6 +69,8 @@ export async function buildExport(): Promise<ExportFile | null> {
     scheduledSessions: scheduled.data ?? [],
     workouts: workouts.data ?? [],
     workoutSets: sets.data ?? [],
+    recipes: recipes.data ?? [],
+    loggedRecipes: loggedRecipes.data ?? [],
   }
 }
 

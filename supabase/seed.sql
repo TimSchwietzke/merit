@@ -115,6 +115,17 @@ begin
     where plan.variant = v and (d > 0 or meal in ('breakfast', 'lunch'));
   end loop;
 
+  -- Two recipes: a shake counted in servings, a bowl the same.
+  insert into public.recipes (id, user_id, name) values
+    ('c0000000-0000-0000-0000-000000000001', me, 'Proteinshake'),
+    ('c0000000-0000-0000-0000-000000000002', me, 'Skyr-Bowl');
+  insert into public.recipe_items (recipe_id, food_id, quantity_g) values
+    ('c0000000-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000005', 300),
+    ('c0000000-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000006', 30),
+    ('c0000000-0000-0000-0000-000000000002', 'f0000000-0000-0000-0000-000000000001', 250),
+    ('c0000000-0000-0000-0000-000000000002', 'f0000000-0000-0000-0000-000000000003', 100),
+    ('c0000000-0000-0000-0000-000000000002', 'f0000000-0000-0000-0000-000000000002', 40);
+
   -- Two routines on a weekly plan: upper Monday and Thursday, lower Tuesday
   -- and Friday.
   insert into public.routines (id, user_id, name, position, created_at) values

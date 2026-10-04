@@ -685,6 +685,43 @@
           "note": "Protein 1.8 g per kg, fat 30% of energy. Change them under “goals”."
         }
       }
+    },
+    "recipes": {
+      "label": "recipes",
+      "title": "Recipes",
+      "manage": "Edit recipes",
+      "create": "Create a recipe",
+      "addIngredient": "Add ingredient",
+      "backToRecipe": "Back to the recipe",
+      "back": "Back to recipes",
+      "defaultName": "New recipe",
+      "empty": "no recipes yet",
+      "loadFailed": "Your recipes could not be loaded. Reload the page.",
+      "createFailed": "The recipe was not created. Try again.",
+      "saveFailed": "The recipe did not save. Try again.",
+      "ingredients_one": "{{count}} ingredient",
+      "ingredients_other": "{{count}} ingredients",
+      "name": "name",
+      "total": "weight when made",
+      "totalHint": " · optional",
+      "ingredientsLabel": "ingredients",
+      "noIngredients": "no ingredients yet",
+      "delete": "Delete recipe",
+      "deleteTitle": "Delete recipe?",
+      "deleteBody": "Days you ate it on stay as they are.",
+      "saveItem": "Save amount",
+      "removeItem": "Remove ingredient",
+      "portion": {
+        "mode": "portion",
+        "byParts": "Share",
+        "byGrams": "Grams",
+        "servings": "servings",
+        "parts": "share · 1 of",
+        "partsUnit": "parts",
+        "grams": "amount",
+        "invalid": "Enter a valid amount."
+      },
+      "deleted": "{{name}} removed"
     }
   }
 }

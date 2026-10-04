@@ -24,10 +24,13 @@ export function RowBody({
   children,
   onClick,
   to,
+  expanded,
 }: {
   children: ReactNode
   onClick?: () => void
   to?: string
+  /** For a row that unfolds what is under it. */
+  expanded?: boolean
 }) {
   return to ? (
     // Chromium starts a native link drag on mousedown-and-move, which fires
@@ -36,7 +39,7 @@ export function RowBody({
       {children}
     </Link>
   ) : (
-    <button type="button" onClick={onClick} className={ROW}>
+    <button type="button" onClick={onClick} aria-expanded={expanded} className={ROW}>
       {children}
     </button>
   )

@@ -29,6 +29,7 @@ export function PortionForm({
   pending,
   failed,
   submitLabel,
+  withMeal = true,
   onSubmit,
 }: {
   food: { name: string; brand: string | null; nutrients: FoodNutrients; servingSizeG?: number | null; servingLabel?: string | null }
@@ -37,6 +38,8 @@ export function PortionForm({
   pending: boolean
   failed: boolean
   submitLabel: string
+  /** Off for a recipe ingredient, which belongs to a recipe and not to a meal. */
+  withMeal?: boolean
   onSubmit: (portion: { quantityG: number; mealType: MealType }) => void
 }) {
   const { t, i18n } = useTranslation()
@@ -85,15 +88,17 @@ export function PortionForm({
 
         {/* Four options is the ceiling for a segmented control (§10.7), and
             there are exactly four meals. */}
-        <div className="flex flex-col items-start gap-2">
-          <p className="font-mono text-2xs text-ink-faint">{t('pages.food.portion.meal')}</p>
-          <SegmentedControl<MealType>
-            label={t('pages.food.portion.meal')}
-            value={mealType}
-            onChange={setMealType}
-            segments={MEAL_TYPES.map((value) => ({ value, label: t(`pages.food.meals.${value}`) }))}
-          />
-        </div>
+        {withMeal ? (
+          <div className="flex flex-col items-start gap-2">
+            <p className="font-mono text-2xs text-ink-faint">{t('pages.food.portion.meal')}</p>
+            <SegmentedControl<MealType>
+              label={t('pages.food.portion.meal')}
+              value={mealType}
+              onChange={setMealType}
+              segments={MEAL_TYPES.map((value) => ({ value, label: t(`pages.food.meals.${value}`) }))}
+            />
+          </div>
+        ) : null}
 
         <p className="font-mono text-2xs text-ink-faint">
           {/* A no-break space holds the line's height, so the form does not

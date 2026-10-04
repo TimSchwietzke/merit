@@ -72,6 +72,8 @@ export default function LoggedPortionPage() {
         food={entry.food}
         quantityG={formatForInput(entry.quantityG, i18n.language, QUANTITY_LIMITS.decimals)}
         mealType={entry.mealType}
+        // An ingredient stays with its recipe line, so only its amount changes.
+        withMeal={!entry.group}
         pending={pending}
         failed={failed}
         submitLabel={pending ? t('pages.food.entry.saving') : t('pages.food.entry.save')}
