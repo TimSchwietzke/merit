@@ -1,5 +1,5 @@
 import { ScanBarcode } from 'lucide-react'
-import { lazy, Suspense, useState, type FormEvent } from 'react'
+import { lazy, Suspense, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -73,7 +73,7 @@ export default function AddFoodPage() {
   // Set when the food is an ingredient for a recipe rather than a portion for
   // the day: same search, and the amount goes into the recipe instead.
   const forRecipe = params.get('recipe')
-  const backTo = forRecipe ? `/food/recipes/${forRecipe}` : `/food?date=${date}`
+  const backTo = forRecipe ? `/food/recipes/${forRecipe}?date=${date}` : `/food?date=${date}`
 
   const [query, setQuery] = useState('')
   // What was typed, and what was asked. A search happens because somebody
@@ -119,9 +119,14 @@ export default function AddFoodPage() {
   }
 
   // Straight into the editor, as the floating add on the recipe list does.
+  // Once: a second tap during the insert would make a second recipe.
+  const creatingRecipe = useRef(false)
   async function newRecipe() {
+    if (creatingRecipe.current) return
+    creatingRecipe.current = true
     const id = await createRecipe(t('pages.recipes.defaultName'))
-    if (id) navigate(`/food/recipes/${id}?new=1`)
+    creatingRecipe.current = false
+    if (id) navigate(`/food/recipes/${id}?new=1&date=${date}`)
     else toast(t('pages.recipes.createFailed'))
   }
 

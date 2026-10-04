@@ -409,9 +409,7 @@ function Meal({
           ).kcal.value
           return (
             <Fragment key={line.id}>
-              {/* Removing the line removes the meal it stands for. The swipe is
-                  the quick way; the button under the ingredients is the one a
-                  keyboard or a screen reader reaches. */}
+              {/* Removing the line removes the meal it stands for. */}
               <SwipeRow
                 open={openRow === line.id}
                 onOpenChange={(next) => onOpenRow(next ? line.id : null)}
@@ -454,7 +452,10 @@ function Meal({
                         <EntryBody entry={row} date={date} locale={locale} />
                       </li>
                     ))}
-                    <li className="pl-5">
+                    {/* Out of sight at rest, a destructive control does not sit
+                        in the list (§10.1), but there for a keyboard or a screen
+                        reader, which cannot swipe. */}
+                    <li className="sr-only pl-5 focus-within:not-sr-only">
                       <RowBody onClick={() => onRemoveGroup(line.rows)}>
                         <span className="min-w-0 flex-1 text-sm text-danger">{t('pages.food.entry.delete')}</span>
                       </RowBody>

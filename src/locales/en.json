@@ -729,7 +729,8 @@
       "addToRecipe": "Add to recipe",
       "adding": "Adding…",
       "addFailed": "The ingredient was not added. Try again.",
-      "deleted": "{{name}} deleted"
+      "deleted": "{{name}} deleted",
+      "restoreFailed": "{{name}} could not be put back."
     }
   }
 }

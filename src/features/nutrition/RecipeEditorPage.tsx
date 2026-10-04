@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Sheet } from '@/components/ui/sheet'
 import { useRecipes, type Recipe, type RecipeItem } from '@/features/nutrition/useRecipes'
+import { todayKey } from '@/lib/date'
 import { formatForInput, formatNumber, parseDecimalInput } from '@/lib/format'
 import { QUANTITY_LIMITS } from '@/lib/nutrition'
 
@@ -60,6 +61,9 @@ function Editor({
   const locale = i18n.language
   const navigate = useNavigate()
   const [params] = useSearchParams()
+  // The day add-food was opened for, carried round the whole recipe loop so the
+  // next thing logged lands on it and not on today.
+  const date = params.get('date') ?? todayKey()
 
   const [name, setName] = useState(recipe.name)
   const [total, setTotal] = useState(
@@ -113,7 +117,12 @@ function Editor({
       const name = nameChange(typed.current.name, current)
       const total = totalChange(typed.current.total, current)
       if (name || (total && total !== 'invalid')) {
-        void update(current.id, { ...(name ? { name } : {}), ...(total && total !== 'invalid' ? total : {}) })
+        // Toasted on whatever screen comes next: sonner outlives this one.
+        void update(current.id, { ...(name ? { name } : {}), ...(total && total !== 'invalid' ? total : {}) }).then(
+          (ok) => {
+            if (!ok) toast(t('pages.recipes.saveFailed'))
+          },
+        )
       }
     },
     // On unmount only; the refs carry the latest values.
@@ -123,17 +132,29 @@ function Editor({
 
   async function deleteRecipe() {
     if (!(await remove(recipe.id))) return toast(t('pages.recipes.saveFailed'))
-    navigate('/food/recipes')
+    navigate(`/food/recipes?date=${date}`)
     // Undo rather than a question first (§14).
     toast(t('pages.recipes.deleted', { name: recipe.name }), {
-      action: { label: t('common.undo'), onClick: () => void restore(recipe) },
+      action: {
+        label: t('common.undo'),
+        onClick: () =>
+          void restore(recipe).then((ok) => {
+            if (!ok) toast(t('pages.recipes.restoreFailed', { name: recipe.name }))
+          }),
+      },
     })
   }
 
   async function removeIngredient(item: RecipeItem) {
     if (!(await removeItem(item.id))) return toast(t('pages.recipes.saveFailed'))
     toast(t('pages.recipes.itemRemoved', { name: item.food.name }), {
-      action: { label: t('common.undo'), onClick: () => void addItem(recipe.id, item.food.id, item.quantityG) },
+      action: {
+        label: t('common.undo'),
+        onClick: () =>
+          void addItem(recipe.id, item.food.id, item.quantityG, item.createdAt).then((ok) => {
+            if (!ok) toast(t('pages.recipes.restoreFailed', { name: item.food.name }))
+          }),
+      },
     })
   }
 
@@ -197,7 +218,7 @@ function Editor({
         )}
 
         <Button asChild variant="tinted" className="mt-4 w-full">
-          <Link to={`/food/add?recipe=${recipe.id}`}>{t('pages.recipes.addIngredient')}</Link>
+          <Link to={`/food/add?recipe=${recipe.id}&date=${date}`}>{t('pages.recipes.addIngredient')}</Link>
         </Button>
       </section>
 
@@ -210,7 +231,7 @@ function Editor({
       </Button>
 
       <Link
-        to="/food/recipes"
+        to={`/food/recipes?date=${date}`}
         className="mt-8 flex min-h-11 items-center font-mono text-2xs text-accent underline decoration-1 underline-offset-2"
       >
         ← {t('pages.recipes.back')}

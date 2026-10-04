@@ -25,7 +25,7 @@ export default function RecipesPage() {
   // editor it opens on is where it gets its real one.
   async function addRecipe() {
     const id = await create(t('pages.recipes.defaultName'))
-    if (id) navigate(`/food/recipes/${id}?new=1`)
+    if (id) navigate(`/food/recipes/${id}?new=1&date=${date}`)
     else toast(t('pages.recipes.createFailed'))
   }
 
@@ -47,7 +47,7 @@ export default function RecipesPage() {
         ) : (
           <Rows>
             {recipes.map((recipe) => (
-              <Row key={recipe.id} to={`/food/recipes/${recipe.id}`}>
+              <Row key={recipe.id} to={`/food/recipes/${recipe.id}?date=${date}`}>
                 <span className="min-w-0 flex-1">
                   <span className="block truncate">{recipe.name}</span>
                   <span className="block truncate font-mono text-2xs text-ink-faint">

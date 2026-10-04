@@ -729,7 +729,8 @@
       "addToRecipe": "Zum Rezept hinzufügen",
       "adding": "Wird hinzugefügt …",
       "addFailed": "Die Zutat wurde nicht hinzugefügt. Versuche es noch einmal.",
-      "deleted": "{{name}} gelöscht"
+      "deleted": "{{name}} gelöscht",
+      "restoreFailed": "{{name}} konnte nicht wiederhergestellt werden."
     }
   }
 }

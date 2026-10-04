@@ -15,6 +15,8 @@ import { supabase } from '@/lib/supabase'
 export interface RecipeItem {
   id: string
   quantityG: number
+  /** The order ingredients are listed in, kept through an undo. */
+  createdAt: string
   food: CatalogueFood
 }
 
@@ -40,7 +42,12 @@ const SELECT = `id, name, total_g, recipe_items ( id, quantity_g, created_at, fo
 const toRecipe = (row: Row): Recipe => {
   const items = [...row.recipe_items]
     .sort((a, b) => a.created_at.localeCompare(b.created_at))
-    .map((item) => ({ id: item.id, quantityG: item.quantity_g, food: toCatalogueFood(item.foods) }))
+    .map((item) => ({
+      id: item.id,
+      quantityG: item.quantity_g,
+      createdAt: item.created_at,
+      food: toCatalogueFood(item.foods),
+    }))
   return {
     id: row.id,
     name: row.name,
@@ -140,8 +147,12 @@ export function useRecipes() {
   )
 
   const addItem = useCallback(
-    (recipeId: string, foodId: string, quantityG: number) =>
-      write(() => supabase.from('recipe_items').insert({ recipe_id: recipeId, food_id: foodId, quantity_g: quantityG })),
+    (recipeId: string, foodId: string, quantityG: number, createdAt?: string) =>
+      write(() =>
+        supabase
+          .from('recipe_items')
+          .insert({ recipe_id: recipeId, food_id: foodId, quantity_g: quantityG, created_at: createdAt }),
+      ),
     [write],
   )
 
@@ -168,7 +179,12 @@ export function useRecipes() {
       if (error) return false
       return write(() =>
         supabase.from('recipe_items').insert(
-          recipe.items.map((item) => ({ recipe_id: recipe.id, food_id: item.food.id, quantity_g: item.quantityG })),
+          recipe.items.map((item) => ({
+            recipe_id: recipe.id,
+            food_id: item.food.id,
+            quantity_g: item.quantityG,
+            created_at: item.createdAt,
+          })),
         ),
       )
     },
