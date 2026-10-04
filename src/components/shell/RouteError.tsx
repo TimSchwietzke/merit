@@ -37,7 +37,7 @@ export default function RouteError() {
     <main className="mx-auto flex min-h-[100dvh] w-full max-w-[860px] flex-col justify-center px-4 py-10 md:px-6">
       <PageHeader
         title={t(stale ? 'pages.error.stale.title' : 'pages.error.title')}
-        lead={t(stale ? 'pages.error.stale.lead' : 'pages.error.lead')}
+        lead={stale ? t('pages.error.stale.lead') : undefined}
       />
 
       <div className="flex flex-col gap-3 sm:flex-row">

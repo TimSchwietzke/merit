@@ -336,7 +336,6 @@ function Meal({
             key={entry.id}
             open={openRow === entry.id}
             onOpenChange={(open) => onOpenRow(open ? entry.id : null)}
-            label={t('pages.food.log.swipe')}
             actions={
               <button
                 type="button"

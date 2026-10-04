@@ -183,9 +183,12 @@ function StepShell({
         <h1 className="font-serif text-xl leading-snug tracking-tight text-balance">
           {t(`pages.welcome.steps.${step}.title`)}
         </h1>
-        <p className="text-sm leading-[1.6] text-ink-muted">
-          {t(`pages.welcome.steps.${step}.lead`)}
-        </p>
+        {/* Only the steps whose question needs one; an empty lead renders nothing. */}
+        {t(`pages.welcome.steps.${step}.lead`) ? (
+          <p className="text-sm leading-[1.6] text-ink-muted">
+            {t(`pages.welcome.steps.${step}.lead`)}
+          </p>
+        ) : null}
       </div>
 
       <div className="mt-8 flex flex-col gap-6">{children}</div>

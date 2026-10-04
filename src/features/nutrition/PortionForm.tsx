@@ -96,8 +96,10 @@ export function PortionForm({
         </div>
 
         <p className="font-mono text-2xs text-ink-faint">
+          {/* A no-break space holds the line's height, so the form does not
+              jump when the first valid quantity arrives. */}
           {preview === null ? (
-            t('pages.food.portion.previewPending')
+            '\u00a0'
           ) : (
             <>
               <span className="text-ink">{formatNumber(preview.kcal ?? 0, locale, 0)}</span> kcal ·{' '}

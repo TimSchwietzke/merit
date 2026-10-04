@@ -20,7 +20,7 @@
     "welcome": "setup"
   },
   "common": {
-    "notBuiltYet": "not built yet",
+    "notBuiltYet": "planned",
     "today": "today",
     "notFound": "not found",
     "loading": "loading",
@@ -31,13 +31,12 @@
     "filtersOpen": "Filters, {{count}} active",
     "close": "Close",
     "streak": {
-      "nutrition": "kept up",
+      "nutrition": "days in a row",
       "training": "weeks to plan",
       "days_one": "{{count}} day",
       "days_other": "{{count}} days",
       "weeks_one": "{{count}} week",
-      "weeks_other": "{{count}} weeks",
-      "none": "nothing to report yet"
+      "weeks_other": "{{count}} weeks"
     },
     "week": {
       "previous": "Previous week",
@@ -50,7 +49,7 @@
   "auth": {
     "signIn": {
       "title": "Sign in",
-      "lead": "Merit is invite-only. Accounts are created by hand, there is no sign-up.",
+      "lead": "merit is invite-only. Accounts are created by hand, there is no sign-up.",
       "email": "e-mail",
       "password": "password",
       "submit": "Sign in",
@@ -70,21 +69,15 @@
       "over": "kcal over",
       "ringAria": "{{total}} of {{target}} kcal today, {{remaining}} kcal from the target.",
       "noTarget": "no calorie target yet",
-      "setTarget": "Set a target",
-      "nothingLogged": "nothing logged today",
-      "macros": "macros",
-      "logFood": "Log a food",
       "training": {
-        "label": "training",
         "due": "{{name}} is due today.",
         "doneToday": "{{name}} done.",
         "rest": "Rest day.",
         "next": "Next is {{name}} on {{day}}.",
         "nextTomorrow": "Next is {{name}} tomorrow.",
-        "nothingPlanned": "No routine is planned in yet.",
-        "open": "Training"
+        "nothingPlanned": "No routine is planned in yet."
       },
-      "loadFailed": "Today could not be loaded. Check your connection and try again.",
+      "loadFailed": "did not load",
       "weight": {
         "noTrend": "no trend yet",
         "week": "{{delta}} kg this week"
@@ -109,8 +102,8 @@
         "upper-back": "back"
       },
       "recency": {
-        "label": "what you have trained lately",
-        "never": "{{region}} has had nothing at all",
+        "label": "last trained",
+        "never": "{{region}}: never",
         "cold": "{{region}} last, over a week ago",
         "longest_one": "{{region}} last, {{count}} day ago",
         "longest_other": "{{region}} last, {{count}} days ago",
@@ -118,13 +111,12 @@
       }
     },
     "food": {
-      "loadFailed": "The day's foods could not be loaded. Check your connection and try again.",
+      "loadFailed": "The day's foods could not be loaded. Reload the page.",
       "deleted": "{{name}} removed",
       "undoFailed": "That portion could not be put back. Log it again.",
       "day": {
         "previous": "Previous day",
-        "next": "Next day",
-        "today": "Back to today"
+        "next": "Next day"
       },
       "meals": {
         "breakfast": "breakfast",
@@ -146,86 +138,74 @@
         "label": "the day",
         "partial": "partial · {{known}} of {{total}} foods",
         "none": "no data",
-        "left": "{{left}} left",
-        "over": "{{over}} over",
-        "noTarget": "set a calorie target",
-        "ariaCalories": "Calories today against your target"
+        "noTarget": "set a calorie target"
       },
       "log": {
         "label": "logged",
         "empty": "nothing logged yet",
         "add": "Add food",
-        "swipe": "Swipe the row sideways to remove it.",
         "remove": "Remove"
       },
       "add": {
         "title": "Add food",
         "search": "search",
-        "searchHint": " · type a name, then search",
-        "searching": "searching …",
+        "searching": "searching…",
         "noResults": "nothing found",
         "addYourself": "Type it in yourself",
-        "searchFailed": "The search did not go through. Check your connection and try again.",
+        "searchFailed": "The search did not go through. Try again.",
         "back": "Back to the day",
         "recent": "recently used",
         "catalogue": "catalogue",
         "usda": "usda",
-        "searchingUsda": "searching usda …",
-        "usdaFailed": "usda could not be reached. What is above is the whole catalogue.",
-        "usdaBusy": "usda is busy just now. Try again in a few minutes.",
+        "usdaFailed": "usda not reachable",
+        "usdaBusy": "usda busy",
         "off": "open food facts",
-        "searchOff": "Search Open Food Facts",
-        "offSearching": "searching …",
-        "offNone": "nothing found",
-        "offBusy": "too many searches",
-        "offFailed": "not reachable",
-        "scan": "Scan",
+        "offBusy": "open food facts busy",
+        "offFailed": "open food facts not reachable",
         "elsewhere": "if nothing fits",
-        "go": "Search"
+        "go": "Search",
+        "backToSearch": "Back to search"
       },
       "portion": {
         "quantity": "quantity",
         "meal": "meal",
-        "quantityInvalid": "Enter a quantity between 1 and 10000 g, like 250.",
-        "previewPending": "enter a quantity to see what it comes to",
-        "saveFailed": "That portion did not save. Check your connection and try again.",
+        "quantityInvalid": "Enter a quantity between 1 and 10,000 g, like 250.",
+        "saveFailed": "That portion did not save. Try again.",
         "save": "Log it",
         "saving": "Logging…"
       },
       "new": {
         "title": "Add a food",
-        "shared": "Anything you add is visible to everyone using Merit. Values per 100 g or 100 ml, as on the packaging.",
+        "shared": "Anything you add is visible to everyone using merit. Values per 100 g or 100 ml, as on the packaging.",
         "name": "name",
         "brand": "brand",
         "optional": " · optional",
-        "required": "required",
         "nameInvalid": "Give the food a name.",
         "valueInvalid": "Enter a number, or leave it empty if the packaging does not say.",
-        "requiredInvalid": "Energy, fat, carbohydrate and protein are needed to log anything against them.",
+        "requiredInvalid": "Required.",
         "subValueTooHigh": "A sub-value cannot be larger than the total it is part of.",
         "save": "Add to the catalogue",
         "saving": "Adding…",
-        "saveFailed": "That food was not added. Check your connection and try again."
+        "saveFailed": "That food was not added. Try again."
       },
       "scan": {
         "title": "Scan a barcode",
         "open": "Scan a barcode",
         "viewport": "Camera, pointed at a barcode",
-        "instruction": "barcode in the frame",
         "looking": "looking it up",
         "barcode": "barcode",
         "look": "Look up",
         "barcodeInvalid": "That is not a barcode. Check the digits and try again.",
-        "denied": "Merit has no access to the camera. Allow it in the browser and try again, or type the number below.",
+        "denied": "merit has no access to the camera. Allow it in the browser and try again, or type the number below.",
         "missing": "no product for this barcode",
-        "offline": "Open Food Facts could not be reached. Check your connection, or add the food yourself.",
+        "offline": "Open Food Facts could not be reached.",
         "addYourself": "Add it yourself",
         "attribution": "Product data from Open Food Facts, under the ODbL.",
         "starting": "starting the camera",
         "retry": "Try the camera again",
         "torchOn": "Turn the light on",
         "torchOff": "Turn the light off",
-        "or": "or type the number"
+        "or": "or"
       },
       "entry": {
         "title": "Logged portion",
@@ -244,12 +224,11 @@
       }
     },
     "training": {
-      "loadFailed": "The day's sets could not be loaded. Check your connection and try again.",
+      "loadFailed": "The day's sets could not be loaded. Reload the page.",
       "empty": "nothing logged yet",
       "addExercise": "Add an exercise",
       "deleted": "set removed",
       "undoFailed": "That set could not be put back. Log it again.",
-      "swipe": "Swipe the row sideways to remove it.",
       "remove": "Remove",
       "lastTime": "last time",
       "never": "first time",
@@ -257,20 +236,13 @@
       "set": {
         "reps": "reps",
         "weight": "weight",
-        "rir": "rir",
-        "rirHint": " · optional",
-        "add": "Log set",
-        "adding": "Logging…",
-        "invalid": "Enter reps and a weight. Zero is a weight; empty is not.",
-        "addFailed": "That set did not save. Check your connection and try again."
+        "rir": "rir"
       },
       "add": {
         "title": "Add an exercise",
         "search": "search",
-        "searching": "searching",
-        "noResults": "no exercise matches",
         "back": "Back to the day",
-        "searchFailed": "The search did not go through. Check your connection and try again.",
+        "searchFailed": "The search did not go through. Try again.",
         "recent": "recently used",
         "filterEquipment": "equipment",
         "noMatch": "Nothing matches {{filters}}.",
@@ -298,12 +270,7 @@
         "full_body": "full body"
       },
       "setRow": {
-        "add": "Add a set",
-        "done": "Mark done",
-        "undone": "Mark not done",
-        "planned": "planned",
-        "save": "Save",
-        "editing": "Editing set {{n}}"
+        "add": "Add a set"
       },
       "week": {
         "label": "this week",
@@ -311,59 +278,47 @@
         "nothing": "nothing planned",
         "put": "Put a routine on this day",
         "putTitle": "which routine?",
-        "putFailed": "That did not save. Check your connection and try again.",
+        "putFailed": "The routine was not planned in. Try again.",
         "open": "not started",
         "progress": "{{logged}} of {{total}} sets done",
         "setCount_one": "{{count}} set",
         "setCount_other": "{{count}} sets",
-        "marks": "rest day · planned · done",
         "move": "Move this session",
         "moving": "Pick the day to swap {{name}} with.",
         "moveCancel": "Cancel",
         "swapConfirm": "Swap {{a}} ({{aDay}}) with {{b}} ({{bDay}})?",
         "confirm": "Swap them",
-        "loadFailed": "Your week could not be loaded. Check your connection and try again.",
+        "loadFailed": "Your week could not be loaded. Reload the page.",
         "putNew": "Make a new routine"
       },
       "session": {
         "label": "the session",
         "changeRoutine": "Do a different routine",
         "changeRoutineTitle": "which routine?",
-        "replaced": "{{wanted}} instead of {{displaced}} on this day. {{displaced}} is back next week.",
         "start": "Start the session",
         "starting": "Starting…",
-        "startFailed": "That did not start. Check your connection and try again.",
-        "resume": "Open the session",
-        "removeSet": "One set fewer",
+        "startFailed": "The session did not start. Try again.",
         "addSet": "One set more",
-        "removeExercise": "Not today",
-        "sets": "{{sets}} × {{reps}}",
+        "removeExercise": "Skip {{name}} today",
         "empty": "nothing left in this session",
         "unsaved": "changed for today",
-        "save": "Save the change",
         "scopeTitle": "keep this change for…",
         "scopeToday": "Today only",
-        "scopeTodayHint": "The routine itself is untouched.",
         "scopeAlways": "Every future session",
-        "scopeAlwaysHint": "Changes the routine for good.",
         "scopePick": "Pick the days",
-        "scopePickHint": "For a stretch where you have less time.",
         "pickTitle": "which days?",
         "pickDone": "Apply to {{count}} days",
-        "saveFailed": "That change did not save. Check your connection and try again.",
         "moveHere": "Train today instead?",
-        "moveHereBody": "{{name}} is planned for {{day}}. Starting it now moves it to today.",
+        "moveHereBody": "{{name}} is planned for {{day}}.",
         "moveConfirm": "Move it to today"
       },
       "bar": {
-        "title": "Session running",
         "setOf": "Set {{n}} of {{total}}",
         "log": "Log set",
         "logging": "Logging…",
         "expand": "Show the session",
         "collapse": "Hide the session",
         "finish": "End the session",
-        "finished": "Everything logged.",
         "invalid": "Enter reps and a weight."
       },
       "stats": {
@@ -395,7 +350,7 @@
       },
       "offline_one": "offline · 1 set is waiting on this device",
       "offline_other": "offline · {{count}} sets are waiting on this device",
-      "syncRejected": "The server refused one change and it was dropped. Check today's sets."
+      "syncRejected": "The server refused a change and it was dropped. Check today’s sets."
     },
     "notFound": {
       "title": "Page not found",
@@ -403,7 +358,7 @@
       "back": "Back to the dashboard"
     },
     "weight": {
-      "loadFailed": "Your weigh-ins could not be loaded. Check your connection and try again.",
+      "loadFailed": "Your weigh-ins could not be loaded. Reload the page.",
       "deleted": "{{date}} deleted",
       "undoFailed": "That entry could not be put back. Log the day again.",
       "range": "Time range",
@@ -418,7 +373,7 @@
           "days": "{{days}} d",
           "all": "all"
         },
-        "empty": "log a weight to see the trend",
+        "empty": "no trend yet",
         "raw": "daily",
         "average": "{{days}}-day average",
         "aria": "Weight in kilograms, {{entries}} weigh-ins from {{from}} to {{to}}, between {{low}} and {{high}} kg. The daily values and their seven-day average.",
@@ -437,10 +392,10 @@
         "bodyFatInvalid": "Enter a percentage between 1 and 75, like 18.5, or leave it empty.",
         "save": "Save weight",
         "saving": "Saving…",
-        "saveFailed": "That weigh-in did not save. Check your connection and try again.",
+        "saveFailed": "That weigh-in did not save. Try again.",
         "delete": "Delete entry",
         "deleting": "Deleting…",
-        "deleteFailed": "That entry could not be deleted. Check your connection and try again."
+        "deleteFailed": "That entry could not be deleted. Try again."
       },
       "list": {
         "label": "log",
@@ -457,10 +412,10 @@
       }
     },
     "goals": {
-      "loadFailed": "Your targets could not be loaded. Check your connection and try again.",
+      "loadFailed": "Your targets could not be loaded. Reload the page.",
       "body": {
         "label": "you",
-        "lead": "Used to work out what a day costs you.",
+        "lead": "Used to calculate your calorie target.",
         "height": "height",
         "birthDate": "date of birth",
         "sex": "sex",
@@ -487,7 +442,7 @@
         "heightInvalid": "Enter a height in centimetres, like 181.",
         "save": "Save",
         "saving": "Saving…",
-        "saveFailed": "That did not save. Check your connection and try again."
+        "saveFailed": "Your details did not save. Try again."
       },
       "targets": {
         "label": "targets",
@@ -503,17 +458,17 @@
         "resting": "at rest",
         "maintenance": "to hold your weight",
         "needs": "Fill in {{fields}} above to calculate a target.",
-        "kcalInvalid": "Enter a calorie target between 500 and 10000.",
+        "kcalInvalid": "Enter a calorie target between 500 and 10,000.",
         "macroInvalid": "Enter a value in grams.",
         "save": "Save targets",
         "saving": "Saving…",
-        "saveFailed": "Those targets did not save. Check your connection and try again.",
+        "saveFailed": "Those targets did not save. Try again.",
         "appliesFrom": "applies from today; earlier days keep the target they had",
         "calc": {
           "label": "work the macros out",
           "proteinPerKg": "protein per kg",
           "fatShare": "fat share",
-          "apply": "Fill the three fields",
+          "apply": "Use these macros",
           "needsWeight": "needs a weigh-in first",
           "needsKcal": "needs a calorie target first",
           "invalid": "Enter a number."
@@ -525,13 +480,12 @@
       "empty": "no routine yet",
       "defaultName": "New routine",
       "create": "Add a routine",
-      "createFailed": "That did not save. Check your connection and try again.",
+      "createFailed": "The routine was not created. Try again.",
       "exerciseCount_one": "{{count}} exercise",
       "exerciseCount_other": "{{count}} exercises",
       "unfinished": "no exercises yet",
       "noWeekday": "not planned in",
-      "loadFailed": "Your routines could not be loaded. Check your connection and try again.",
-      "back": "training",
+      "loadFailed": "Your routines could not be loaded. Reload the page.",
       "editor": {
         "unnamed": "a new routine",
         "steps": "the two steps of a routine",
@@ -540,7 +494,7 @@
         "name": "name",
         "namePlaceholder": "Upper body 1",
         "weekdays": "planned for",
-        "weekdaysHint": " · leave empty to start it whenever",
+        "weekdaysHint": " · optional",
         "exercises": "exercises",
         "addExercise": "Add an exercise",
         "pickTitle": "which exercise?",
@@ -555,7 +509,7 @@
         "back": "Back",
         "save": "Save",
         "saving": "Saving…",
-        "saveFailed": "That did not save. Check your connection and try again.",
+        "saveFailed": "The routine did not save. Try again.",
         "setN": "set {{n}}",
         "addSet": "One set more",
         "removeSet": "Remove set {{n}}"
@@ -563,7 +517,7 @@
       "delete": "Delete",
       "swipe": "Swipe a routine sideways to delete it.",
       "deleted": "{{name}} deleted",
-      "undoFailed": "That could not be put back. Check your connection and try again."
+      "undoFailed": "The routine could not be put back."
     },
     "account": {
       "profile": {
@@ -572,19 +526,19 @@
           "field": "display name",
           "placeholder": "Your name",
           "save": "Save name",
-          "saving": "Saving …",
+          "saving": "Saving…",
           "saved": "Saved.",
-          "failed": "The name was not saved. Check your connection and try again."
+          "failed": "The name was not saved. Try again."
         },
         "email": {
           "label": "email",
           "current": "signed in as",
           "field": "new address",
           "save": "Change address",
-          "saving": "Changing …",
+          "saving": "Changing…",
           "sent": "Confirmation email on its way. Open the link in it, and check the spam folder too.",
           "unchanged": "That is the address you are already signed in with.",
-          "failed": "The address was not changed. Check your connection and try again."
+          "failed": "The address was not changed. Try again."
         },
         "password": {
           "label": "password",
@@ -592,16 +546,15 @@
           "field": "new password",
           "repeat": "repeat new password",
           "save": "Change password",
-          "saving": "Changing …",
+          "saving": "Changing…",
           "saved": "Password changed.",
           "tooShort": "At least eight characters.",
           "mismatch": "The two entries do not match.",
           "wrongCurrent": "That is not the current password.",
-          "failed": "The password was not changed. Check your connection and try again."
+          "failed": "The password was not changed. Try again."
         }
       },
       "preferences": {
-        "label": "preferences",
         "language": "language",
         "theme": "theme",
         "languages": {
@@ -613,41 +566,37 @@
           "dark": "dark",
           "system": "system"
         },
-        "saveFailed": "That preference did not save and has been put back. Check your connection and try again."
+        "saveFailed": "That preference did not save and has been put back. Try again."
       },
       "account": {
-        "label": "account",
-        "signedInAs": "signed in as",
         "signOut": "Sign out",
         "signingOut": "Signing out…"
       },
       "data": {
-        "label": "your data",
         "export": "Download my data",
         "exporting": "Preparing…",
-        "exportFailed": "That did not download. Check your connection and try again.",
+        "exportFailed": "The download did not work. Try again.",
         "delete": "Delete my account",
         "deleting": "Deleting…",
         "deleteHint": "Removes the account and everything scoped to it: weigh-ins, food log, routines, sets. Foods and exercises you added stay in the shared catalogue without your name on them. This cannot be undone.",
         "deleteConfirm": "Delete this account and everything in it? This cannot be undone.",
         "deleteConfirmLabel": "Delete everything",
-        "deleteFailed": "The account was not deleted. Check your connection and try again.",
+        "deleteFailed": "The account was not deleted. Try again.",
         "legal": "legal",
         "privacy": "Privacy",
         "imprint": "Imprint"
       }
     },
     "cardio": {
-      "planned": "Sessions, minutes and the calories they cost, once the four essentials work."
+      "planned": "Sessions, minutes and the calories they burn."
     },
     "error": {
       "title": "That did not load",
-      "lead": "Something went wrong on the way to this screen. Going back to the start usually helps.",
       "reload": "Reload",
-      "home": "Back to the start",
+      "home": "Back to the dashboard",
       "stale": {
         "title": "merit was updated",
-        "lead": "This tab is still running an older version. Reloading fetches the new one; your entries stay as they are."
+        "lead": "This tab is running an older version. Your entries are kept."
       }
     },
     "legal": {
@@ -658,7 +607,7 @@
       "imprint": {
         "title": "Imprint"
       },
-      "missing": "This page is not finished. Its text has not been supplied yet and must be in place before anybody is invited. See docs/LEGAL-INPUTS.md."
+      "missing": "This page is not available yet."
     },
     "consent": {
       "title": "Before you start",
@@ -678,8 +627,8 @@
       "notReady": "merit is not ready to be used yet: its privacy notice has not been published, so there is nothing to consent to. See docs/LEGAL-INPUTS.md."
     },
     "welcome": {
-      "loadFailed": "Your details could not be loaded. Check your connection and try again.",
-      "saveFailed": "That was not saved. Check your connection and try again.",
+      "loadFailed": "Your details could not be loaded. Reload the page.",
+      "saveFailed": "Your details did not save. Try again.",
       "next": "Continue",
       "later": "later",
       "back": "back",
@@ -687,10 +636,10 @@
       "intro": {
         "panel": "Introduction, panel {{n}} of {{total}}",
         "next": "Next",
-        "start": "Get started",
+        "start": "Set up",
         "skip": "skip",
         "merit": {
-          "label": "what this is",
+          "label": "merit",
           "line": "Your numbers, in one place.",
           "body": "merit keeps what you eat, what you lift and what you weigh. None of it is graded."
         },
@@ -712,8 +661,8 @@
       },
       "steps": {
         "name": {
-          "title": "What should we call you?",
-          "lead": "It goes at the top of the dashboard, and you can change it at any time."
+          "title": "What is your name?",
+          "lead": ""
         },
         "body": {
           "title": "What do you weigh, and how tall are you?",
@@ -726,13 +675,13 @@
         },
         "goal": {
           "title": "How much do you move, and where is this going?",
-          "lead": "This sets how far your target sits from what holds your weight steady."
+          "lead": ""
         },
         "target": {
           "title": "Your daily target",
           "lead": "Worked out from what you entered, in force from today.",
           "save": "Save target",
-          "note": "protein and fat are starting points: 1.8 g per kg and 30 % of the energy. change them under targets."
+          "note": "Protein 1.8 g per kg, fat 30% of energy. Change them under “goals”."
         }
       }
     }

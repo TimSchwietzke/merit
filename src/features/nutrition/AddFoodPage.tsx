@@ -199,7 +199,7 @@ export default function AddFoodPage() {
           onSubmit={logPortion}
         />
         <Button variant="bare" className="mt-4" onClick={() => setPicked(null)}>
-          ← {t('pages.food.add.search')}
+          ← {t('pages.food.add.backToSearch')}
         </Button>
       </>
     )
@@ -218,25 +218,23 @@ export default function AddFoodPage() {
         {scanResult ? (
           <div className="mt-6 rounded-lg border border-line bg-surface px-4 py-6 text-center">
             <p className="text-sm text-ink-muted">{t(`pages.food.scan.${scanResult}`)}</p>
-            {scanResult === 'missing' ? (
-              <Button
-                variant="tinted"
-                className="mt-4"
-                onClick={() => {
-                  setScanning(false)
-                  setCreating(true)
-                }}
-              >
-                {t('pages.food.scan.addYourself')}
-              </Button>
-            ) : null}
+            <Button
+              variant="tinted"
+              className="mt-4"
+              onClick={() => {
+                setScanning(false)
+                setCreating(true)
+              }}
+            >
+              {t('pages.food.scan.addYourself')}
+            </Button>
           </div>
         ) : null}
 
         <Attribution />
 
         <Button variant="bare" className="mt-4" onClick={() => setScanning(false)}>
-          ← {t('pages.food.add.search')}
+          ← {t('pages.food.add.backToSearch')}
         </Button>
       </>
     )
@@ -248,7 +246,7 @@ export default function AddFoodPage() {
         <PageHeader title={t('pages.food.new.title')} />
         <NewFoodForm pending={pending} failed={failed} onSubmit={createFood} />
         <Button variant="bare" className="mt-4" onClick={() => setCreating(false)}>
-          ← {t('pages.food.add.search')}
+          ← {t('pages.food.add.backToSearch')}
         </Button>
       </>
     )
@@ -276,7 +274,6 @@ export default function AddFoodPage() {
       <form onSubmit={search} className="flex flex-col gap-2">
         <Label htmlFor="food-search">
           {t('pages.food.add.search')}
-          <span className="text-ink-faint">{t('pages.food.add.searchHint')}</span>
         </Label>
 
         <div className="flex items-start gap-2">
@@ -336,10 +333,6 @@ export default function AddFoodPage() {
               locale={locale}
             />
           </Collapsible>
-        ) : null}
-
-        {searching ? (
-          <p className="font-mono text-2xs text-ink-faint">{t('pages.food.add.searching')}</p>
         ) : null}
 
         {status === 'error' ? (

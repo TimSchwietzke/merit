@@ -50,7 +50,8 @@ export function SwipeRow({
   open: boolean
   onOpenChange: (open: boolean) => void
   /** Names the gesture for anybody who cannot perform it. */
-  label: string
+  /** Only where the swipe is the sole way to the action; elsewhere it is noise read after every row. */
+  label?: string
 }) {
   const contentRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLDivElement>(null)
@@ -160,7 +161,7 @@ export function SwipeRow({
         {children}
       </div>
 
-      <span className="sr-only">{label}</span>
+      {label ? <span className="sr-only">{label}</span> : null}
     </li>
   )
 }
