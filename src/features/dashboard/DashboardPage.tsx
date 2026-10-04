@@ -102,7 +102,9 @@ export default function DashboardPage() {
 
       {/* The body, on the ground rather than in a box. It is the thing only
           this screen can show, so it gets the room and nothing frames it. */}
-      <MuscleRecency history={workout.history} exercises={workout.exercises} today={today} />
+      <div data-domain="training">
+        <MuscleRecency history={workout.history} exercises={workout.exercises} today={today} />
+      </div>
 
       {/* Four readings in four different shapes, packed rather than stacked.
           The day's eating is tall and holds a ring, so it takes the left column
@@ -146,7 +148,7 @@ export default function DashboardPage() {
       {/* One sentence, last, in the one serif line per screen §4.1 allows and
           on the accent edge §6 calls the signature. Read once the picture has
           already said where you stand. */}
-      <div className="mt-8">
+      <div className="mt-8" data-domain="training">
         <TrainingLine locale={locale} routines={routines} sets={workout.sets} />
       </div>
     </>
@@ -171,7 +173,7 @@ function NutritionCard({
 
   if (status !== 'ready' || !goal) {
     return (
-      <DomainCard to={goal ? '/food' : '/goals'} label={t('nav.food')} value="—">
+      <DomainCard domain="nutrition" to={goal ? '/food' : '/goals'} label={t('nav.food')} value="—">
         <p className="font-mono text-2xs text-ink-faint">
           {status === 'error'
             ? t('pages.dashboard.loadFailed')
@@ -186,6 +188,7 @@ function NutritionCard({
   return (
     <Link
       to="/food"
+      data-domain="nutrition"
       className="flex h-full flex-col gap-4 rounded-lg bg-surface p-4 transition-colors
                  [transition-duration:140ms] hover:bg-surface-2 active:bg-surface-2
                  active:[transition-duration:0ms]"
@@ -305,7 +308,7 @@ function StreakCard({
 
   if (days <= 1 && streak === 0) {
     return (
-      <DomainCard to="/training" label={t('common.streak.training')} value="—">
+      <DomainCard domain="training" to="/training" label={t('common.streak.training')} value="—">
         <p className="font-mono text-2xs text-ink-faint">{t('common.streak.none')}</p>
       </DomainCard>
     )
@@ -323,6 +326,7 @@ function StreakCard({
     </DomainCard>
   ) : (
     <DomainCard
+      domain="nutrition"
       to="/food"
       label={t('common.streak.nutrition')}
       value={String(days)}

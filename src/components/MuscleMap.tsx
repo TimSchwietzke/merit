@@ -13,8 +13,8 @@ import { BACK, FRONT, OUTLINE, SILHOUETTE, VIEW_BOX } from '@/components/muscle-
  * mixed into `surface-2` by however much the caller asked for. That is the same
  * fill-density rule the mosaic and the week strip follow, and it is why the map
  * still reads in greyscale and to a red-green deficiency. Colour arrives
- * through `accent`, so the body is oxide inside training and moss on the
- * dashboard without being told which.
+ * through `accent`, and the body is training's, so it is oxide wherever it
+ * renders (the dashboard wraps it in `data-domain="training"`).
  *
  * Regions that are not muscles at all (head, hands, feet) stay silhouette
  * whatever is passed for them.
