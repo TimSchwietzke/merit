@@ -734,7 +734,7 @@
       "removeFailed": "{{name}} wurde nicht entfernt. Versuche es noch einmal.",
       "fromMeal": {
         "title": "als rezept speichern",
-        "save": "Rezept speichern",
+        "save": "Speichern",
         "open": "{{meal}} als rezept speichern",
         "remove": "{{name}} entfernen",
         "removeBranded": "{{name}}, {{brand}} entfernen",

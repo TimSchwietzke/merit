@@ -734,7 +734,7 @@
       "removeFailed": "{{name}} was not removed. Try again.",
       "fromMeal": {
         "title": "save as recipe",
-        "save": "Save recipe",
+        "save": "Save",
         "open": "save as recipe: {{meal}}",
         "remove": "Remove {{name}}",
         "removeBranded": "Remove {{name}}, {{brand}}",

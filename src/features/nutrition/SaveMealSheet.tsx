@@ -1,6 +1,6 @@
 import { useEffect, useId, useRef, useState, type MouseEvent } from 'react'
 import { useTranslation } from 'react-i18next'
-import { X } from 'lucide-react'
+import { CircleAlert, X } from 'lucide-react'
 import { toast } from 'sonner'
 
 import { Rows } from '@/components/Rows'
@@ -117,11 +117,11 @@ function Content({
                   {item.brand ? <span className="block truncate text-sm text-ink-muted">{item.brand}</span> : null}
                 </span>
                 <span
-                  className={`shrink-0 font-mono text-2xs tabular-nums ${item.overLimit ? 'text-danger' : 'text-ink-faint'}`}
+                  className={`flex shrink-0 items-center gap-1 font-mono text-2xs tabular-nums ${item.overLimit ? 'text-danger' : 'text-ink-faint'}`}
                 >
                   {item.overLimit ? (
                     <>
-                      <span aria-hidden>! </span>
+                      <CircleAlert size={12} strokeWidth={1.75} aria-hidden className="shrink-0" />
                       <span className="sr-only">{t('pages.recipes.fromMeal.overLimitItem')} </span>
                     </>
                   ) : null}

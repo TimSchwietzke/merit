@@ -234,7 +234,7 @@ test('a meal is saved as a recipe in place, and add-food lists it', async ({ pag
 
   await sheet.getByRole('button', { name: 'Haferflocken, kernig entfernen' }).click()
   await expect(sheet.getByText('Haferflocken, kernig')).toHaveCount(0)
-  await sheet.getByRole('button', { name: 'Rezept speichern' }).click()
+  await sheet.getByRole('button', { name: 'Speichern' }).click()
 
   await expect(page.getByText('Frühstück #1 gespeichert')).toBeVisible()
   await expect(sheet).toHaveCount(0)
