@@ -24,7 +24,7 @@ export function NumberField({
 }: Omit<ComponentProps<'input'>, 'type'> & {
   id: string
   label: string
-  /** Rendered inside the field, right-aligned: `kg`, `%`, `g`. */
+  /** Rendered inside the field, right-aligned: `kg`, `%`, `g`. Empty when the label already says it. */
   unit: string
   hint?: ReactNode
   /** Named under the field when the value cannot be read. */
@@ -49,25 +49,28 @@ export function NumberField({
           // The unit is described rather than hidden: it is inside the field
           // and not in the label, so hiding it leaves a screen reader asking
           // for a weight in nothing in particular.
-          aria-describedby={[unitId, error ? errorId : null].filter(Boolean).join(' ')}
+          aria-describedby={[unit ? unitId : null, error ? errorId : null].filter(Boolean).join(' ') || undefined}
           className={cn(
             // Reserves the unit's column so a four-digit value cannot run
             // underneath it. `md:` as well: the input's own `md:px-3` sits in
             // a media query and would otherwise win back the right padding
             // from `lg` up. Where the collision is invisible until someone
             // types four digits.
-            'pr-12 text-right font-mono tabular-nums md:pr-12',
+            'text-right font-mono tabular-nums',
+            unit ? 'pr-12 md:pr-12' : 'pr-3.5 md:pr-3.5',
             error && 'border-danger',
             className,
           )}
           {...props}
         />
-        <span
-          id={unitId}
-          className="pointer-events-none absolute inset-y-0 right-3.5 flex items-center font-mono text-2xs text-ink-faint"
-        >
-          {unit}
-        </span>
+        {unit ? (
+          <span
+            id={unitId}
+            className="pointer-events-none absolute inset-y-0 right-3.5 flex items-center font-mono text-2xs text-ink-faint"
+          >
+            {unit}
+          </span>
+        ) : null}
       </div>
 
       {error ? (

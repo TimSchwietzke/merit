@@ -93,6 +93,7 @@ npm run db:start    # local Supabase, every migration and seed.sql applied; writ
 npm run dev:local   # dev server against it; sign in as dev@merit.local / merit-dev
 npm run db:reset    # rebuild the local database from the migrations
 npm run db:types    # regenerate src/types/database.ts from the local schema
+npm run db:test     # pgTAP tests in supabase/tests against the local database
 npm run db:stop
 ```
 

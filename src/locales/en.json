@@ -17,7 +17,10 @@
     "profile": "profile",
     "appearance": "appearance",
     "data": "your data",
-    "welcome": "setup"
+    "welcome": "setup",
+    "recipes": "recipes",
+    "meal": "recipe",
+    "entry": "portion"
   },
   "common": {
     "notBuiltYet": "planned",
@@ -211,7 +214,8 @@
         "title": "Logged portion",
         "save": "Save changes",
         "saving": "Saving…",
-        "delete": "Remove from the day"
+        "delete": "Remove from the day",
+        "deleteFailed": "The portion was not removed. Try again."
       },
       "stats": {
         "average": "average",
@@ -685,6 +689,49 @@
           "note": "Protein 1.8 g per kg, fat 30% of energy. Change them under “goals”."
         }
       }
+    },
+    "recipes": {
+      "label": "recipes",
+      "title": "Recipes",
+      "manage": "Edit recipes",
+      "create": "Create a recipe",
+      "addIngredient": "Add ingredient",
+      "backToRecipe": "Back to the recipe",
+      "back": "Back to recipes",
+      "defaultName": "New recipe",
+      "empty": "no recipes yet",
+      "loadFailed": "Your recipes could not be loaded. Reload the page.",
+      "createFailed": "The recipe was not created. Try again.",
+      "saveFailed": "The recipe did not save. Try again.",
+      "ingredients_one": "{{count}} ingredient",
+      "ingredients_other": "{{count}} ingredients",
+      "name": "name",
+      "ingredientsLabel": "ingredients",
+      "noIngredients": "no ingredients yet",
+      "delete": "Delete recipe",
+      "saveItem": "Save amount",
+      "removeItem": "Remove ingredient",
+      "portion": {
+        "mode": "portion",
+        "byWhole": "whole",
+        "byParts": "share",
+        "whole": "whole recipe",
+        "parts": "parts in total",
+        "wholeInvalid": "Enter a number between 0.1 and 100.",
+        "partsInvalid": "Enter whole numbers from 1 to 100, the first no larger than the second.",
+        "eaten": "parts eaten",
+        "share": "share"
+      },
+      "lineRemoved": "{{name}} removed",
+      "undoFailed": "{{name}} could not be put back. Log it again.",
+      "itemRemoved": "{{name}} removed",
+      "addToRecipe": "Add to recipe",
+      "adding": "Adding…",
+      "addFailed": "The ingredient was not added. Try again.",
+      "deleted": "{{name}} deleted",
+      "restoreFailed": "{{name}} could not be put back.",
+      "backToLine": "Back to {{name}}",
+      "removeFailed": "{{name}} was not removed. Try again."
     }
   }
 }

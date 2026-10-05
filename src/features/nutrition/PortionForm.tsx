@@ -27,16 +27,25 @@ export function PortionForm({
   quantityG = '',
   mealType: initialMeal = 'breakfast',
   pending,
+  disabled = false,
   failed,
   submitLabel,
+  withMeal = true,
+  failedMessage,
   onSubmit,
 }: {
   food: { name: string; brand: string | null; nutrients: FoodNutrients; servingSizeG?: number | null; servingLabel?: string | null }
   quantityG?: string
   mealType?: MealType
   pending: boolean
+  /** Off while something else on the screen is writing; not busy itself. */
+  disabled?: boolean
   failed: boolean
   submitLabel: string
+  /** Off for a recipe ingredient, which belongs to a recipe and not to a meal. */
+  withMeal?: boolean
+  /** What a failed save says, when it is not a portion of the day. */
+  failedMessage?: string
   onSubmit: (portion: { quantityG: number; mealType: MealType }) => void
 }) {
   const { t, i18n } = useTranslation()
@@ -83,43 +92,76 @@ export function PortionForm({
           required
         />
 
-        {/* Four options is the ceiling for a segmented control (§10.7), and
-            there are exactly four meals. */}
-        <div className="flex flex-col items-start gap-2">
-          <p className="font-mono text-2xs text-ink-faint">{t('pages.food.portion.meal')}</p>
-          <SegmentedControl<MealType>
-            label={t('pages.food.portion.meal')}
-            value={mealType}
-            onChange={setMealType}
-            segments={MEAL_TYPES.map((value) => ({ value, label: t(`pages.food.meals.${value}`) }))}
-          />
-        </div>
+        {withMeal ? <MealPicker value={mealType} onChange={setMealType} /> : null}
 
-        <p className="font-mono text-2xs text-ink-faint">
-          {/* A no-break space holds the line's height, so the form does not
-              jump when the first valid quantity arrives. */}
-          {preview === null ? (
-            '\u00a0'
-          ) : (
-            <>
-              <span className="text-ink">{formatNumber(preview.kcal ?? 0, locale, 0)}</span> kcal ·{' '}
-              {formatNumber(preview.protein ?? 0, locale, 1)} g {t('pages.food.nutrients.protein')} ·{' '}
-              {formatNumber(preview.fat ?? 0, locale, 1)} g {t('pages.food.nutrients.fat')} ·{' '}
-              {formatNumber(preview.carbs ?? 0, locale, 1)} g {t('pages.food.nutrients.carbs')}
-            </>
-          )}
-        </p>
+        <MacroLine
+          values={
+            preview && {
+              kcal: preview.kcal ?? 0,
+              protein: preview.protein ?? 0,
+              fat: preview.fat ?? 0,
+              carbs: preview.carbs ?? 0,
+            }
+          }
+        />
 
         {failed ? (
           <p role="alert" className="text-sm text-danger">
-            {t('pages.food.portion.saveFailed')}
+            {failedMessage ?? t('pages.food.portion.saveFailed')}
           </p>
         ) : null}
 
-        <Button type="submit" variant="primary" pending={pending}>
+        <Button type="submit" variant="primary" pending={pending} disabled={disabled}>
           {submitLabel}
         </Button>
       </Panel>
     </form>
+  )
+}
+
+/** Which meal, as the four-way control every portion form uses. */
+export function MealPicker({ value, onChange }: { value: MealType; onChange: (meal: MealType) => void }) {
+  const { t } = useTranslation()
+  // Four options is the ceiling for a segmented control (§10.7), and there are
+  // exactly four meals.
+  return (
+    <div className="flex flex-col items-start gap-2">
+      <p className="font-mono text-2xs text-ink-faint">{t('pages.food.portion.meal')}</p>
+      <SegmentedControl<MealType>
+        label={t('pages.food.portion.meal')}
+        value={value}
+        onChange={onChange}
+        segments={MEAL_TYPES.map((meal) => ({ value: meal, label: t(`pages.food.meals.${meal}`) }))}
+      />
+    </div>
+  )
+}
+
+/**
+ * Energy and the three macros of a portion, as it is being typed. A no-break
+ * space before every unit keeps a number and its unit on one line, and an
+ * empty line holds its height so the form does not jump on the first value.
+ */
+export function MacroLine({
+  values,
+}: {
+  values: { kcal: number; protein: number; fat: number; carbs: number } | null
+}) {
+  const { t, i18n } = useTranslation()
+  const locale = i18n.language
+  const g = (n: number, key: 'protein' | 'fat' | 'carbs') =>
+    `${formatNumber(n, locale, 1)}\u00a0g\u00a0${t(`pages.food.nutrients.${key}`)}`
+  return (
+    <p className="font-mono text-2xs text-ink-faint">
+      {values === null ? (
+        '\u00a0'
+      ) : (
+        <>
+          <span className="text-ink">{formatNumber(values.kcal, locale, 0)}</span>
+          {'\u00a0kcal · '}
+          {g(values.protein, 'protein')} · {g(values.fat, 'fat')} · {g(values.carbs, 'carbs')}
+        </>
+      )}
+    </p>
   )
 }

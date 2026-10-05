@@ -28,6 +28,7 @@ import { useFoodLog, type LoggedFood } from '@/features/nutrition/useFoodLog'
 import { goalOn } from '@/lib/goals'
 import { addDays, todayKey } from '@/lib/date'
 import { formatNumber } from '@/lib/format'
+import { formatRecipePortion } from '@/lib/recipe'
 import {
   isComplete,
   LABEL_ORDER,
@@ -52,7 +53,7 @@ export default function FoodPage() {
 
   const today = todayKey()
   const date = params.get('date') ?? today
-  const { entries, status, remove, restore } = useFoodLog(date)
+  const { entries, status, remove, restore, removeGroup, restoreGroup } = useFoodLog(date)
   const { days: loggedDays, totals: history } = useFoodHistory(today)
   const streak = dailyStreak(loggedDays, today)
   const [openRow, setOpenRow] = useState<string | null>(null)
@@ -91,6 +92,21 @@ export default function FoodPage() {
         onClick: () => {
           void restore(entry).then((ok) => {
             if (!ok) toast(t('pages.food.undoFailed'))
+          })
+        },
+      },
+    })
+  }
+
+  async function onRemoveGroup(rows: LoggedFood[]) {
+    const group = rows[0]?.group
+    if (!group || !(await removeGroup(group.id))) return
+    toast(t('pages.recipes.lineRemoved', { name: group.name }), {
+      action: {
+        label: t('common.undo'),
+        onClick: () => {
+          void restoreGroup(rows).then((ok) => {
+            if (!ok) toast(t('pages.recipes.undoFailed', { name: group.name }))
           })
         },
       },
@@ -282,6 +298,7 @@ export default function FoodPage() {
               openRow={openRow}
               onOpenRow={setOpenRow}
               onRemove={onRemove}
+              onRemoveGroup={onRemoveGroup}
             />
           ))
         )}
@@ -314,6 +331,7 @@ function Meal({
   openRow,
   onOpenRow,
   onRemove,
+  onRemoveGroup,
 }: {
   meal: MealType
   date: string
@@ -322,11 +340,38 @@ function Meal({
   openRow: string | null
   onOpenRow: (id: string | null) => void
   onRemove: (entry: LoggedFood) => void
+  onRemoveGroup: (rows: LoggedFood[]) => void
 }) {
   const { t } = useTranslation()
   const kcal = sumPortions(
     entries.map((entry) => ({ nutrients: entry.food.nutrients, quantityG: entry.quantityG })),
   ).kcal.value
+
+  // A logged recipe is one line, in the place its first ingredient was logged.
+  const lines: ({ kind: 'entry'; entry: LoggedFood } | { kind: 'recipe'; id: string; rows: LoggedFood[] })[] = []
+  for (const entry of entries) {
+    if (!entry.group) {
+      lines.push({ kind: 'entry', entry })
+      continue
+    }
+    const line = lines.find((item) => item.kind === 'recipe' && item.id === entry.group?.id)
+    if (line && line.kind === 'recipe') line.rows.push(entry)
+    else lines.push({ kind: 'recipe', id: entry.group.id, rows: [entry] })
+  }
+
+  const remove = (key: string, run: () => void) => (
+    <button
+      type="button"
+      onClick={() => {
+        onOpenRow(null)
+        run()
+      }}
+      className="flex w-full items-center justify-center bg-danger px-3 text-sm font-medium text-bg"
+      key={key}
+    >
+      {t('pages.food.log.remove')}
+    </button>
+  )
 
   return (
     <section className="mb-5 last:mb-0">
@@ -335,47 +380,79 @@ function Meal({
         hint={`${formatNumber(kcal, locale, 0)} kcal`}
       />
       <Rows>
-        {entries.map((entry) => (
-          // Tapping opens the portion; removing it costs a deliberate sideways
-          // drag (§10.1). The screen the tap opens carries a delete button of
-          // its own, so the gesture is never the only way to reach it.
-          <SwipeRow
-            key={entry.id}
-            open={openRow === entry.id}
-            onOpenChange={(open) => onOpenRow(open ? entry.id : null)}
-            actions={
-              <button
-                type="button"
-                onClick={() => {
-                  onOpenRow(null)
-                  onRemove(entry)
-                }}
-                className="flex w-full items-center justify-center bg-danger px-3 text-sm font-medium text-bg"
+        {lines.map((line) => {
+          if (line.kind === 'entry') {
+            const { entry } = line
+            return (
+              // Tapping opens the portion; removing it costs a deliberate
+              // sideways drag (§10.1). The screen the tap opens carries a
+              // delete button of its own, so the gesture is never the only way.
+              <SwipeRow
+                key={entry.id}
+                open={openRow === entry.id}
+                onOpenChange={(open) => onOpenRow(open ? entry.id : null)}
+                actions={remove(entry.id, () => onRemove(entry))}
               >
-                {t('pages.food.log.remove')}
-              </button>
-            }
-          >
-            <RowBody to={`/food/entry/${entry.id}?date=${date}`}>
-              <span className="min-w-0 flex-1">
-                <span className="block truncate">{entry.food.name}</span>
-                {entry.food.brand ? (
-                  <span className="block truncate text-sm text-ink-muted">{entry.food.brand}</span>
-                ) : null}
-              </span>
-              <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
-                {formatNumber(entry.quantityG, locale, 0)} g
-              </span>
-              <span className="shrink-0">
-                <Value
-                  n={formatNumber((entry.food.nutrients.kcal * entry.quantityG) / 100, locale, 0)}
-                  unit="kcal"
-                />
-              </span>
-            </RowBody>
-          </SwipeRow>
-        ))}
+                <EntryBody entry={entry} date={date} locale={locale} />
+              </SwipeRow>
+            )
+          }
+
+          const group = line.rows[0].group!
+          const lineKcal = sumPortions(
+            line.rows.map((row) => ({ nutrients: row.food.nutrients, quantityG: row.quantityG })),
+          ).kcal.value
+          return (
+            // One line for the meal it stands for. Tapping opens its screen,
+            // where the portion, the meal and each ingredient change; the swipe
+            // removes the whole of it, and that screen has a button for it too.
+            <SwipeRow
+              key={line.id}
+              open={openRow === line.id}
+              onOpenChange={(next) => onOpenRow(next ? line.id : null)}
+              actions={remove(line.id, () => onRemoveGroup(line.rows))}
+            >
+              <RowBody to={`/food/meal/${line.id}?date=${date}`}>
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate">{group.name}</span>
+                  <span className="block truncate text-sm text-ink-muted">
+                    {line.rows.map((row) => row.food.name).join(' · ')}
+                  </span>
+                </span>
+                <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
+                  {formatRecipePortion(group.portion, locale)}
+                </span>
+                <span className="shrink-0">
+                  <Value n={formatNumber(lineKcal, locale, 0)} unit="kcal" />
+                </span>
+              </RowBody>
+            </SwipeRow>
+          )
+        })}
       </Rows>
     </section>
+  )
+}
+
+/** A logged food as a row: what, how much, how many kcal. */
+function EntryBody({ entry, date, locale }: { entry: LoggedFood; date: string; locale: string }) {
+  return (
+    <RowBody to={`/food/entry/${entry.id}?date=${date}`}>
+      <span className="min-w-0 flex-1">
+        <span className="block truncate">{entry.food.name}</span>
+        {entry.food.brand ? (
+          <span className="block truncate text-sm text-ink-muted">{entry.food.brand}</span>
+        ) : null}
+      </span>
+      <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
+        {formatNumber(entry.quantityG, locale, 0)} g
+      </span>
+      <span className="shrink-0">
+        <Value
+          n={formatNumber((entry.food.nutrients.kcal * entry.quantityG) / 100, locale, 0)}
+          unit="kcal"
+        />
+      </span>
+    </RowBody>
   )
 }

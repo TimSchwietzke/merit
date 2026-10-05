@@ -134,16 +134,24 @@ test('the week strip changes the day below it without leaving the screen', async
   // screen: the card is the way into the session and says so in its href.
   const card = page.locator('a[href*="/training/session"]')
 
-  await days.nth(0).click()
+  // The fixture logs sets today, so today's planned session is running and
+  // its card is no longer a way in. Each routine is planned twice a week; the
+  // test looks at whichever of its two days is not today, so it passes on a
+  // Monday or a Tuesday as well.
+  const today = (new Date().getDay() + 6) % 7
+  const notToday = (a: number, b: number) => (today === a ? b : a)
+
+  await days.nth(notToday(0, 3)).click()
   await expect(card).toHaveText(/Oberkörper 1/)
 
-  // Wednesday has nothing on it, and saying so is a change in place: the strip
-  // exists so that looking at another day is not a navigation.
-  await days.nth(2).click()
+  // Wednesday and Saturday have nothing on them (unless it is today, which has
+  // the fixture's sets), and saying so is a change in place: the strip exists
+  // so that looking at another day is not a navigation.
+  await days.nth(notToday(2, 5)).click()
   await expect(page.getByText('nichts geplant')).toBeVisible()
   expect(new URL(page.url()).pathname).toBe('/training')
 
-  await days.nth(1).click()
+  await days.nth(notToday(1, 4)).click()
   await expect(card).toHaveText(/Unterkörper/)
 })
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
@@ -24,14 +25,20 @@ export default function LoggedPortionPage() {
   const [params] = useSearchParams()
   const date = params.get('date') ?? todayKey()
 
-  const { entries, status, update, remove } = useFoodLog(date)
+  const { entries, status, update, remove, restore } = useFoodLog(date)
   const [pending, setPending] = useState(false)
   const [failed, setFailed] = useState(false)
 
-  const entry: LoggedFood | undefined = entries.find((row) => row.id === id)
+  // While its own delete is in flight the row has already left the day's
+  // rows (optimistically), so the screen keeps showing what was tapped.
+  const [deleting, setDeleting] = useState<LoggedFood | null>(null)
+  const [deleteFailed, setDeleteFailed] = useState(false)
+  const entry: LoggedFood | undefined = entries.find((row) => row.id === id) ?? deleting ?? undefined
+  // An ingredient was opened from its recipe line, and goes back there.
+  const back = entry?.group ? `/food/meal/${entry.group.id}?date=${date}` : `/food?date=${date}`
 
-  // The row can be gone, deleted here, or on another device. Nothing to edit
-  // then, and no reason to sit on a dead screen.
+  // The row can be gone, deleted on another device. Nothing to edit then, and
+  // no reason to sit on a dead screen.
   useEffect(() => {
     if (status === 'ready' && !entry) navigate(`/food?date=${date}`, { replace: true })
   }, [status, entry, navigate, date])
@@ -50,18 +57,33 @@ export default function LoggedPortionPage() {
     setFailed(false)
     const saved = await update(id, { quantityG, mealType })
     setPending(false)
-    if (saved) navigate(`/food?date=${date}`)
+    if (saved) navigate(back)
     else setFailed(true)
   }
 
+  // The delete first, then back: the screen it returns to then reads the day
+  // without the row, rather than racing the delete and showing it for a beat.
   async function onDelete() {
-    if (!id) return
-    setPending(true)
-    setFailed(false)
-    const removed = await remove(id)
-    setPending(false)
-    if (removed) navigate(`/food?date=${date}`)
-    else setFailed(true)
+    if (!id || !entry) return
+    const removed = entry
+    setDeleting(removed)
+    setDeleteFailed(false)
+    if (!(await remove(id))) {
+      setDeleting(null)
+      setDeleteFailed(true)
+      return
+    }
+    navigate(back)
+    // The undo the button's comment promises (§14), as the day's swipe has.
+    toast(t('pages.food.deleted', { name: removed.food.name }), {
+      action: {
+        label: t('common.undo'),
+        onClick: () =>
+          void restore(removed).then((ok) => {
+            if (!ok) toast(t('pages.food.undoFailed'))
+          }),
+      },
+    })
   }
 
   return (
@@ -72,7 +94,11 @@ export default function LoggedPortionPage() {
         food={entry.food}
         quantityG={formatForInput(entry.quantityG, i18n.language, QUANTITY_LIMITS.decimals)}
         mealType={entry.mealType}
+        // An ingredient stays with its recipe line, so only its amount changes.
+        withMeal={!entry.group}
+        // Nothing saves into a row that is being deleted.
         pending={pending}
+        disabled={deleting !== null}
         failed={failed}
         submitLabel={pending ? t('pages.food.entry.saving') : t('pages.food.entry.save')}
         onSubmit={save}
@@ -83,17 +109,23 @@ export default function LoggedPortionPage() {
       <Button
         variant="quiet"
         className="mt-4 text-danger hover:border-danger"
-        pending={pending}
+        pending={deleting !== null}
+        disabled={pending}
         onClick={onDelete}
       >
         {t('pages.food.entry.delete')}
       </Button>
+      {deleteFailed ? (
+        <p role="alert" className="mt-2 text-sm text-danger">
+          {t('pages.food.entry.deleteFailed')}
+        </p>
+      ) : null}
 
       <Link
-        to={`/food?date=${date}`}
+        to={back}
         className="mt-8 flex min-h-11 items-center font-mono text-2xs text-accent underline decoration-1 underline-offset-2"
       >
-        ← {t('pages.food.add.back')}
+        ← {entry.group ? t('pages.recipes.backToLine', { name: entry.group.name }) : t('pages.food.add.back')}
       </Link>
     </>
   )

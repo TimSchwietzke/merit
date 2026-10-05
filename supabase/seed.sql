@@ -115,6 +115,19 @@ begin
     where plan.variant = v and (d > 0 or meal in ('breakfast', 'lunch'));
   end loop;
 
+  -- Two recipes: a shake counted in servings, a bowl the same.
+  insert into public.recipes (id, user_id, name) values
+    ('c0000000-0000-0000-0000-000000000001', me, 'Proteinshake'),
+    ('c0000000-0000-0000-0000-000000000002', me, 'Skyr-Bowl');
+  -- Distinct created_at: it is the order ingredients are listed in, and rows
+  -- from one statement would all share now().
+  insert into public.recipe_items (recipe_id, food_id, quantity_g, created_at) values
+    ('c0000000-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000005', 300, now() - interval '5 s'),
+    ('c0000000-0000-0000-0000-000000000001', 'f0000000-0000-0000-0000-000000000006', 30, now() - interval '4 s'),
+    ('c0000000-0000-0000-0000-000000000002', 'f0000000-0000-0000-0000-000000000001', 250, now() - interval '3 s'),
+    ('c0000000-0000-0000-0000-000000000002', 'f0000000-0000-0000-0000-000000000003', 100, now() - interval '2 s'),
+    ('c0000000-0000-0000-0000-000000000002', 'f0000000-0000-0000-0000-000000000002', 40, now() - interval '1 s');
+
   -- Two routines on a weekly plan: upper Monday and Thursday, lower Tuesday
   -- and Friday.
   insert into public.routines (id, user_id, name, position, created_at) values

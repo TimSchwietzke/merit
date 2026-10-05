@@ -38,13 +38,13 @@ export type Database = {
                   ]
                 },"food_logs": {
                   Row: {
-                    "created_at": string,"date": string,"food_id": string,"id": string,"meal_type": string,"quantity_g": number,"updated_at": string,"user_id": string
+                    "created_at": string,"date": string,"food_id": string,"group_id": string | null,"id": string,"meal_type": string,"quantity_g": number,"recipe_g": number | null,"updated_at": string,"user_id": string
                   }
                   Insert: {
-                    "created_at"?: string,"date": string,"food_id": string,"id"?: string,"meal_type": string,"quantity_g": number,"updated_at"?: string,"user_id": string
+                    "created_at"?: string,"date": string,"food_id": string,"group_id"?: string | null,"id"?: string,"meal_type": string,"quantity_g": number,"recipe_g"?: number | null,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "created_at"?: string,"date"?: string,"food_id"?: string,"id"?: string,"meal_type"?: string,"quantity_g"?: number,"updated_at"?: string,"user_id"?: string
+                    "created_at"?: string,"date"?: string,"food_id"?: string,"group_id"?: string | null,"id"?: string,"meal_type"?: string,"quantity_g"?: number,"recipe_g"?: number | null,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {
@@ -53,6 +53,12 @@ export type Database = {
 isOneToOne: false
       referencedRelation: "foods"
       referencedColumns: ["id"]
+    },{
+      foreignKeyName: "food_logs_group_fkey"
+      columns: ["group_id","user_id"]
+isOneToOne: false
+      referencedRelation: "logged_recipes"
+      referencedColumns: ["id","user_id"]
     }
                   ]
                 },"foods": {
@@ -67,6 +73,25 @@ isOneToOne: false
                   }
                   Relationships: [
                     
+                  ]
+                },"logged_recipes": {
+                  Row: {
+                    "created_at": string,"date": string,"factor": number,"id": string,"meal_type": string,"name": string,"parts_eaten": number | null,"parts_total": number | null,"recipe_id": string | null,"user_id": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"date": string,"factor": number,"id"?: string,"meal_type": string,"name": string,"parts_eaten"?: number | null,"parts_total"?: number | null,"recipe_id"?: string | null,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"date"?: string,"factor"?: number,"id"?: string,"meal_type"?: string,"name"?: string,"parts_eaten"?: number | null,"parts_total"?: number | null,"recipe_id"?: string | null,"user_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "logged_recipes_recipe_id_fkey"
+      columns: ["recipe_id"]
+isOneToOne: false
+      referencedRelation: "recipes"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"nutrition_goals": {
                   Row: {
@@ -90,6 +115,44 @@ isOneToOne: false
                   }
                   Update: {
                     "activity_level"?: string | null,"birth_date"?: string | null,"consent_at"?: string | null,"consent_version"?: string | null,"created_at"?: string,"display_name"?: string | null,"goal"?: string | null,"height_cm"?: number | null,"locale"?: string,"onboarded_at"?: string | null,"sex"?: string | null,"theme"?: string,"updated_at"?: string,"user_id"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"recipe_items": {
+                  Row: {
+                    "created_at": string,"food_id": string,"id": string,"quantity_g": number,"recipe_id": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"food_id": string,"id"?: string,"quantity_g": number,"recipe_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"food_id"?: string,"id"?: string,"quantity_g"?: number,"recipe_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "recipe_items_food_id_fkey"
+      columns: ["food_id"]
+isOneToOne: false
+      referencedRelation: "foods"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "recipe_items_recipe_id_fkey"
+      columns: ["recipe_id"]
+isOneToOne: false
+      referencedRelation: "recipes"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"recipes": {
+                  Row: {
+                    "created_at": string,"id": string,"name": string,"updated_at": string,"user_id": string
+                  }
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"name": string,"updated_at"?: string,"user_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"name"?: string,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     
@@ -239,8 +302,14 @@ isOneToOne: false
 "delete_own_account":
 { Args: Record<PropertyKey, never>; Returns: undefined
                            },
+"log_recipe":
+{ Args: { "day": string,"eaten"?: number,"factor": number,"meal": string,"recipe": string,"total"?: number }; Returns: string
+                           },
 "set_routine_exercises":
 { Args: { "items": Json,"routine": string }; Returns: undefined
+                           },
+"update_logged_recipe":
+{ Args: { "eaten"?: number,"factor": number,"line": string,"meal": string,"total"?: number }; Returns: undefined
                            }
           }
           Enums: {

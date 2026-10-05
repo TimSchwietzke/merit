@@ -10,6 +10,7 @@
     "db:start": "npx --yes supabase start && npx --yes supabase status -o env --override-name api.url=VITE_SUPABASE_URL --override-name auth.anon_key=VITE_SUPABASE_ANON_KEY | grep ^VITE_ > .env.localdb",
     "db:reset": "npx --yes supabase db reset --local",
     "db:stop": "npx --yes supabase stop",
+    "db:test": "npx --yes supabase test db",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "oxlint",

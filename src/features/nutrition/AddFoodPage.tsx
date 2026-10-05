@@ -1,7 +1,8 @@
 import { ScanBarcode } from 'lucide-react'
-import { lazy, Suspense, useState, type FormEvent } from 'react'
+import { lazy, Suspense, useRef, useState, type FormEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import { PageHeader } from '@/components/PageHeader'
 import { Row, Rows } from '@/components/Rows'
@@ -16,6 +17,11 @@ import { cacheOffFood } from '@/features/nutrition/resolve-barcode'
 import { resolveUsdaFood } from '@/features/nutrition/resolve-usda'
 import { normaliseBarcode } from '@/lib/barcode'
 import { PortionForm } from '@/features/nutrition/PortionForm'
+import { RecipePortionForm } from '@/features/nutrition/RecipePortionForm'
+import { useRecipes, wholeOf, type Recipe } from '@/features/nutrition/useRecipes'
+import { Panel } from '@/components/Panel'
+import type { RecipePortion } from '@/lib/recipe'
+import { searchWords } from '@/lib/search-rank'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
 import { useFoodSearch } from '@/features/nutrition/useFoodSearch'
 import {
@@ -66,6 +72,10 @@ export default function AddFoodPage() {
   const [params] = useSearchParams()
   const date = params.get('date') ?? todayKey()
   const meal = (params.get('meal') as MealType | null) ?? undefined
+  // Set when the food is an ingredient for a recipe rather than a portion for
+  // the day: same search, and the amount goes into the recipe instead.
+  const forRecipe = params.get('recipe')
+  const backTo = forRecipe ? `/food/recipes/${forRecipe}?date=${date}` : `/food?date=${date}`
 
   const [query, setQuery] = useState('')
   // What was typed, and what was asked. A search happens because somebody
@@ -88,19 +98,45 @@ export default function AddFoodPage() {
   }
 
   const [picked, setPicked] = useState<CatalogueFood | null>(null)
+  const [pickedRecipe, setPickedRecipe] = useState<Recipe | null>(null)
+  const { recipes, addItem, create: createRecipe } = useRecipes()
   const [creating, setCreating] = useState(false)
   const [scanning, setScanning] = useState(params.get('scan') === '1')
   const [pending, setPending] = useState(false)
   const [failed, setFailed] = useState(false)
   const [scanResult, setScanResult] = useState<'missing' | 'offline' | null>(null)
   const [scannedBarcode, setScannedBarcode] = useState<string | null>(null)
-  const { add } = useFoodLog(date)
+  const { add, logRecipe } = useFoodLog(date)
 
   async function logPortion({ quantityG, mealType }: { quantityG: number; mealType: MealType }) {
     if (!picked) return
     setPending(true)
     setFailed(false)
-    const saved = await add({ foodId: picked.id, mealType, quantityG })
+    const saved = forRecipe
+      ? await addItem(forRecipe, picked.id, quantityG)
+      : await add({ foodId: picked.id, mealType, quantityG })
+    setPending(false)
+    if (saved) navigate(backTo)
+    else setFailed(true)
+  }
+
+  // Straight into the editor, as the floating add on the recipe list does.
+  // Once: a second tap during the insert would make a second recipe.
+  const creatingRecipe = useRef(false)
+  async function newRecipe() {
+    if (creatingRecipe.current) return
+    creatingRecipe.current = true
+    const id = await createRecipe(t('pages.recipes.defaultName'))
+    creatingRecipe.current = false
+    if (id) navigate(`/food/recipes/${id}?new=1&date=${date}`)
+    else toast(t('pages.recipes.createFailed'))
+  }
+
+  async function logPickedRecipe({ mealType, portion }: { mealType: MealType; portion: RecipePortion }) {
+    if (!pickedRecipe) return
+    setPending(true)
+    setFailed(false)
+    const saved = await logRecipe(pickedRecipe.id, mealType, portion)
     setPending(false)
     if (saved) navigate(`/food?date=${date}`)
     else setFailed(true)
@@ -190,16 +226,46 @@ export default function AddFoodPage() {
     setCreating(false)
   }
 
+  const title = t(forRecipe ? 'pages.recipes.addIngredient' : 'pages.food.add.title')
+
+  if (pickedRecipe) {
+    return (
+      <>
+        <PageHeader title={title} />
+        <Panel className="flex flex-col gap-5 p-4">
+          <p className="text-ink">{pickedRecipe.name}</p>
+          <RecipePortionForm
+            whole={wholeOf(pickedRecipe.totals)}
+            mealType={meal}
+            pending={pending}
+            failed={failed}
+            submitLabel={t(pending ? 'pages.food.portion.saving' : 'pages.food.portion.save')}
+            onSubmit={logPickedRecipe}
+          />
+        </Panel>
+        <Button variant="bare" className="mt-4" onClick={() => setPickedRecipe(null)}>
+          ← {t('pages.food.add.backToSearch')}
+        </Button>
+      </>
+    )
+  }
+
   if (picked) {
     return (
       <>
-        <PageHeader title={t('pages.food.add.title')} />
+        <PageHeader title={title} />
         <PortionForm
           food={picked}
           mealType={meal}
           pending={pending}
           failed={failed}
-          submitLabel={pending ? t('pages.food.portion.saving') : t('pages.food.portion.save')}
+          withMeal={!forRecipe}
+          failedMessage={forRecipe ? t('pages.recipes.addFailed') : undefined}
+          submitLabel={
+            forRecipe
+              ? t(pending ? 'pages.recipes.adding' : 'pages.recipes.addToRecipe')
+              : t(pending ? 'pages.food.portion.saving' : 'pages.food.portion.save')
+          }
           onSubmit={logPortion}
         />
         <Button variant="bare" className="mt-4" onClick={() => setPicked(null)}>
@@ -262,6 +328,11 @@ export default function AddFoodPage() {
   const nothing =
     asked && !searching && results.length === 0 && usda.length === 0 && off.length === 0
 
+  const words = searchWords(term)
+  const shownRecipes = asked
+    ? recipes.filter((recipe) => words.every((word) => recipe.name.toLowerCase().includes(word)))
+    : recipes
+
   function search(event: FormEvent) {
     event.preventDefault()
     setTerm(query.trim())
@@ -272,7 +343,7 @@ export default function AddFoodPage() {
       {/* No lead. The screen is a search field with its own label, and a
           paragraph naming the databases behind it is a paragraph nobody reads
           twice (§14, and the wording pass on docs/TODO.md). */}
-      <PageHeader title={t('pages.food.add.title')} />
+      <PageHeader title={title} />
 
       {/* A form, so the keyboard's own go key does what the button does. */}
       <form onSubmit={search} className="flex flex-col gap-2">
@@ -319,6 +390,40 @@ export default function AddFoodPage() {
             After a search it goes: what was asked for is what the screen is
             about, and every one of these rows is in the catalogue anyway, so
             the results hold whichever of them matched. */}
+        {/* Your own recipes first: logging one is the whole meal in one tap.
+            Not offered while adding an ingredient, a recipe is not made of
+            recipes. After a search, only the ones whose name matches. */}
+        {!forRecipe && (shownRecipes.length > 0 || !asked) ? (
+          <div className="mb-4">
+            {shownRecipes.length > 0 ? (
+              <Collapsible
+                label={t('pages.recipes.label')}
+                count={shownRecipes.length}
+                open={!folded.has('recipes')}
+                onOpenChange={(open) => fold('recipes', open)}
+              >
+                <Rows>
+                  {shownRecipes.map((recipe) => (
+                    <Row key={recipe.id} onClick={() => setPickedRecipe(recipe)}>
+                      <span className="min-w-0 flex-1 truncate">{recipe.name}</span>
+                      <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
+                        {formatNumber(recipe.totals.kcal.value, locale, 0)} kcal
+                      </span>
+                    </Row>
+                  ))}
+                  {!asked ? (
+                    <ManageRecipes label={t('pages.recipes.manage')} to={`/food/recipes?date=${date}`} />
+                  ) : null}
+                </Rows>
+              </Collapsible>
+            ) : (
+              <Rows>
+                <ManageRecipes label={t('pages.recipes.create')} onClick={() => void newRecipe()} />
+              </Rows>
+            )}
+          </div>
+        ) : null}
+
         {!asked && recent.length > 0 ? (
           <Collapsible
             label={t('pages.food.add.recent')}
@@ -455,10 +560,10 @@ export default function AddFoodPage() {
       <Attribution />
 
       <Link
-        to={`/food?date=${date}`}
+        to={backTo}
         className="mt-8 inline-flex min-h-11 items-center font-mono text-2xs text-accent underline decoration-1 underline-offset-2"
       >
-        ← {t('pages.food.add.back')}
+        ← {t(forRecipe ? 'pages.recipes.backToRecipe' : 'pages.food.add.back')}
       </Link>
     </>
   )
@@ -484,6 +589,18 @@ function Attribution() {
         {ATTRIBUTION_URL.replace('https://', '')}
       </a>
     </p>
+  )
+}
+
+/** The way from add-food to the recipe list, as the last row of the group. */
+function ManageRecipes({ label, to, onClick }: { label: string; to?: string; onClick?: () => void }) {
+  return (
+    <Row to={to} onClick={onClick}>
+      <span className="min-w-0 flex-1 text-ink-muted">{label}</span>
+      <span aria-hidden className="shrink-0 font-mono text-2xs text-ink-faint">
+        →
+      </span>
+    </Row>
   )
 }
 
