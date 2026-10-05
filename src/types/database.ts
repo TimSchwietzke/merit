@@ -38,13 +38,13 @@ export type Database = {
                   ]
                 },"food_logs": {
                   Row: {
-                    "created_at": string,"date": string,"food_id": string,"group_id": string | null,"id": string,"meal_type": string,"quantity_g": number,"updated_at": string,"user_id": string
+                    "created_at": string,"date": string,"food_id": string,"group_id": string | null,"id": string,"meal_type": string,"quantity_g": number,"recipe_g": number | null,"updated_at": string,"user_id": string
                   }
                   Insert: {
-                    "created_at"?: string,"date": string,"food_id": string,"group_id"?: string | null,"id"?: string,"meal_type": string,"quantity_g": number,"updated_at"?: string,"user_id": string
+                    "created_at"?: string,"date": string,"food_id": string,"group_id"?: string | null,"id"?: string,"meal_type": string,"quantity_g": number,"recipe_g"?: number | null,"updated_at"?: string,"user_id": string
                   }
                   Update: {
-                    "created_at"?: string,"date"?: string,"food_id"?: string,"group_id"?: string | null,"id"?: string,"meal_type"?: string,"quantity_g"?: number,"updated_at"?: string,"user_id"?: string
+                    "created_at"?: string,"date"?: string,"food_id"?: string,"group_id"?: string | null,"id"?: string,"meal_type"?: string,"quantity_g"?: number,"recipe_g"?: number | null,"updated_at"?: string,"user_id"?: string
                   }
                   Relationships: [
                     {

@@ -2,7 +2,7 @@
 -- keeps one user's recipes away from another's. Runs in a transaction and
 -- rolls back, so it leaves the local database as it found it.
 begin;
-select plan(10);
+select plan(12);
 
 -- Two users. The trigger gives each a profile.
 insert into auth.users (id, aud, role, email) values
@@ -41,6 +41,16 @@ select is(
   (select count(*) from public.food_logs where group_id = :'line' and meal_type = 'lunch')::int, 2,
   'the rows move to the line''s new meal');
 select is((select meal_type from public.logged_recipes where id = :'line'), 'lunch', 'and so does the line');
+
+-- There and back does not drift: a third, then the whole again.
+select public.update_logged_recipe(:'line', 1.0 / 3, 'lunch');
+select public.update_logged_recipe(:'line', 1, 'lunch');
+select is(
+  (select quantity_g from public.food_logs where group_id = :'line' and food_id = '7e570000-0000-0000-0000-00000000f001'),
+  500::numeric, 'a third and back is 500 g again, not 499.9');
+select is(
+  (select quantity_g from public.food_logs where group_id = :'line' and food_id = '7e570000-0000-0000-0000-00000000f002'),
+  0.4::numeric, 'a pinch held at 0.1 g by an eighth comes back as itself');
 
 -- As B.
 set local request.jwt.claims = '{"sub": "7e570000-0000-0000-0000-0000000000b2", "role": "authenticated"}';

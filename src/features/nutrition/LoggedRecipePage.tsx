@@ -7,6 +7,7 @@ import { PageHeader } from '@/components/PageHeader'
 import { Panel } from '@/components/Panel'
 import { Row, Rows } from '@/components/Rows'
 import { SectionHead } from '@/components/SectionHead'
+import { Value } from '@/components/Value'
 import { Button } from '@/components/ui/button'
 import { RecipePortionForm } from '@/features/nutrition/RecipePortionForm'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
@@ -31,6 +32,8 @@ export default function LoggedRecipePage() {
   const { entries, status, updateGroup, removeGroup, restoreGroup } = useFoodLog(date)
   const [pending, setPending] = useState(false)
   const [failed, setFailed] = useState(false)
+  const [removing, setRemoving] = useState(false)
+  const [removeFailed, setRemoveFailed] = useState(false)
 
   const rows = entries.filter((entry) => entry.group?.id === id)
   const group = rows[0]?.group
@@ -48,10 +51,16 @@ export default function LoggedRecipePage() {
     )
   }
 
-  const eaten = sumPortions(rows.map((row) => ({ nutrients: row.food.nutrients, quantityG: row.quantityG })))
-  // The form previews shares of the whole, so what was eaten is scaled back up.
-  const whole = wholeOf(eaten)
-  for (const key of ['kcal', 'protein', 'fat', 'carbs'] as const) whole[key] /= group.factor
+  // The form previews shares of the whole recipe, from each row's unrounded
+  // amount in it (falling back to the portion scaled up, for a row without one).
+  const whole = wholeOf(
+    sumPortions(
+      rows.map((row) => ({
+        nutrients: row.food.nutrients,
+        quantityG: row.recipeG ?? row.quantityG / group.factor,
+      })),
+    ),
+  )
 
   async function save({ mealType, share }: { mealType: Parameters<typeof updateGroup>[2]; share: number }) {
     if (!group) return
@@ -64,7 +73,12 @@ export default function LoggedRecipePage() {
   }
 
   async function onRemove() {
-    if (!group || !(await removeGroup(group.id))) return setFailed(true)
+    if (!group || removing) return
+    setRemoving(true)
+    setRemoveFailed(false)
+    const removed = await removeGroup(group.id)
+    setRemoving(false)
+    if (!removed) return setRemoveFailed(true)
     navigate(day)
     toast(t('pages.recipes.lineRemoved', { name: group.name }), {
       action: {
@@ -94,10 +108,7 @@ export default function LoggedRecipePage() {
       </Panel>
 
       <section className="mt-8">
-        <SectionHead
-          label={t('pages.recipes.ingredientsLabel')}
-          hint={`${formatNumber(eaten.kcal.value, locale, 0)} kcal`}
-        />
+        <SectionHead label={t('pages.recipes.ingredientsLabel')} />
         <Rows>
           {rows.map((row) => (
             <Row key={row.id} to={`/food/entry/${row.id}?date=${date}`}>
@@ -105,8 +116,8 @@ export default function LoggedRecipePage() {
               <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
                 {formatNumber(row.quantityG, locale, 0)} g
               </span>
-              <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
-                {formatNumber((row.food.nutrients.kcal * row.quantityG) / 100, locale, 0)} kcal
+              <span className="shrink-0">
+                <Value n={formatNumber((row.food.nutrients.kcal * row.quantityG) / 100, locale, 0)} unit="kcal" />
               </span>
             </Row>
           ))}
@@ -114,9 +125,19 @@ export default function LoggedRecipePage() {
       </section>
 
       {/* Undoable, so it does not ask first (§14). */}
-      <Button variant="quiet" className="mt-8 text-danger hover:border-danger" onClick={() => void onRemove()}>
+      <Button
+        variant="quiet"
+        className="mt-8 text-danger hover:border-danger"
+        pending={removing}
+        onClick={() => void onRemove()}
+      >
         {t('pages.food.entry.delete')}
       </Button>
+      {removeFailed ? (
+        <p role="alert" className="mt-2 text-sm text-danger">
+          {t('pages.recipes.removeFailed')}
+        </p>
+      ) : null}
 
       <Link
         to={day}

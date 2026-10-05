@@ -108,6 +108,13 @@ create index logged_recipes_user_date_idx on public.logged_recipes (user_id, dat
 alter table public.logged_recipes add constraint logged_recipes_id_user_key unique (id, user_id);
 
 alter table public.food_logs add column group_id uuid;
+
+-- The ingredient's amount in one whole recipe, unrounded. quantity_g is the
+-- portion, kept to the column's 0.1 g; a new portion is computed from this,
+-- never from the last rounded result, so changing it back and forth does not
+-- drift. Set when a recipe is logged, and when one ingredient is corrected for
+-- the day (its new amount over the line's factor). Null on a plain entry.
+alter table public.food_logs add column recipe_g numeric check (recipe_g > 0);
 alter table public.food_logs
   add constraint food_logs_group_fkey foreign key (group_id, user_id)
   references public.logged_recipes (id, user_id) on delete cascade;
@@ -140,9 +147,9 @@ begin
   -- Rounded to the column's 0.1 g, and never below it: an eighth of a pinch of
   -- salt is still in the pot, and the column refuses zero. A microsecond apart,
   -- so the day lists them in the recipe's order rather than at random.
-  insert into public.food_logs (user_id, date, meal_type, food_id, quantity_g, group_id, created_at)
+  insert into public.food_logs (user_id, date, meal_type, food_id, quantity_g, recipe_g, group_id, created_at)
   select (select auth.uid()), day, meal, item.food_id,
-         greatest(round(item.quantity_g * factor, 1), 0.1), line,
+         greatest(round(item.quantity_g * factor, 1), 0.1), item.quantity_g, line,
          now() + (row_number() over (order by item.created_at)) * interval '1 microsecond'
     from public.recipe_items item
    where item.recipe_id = source.id;
@@ -154,8 +161,8 @@ $$;
 grant execute on function public.log_recipe(uuid, date, text, numeric) to authenticated;
 
 
--- Changing a logged line's portion or meal: every row under it is scaled by
--- the same ratio, so an ingredient corrected for that day stays corrected in
+-- Changing a logged line's portion or meal: every row is recomputed from its
+-- recipe_g, so an ingredient corrected for that day stays corrected in
 -- proportion, and the meal moves with the line. One transaction, as above.
 create function public.update_logged_recipe(line uuid, factor numeric, meal text)
 returns void
@@ -163,18 +170,14 @@ language plpgsql
 security invoker
 set search_path = ''
 as $$
-declare
-  previous numeric;
 begin
-  select l.factor into previous from public.logged_recipes l where l.id = line;
-  if previous is null then
+  update public.logged_recipes l set factor = update_logged_recipe.factor, meal_type = meal where l.id = line;
+  if not found then
     raise exception 'logged recipe not found';
   end if;
 
-  update public.logged_recipes l set factor = update_logged_recipe.factor, meal_type = meal where l.id = line;
-
   update public.food_logs f
-     set quantity_g = least(greatest(round(f.quantity_g * update_logged_recipe.factor / previous, 1), 0.1), 10000),
+     set quantity_g = least(greatest(round(f.recipe_g * update_logged_recipe.factor, 1), 0.1), 10000),
          meal_type = meal
    where f.group_id = line;
 end;

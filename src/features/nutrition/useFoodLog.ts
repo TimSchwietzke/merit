@@ -21,6 +21,8 @@ export interface LoggedFood {
   food: { id: string; name: string; brand: string | null; nutrients: FoodNutrients }
   /** The logged recipe this row is an ingredient of, or null for a plain entry. */
   group: LoggedRecipe | null
+  /** For an ingredient: its amount in one whole recipe, unrounded. */
+  recipeG: number | null
 }
 
 export interface LoggedRecipe {
@@ -33,7 +35,7 @@ export interface LoggedRecipe {
 export interface FoodLog {
   entries: LoggedFood[]
   status: 'loading' | 'ready' | 'error'
-  add: (entry: { foodId: string; mealType: MealType; quantityG: number; groupId?: string }) => Promise<boolean>
+  add: (entry: { foodId: string; mealType: MealType; quantityG: number; groupId?: string; recipeG?: number | null }) => Promise<boolean>
   /** Change a logged portion's quantity or the meal it belongs to. */
   update: (id: string, portion: { mealType: MealType; quantityG: number }) => Promise<boolean>
   remove: (id: string) => Promise<boolean>
@@ -49,7 +51,7 @@ export interface FoodLog {
 }
 
 /** The columns a portion needs, and the shape the maths expects. */
-const SELECT = `id, meal_type, quantity_g,
+const SELECT = `id, meal_type, quantity_g, recipe_g,
   logged_recipes!food_logs_group_fkey ( id, recipe_id, name, factor ),
   foods!inner (
     id, name, brand,
@@ -61,6 +63,7 @@ type Row = {
   id: string
   meal_type: string
   quantity_g: number
+  recipe_g: number | null
   logged_recipes: { id: string; recipe_id: string | null; name: string; factor: number } | null
   foods: {
     id: string
@@ -96,6 +99,7 @@ const toEntry = (row: Row): LoggedFood => ({
       salt: row.foods.salt_100g,
     },
   },
+  recipeG: row.recipe_g,
   group: row.logged_recipes
     ? {
         id: row.logged_recipes.id,
@@ -105,6 +109,14 @@ const toEntry = (row: Row): LoggedFood => ({
       }
     : null,
 })
+
+/**
+ * Every mounted day, told when any of them has written. An undo can run after
+ * its screen has gone (the toast outlives it), and the day it returns to has
+ * its own copy of the rows.
+ */
+const mounted = new Set<() => void>()
+const changed = () => mounted.forEach((reload) => reload())
 
 export function useFoodLog(date: string): FoodLog {
   const { session } = useSession()
@@ -122,6 +134,13 @@ export function useFoodLog(date: string): FoodLog {
   // Bumped after a write whose rows the server makes (a logged recipe), so the
   // day is read again rather than rebuilt here.
   const [version, setVersion] = useState(0)
+  useEffect(() => {
+    const reload = () => setVersion((v) => v + 1)
+    mounted.add(reload)
+    return () => {
+      mounted.delete(reload)
+    }
+  }, [])
   const loadedRef = useRef(loaded)
   const apply = useCallback((next: (current: LoggedFood[]) => LoggedFood[], forDate: string) => {
     loadedRef.current = { date: forDate, entries: next(loadedRef.current.entries), error: false }
@@ -162,11 +181,13 @@ export function useFoodLog(date: string): FoodLog {
       mealType,
       quantityG,
       groupId,
+      recipeG,
     }: {
       foodId: string
       mealType: MealType
       quantityG: number
       groupId?: string
+      recipeG?: number | null
     }) => {
       if (!userId) return false
 
@@ -182,12 +203,14 @@ export function useFoodLog(date: string): FoodLog {
           food_id: foodId,
           quantity_g: quantityG,
           group_id: groupId ?? null,
+          recipe_g: recipeG ?? null,
         })
         .select(SELECT)
         .single()
 
       if (!data || error) return false
       apply((current) => [...current, toEntry(data as unknown as Row)], date)
+      changed()
       return true
     },
     [apply, date, userId],
@@ -208,9 +231,16 @@ export function useFoodLog(date: string): FoodLog {
         date,
       )
 
+      // A corrected ingredient keeps its correction through a later change of
+      // the line's portion: its base becomes the new amount over the factor.
+      const group = previous.find((entry) => entry.id === id)?.group
       const { data, error } = await supabase
         .from('food_logs')
-        .update({ meal_type: portion.mealType, quantity_g: portion.quantityG })
+        .update({
+          meal_type: portion.mealType,
+          quantity_g: portion.quantityG,
+          ...(group ? { recipe_g: portion.quantityG / group.factor } : {}),
+        })
         .eq('id', id)
         .eq('user_id', userId)
         .select('id')
@@ -253,6 +283,7 @@ export function useFoodLog(date: string): FoodLog {
         mealType: entry.mealType,
         quantityG: entry.quantityG,
         groupId: entry.group?.id,
+        recipeG: entry.recipeG,
       }),
     [add],
   )
@@ -262,7 +293,7 @@ export function useFoodLog(date: string): FoodLog {
       if (!userId) return false
       const { error } = await supabase.rpc('log_recipe', { recipe: recipeId, day: date, meal: mealType, factor })
       if (error) return false
-      setVersion((v) => v + 1)
+      changed()
       return true
     },
     [date, userId],
@@ -273,7 +304,7 @@ export function useFoodLog(date: string): FoodLog {
       if (!userId) return false
       const { error } = await supabase.rpc('update_logged_recipe', { line: groupId, factor, meal: mealType })
       if (error) return false
-      setVersion((v) => v + 1)
+      changed()
       return true
     },
     [userId],
@@ -328,10 +359,11 @@ export function useFoodLog(date: string): FoodLog {
           meal_type: row.mealType,
           food_id: row.food.id,
           quantity_g: row.quantityG,
+          recipe_g: row.recipeG,
           group_id: line.id,
         })),
       )
-      setVersion((v) => v + 1)
+      changed()
       return !rowsError
     },
     [date, userId],

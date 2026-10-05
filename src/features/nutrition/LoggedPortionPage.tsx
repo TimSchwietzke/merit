@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { toast } from 'sonner'
 
 import { PageHeader } from '@/components/PageHeader'
 import { Button } from '@/components/ui/button'
@@ -24,7 +25,7 @@ export default function LoggedPortionPage() {
   const [params] = useSearchParams()
   const date = params.get('date') ?? todayKey()
 
-  const { entries, status, update, remove } = useFoodLog(date)
+  const { entries, status, update, remove, restore } = useFoodLog(date)
   const [pending, setPending] = useState(false)
   const [failed, setFailed] = useState(false)
 
@@ -62,8 +63,18 @@ export default function LoggedPortionPage() {
     setFailed(false)
     const removed = await remove(id)
     setPending(false)
-    if (removed) navigate(back)
-    else setFailed(true)
+    if (!removed || !entry) return setFailed(true)
+    navigate(back)
+    // The undo the button's comment promises (§14), as the day's swipe has.
+    toast(t('pages.food.deleted', { name: entry.food.name }), {
+      action: {
+        label: t('common.undo'),
+        onClick: () =>
+          void restore(entry).then((ok) => {
+            if (!ok) toast(t('pages.food.undoFailed'))
+          }),
+      },
+    })
   }
 
   return (

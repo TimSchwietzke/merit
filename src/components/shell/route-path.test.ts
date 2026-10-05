@@ -90,6 +90,10 @@ describe('backTo', () => {
     expect(backTo('/goals')?.to).toBe('/account')
     expect(backTo('/food/add')?.to).toBe('/food')
     expect(backTo('/training/routines/17')?.to).toBe('/training')
+    // Recipes, a logged recipe and a logged entry are under food, not the day itself.
+    expect(backTo('/food/recipes/r1')?.to).toBe('/food')
+    expect(backTo('/food/meal/m1')?.to).toBe('/food')
+    expect(backTo('/food/entry/e1')?.to).toBe('/food')
   })
 
   it('names the parent, so the control can say where it goes', () => {

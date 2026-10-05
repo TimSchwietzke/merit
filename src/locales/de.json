@@ -18,7 +18,9 @@
     "appearance": "darstellung",
     "data": "deine daten",
     "welcome": "einrichtung",
-    "recipes": "rezepte"
+    "recipes": "rezepte",
+    "meal": "mahlzeit",
+    "entry": "eintrag"
   },
   "common": {
     "notBuiltYet": "geplant",
@@ -726,7 +728,8 @@
       "addFailed": "Die Zutat wurde nicht hinzugefügt. Versuche es noch einmal.",
       "deleted": "{{name}} gelöscht",
       "restoreFailed": "{{name}} konnte nicht wiederhergestellt werden.",
-      "backToLine": "Zurück zu {{name}}"
+      "backToLine": "Zurück zu {{name}}",
+      "removeFailed": "Die Mahlzeit wurde nicht entfernt. Versuche es noch einmal."
     }
   }
 }

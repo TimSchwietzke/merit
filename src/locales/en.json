@@ -18,7 +18,9 @@
     "appearance": "appearance",
     "data": "your data",
     "welcome": "setup",
-    "recipes": "recipes"
+    "recipes": "recipes",
+    "meal": "meal",
+    "entry": "entry"
   },
   "common": {
     "notBuiltYet": "planned",
@@ -726,7 +728,8 @@
       "addFailed": "The ingredient was not added. Try again.",
       "deleted": "{{name}} deleted",
       "restoreFailed": "{{name}} could not be put back.",
-      "backToLine": "Back to {{name}}"
+      "backToLine": "Back to {{name}}",
+      "removeFailed": "The meal was not removed. Try again."
     }
   }
 }
