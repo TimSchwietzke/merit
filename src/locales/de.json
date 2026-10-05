@@ -19,8 +19,8 @@
     "data": "deine daten",
     "welcome": "einrichtung",
     "recipes": "rezepte",
-    "meal": "mahlzeit",
-    "entry": "eintrag"
+    "meal": "rezept",
+    "entry": "portion"
   },
   "common": {
     "notBuiltYet": "geplant",
@@ -214,7 +214,8 @@
         "title": "Erfasste Portion",
         "save": "Änderungen speichern",
         "saving": "Wird gespeichert …",
-        "delete": "Aus dem Tag entfernen"
+        "delete": "Aus dem Tag entfernen",
+        "deleteFailed": "Die Portion wurde nicht entfernt. Versuche es noch einmal."
       },
       "stats": {
         "average": "schnitt",
@@ -729,7 +730,7 @@
       "deleted": "{{name}} gelöscht",
       "restoreFailed": "{{name}} konnte nicht wiederhergestellt werden.",
       "backToLine": "Zurück zu {{name}}",
-      "removeFailed": "Die Mahlzeit wurde nicht entfernt. Versuche es noch einmal."
+      "removeFailed": "{{name}} wurde nicht entfernt. Versuche es noch einmal."
     }
   }
 }

@@ -19,8 +19,8 @@
     "data": "your data",
     "welcome": "setup",
     "recipes": "recipes",
-    "meal": "meal",
-    "entry": "entry"
+    "meal": "recipe",
+    "entry": "portion"
   },
   "common": {
     "notBuiltYet": "planned",
@@ -214,7 +214,8 @@
         "title": "Logged portion",
         "save": "Save changes",
         "saving": "Saving…",
-        "delete": "Remove from the day"
+        "delete": "Remove from the day",
+        "deleteFailed": "The portion was not removed. Try again."
       },
       "stats": {
         "average": "average",
@@ -729,7 +730,7 @@
       "deleted": "{{name}} deleted",
       "restoreFailed": "{{name}} could not be put back.",
       "backToLine": "Back to {{name}}",
-      "removeFailed": "The meal was not removed. Try again."
+      "removeFailed": "{{name}} was not removed. Try again."
     }
   }
 }

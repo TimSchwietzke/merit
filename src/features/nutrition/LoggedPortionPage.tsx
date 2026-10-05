@@ -35,9 +35,15 @@ export default function LoggedPortionPage() {
 
   // The row can be gone, deleted here, or on another device. Nothing to edit
   // then, and no reason to sit on a dead screen.
+  // Leaving because of its own delete: the router's navigation is a deferred
+  // transition, so the optimistic removal renders first, and without this the
+  // screen would take its entry's absence as "gone elsewhere" and redirect.
+  const [leaving, setLeaving] = useState(false)
   useEffect(() => {
-    if (status === 'ready' && !entry) navigate(`/food?date=${date}`, { replace: true })
-  }, [status, entry, navigate, date])
+    if (status === 'ready' && !entry && !leaving) navigate(`/food?date=${date}`, { replace: true })
+  }, [status, entry, leaving, navigate, date])
+
+  if (leaving) return null
 
   if (!entry) {
     return (
@@ -57,14 +63,16 @@ export default function LoggedPortionPage() {
     else setFailed(true)
   }
 
+  // Back first, then the delete, as on the recipe line: this screen's entry
+  // leaves its rows at once, and the outcome arrives as a toast.
   async function onDelete() {
-    if (!id) return
-    setPending(true)
-    setFailed(false)
-    const removed = await remove(id)
-    setPending(false)
-    if (!removed || !entry) return setFailed(true)
+    if (!id || !entry) return
+    setLeaving(true)
     navigate(back)
+    if (!(await remove(id))) {
+      toast(t('pages.food.entry.deleteFailed'))
+      return
+    }
     // The undo the button's comment promises (§14), as the day's swipe has.
     toast(t('pages.food.deleted', { name: entry.food.name }), {
       action: {

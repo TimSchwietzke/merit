@@ -116,7 +116,11 @@ const toEntry = (row: Row): LoggedFood => ({
  * its own copy of the rows.
  */
 const mounted = new Set<() => void>()
-const changed = () => mounted.forEach((reload) => reload())
+/** Tell every mounted day but `except`, which already holds the change. */
+const changed = (except?: () => void) =>
+  mounted.forEach((reload) => {
+    if (reload !== except) reload()
+  })
 
 export function useFoodLog(date: string): FoodLog {
   const { session } = useSession()
@@ -134,11 +138,32 @@ export function useFoodLog(date: string): FoodLog {
   // Bumped after a write whose rows the server makes (a logged recipe), so the
   // day is read again rather than rebuilt here.
   const [version, setVersion] = useState(0)
+
+  // A reload that arrives while one of this day's own writes is in flight
+  // waits for it: read now, it would bring back the row being removed, and a
+  // failed write would then roll back over what the reload brought in.
+  const pending = useRef(0)
+  const stale = useRef(false)
+  const [self] = useState(() => () => {
+    if (pending.current > 0) stale.current = true
+    else setVersion((v) => v + 1)
+  })
   useEffect(() => {
-    const reload = () => setVersion((v) => v + 1)
-    mounted.add(reload)
+    mounted.add(self)
     return () => {
-      mounted.delete(reload)
+      mounted.delete(self)
+    }
+  }, [self])
+  const writing = useCallback(async <T,>(run: () => Promise<T>): Promise<T> => {
+    pending.current += 1
+    try {
+      return await run()
+    } finally {
+      pending.current -= 1
+      if (pending.current === 0 && stale.current) {
+        stale.current = false
+        setVersion((v) => v + 1)
+      }
     }
   }, [])
   const loadedRef = useRef(loaded)
@@ -210,16 +235,19 @@ export function useFoodLog(date: string): FoodLog {
 
       if (!data || error) return false
       apply((current) => [...current, toEntry(data as unknown as Row)], date)
-      changed()
+      changed(self)
       return true
     },
-    [apply, date, userId],
+    [apply, date, self, userId],
   )
 
   const update = useCallback(
     async (id: string, portion: { mealType: MealType; quantityG: number }) => {
       if (!userId) return false
       const previous = loadedRef.current.entries
+      // A corrected ingredient keeps its correction through a later change of
+      // the line's portion: its base becomes the new amount over the factor.
+      const group = previous.find((entry) => entry.id === id)?.group
 
       apply(
         (current) =>
@@ -231,26 +259,28 @@ export function useFoodLog(date: string): FoodLog {
         date,
       )
 
-      // A corrected ingredient keeps its correction through a later change of
-      // the line's portion: its base becomes the new amount over the factor.
-      const group = previous.find((entry) => entry.id === id)?.group
-      const { data, error } = await supabase
-        .from('food_logs')
-        .update({
-          meal_type: portion.mealType,
-          quantity_g: portion.quantityG,
-          ...(group ? { recipe_g: portion.quantityG / group.factor } : {}),
-        })
-        .eq('id', id)
-        .eq('user_id', userId)
-        .select('id')
-        .single()
+      const { data, error } = await writing(async () =>
+        supabase
+          .from('food_logs')
+          .update({
+            meal_type: portion.mealType,
+            quantity_g: portion.quantityG,
+            ...(group ? { recipe_g: portion.quantityG / group.factor } : {}),
+          })
+          .eq('id', id)
+          .eq('user_id', userId)
+          .select('id')
+          .single(),
+      )
 
-      if (data && !error) return true
+      if (data && !error) {
+        changed(self)
+        return true
+      }
       apply(() => previous, date)
       return false
     },
-    [apply, date, userId],
+    [apply, date, self, userId, writing],
   )
 
   const remove = useCallback(
@@ -259,19 +289,18 @@ export function useFoodLog(date: string): FoodLog {
       const previous = loadedRef.current.entries
       apply((current) => current.filter((entry) => entry.id !== id), date)
 
-      const { data, error } = await supabase
-        .from('food_logs')
-        .delete()
-        .eq('id', id)
-        .eq('user_id', userId)
-        .select('id')
-        .single()
+      const { data, error } = await writing(async () =>
+        supabase.from('food_logs').delete().eq('id', id).eq('user_id', userId).select('id').single(),
+      )
 
-      if (data && !error) return true
+      if (data && !error) {
+        changed(self)
+        return true
+      }
       apply(() => previous, date)
       return false
     },
-    [apply, date, userId],
+    [apply, date, self, userId, writing],
   )
 
   // Undo re-inserts rather than un-deletes, so the row comes back with a new
@@ -317,19 +346,18 @@ export function useFoodLog(date: string): FoodLog {
       apply((current) => current.filter((entry) => entry.group?.id !== groupId), date)
 
       // The rows go with the line (on delete cascade).
-      const { data, error } = await supabase
-        .from('logged_recipes')
-        .delete()
-        .eq('id', groupId)
-        .eq('user_id', userId)
-        .select('id')
-        .single()
+      const { data, error } = await writing(async () =>
+        supabase.from('logged_recipes').delete().eq('id', groupId).eq('user_id', userId).select('id').single(),
+      )
 
-      if (data && !error) return true
+      if (data && !error) {
+        changed(self)
+        return true
+      }
       apply(() => previous, date)
       return false
     },
-    [apply, date, userId],
+    [apply, date, self, userId, writing],
   )
 
   const restoreGroup = useCallback(

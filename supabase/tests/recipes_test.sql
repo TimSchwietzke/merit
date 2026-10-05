@@ -2,7 +2,7 @@
 -- keeps one user's recipes away from another's. Runs in a transaction and
 -- rolls back, so it leaves the local database as it found it.
 begin;
-select plan(12);
+select plan(13);
 
 -- Two users. The trigger gives each a profile.
 insert into auth.users (id, aud, role, email) values
@@ -52,6 +52,12 @@ select is(
   (select quantity_g from public.food_logs where group_id = :'line' and food_id = '7e570000-0000-0000-0000-00000000f002'),
   0.4::numeric, 'a pinch held at 0.1 g by an eighth comes back as itself');
 
+select throws_ok(
+  format($$ insert into public.food_logs (user_id, date, meal_type, food_id, quantity_g, group_id)
+            values ('7e570000-0000-0000-0000-0000000000a1', '2026-10-04', 'lunch',
+                    '7e570000-0000-0000-0000-00000000f001', 10, %L) $$, :'line'),
+  '23514', null, 'an ingredient row needs its base');
+
 -- As B.
 set local request.jwt.claims = '{"sub": "7e570000-0000-0000-0000-0000000000b2", "role": "authenticated"}';
 
@@ -63,9 +69,9 @@ select throws_like(
   format($$ select public.update_logged_recipe(%L, 4, 'snack') $$, :'line'),
   '%not found%', 'B cannot change A''s logged line');
 select throws_ok(
-  format($$ insert into public.food_logs (user_id, date, meal_type, food_id, quantity_g, group_id)
+  format($$ insert into public.food_logs (user_id, date, meal_type, food_id, quantity_g, recipe_g, group_id)
             values ('7e570000-0000-0000-0000-0000000000b2', '2026-10-04', 'dinner',
-                    '7e570000-0000-0000-0000-00000000f001', 100, %L) $$, :'line'),
+                    '7e570000-0000-0000-0000-00000000f001', 100, 100, %L) $$, :'line'),
   '23503', null, 'B cannot hang a row under A''s logged line');
 
 -- As A again: deleting the line takes its rows.

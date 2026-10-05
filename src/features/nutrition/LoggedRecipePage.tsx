@@ -32,16 +32,18 @@ export default function LoggedRecipePage() {
   const { entries, status, updateGroup, removeGroup, restoreGroup } = useFoodLog(date)
   const [pending, setPending] = useState(false)
   const [failed, setFailed] = useState(false)
-  const [removing, setRemoving] = useState(false)
-  const [removeFailed, setRemoveFailed] = useState(false)
 
   const rows = entries.filter((entry) => entry.group?.id === id)
   const group = rows[0]?.group
 
   // Gone, removed here or on another device: nothing to show.
+  // As on an entry's screen: its own delete is not "gone elsewhere".
+  const [leaving, setLeaving] = useState(false)
   useEffect(() => {
-    if (status === 'ready' && !group) navigate(day, { replace: true })
-  }, [status, group, navigate, day])
+    if (status === 'ready' && !group && !leaving) navigate(day, { replace: true })
+  }, [status, group, leaving, navigate, day])
+
+  if (leaving) return null
 
   if (!group) {
     return (
@@ -72,14 +74,17 @@ export default function LoggedRecipePage() {
     else setFailed(true)
   }
 
+  // Back to the day first, then the delete: the line leaves this screen's own
+  // rows at once, and a screen whose subject has gone has nothing to show. The
+  // outcome arrives as a toast on the day.
   async function onRemove() {
-    if (!group || removing) return
-    setRemoving(true)
-    setRemoveFailed(false)
-    const removed = await removeGroup(group.id)
-    setRemoving(false)
-    if (!removed) return setRemoveFailed(true)
+    if (!group) return
+    setLeaving(true)
     navigate(day)
+    if (!(await removeGroup(group.id))) {
+      toast(t('pages.recipes.removeFailed', { name: group.name }))
+      return
+    }
     toast(t('pages.recipes.lineRemoved', { name: group.name }), {
       action: {
         label: t('common.undo'),
@@ -125,19 +130,9 @@ export default function LoggedRecipePage() {
       </section>
 
       {/* Undoable, so it does not ask first (§14). */}
-      <Button
-        variant="quiet"
-        className="mt-8 text-danger hover:border-danger"
-        pending={removing}
-        onClick={() => void onRemove()}
-      >
+      <Button variant="quiet" className="mt-8 text-danger hover:border-danger" onClick={() => void onRemove()}>
         {t('pages.food.entry.delete')}
       </Button>
-      {removeFailed ? (
-        <p role="alert" className="mt-2 text-sm text-danger">
-          {t('pages.recipes.removeFailed')}
-        </p>
-      ) : null}
 
       <Link
         to={day}

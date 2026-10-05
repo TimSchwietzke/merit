@@ -26,9 +26,11 @@ import { useSession } from '@/features/auth/useSession'
  */
 export function AppHeader() {
   const { t } = useTranslation()
-  const { pathname } = useLocation()
+  const { pathname, search } = useLocation()
   const segments = pathSegments(pathname)
   const back = backTo(pathname)
+  // A screen opened for a day goes back up to that day, not to today.
+  const date = new URLSearchParams(search).get('date')
   const { session } = useSession()
   const email = session?.user.email ?? null
   // One letter, not a photo: nobody in a group of ten uploads one, and an
@@ -45,7 +47,7 @@ export function AppHeader() {
             to drop it. The destination is in the accessible name instead. */}
         {back?.to ? (
           <Link
-            to={back.to}
+            to={date ? `${back.to}?date=${date}` : back.to}
             aria-label={t('common.backTo', { screen: t(back.labelKey) })}
             className="-ml-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full
                        text-ink-muted transition-colors [transition-duration:140ms]

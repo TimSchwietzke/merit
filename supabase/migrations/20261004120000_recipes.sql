@@ -115,6 +115,10 @@ alter table public.food_logs add column group_id uuid;
 -- drift. Set when a recipe is logged, and when one ingredient is corrected for
 -- the day (its new amount over the line's factor). Null on a plain entry.
 alter table public.food_logs add column recipe_g numeric check (recipe_g > 0);
+-- An ingredient without its base would be rescaled from nothing: refused.
+-- Every existing row has no group, so this holds for them as it is.
+alter table public.food_logs
+  add constraint food_logs_ingredient_has_base check (group_id is null or recipe_g is not null);
 alter table public.food_logs
   add constraint food_logs_group_fkey foreign key (group_id, user_id)
   references public.logged_recipes (id, user_id) on delete cascade;
