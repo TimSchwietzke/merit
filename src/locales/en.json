@@ -731,7 +731,16 @@
       "deleted": "{{name}} deleted",
       "restoreFailed": "{{name}} could not be put back.",
       "backToLine": "Back to {{name}}",
-      "removeFailed": "{{name}} was not removed. Try again."
+      "removeFailed": "{{name}} was not removed. Try again.",
+      "fromMeal": {
+        "title": "save as recipe",
+        "save": "Save recipe",
+        "remove": "Remove {{name}}",
+        "removeBranded": "Remove {{name}}, {{brand}}",
+        "overLimit": "More than {{max}} g per ingredient cannot be saved.",
+        "overLimitItem": "over the limit",
+        "saved": "{{name}} saved"
+      }
     }
   }
 }
