@@ -718,7 +718,7 @@
         "whole": "ganzes rezept",
         "parts": "teile insgesamt",
         "wholeInvalid": "Trage eine Zahl zwischen 0,1 und 100 ein.",
-        "partsInvalid": "Trage ganze Zahlen von 1 bis 100 ein, gegessen höchstens so viele wie insgesamt.",
+        "partsInvalid": "Trage ganze Zahlen von 1 bis 100 ein, die erste nicht größer als die zweite.",
         "eaten": "teile gegessen",
         "share": "anteil"
       },

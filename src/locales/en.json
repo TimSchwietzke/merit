@@ -718,7 +718,7 @@
         "whole": "whole recipe",
         "parts": "parts in total",
         "wholeInvalid": "Enter a number between 0.1 and 100.",
-        "partsInvalid": "Enter whole numbers from 1 to 100, with parts eaten no more than parts in total.",
+        "partsInvalid": "Enter whole numbers from 1 to 100, the first no larger than the second.",
         "eaten": "parts eaten",
         "share": "share"
       },

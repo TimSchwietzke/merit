@@ -103,7 +103,7 @@ export function RecipePortionForm({
           value={times}
           onChange={(event) => setTimes(event.target.value)}
           placeholder="1"
-          error={error ? t('pages.recipes.portion.wholeInvalid') : undefined}
+          error={error && parsedTimes === null ? t('pages.recipes.portion.wholeInvalid') : undefined}
           required
         />
       ) : (
