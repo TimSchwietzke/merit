@@ -420,7 +420,7 @@ function Meal({
                   </span>
                 </span>
                 <span className="shrink-0 font-mono text-2xs tabular-nums text-ink-faint">
-                  {formatRecipePortion(group.factor, locale)}
+                  {formatRecipePortion(group.portion, locale)}
                 </span>
                 <span className="shrink-0">
                   <Value n={formatNumber(lineKcal, locale, 0)} unit="kcal" />

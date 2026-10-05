@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { MacroLine, MealPicker } from '@/features/nutrition/PortionForm'
 import { formatForInput, parseDecimalInput } from '@/lib/format'
 import type { MealType } from '@/lib/nutrition'
-import { MAX_PARTS, portionOf, recipeShare, type RecipePortion } from '@/lib/recipe'
+import { MAX_PARTS, recipeShare, type RecipePortion } from '@/lib/recipe'
 
 /** A hundred shakes, or a pot in a hundred parts; past that it is a typo. */
 const WHOLE_LIMITS = { min: 0.1, max: 100, decimals: 2 } as const
@@ -21,7 +21,7 @@ type Kind = RecipePortion['kind']
  */
 export function RecipePortionForm({
   whole,
-  share: initialShare = 1,
+  portion: initial = { kind: 'whole', times: 1 },
   mealType: initialMeal = 'breakfast',
   pending,
   failed,
@@ -30,15 +30,15 @@ export function RecipePortionForm({
 }: {
   /** The whole recipe's energy and macros; the preview scales them. */
   whole: { kcal: number; protein: number; fat: number; carbs: number }
-  share?: number
+  /** The portion the form opens on: what was logged, or once the whole. */
+  portion?: RecipePortion
   mealType?: MealType
   pending: boolean
   failed: boolean
   submitLabel: string
-  onSubmit: (portion: { mealType: MealType; share: number }) => void
+  onSubmit: (portion: { mealType: MealType; portion: RecipePortion }) => void
 }) {
   const { t, i18n } = useTranslation()
-  const initial = portionOf(initialShare)
 
   const [kind, setKind] = useState<Kind>(initial.kind)
   const [times, setTimes] = useState(
@@ -49,21 +49,28 @@ export function RecipePortionForm({
   const [mealType, setMealType] = useState<MealType>(initialMeal)
   const [error, setError] = useState(false)
 
-  const share = (() => {
-    if (kind === 'whole') {
-      const parsed = parseDecimalInput(times, WHOLE_LIMITS)
-      return parsed === null ? null : recipeShare({ kind, times: parsed })
-    }
-    const e = parseDecimalInput(eaten, PART_LIMITS)
-    const o = parseDecimalInput(of, PART_LIMITS)
-    return e === null || o === null ? null : recipeShare({ kind, eaten: e, of: o })
-  })()
+  // Parsed once; which of the two part fields is wrong is said per field.
+  const parsedTimes = parseDecimalInput(times, WHOLE_LIMITS)
+  const parsedEaten = parseDecimalInput(eaten, PART_LIMITS)
+  const parsedOf = parseDecimalInput(of, PART_LIMITS)
+  const portion: RecipePortion | null =
+    kind === 'whole'
+      ? parsedTimes === null
+        ? null
+        : { kind, times: parsedTimes }
+      : parsedEaten === null || parsedOf === null
+        ? null
+        : { kind, eaten: parsedEaten, of: parsedOf }
+  const share = portion ? recipeShare(portion) : null
+  const tooMany = parsedEaten !== null && parsedOf !== null && parsedEaten > parsedOf
+  const eatenBad = error && (parsedEaten === null || tooMany)
+  const ofBad = error && (parsedOf === null || tooMany)
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    if (share === null) return setError(true)
+    if (share === null || portion === null) return setError(true)
     setError(false)
-    onSubmit({ mealType, share })
+    onSubmit({ mealType, portion })
   }
 
   return (
@@ -107,6 +114,9 @@ export function RecipePortionForm({
               onChange={(event) => setEaten(event.target.value)}
               placeholder="1"
               required
+              aria-invalid={eatenBad || undefined}
+              aria-describedby={eatenBad ? 'recipe-parts-error' : undefined}
+              className={eatenBad ? 'border-danger' : undefined}
             />
             <NumberField
               id="recipe-parts"
@@ -116,10 +126,13 @@ export function RecipePortionForm({
               onChange={(event) => setOf(event.target.value)}
               placeholder="8"
               required
+              aria-invalid={ofBad || undefined}
+              aria-describedby={ofBad ? 'recipe-parts-error' : undefined}
+              className={ofBad ? 'border-danger' : undefined}
             />
           </div>
           {error ? (
-            <p role="alert" className="text-sm text-danger">
+            <p id="recipe-parts-error" role="alert" className="text-sm text-danger">
               {t('pages.recipes.portion.partsInvalid')}
             </p>
           ) : null}

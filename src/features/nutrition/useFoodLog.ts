@@ -3,6 +3,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { useSession } from '@/features/auth/useSession'
 import { supabase } from '@/lib/supabase'
 import type { FoodNutrients, MealType } from '@/lib/nutrition'
+import { storedPortion, type RecipePortion } from '@/lib/recipe'
 
 /**
  * One day's logged portions, joined to the catalogue.
@@ -30,6 +31,8 @@ export interface LoggedRecipe {
   recipeId: string | null
   name: string
   factor: number
+  /** The portion as typed: parts, or the whole recipe times `factor`. */
+  portion: RecipePortion
 }
 
 export interface FoodLog {
@@ -41,9 +44,9 @@ export interface FoodLog {
   remove: (id: string) => Promise<boolean>
   restore: (entry: LoggedFood) => Promise<boolean>
   /** A recipe, scaled, as one line of ingredient rows (`log_recipe`). */
-  logRecipe: (recipeId: string, mealType: MealType, factor: number) => Promise<boolean>
+  logRecipe: (recipeId: string, mealType: MealType, portion: RecipePortion) => Promise<boolean>
   /** A logged recipe line's portion and meal, every row under it with it. */
-  updateGroup: (groupId: string, factor: number, mealType: MealType) => Promise<boolean>
+  updateGroup: (groupId: string, portion: RecipePortion, mealType: MealType) => Promise<boolean>
   /** A logged recipe line and every row under it. */
   removeGroup: (groupId: string) => Promise<boolean>
   /** Undo for `removeGroup`: the line and its rows come back as they were. */
@@ -52,7 +55,7 @@ export interface FoodLog {
 
 /** The columns a portion needs, and the shape the maths expects. */
 const SELECT = `id, meal_type, quantity_g, recipe_g,
-  logged_recipes!food_logs_group_fkey ( id, recipe_id, name, factor ),
+  logged_recipes!food_logs_group_fkey ( id, recipe_id, name, factor, parts_eaten, parts_total ),
   foods!inner (
     id, name, brand,
     kcal_100g, fat_100g, carbs_100g, protein_100g,
@@ -64,7 +67,14 @@ type Row = {
   meal_type: string
   quantity_g: number
   recipe_g: number | null
-  logged_recipes: { id: string; recipe_id: string | null; name: string; factor: number } | null
+  logged_recipes: {
+    id: string
+    recipe_id: string | null
+    name: string
+    factor: number
+    parts_eaten: number | null
+    parts_total: number | null
+  } | null
   foods: {
     id: string
     name: string
@@ -106,9 +116,16 @@ const toEntry = (row: Row): LoggedFood => ({
         recipeId: row.logged_recipes.recipe_id,
         name: row.logged_recipes.name,
         factor: row.logged_recipes.factor,
+        portion: storedPortion(row.logged_recipes.factor, row.logged_recipes.parts_eaten, row.logged_recipes.parts_total),
       }
     : null,
 })
+
+/** A portion as the two RPCs take it: the share, and the parts when given in parts. */
+const rpcPortion = (portion: RecipePortion) =>
+  portion.kind === 'part'
+    ? { factor: portion.eaten / portion.of, eaten: portion.eaten, total: portion.of }
+    : { factor: portion.times }
 
 /**
  * Every mounted day, told when any of them has written. An undo can run after
@@ -318,9 +335,9 @@ export function useFoodLog(date: string): FoodLog {
   )
 
   const logRecipe = useCallback(
-    async (recipeId: string, mealType: MealType, factor: number) => {
+    async (recipeId: string, mealType: MealType, portion: RecipePortion) => {
       if (!userId) return false
-      const { error } = await supabase.rpc('log_recipe', { recipe: recipeId, day: date, meal: mealType, factor })
+      const { error } = await supabase.rpc('log_recipe', { recipe: recipeId, day: date, meal: mealType, ...rpcPortion(portion) })
       if (error) return false
       changed()
       return true
@@ -329,9 +346,9 @@ export function useFoodLog(date: string): FoodLog {
   )
 
   const updateGroup = useCallback(
-    async (groupId: string, factor: number, mealType: MealType) => {
+    async (groupId: string, portion: RecipePortion, mealType: MealType) => {
       if (!userId) return false
-      const { error } = await supabase.rpc('update_logged_recipe', { line: groupId, factor, meal: mealType })
+      const { error } = await supabase.rpc('update_logged_recipe', { line: groupId, meal: mealType, ...rpcPortion(portion) })
       if (error) return false
       changed()
       return true
@@ -373,6 +390,8 @@ export function useFoodLog(date: string): FoodLog {
           recipe_id: group.recipeId,
           name: group.name,
           factor: group.factor,
+          parts_eaten: group.portion.kind === 'part' ? group.portion.eaten : null,
+          parts_total: group.portion.kind === 'part' ? group.portion.of : null,
         })
         .select('id')
         .single()

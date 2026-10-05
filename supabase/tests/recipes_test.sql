@@ -2,7 +2,7 @@
 -- keeps one user's recipes away from another's. Runs in a transaction and
 -- rolls back, so it leaves the local database as it found it.
 begin;
-select plan(13);
+select plan(15);
 
 -- Two users. The trigger gives each a profile.
 insert into auth.users (id, aud, role, email) values
@@ -41,6 +41,13 @@ select is(
   (select count(*) from public.food_logs where group_id = :'line' and meal_type = 'lunch')::int, 2,
   'the rows move to the line''s new meal');
 select is((select meal_type from public.logged_recipes where id = :'line'), 'lunch', 'and so does the line');
+
+-- Parts as typed: 2 of 8 stays 2 of 8, and the share is theirs.
+select public.update_logged_recipe(:'line', 99, 'lunch', 2::smallint, 8::smallint);
+select is(
+  (select array[parts_eaten, parts_total]::int[] from public.logged_recipes where id = :'line'), array[2, 8],
+  '2 of 8 is kept as typed, not as 1/4');
+select is((select factor from public.logged_recipes where id = :'line'), 0.25::numeric, 'the share comes from the parts');
 
 -- There and back does not drift: a third, then the whole again.
 select public.update_logged_recipe(:'line', 1.0 / 3, 'lunch');

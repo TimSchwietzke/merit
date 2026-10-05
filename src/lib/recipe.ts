@@ -18,26 +18,16 @@ export function recipeShare(portion: RecipePortion): number | null {
 }
 
 /**
- * A stored share back into the portion a person would have typed for it.
- *
- * The share is kept to five decimals, so a fraction is recognised when it lies
- * within that rounding of k/d for the smallest d up to MAX_PARTS: 0.4 is 2/5,
- * 0.28571 is 2/7. Two distinct such fractions are always further apart than
- * that, so the match is unambiguous.
+ * A logged line's portion as it was typed: its parts when it was given in
+ * parts (2 of 8 stays 2 of 8), otherwise the whole recipe times its share.
+ * Read back from what was stored, never reconstructed from the share alone.
  */
-export function portionOf(share: number): RecipePortion {
-  if (share < 1) {
-    for (let of = 2; of <= MAX_PARTS; of += 1) {
-      const eaten = Math.round(share * of)
-      if (eaten >= 1 && Math.abs(share - eaten / of) < 1e-5) return { kind: 'part', eaten, of }
-    }
-  }
-  return { kind: 'whole', times: share }
+export function storedPortion(factor: number, eaten: number | null, total: number | null): RecipePortion {
+  return eaten !== null && total !== null ? { kind: 'part', eaten, of: total } : { kind: 'whole', times: factor }
 }
 
-/** A logged recipe's portion as the line shows it: `2/5`, `2×`, `0,45×`. */
-export function formatRecipePortion(share: number, locale: string): string {
-  const portion = portionOf(share)
+/** A portion as the line shows it: `2/8`, `2×`, `0,33×`. */
+export function formatRecipePortion(portion: RecipePortion, locale: string): string {
   if (portion.kind === 'part') return `${portion.eaten}/${portion.of}`
   return `${new Intl.NumberFormat(locale, { maximumFractionDigits: 2 }).format(portion.times)}×`
 }

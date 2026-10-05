@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { formatRecipePortion, portionOf, recipeShare } from '@/lib/recipe'
+import { formatRecipePortion, recipeShare, storedPortion } from '@/lib/recipe'
 
 describe('recipeShare', () => {
   it('counts the whole recipe as multiples', () => {
@@ -21,33 +21,25 @@ describe('recipeShare', () => {
   })
 })
 
-describe('portionOf', () => {
-  it('reads the fraction back out of a share, in lowest terms', () => {
-    expect(portionOf(0.4)).toEqual({ kind: 'part', eaten: 2, of: 5 })
-    expect(portionOf(0.125)).toEqual({ kind: 'part', eaten: 1, of: 8 })
-    expect(portionOf(0.75)).toEqual({ kind: 'part', eaten: 3, of: 4 })
+describe('storedPortion', () => {
+  it('keeps parts exactly as they were typed', () => {
+    expect(storedPortion(0.25, 2, 8)).toEqual({ kind: 'part', eaten: 2, of: 8 })
   })
 
-  it('recognises a share stored to five decimals', () => {
-    expect(portionOf(0.28571)).toEqual({ kind: 'part', eaten: 2, of: 7 })
-    expect(portionOf(0.33333)).toEqual({ kind: 'part', eaten: 1, of: 3 })
-  })
-
-  it('keeps the whole recipe and anything that is no fraction as a multiple', () => {
-    expect(portionOf(1)).toEqual({ kind: 'whole', times: 1 })
-    expect(portionOf(2)).toEqual({ kind: 'whole', times: 2 })
-    expect(portionOf(0.004)).toEqual({ kind: 'whole', times: 0.004 })
+  it('reads a line without parts as the whole recipe times its share', () => {
+    expect(storedPortion(0.33, null, null)).toEqual({ kind: 'whole', times: 0.33 })
+    expect(storedPortion(2, null, null)).toEqual({ kind: 'whole', times: 2 })
   })
 })
 
 describe('formatRecipePortion', () => {
-  it('shows parts as a fraction', () => {
-    expect(formatRecipePortion(0.4, 'de')).toBe('2/5')
-    expect(formatRecipePortion(0.125, 'de')).toBe('1/8')
+  it('shows parts as typed, not reduced', () => {
+    expect(formatRecipePortion({ kind: 'part', eaten: 2, of: 8 }, 'de')).toBe('2/8')
   })
 
   it('shows the whole as a multiple, in the locale', () => {
-    expect(formatRecipePortion(1, 'de')).toBe('1×')
-    expect(formatRecipePortion(1.5, 'de')).toBe('1,5×')
+    expect(formatRecipePortion({ kind: 'whole', times: 1 }, 'de')).toBe('1×')
+    expect(formatRecipePortion({ kind: 'whole', times: 0.33 }, 'de')).toBe('0,33×')
+    expect(formatRecipePortion({ kind: 'whole', times: 1.5 }, 'en')).toBe('1.5×')
   })
 })

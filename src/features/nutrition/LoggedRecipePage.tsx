@@ -14,6 +14,7 @@ import { useFoodLog, type LoggedFood } from '@/features/nutrition/useFoodLog'
 import { wholeOf } from '@/features/nutrition/useRecipes'
 import { todayKey } from '@/lib/date'
 import { formatNumber } from '@/lib/format'
+import type { RecipePortion } from '@/lib/recipe'
 import { sumPortions } from '@/lib/nutrition'
 
 /**
@@ -65,11 +66,11 @@ export default function LoggedRecipePage() {
     ),
   )
 
-  async function save({ mealType, share }: { mealType: Parameters<typeof updateGroup>[2]; share: number }) {
+  async function save({ mealType, portion }: { mealType: Parameters<typeof updateGroup>[2]; portion: RecipePortion }) {
     if (!group) return
     setPending(true)
     setFailed(false)
-    const saved = await updateGroup(group.id, share, mealType)
+    const saved = await updateGroup(group.id, portion, mealType)
     setPending(false)
     if (saved) navigate(day)
     else setFailed(true)
@@ -105,16 +106,17 @@ export default function LoggedRecipePage() {
       <Panel className="p-4">
         <RecipePortionForm
           whole={whole}
-          share={group.factor}
+          portion={group.portion}
           mealType={rows[0].mealType}
-          pending={pending}
+          // Nothing saves into a line that is being deleted.
+          pending={pending || deleting !== null}
           failed={failed}
           submitLabel={t(pending ? 'pages.food.entry.saving' : 'pages.food.entry.save')}
           onSubmit={save}
         />
       </Panel>
 
-      <section className="mt-8">
+      <section className="mt-8" inert={deleting !== null}>
         <SectionHead label={t('pages.recipes.ingredientsLabel')} />
         <Rows>
           {rows.map((row) => (
@@ -135,7 +137,7 @@ export default function LoggedRecipePage() {
       <Button
         variant="quiet"
         className="mt-8 text-danger hover:border-danger"
-        pending={deleting !== null}
+        pending={pending || deleting !== null}
         onClick={() => void onRemove()}
       >
         {t('pages.food.entry.delete')}

@@ -20,6 +20,7 @@ import { PortionForm } from '@/features/nutrition/PortionForm'
 import { RecipePortionForm } from '@/features/nutrition/RecipePortionForm'
 import { useRecipes, wholeOf, type Recipe } from '@/features/nutrition/useRecipes'
 import { Panel } from '@/components/Panel'
+import type { RecipePortion } from '@/lib/recipe'
 import { searchWords } from '@/lib/search-rank'
 import { useFoodLog } from '@/features/nutrition/useFoodLog'
 import { useFoodSearch } from '@/features/nutrition/useFoodSearch'
@@ -131,11 +132,11 @@ export default function AddFoodPage() {
     else toast(t('pages.recipes.createFailed'))
   }
 
-  async function logPickedRecipe({ mealType, share }: { mealType: MealType; share: number }) {
+  async function logPickedRecipe({ mealType, portion }: { mealType: MealType; portion: RecipePortion }) {
     if (!pickedRecipe) return
     setPending(true)
     setFailed(false)
-    const saved = await logRecipe(pickedRecipe.id, mealType, share)
+    const saved = await logRecipe(pickedRecipe.id, mealType, portion)
     setPending(false)
     if (saved) navigate(`/food?date=${date}`)
     else setFailed(true)

@@ -83,6 +83,14 @@ create table public.logged_recipes (
   name        text not null check (length(trim(name)) between 1 and 120),
   -- The share of the recipe eaten: 0.125 for an eighth, 2 for a double shake.
   factor      numeric(8, 5) not null check (factor > 0 and factor <= 100),
+  -- The parts as typed, when the portion was given as parts: 2 of 8 stays
+  -- 2 of 8 and does not come back as 1/4. Null for the whole recipe (×).
+  parts_eaten smallint,
+  parts_total smallint,
+  constraint logged_recipes_parts check (
+    (parts_eaten is null and parts_total is null)
+    or (parts_eaten between 1 and parts_total and parts_total <= 100)
+  ),
   created_at  timestamptz not null default now()
 );
 
@@ -128,7 +136,12 @@ create index food_logs_group_idx on public.food_logs (group_id) where group_id i
 
 -- Logging a recipe is several rows, written in one transaction so a bad
 -- connection cannot leave half a shake in the day.
-create function public.log_recipe(recipe uuid, day date, meal text, factor numeric)
+-- Given parts, the share is theirs: factor is ignored and computed, so the
+-- two can never disagree.
+create function public.log_recipe(
+  recipe uuid, day date, meal text, factor numeric,
+  eaten smallint default null, total smallint default null
+)
 returns uuid
 language plpgsql
 -- Invoker: every read and write below answers to the caller's RLS.
@@ -137,6 +150,7 @@ set search_path = ''
 as $$
 declare
   source public.recipes%rowtype;
+  share numeric := case when total is not null then eaten::numeric / total else factor end;
   line uuid;
 begin
   select * into source from public.recipes where id = recipe;
@@ -144,8 +158,8 @@ begin
     raise exception 'recipe not found';
   end if;
 
-  insert into public.logged_recipes (user_id, date, meal_type, recipe_id, name, factor)
-  values ((select auth.uid()), day, meal, source.id, source.name, factor)
+  insert into public.logged_recipes (user_id, date, meal_type, recipe_id, name, factor, parts_eaten, parts_total)
+  values ((select auth.uid()), day, meal, source.id, source.name, share, eaten, total)
   returning id into line;
 
   -- Rounded to the column's 0.1 g, and never below it: an eighth of a pinch of
@@ -153,7 +167,7 @@ begin
   -- so the day lists them in the recipe's order rather than at random.
   insert into public.food_logs (user_id, date, meal_type, food_id, quantity_g, recipe_g, group_id, created_at)
   select (select auth.uid()), day, meal, item.food_id,
-         greatest(round(item.quantity_g * factor, 1), 0.1), item.quantity_g, line,
+         greatest(round(item.quantity_g * share, 1), 0.1), item.quantity_g, line,
          now() + (row_number() over (order by item.created_at)) * interval '1 microsecond'
     from public.recipe_items item
    where item.recipe_id = source.id;
@@ -162,29 +176,36 @@ begin
 end;
 $$;
 
-grant execute on function public.log_recipe(uuid, date, text, numeric) to authenticated;
+grant execute on function public.log_recipe(uuid, date, text, numeric, smallint, smallint) to authenticated;
 
 
 -- Changing a logged line's portion or meal: every row is recomputed from its
 -- recipe_g, so an ingredient corrected for that day stays corrected in
 -- proportion, and the meal moves with the line. One transaction, as above.
-create function public.update_logged_recipe(line uuid, factor numeric, meal text)
+create function public.update_logged_recipe(
+  line uuid, factor numeric, meal text,
+  eaten smallint default null, total smallint default null
+)
 returns void
 language plpgsql
 security invoker
 set search_path = ''
 as $$
+declare
+  share numeric := case when total is not null then eaten::numeric / total else factor end;
 begin
-  update public.logged_recipes l set factor = update_logged_recipe.factor, meal_type = meal where l.id = line;
+  update public.logged_recipes l
+     set factor = share, meal_type = meal, parts_eaten = eaten, parts_total = total
+   where l.id = line;
   if not found then
     raise exception 'logged recipe not found';
   end if;
 
   update public.food_logs f
-     set quantity_g = least(greatest(round(f.recipe_g * update_logged_recipe.factor, 1), 0.1), 10000),
+     set quantity_g = least(greatest(round(f.recipe_g * share, 1), 0.1), 10000),
          meal_type = meal
    where f.group_id = line;
 end;
 $$;
 
-grant execute on function public.update_logged_recipe(uuid, numeric, text) to authenticated;
+grant execute on function public.update_logged_recipe(uuid, numeric, text, smallint, smallint) to authenticated;
