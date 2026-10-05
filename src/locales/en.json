@@ -716,10 +716,10 @@
         "byWhole": "whole",
         "byParts": "share",
         "whole": "whole recipe",
-        "parts": "split into",
-        "partsUnit": "parts",
+        "parts": "parts in total",
         "wholeInvalid": "Enter a number between 0.1 and 100.",
-        "partsInvalid": "Enter a whole number between 1 and 100."
+        "partsInvalid": "Whole numbers from 1 to 100, eaten no more than split into.",
+        "eaten": "parts eaten"
       },
       "lineRemoved": "{{name}} removed",
       "undoFailed": "{{name}} could not be put back. Log it again.",

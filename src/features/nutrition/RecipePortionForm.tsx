@@ -7,11 +7,11 @@ import { Button } from '@/components/ui/button'
 import { MacroLine, MealPicker } from '@/features/nutrition/PortionForm'
 import { formatForInput, parseDecimalInput } from '@/lib/format'
 import type { MealType } from '@/lib/nutrition'
-import { portionOf, recipeShare, type RecipePortion } from '@/lib/recipe'
+import { MAX_PARTS, portionOf, recipeShare, type RecipePortion } from '@/lib/recipe'
 
 /** A hundred shakes, or a pot in a hundred parts; past that it is a typo. */
 const WHOLE_LIMITS = { min: 0.1, max: 100, decimals: 2 } as const
-const PART_LIMITS = { min: 1, max: 100, decimals: 0 } as const
+const PART_LIMITS = { min: 1, max: MAX_PARTS, decimals: 0 } as const
 
 type Kind = RecipePortion['kind']
 
@@ -41,21 +41,23 @@ export function RecipePortionForm({
   const initial = portionOf(initialShare)
 
   const [kind, setKind] = useState<Kind>(initial.kind)
-  const [value, setValue] = useState(
-    initial.kind === 'part' ? String(initial.of) : formatForInput(initial.times, i18n.language, 2),
+  const [times, setTimes] = useState(
+    initial.kind === 'whole' ? formatForInput(initial.times, i18n.language, 2) : '1',
   )
+  const [eaten, setEaten] = useState(initial.kind === 'part' ? String(initial.eaten) : '1')
+  const [of, setOf] = useState(initial.kind === 'part' ? String(initial.of) : '')
   const [mealType, setMealType] = useState<MealType>(initialMeal)
   const [error, setError] = useState(false)
 
-  const FIELDS = {
-    whole: { label: t('pages.recipes.portion.whole'), unit: '×', placeholder: '1', limits: WHOLE_LIMITS, invalid: t('pages.recipes.portion.wholeInvalid') },
-    part: { label: t('pages.recipes.portion.parts'), unit: t('pages.recipes.portion.partsUnit'), placeholder: '8', limits: PART_LIMITS, invalid: t('pages.recipes.portion.partsInvalid') },
-  }
-  const field = FIELDS[kind]
-
-  const parsed = parseDecimalInput(value, field.limits)
-  const share =
-    parsed === null ? null : recipeShare(kind === 'whole' ? { kind, times: parsed } : { kind, of: parsed })
+  const share = (() => {
+    if (kind === 'whole') {
+      const parsed = parseDecimalInput(times, WHOLE_LIMITS)
+      return parsed === null ? null : recipeShare({ kind, times: parsed })
+    }
+    const e = parseDecimalInput(eaten, PART_LIMITS)
+    const o = parseDecimalInput(of, PART_LIMITS)
+    return e === null || o === null ? null : recipeShare({ kind, eaten: e, of: o })
+  })()
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
@@ -72,7 +74,6 @@ export function RecipePortionForm({
           value={kind}
           onChange={(next) => {
             setKind(next)
-            setValue(next === 'whole' ? '1' : '')
             setError(false)
           }}
           segments={[
@@ -82,16 +83,48 @@ export function RecipePortionForm({
         />
       </div>
 
-      <NumberField
-        id="recipe-portion"
-        label={field.label}
-        unit={field.unit}
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
-        placeholder={field.placeholder}
-        error={error ? field.invalid : undefined}
-        required
-      />
+      {kind === 'whole' ? (
+        <NumberField
+          id="recipe-portion"
+          label={t('pages.recipes.portion.whole')}
+          unit="×"
+          value={times}
+          onChange={(event) => setTimes(event.target.value)}
+          placeholder="1"
+          error={error ? t('pages.recipes.portion.wholeInvalid') : undefined}
+          required
+        />
+      ) : (
+        // Two numbers, read as one: 2 of 5 parts. Side by side, so the pair is
+        // the field rather than two questions.
+        <div className="flex flex-col gap-2">
+          <div className="grid grid-cols-2 gap-3">
+            <NumberField
+              id="recipe-portion"
+              label={t('pages.recipes.portion.eaten')}
+              unit=""
+              value={eaten}
+              onChange={(event) => setEaten(event.target.value)}
+              placeholder="1"
+              required
+            />
+            <NumberField
+              id="recipe-parts"
+              label={t('pages.recipes.portion.parts')}
+              unit=""
+              value={of}
+              onChange={(event) => setOf(event.target.value)}
+              placeholder="8"
+              required
+            />
+          </div>
+          {error ? (
+            <p role="alert" className="text-sm text-danger">
+              {t('pages.recipes.portion.partsInvalid')}
+            </p>
+          ) : null}
+        </div>
+      )}
 
       <MealPicker value={mealType} onChange={setMealType} />
 

@@ -10,7 +10,7 @@ import { SectionHead } from '@/components/SectionHead'
 import { Value } from '@/components/Value'
 import { Button } from '@/components/ui/button'
 import { RecipePortionForm } from '@/features/nutrition/RecipePortionForm'
-import { useFoodLog } from '@/features/nutrition/useFoodLog'
+import { useFoodLog, type LoggedFood } from '@/features/nutrition/useFoodLog'
 import { wholeOf } from '@/features/nutrition/useRecipes'
 import { todayKey } from '@/lib/date'
 import { formatNumber } from '@/lib/format'
@@ -33,17 +33,18 @@ export default function LoggedRecipePage() {
   const [pending, setPending] = useState(false)
   const [failed, setFailed] = useState(false)
 
-  const rows = entries.filter((entry) => entry.group?.id === id)
+  // While its own delete is in flight the rows have already left the day's
+  // (optimistically), so the screen keeps showing what was tapped.
+  const [deleting, setDeleting] = useState<LoggedFood[] | null>(null)
+  const [removeFailed, setRemoveFailed] = useState(false)
+  const live = entries.filter((entry) => entry.group?.id === id)
+  const rows = live.length > 0 ? live : (deleting ?? [])
   const group = rows[0]?.group
 
-  // Gone, removed here or on another device: nothing to show.
-  // As on an entry's screen: its own delete is not "gone elsewhere".
-  const [leaving, setLeaving] = useState(false)
+  // Gone, removed on another device: nothing to show.
   useEffect(() => {
-    if (status === 'ready' && !group && !leaving) navigate(day, { replace: true })
-  }, [status, group, leaving, navigate, day])
-
-  if (leaving) return null
+    if (status === 'ready' && !group) navigate(day, { replace: true })
+  }, [status, group, navigate, day])
 
   if (!group) {
     return (
@@ -74,22 +75,23 @@ export default function LoggedRecipePage() {
     else setFailed(true)
   }
 
-  // Back to the day first, then the delete: the line leaves this screen's own
-  // rows at once, and a screen whose subject has gone has nothing to show. The
-  // outcome arrives as a toast on the day.
+  // The delete first, then back to the day, which then reads without the line.
   async function onRemove() {
     if (!group) return
-    setLeaving(true)
-    navigate(day)
+    const removed = rows
+    setDeleting(removed)
+    setRemoveFailed(false)
     if (!(await removeGroup(group.id))) {
-      toast(t('pages.recipes.removeFailed', { name: group.name }))
+      setDeleting(null)
+      setRemoveFailed(true)
       return
     }
+    navigate(day)
     toast(t('pages.recipes.lineRemoved', { name: group.name }), {
       action: {
         label: t('common.undo'),
         onClick: () =>
-          void restoreGroup(rows).then((ok) => {
+          void restoreGroup(removed).then((ok) => {
             if (!ok) toast(t('pages.recipes.undoFailed', { name: group.name }))
           }),
       },
@@ -130,9 +132,19 @@ export default function LoggedRecipePage() {
       </section>
 
       {/* Undoable, so it does not ask first (§14). */}
-      <Button variant="quiet" className="mt-8 text-danger hover:border-danger" onClick={() => void onRemove()}>
+      <Button
+        variant="quiet"
+        className="mt-8 text-danger hover:border-danger"
+        pending={deleting !== null}
+        onClick={() => void onRemove()}
+      >
         {t('pages.food.entry.delete')}
       </Button>
+      {removeFailed ? (
+        <p role="alert" className="mt-2 text-sm text-danger">
+          {t('pages.recipes.removeFailed', { name: group.name })}
+        </p>
+      ) : null}
 
       <Link
         to={day}

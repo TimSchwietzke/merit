@@ -29,8 +29,10 @@ export function AppHeader() {
   const { pathname, search } = useLocation()
   const segments = pathSegments(pathname)
   const back = backTo(pathname)
-  // A screen opened for a day goes back up to that day, not to today.
+  // A screen opened for a day goes back up to that day, not to today. The
+  // dashboard is not day-scoped and is left as it is.
   const date = new URLSearchParams(search).get('date')
+  const withDate = (to: string) => (date && to !== '/' ? `${to}?date=${date}` : to)
   const { session } = useSession()
   const email = session?.user.email ?? null
   // One letter, not a photo: nobody in a group of ten uploads one, and an
@@ -47,7 +49,7 @@ export function AppHeader() {
             to drop it. The destination is in the accessible name instead. */}
         {back?.to ? (
           <Link
-            to={date ? `${back.to}?date=${date}` : back.to}
+            to={withDate(back.to)}
             aria-label={t('common.backTo', { screen: t(back.labelKey) })}
             className="-ml-2 inline-flex size-11 shrink-0 items-center justify-center rounded-full
                        text-ink-muted transition-colors [transition-duration:140ms]
@@ -78,7 +80,7 @@ export function AppHeader() {
                 ) : null}
                 {segment.to && !last ? (
                   <Link
-                    to={segment.to}
+                    to={withDate(segment.to)}
                     className="text-ink-faint transition-colors [transition-duration:140ms] hover:text-ink"
                   >
                     {t(segment.labelKey)}
