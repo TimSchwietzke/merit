@@ -87,9 +87,15 @@ create table public.logged_recipes (
   -- 2 of 8 and does not come back as 1/4. Null for the whole recipe (×).
   parts_eaten smallint,
   parts_total smallint,
+  -- Both or neither, in range, and the share theirs: so the two cannot
+  -- disagree whichever way a row is written, not only through the RPCs.
   constraint logged_recipes_parts check (
-    (parts_eaten is null and parts_total is null)
-    or (parts_eaten between 1 and parts_total and parts_total <= 100)
+    (parts_eaten is null) = (parts_total is null)
+    and (parts_eaten is null or (
+      parts_eaten between 1 and parts_total
+      and parts_total <= 100
+      and factor = round(parts_eaten::numeric / parts_total, 5)
+    ))
   ),
   created_at  timestamptz not null default now()
 );

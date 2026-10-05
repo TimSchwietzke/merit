@@ -4,10 +4,12 @@ import { useTranslation } from 'react-i18next'
 import { NumberField } from '@/components/NumberField'
 import { SegmentedControl } from '@/components/SegmentedControl'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 import { MacroLine, MealPicker } from '@/features/nutrition/PortionForm'
 import { formatForInput, parseDecimalInput } from '@/lib/format'
 import type { MealType } from '@/lib/nutrition'
 import { MAX_PARTS, recipeShare, type RecipePortion } from '@/lib/recipe'
+import { cn } from '@/lib/utils'
 
 /** A hundred shakes, or a pot in a hundred parts; past that it is a typo. */
 const WHOLE_LIMITS = { min: 0.1, max: 100, decimals: 2 } as const
@@ -24,6 +26,7 @@ export function RecipePortionForm({
   portion: initial = { kind: 'whole', times: 1 },
   mealType: initialMeal = 'breakfast',
   pending,
+  disabled = false,
   failed,
   submitLabel,
   onSubmit,
@@ -34,6 +37,8 @@ export function RecipePortionForm({
   portion?: RecipePortion
   mealType?: MealType
   pending: boolean
+  /** Off while something else on the screen is writing; not busy itself. */
+  disabled?: boolean
   failed: boolean
   submitLabel: string
   onSubmit: (portion: { mealType: MealType; portion: RecipePortion }) => void
@@ -102,41 +107,45 @@ export function RecipePortionForm({
           required
         />
       ) : (
-        // Two numbers, read as one: 2 of 5 parts. Side by side, so the pair is
-        // the field rather than two questions.
-        <div className="flex flex-col gap-2">
-          <div className="grid grid-cols-2 gap-3">
-            <NumberField
+        // Written the way the day shows it: 3 / 8. One label for the pair; each
+        // field keeps its own name for a screen reader, which a slash is not.
+        <fieldset className="flex flex-col gap-2">
+          <legend className="sr-only">{t('pages.recipes.portion.share')}</legend>
+          <div className="flex items-center gap-3">
+            <Input
               id="recipe-portion"
-              label={t('pages.recipes.portion.eaten')}
-              unit=""
+              inputMode="numeric"
+              autoComplete="off"
+              aria-label={t('pages.recipes.portion.eaten')}
               value={eaten}
               onChange={(event) => setEaten(event.target.value)}
               placeholder="1"
-              required
               aria-invalid={eatenBad || undefined}
               aria-describedby={eatenBad ? 'recipe-parts-error' : undefined}
-              className={eatenBad ? 'border-danger' : undefined}
+              className={cn('w-20 text-center font-mono tabular-nums', eatenBad && 'border-danger')}
             />
-            <NumberField
+            <span aria-hidden className="font-mono text-lg text-ink-faint">
+              /
+            </span>
+            <Input
               id="recipe-parts"
-              label={t('pages.recipes.portion.parts')}
-              unit=""
+              inputMode="numeric"
+              autoComplete="off"
+              aria-label={t('pages.recipes.portion.parts')}
               value={of}
               onChange={(event) => setOf(event.target.value)}
               placeholder="8"
-              required
               aria-invalid={ofBad || undefined}
               aria-describedby={ofBad ? 'recipe-parts-error' : undefined}
-              className={ofBad ? 'border-danger' : undefined}
+              className={cn('w-20 text-center font-mono tabular-nums', ofBad && 'border-danger')}
             />
           </div>
-          {error ? (
+          {eatenBad || ofBad ? (
             <p id="recipe-parts-error" role="alert" className="text-sm text-danger">
               {t('pages.recipes.portion.partsInvalid')}
             </p>
           ) : null}
-        </div>
+        </fieldset>
       )}
 
       <MealPicker value={mealType} onChange={setMealType} />
@@ -160,7 +169,7 @@ export function RecipePortionForm({
         </p>
       ) : null}
 
-      <Button type="submit" variant="primary" pending={pending}>
+      <Button type="submit" variant="primary" pending={pending} disabled={disabled}>
         {submitLabel}
       </Button>
     </form>

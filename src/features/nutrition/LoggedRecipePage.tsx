@@ -109,7 +109,8 @@ export default function LoggedRecipePage() {
           portion={group.portion}
           mealType={rows[0].mealType}
           // Nothing saves into a line that is being deleted.
-          pending={pending || deleting !== null}
+          pending={pending}
+          disabled={deleting !== null}
           failed={failed}
           submitLabel={t(pending ? 'pages.food.entry.saving' : 'pages.food.entry.save')}
           onSubmit={save}
@@ -137,7 +138,8 @@ export default function LoggedRecipePage() {
       <Button
         variant="quiet"
         className="mt-8 text-danger hover:border-danger"
-        pending={pending || deleting !== null}
+        pending={deleting !== null}
+        disabled={pending}
         onClick={() => void onRemove()}
       >
         {t('pages.food.entry.delete')}

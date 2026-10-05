@@ -719,7 +719,8 @@
         "parts": "teile insgesamt",
         "wholeInvalid": "Trage eine Zahl zwischen 0,1 und 100 ein.",
         "partsInvalid": "Trage ganze Zahlen von 1 bis 100 ein, gegessen höchstens so viele wie insgesamt.",
-        "eaten": "teile gegessen"
+        "eaten": "teile gegessen",
+        "share": "anteil"
       },
       "lineRemoved": "{{name}} entfernt",
       "undoFailed": "{{name}} konnte nicht wiederhergestellt werden. Trage es noch einmal ein.",

@@ -27,6 +27,7 @@ export function PortionForm({
   quantityG = '',
   mealType: initialMeal = 'breakfast',
   pending,
+  disabled = false,
   failed,
   submitLabel,
   withMeal = true,
@@ -37,6 +38,8 @@ export function PortionForm({
   quantityG?: string
   mealType?: MealType
   pending: boolean
+  /** Off while something else on the screen is writing; not busy itself. */
+  disabled?: boolean
   failed: boolean
   submitLabel: string
   /** Off for a recipe ingredient, which belongs to a recipe and not to a meal. */
@@ -108,7 +111,7 @@ export function PortionForm({
           </p>
         ) : null}
 
-        <Button type="submit" variant="primary" pending={pending}>
+        <Button type="submit" variant="primary" pending={pending} disabled={disabled}>
           {submitLabel}
         </Button>
       </Panel>

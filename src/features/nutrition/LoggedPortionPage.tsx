@@ -97,7 +97,8 @@ export default function LoggedPortionPage() {
         // An ingredient stays with its recipe line, so only its amount changes.
         withMeal={!entry.group}
         // Nothing saves into a row that is being deleted.
-        pending={pending || deleting !== null}
+        pending={pending}
+        disabled={deleting !== null}
         failed={failed}
         submitLabel={pending ? t('pages.food.entry.saving') : t('pages.food.entry.save')}
         onSubmit={save}
@@ -108,7 +109,8 @@ export default function LoggedPortionPage() {
       <Button
         variant="quiet"
         className="mt-4 text-danger hover:border-danger"
-        pending={pending || deleting !== null}
+        pending={deleting !== null}
+        disabled={pending}
         onClick={onDelete}
       >
         {t('pages.food.entry.delete')}
