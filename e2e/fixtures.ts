@@ -393,6 +393,34 @@ export async function stubBackend(
     route.fulfill({ status: 200, contentType: 'application/json', body: 'null' }),
   )
 
+  // No recipes until one is saved from a meal; then the lists read it back.
+  const recipes: unknown[] = []
+
+  await page.route('**/rest/v1/recipes*', (route) =>
+    route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify(recipes) }),
+  )
+
+  // Registered after the catch-all above, so it answers first.
+  await page.route('**/rest/v1/rpc/save_recipe*', (route) => {
+    const sent = JSON.parse(route.request().postData() ?? '{}')
+    const name = sent.name.trim() || `${sent.meal} #1`
+    recipes.push({
+      id: `rc${recipes.length + 1}`,
+      name,
+      recipe_items: sent.items.map((item: { food_id: string; quantity_g: number }, i: number) => ({
+        id: `ri${i}`,
+        quantity_g: item.quantity_g,
+        created_at: `2026-01-01T00:00:0${i}Z`,
+        foods: FOODS.find((food) => food.id === item.food_id),
+      })),
+    })
+    return route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({ id: `rc${recipes.length}`, name }),
+    })
+  })
+
   await page.route('**/rest/v1/scheduled_sessions*', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
   )

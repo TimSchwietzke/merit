@@ -305,6 +305,20 @@ isOneToOne: false
 "log_recipe":
 { Args: { "day": string,"eaten"?: number,"factor": number,"meal": string,"recipe": string,"total"?: number }; Returns: string
                            },
+"save_recipe":
+{ Args: { "items": Json,"meal": string,"name": string }; Returns: {
+              "created_at": string,
+"id": string,
+"name": string,
+"updated_at": string,
+"user_id": string
+            }
+                          SetofOptions: {
+        from: "*"
+        to: "recipes"
+        isOneToOne: true
+        isSetofReturn: false
+      } },
 "set_routine_exercises":
 { Args: { "items": Json,"routine": string }; Returns: undefined
                            },

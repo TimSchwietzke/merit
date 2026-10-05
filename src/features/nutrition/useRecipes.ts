@@ -187,5 +187,23 @@ export function useRecipes() {
     [userId, write],
   )
 
-  return { ...state, create, update, remove, restore, addItem, updateItem, removeItem }
+  // A logged meal kept as a recipe, written in one call: the database names it
+  // after the meal when the name is empty, and leaves nothing behind when any
+  // part fails. Returns the name it chose, for the confirmation.
+  const saveFromMeal = useCallback(
+    async (name: string, meal: string, items: { foodId: string; quantityG: number }[]) => {
+      if (!userId) return null
+      const { data, error } = await supabase.rpc('save_recipe', {
+        name,
+        meal,
+        items: items.map((item) => ({ food_id: item.foodId, quantity_g: item.quantityG })),
+      })
+      if (!data || error) return null
+      changed()
+      return { id: data.id, name: data.name }
+    },
+    [userId],
+  )
+
+  return { ...state, create, update, remove, restore, addItem, updateItem, removeItem, saveFromMeal }
 }

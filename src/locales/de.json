@@ -731,7 +731,17 @@
       "deleted": "{{name}} gelöscht",
       "restoreFailed": "{{name}} konnte nicht wiederhergestellt werden.",
       "backToLine": "Zurück zu {{name}}",
-      "removeFailed": "{{name}} wurde nicht entfernt. Versuche es noch einmal."
+      "removeFailed": "{{name}} wurde nicht entfernt. Versuche es noch einmal.",
+      "fromMeal": {
+        "title": "als rezept speichern",
+        "save": "Speichern",
+        "open": "{{meal}} als rezept speichern",
+        "remove": "{{name}} entfernen",
+        "removeBranded": "{{name}}, {{brand}} entfernen",
+        "overLimit": "Mehr als {{max}} g je Zutat lassen sich nicht speichern.",
+        "overLimitItem": "über dem Limit",
+        "saved": "{{name}} gespeichert"
+      }
     }
   }
 }

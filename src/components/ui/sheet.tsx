@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react'
+import { useRef, type ReactNode } from 'react'
 import { Dialog } from 'radix-ui'
 import { X } from 'lucide-react'
 
@@ -27,12 +27,26 @@ export function Sheet({
   closeLabel: string
   children: ReactNode
 }) {
+  // Radix hands focus back to a `Dialog.Trigger`, and these sheets are opened
+  // by plain buttons, so without this a closed sheet left focus on the body.
+  const opener = useRef<HTMLElement | null>(null)
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-40 bg-ink/20 backdrop-blur-[2px]" />
 
         <Dialog.Content
+          onOpenAutoFocus={() => {
+            const active = document.activeElement
+            // A sheet opened as another closes sees the body here, not a control.
+            opener.current = active instanceof HTMLElement && active !== document.body ? active : null
+          }}
+          onCloseAutoFocus={(event) => {
+            event.preventDefault()
+            // Radix restores after a tick; if a second sheet opened meanwhile,
+            // focusing the page behind it would escape its focus trap.
+            if (!document.querySelector('[role="dialog"]')) opener.current?.focus()
+          }}
           className="fixed inset-x-0 bottom-0 z-50 max-h-[85dvh] overflow-y-auto rounded-t-xl
                      border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] shadow-lg
                      md:inset-x-auto md:bottom-auto md:left-1/2 md:top-1/2 md:w-[420px]

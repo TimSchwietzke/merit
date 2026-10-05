@@ -4,6 +4,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { toast } from 'sonner'
 
 import { FloatingAdd } from '@/components/FloatingAdd'
+import { SaveMealSheet } from '@/features/nutrition/SaveMealSheet'
 import { useActiveSession } from '@/features/training/useActiveSession'
 import { EmptyState } from '@/components/EmptyState'
 import { Panel } from '@/components/Panel'
@@ -343,6 +344,7 @@ function Meal({
   onRemoveGroup: (rows: LoggedFood[]) => void
 }) {
   const { t } = useTranslation()
+  const [saveOpen, setSaveOpen] = useState(false)
   const kcal = sumPortions(
     entries.map((entry) => ({ nutrients: entry.food.nutrients, quantityG: entry.quantityG })),
   ).kcal.value
@@ -377,8 +379,24 @@ function Meal({
     <section className="mb-5 last:mb-0">
       <SectionHead
         label={t(`pages.food.meals.${meal}`)}
-        hint={`${formatNumber(kcal, locale, 0)} kcal`}
+        hint={
+          <span className="flex items-baseline gap-4">
+            <span>{formatNumber(kcal, locale, 0)} kcal</span>
+            {/* Secondary, so it stays in the head's own mono and ink. The
+                padding makes the target 44px tall and the negative margin
+                keeps the head from growing with it (§5.2). */}
+            <button
+              type="button"
+              aria-label={t('pages.recipes.fromMeal.open', { meal: t(`pages.food.meals.${meal}`) })}
+              onClick={() => setSaveOpen(true)}
+              className="-mx-2 -my-[13px] px-2 py-[13px] underline decoration-1 underline-offset-2 hover:text-ink active:text-ink"
+            >
+              {t('pages.recipes.fromMeal.title')}
+            </button>
+          </span>
+        }
       />
+      <SaveMealSheet open={saveOpen} onOpenChange={setSaveOpen} meal={meal} entries={entries} />
       <Rows>
         {lines.map((line) => {
           if (line.kind === 'entry') {
