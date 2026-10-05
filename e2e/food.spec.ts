@@ -205,3 +205,62 @@ test('one search asks every source, and typing asks none', async ({ page }) => {
   await page.getByRole('button', { name: /Skyr Vanille/ }).click()
   await expect(page.getByLabel('menge')).toBeVisible()
 })
+
+test('a meal is saved as a recipe in place, and add-food lists it', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+  await page.goto('/food')
+  await waitForScreen(page)
+
+  const open = page.getByRole('button', { name: 'frühstück als rezept speichern' })
+  await open.evaluate((el) => el.scrollIntoView({ block: 'center' }))
+  const url = page.url()
+  const scrollY = await page.evaluate(() => window.scrollY)
+
+  // Keyboard only: Enter opens it, Escape closes it and hands focus back.
+  const sheet = page.getByRole('dialog', { name: 'als rezept speichern' })
+  await open.focus()
+  await open.press('Enter')
+  await expect(sheet).toBeVisible()
+  await page.keyboard.press('Escape')
+  await expect(sheet).toHaveCount(0)
+  await expect(open).toBeFocused()
+  await open.press('Enter')
+
+  // The banana is a snack: only breakfast's foods are offered.
+  await expect(sheet.getByText('Skyr, natur')).toBeVisible()
+  await expect(sheet.getByText('Haferflocken, kernig')).toBeVisible()
+  await expect(sheet.getByText('Banane')).toHaveCount(0)
+
+  await sheet.getByRole('button', { name: 'Haferflocken, kernig entfernen' }).click()
+  await expect(sheet.getByText('Haferflocken, kernig')).toHaveCount(0)
+  await sheet.getByRole('button', { name: 'Rezept speichern' }).click()
+
+  await expect(page.getByText('Frühstück #1 gespeichert')).toBeVisible()
+  await expect(sheet).toHaveCount(0)
+  expect(page.url()).toBe(url)
+  expect(await page.evaluate(() => window.scrollY)).toBe(scrollY)
+  // The day itself is untouched.
+  await expect(page.getByRole('link', { name: /Haferflocken/ })).toBeVisible()
+  await expect(page.getByRole('link', { name: /Skyr/ })).toBeVisible()
+
+  await page.goto('/food/add')
+  await waitForScreen(page)
+  // The skyr alone: 180 g at 63 kcal per 100 g.
+  await expect(page.getByRole('button', { name: /Frühstück #1.*113 kcal/ })).toBeVisible()
+})
+
+test('a day with nothing logged offers no save-as-recipe', async ({ page }) => {
+  await stubBackend(page, { theme: 'light', locale: 'de' })
+  // The day view's question gets an empty day; the history keeps its stub.
+  await page.route('**/rest/v1/food_logs*', (route) =>
+    route.request().url().includes('date=gte')
+      ? route.fallback()
+      : route.fulfill({ status: 200, contentType: 'application/json', body: '[]' }),
+  )
+  await page.goto('/food')
+  await waitForScreen(page)
+
+  await expect(page.getByText('noch nichts erfasst')).toBeVisible()
+  await expect(page.getByRole('button', { name: /als rezept speichern/i })).toHaveCount(0)
+})

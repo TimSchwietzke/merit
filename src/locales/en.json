@@ -735,6 +735,7 @@
       "fromMeal": {
         "title": "save as recipe",
         "save": "Save recipe",
+        "open": "save as recipe: {{meal}}",
         "remove": "Remove {{name}}",
         "removeBranded": "Remove {{name}}, {{brand}}",
         "overLimit": "More than {{max}} g per ingredient cannot be saved.",

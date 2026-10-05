@@ -735,6 +735,7 @@
       "fromMeal": {
         "title": "als rezept speichern",
         "save": "Rezept speichern",
+        "open": "{{meal}} als rezept speichern",
         "remove": "{{name}} entfernen",
         "removeBranded": "{{name}}, {{brand}} entfernen",
         "overLimit": "Mehr als {{max}} g je Zutat lassen sich nicht speichern.",
